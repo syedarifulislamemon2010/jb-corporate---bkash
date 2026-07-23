@@ -47,7 +47,7 @@ class User extends Authenticatable
         ];
     }
 
-    public function organizations()
+    public function organization()
     {
         return $this->belongsTo(Organization::class,'organization','id');
     }

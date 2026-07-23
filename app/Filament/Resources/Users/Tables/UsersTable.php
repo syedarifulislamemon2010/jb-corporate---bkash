@@ -22,6 +22,9 @@ class UsersTable
     {
         $organizations = Organization::where('status_id', 1)->pluck('name', 'id')->toArray();
         return $table
+			->recordUrl(null)
+            ->defaultPaginationPageOption(50)
+            ->paginated([20, 50, 100])
             ->columns([
                 TextColumn::make('id')
                     ->label('ID'),
