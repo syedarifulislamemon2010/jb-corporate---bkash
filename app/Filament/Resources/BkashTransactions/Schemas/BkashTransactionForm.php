@@ -46,7 +46,7 @@ class BkashTransactionForm
                         Select::make('credit_routing')
                             ->label('Creditor Bank')
                             ->placeholder('Select an option')
-                            ->options(Bank::where('bankcode', '!=', 135)->where('status', 1)->pluck('bankname', 'bankcode'))
+                            ->options(Bank::where('bankcode', '!=', 135)->where('status', 1)->orderby('bankname')->pluck('bankname', 'bankcode'))
                             ->live()
                             ->afterStateUpdated(function (Set $set) {
                                 $set('credit_branch_routing', null);
@@ -65,6 +65,7 @@ class BkashTransactionForm
                                 // BRANCHES টেবিলের সঠিক কলাম নেম (BANKID, BRANCHNAME, ROUTINGNO, STATUS)
                                 return Branch::where('bankid', (string) $bankCode)
                                     ->where('status', 1)
+                                    ->orderby('branchname')
                                     ->pluck('branchname', 'routingno')
                                     ->toArray();
                             })
