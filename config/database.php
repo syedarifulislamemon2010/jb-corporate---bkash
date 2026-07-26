@@ -128,6 +128,21 @@ return [
 //                PDO::ATTR_CASE => PDO::CASE_UPPER,
 //            ]
         ],
+        'oracle_settings' => [
+            'driver' => 'oracle',
+            'host' => env('DB_HOST1', 'localhost'),
+            'port' => env('DB_PORT1', '1521'),
+            'database' => env('DB_DATABASE1', 'XE'),
+//            'service_name' => env('DB_SERVICE1', 'sid_alias'),
+            'username' => env('DB_USERNAME1', 'XEUSER'),
+            'password' => env('DB_PASSWORD1', 'XEPASSWD'),
+            'charset' => env('DB_CHARSET', 'AL32UTF8'),
+            'prefix' => env('DB_PREFIX', ''),
+            'prefix_schema' => env('DB_SCHEMA_PREFIX', ''),
+//            'options' => [
+//                PDO::ATTR_CASE => PDO::CASE_UPPER,
+//            ]
+        ],
 
     ],
 
