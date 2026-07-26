@@ -3,7 +3,7 @@
 namespace App\Filament\Resources\BkashTransactions\Schemas;
 
 use Filament\Forms\Components\DateTimePicker;
-use Filament\Forms\Components\Section;
+use Filament\Schemas\Components\Section;
 use Filament\Forms\Components\TextInput;
 use Filament\Schemas\Schema;
 
