@@ -30,7 +30,8 @@ class BkashTransactionForm
                         TextInput::make('reference_id')
                             ->required()
                             ->maxLength(60),
-                    ]),
+                    ])
+                    ->columns(2), 
           
                 Section::make('Account & Banking Details')
                     ->schema([
@@ -56,7 +57,7 @@ class BkashTransactionForm
                             ->label('Creditor Bank Branch')
                             ->placeholder('Select an option')
                             ->searchable()
-                            ->optionsLimit(5000) // <-- এই লাইনটি যুক্ত করা হয়েছে (৫০০০ পর্যন্ত ডাটা দেখাবে)
+                            ->optionsLimit(5000)
                             ->options(function (Get $get) {
                                 $bankCode = $get('credit_routing');
 
@@ -76,7 +77,8 @@ class BkashTransactionForm
                             ->maxLength(10),
                         TextInput::make('credit_account_no')
                             ->maxLength(6),
-                    ]),
+                    ])
+                    ->columns(2), 
             ]);
     }
 }
