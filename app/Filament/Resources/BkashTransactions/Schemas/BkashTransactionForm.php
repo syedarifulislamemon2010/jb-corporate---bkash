@@ -46,7 +46,7 @@ class BkashTransactionForm
                         Select::make('credit_routing')
                             ->label('Creditor Bank')
                             ->placeholder('Select an option')
-                            ->options(Bank::where('bankcode', '!=', 135)->where('status', 1)->orderby('bankname')->pluck('bankname', 'bankcode'))
+                            ->options(Bank::where('bankcode', '!=', 135)->where('status', 1)->orderBy('bankname')->pluck('bankname', 'bankcode'))
                             ->live()
                             ->afterStateUpdated(function (Set $set) {
                                 $set('credit_branch_routing', null);
@@ -55,6 +55,8 @@ class BkashTransactionForm
                         Select::make('credit_branch_routing')
                             ->label('Creditor Bank Branch')
                             ->placeholder('Select an option')
+                            ->searchable()
+                            ->optionsLimit(5000) // <-- এই লাইনটি যুক্ত করা হয়েছে (৫০০০ পর্যন্ত ডাটা দেখাবে)
                             ->options(function (Get $get) {
                                 $bankCode = $get('credit_routing');
 
@@ -62,15 +64,13 @@ class BkashTransactionForm
                                     return [];
                                 }
 
-                                // BRANCHES টেবিলের সঠিক কলাম নেম (BANKID, BRANCHNAME, ROUTINGNO, STATUS)
                                 return Branch::where('bankid', (string) $bankCode)
                                     ->where('status', 1)
-                                    ->orderby('branchname')
+                                    ->orderBy('branchname')
                                     ->pluck('branchname', 'routingno')
                                     ->toArray();
                             })
                             ->disabled(fn (Get $get) => ! $get('credit_routing'))
-                            ->searchable()
                             ->required(),
                         TextInput::make('credit_bank')
                             ->maxLength(10),
