@@ -19,23 +19,49 @@ class BkashTransactionAuthorizationsTable
                     ->label('Reference ID')
                     ->searchable()
                     ->sortable(),
-                TextColumn::make('credit_account_title')
-                    ->label('Account Title')
+
+                TextColumn::make('transaction_type')
+                    ->label('Type')
+                    ->badge()
+                    ->searchable()
+                    ->sortable(),
+
+                TextColumn::make('debit_account_title')
+                    ->label('Debit Title')
+                    ->searchable()
+                    ->toggleable(isToggledHiddenByDefault: true),
+
+                TextColumn::make('debit_account_no')
+                    ->label('Debit Acc')
                     ->searchable(),
+
                 TextColumn::make('credit_account_no')
-                    ->label('Account No')
+                    ->label('Credit Acc')
                     ->searchable(),
+
                 TextColumn::make('amount')
                     ->label('Amount')
                     ->numeric()
                     ->sortable(),
+
+                TextColumn::make('creditor_bank')
+                    ->label('Creditor Bank')
+                    ->searchable(),
+
+                TextColumn::make('creditor_bank_branch')
+                    ->label('Branch')
+                    ->searchable()
+                    ->toggleable(isToggledHiddenByDefault: true),
+
                 TextColumn::make('status_id')
                     ->label('Status ID')
                     ->badge()
                     ->sortable(),
+
                 TextColumn::make('approved_by')
                     ->label('Authorized By')
                     ->searchable(),
+
                 TextColumn::make('approved_at')
                     ->label('Authorized At')
                     ->dateTime('d M Y, h:i A')
@@ -52,7 +78,7 @@ class BkashTransactionAuthorizationsTable
                     ->action(function (Collection $records) {
                         $records->each(function ($record) {
                             $record->update([
-                                'status_id'   => 1002,
+                                'status_id'   => 1002, // Authorized Status
                                 'approved_by' => Auth::user()->name ?? 'SYSTEM',
                                 'approved_at' => Carbon::now(),
                             ]);
