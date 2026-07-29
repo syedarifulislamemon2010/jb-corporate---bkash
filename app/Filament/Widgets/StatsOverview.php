@@ -2,17 +2,28 @@
 
 namespace App\Filament\Widgets;
 
-use Filament\Widgets\StatsOverviewWidget;
+use App\Models\BkashTransaction;
+use Filament\Widgets\StatsOverviewWidget as BaseWidget;
 use Filament\Widgets\StatsOverviewWidget\Stat;
 
-class StatsOverview extends StatsOverviewWidget
+class StatsOverview extends BaseWidget
 {
     protected function getStats(): array
     {
         return [
-            Stat::make('Unique views', '192.1k'),
-            Stat::make('Bounce rate', '21%'),
-            Stat::make('Average time on page', '3:12'),
+            Stat::make('Pending Authorizations', BkashTransaction::where('status_id', 1001)->count())
+                ->description('Awaiting approval')
+                ->descriptionIcon('heroicon-m-arrow-trending-up')
+                ->color('warning'),
+
+            Stat::make('Today Confirmed Volume', 'BDT ' . number_format(BkashTransaction::where('status_id', 1003)->whereDate('confirmed_at', today())->sum('amount'), 2))
+                ->description('Successful transactions today')
+                ->descriptionIcon('heroicon-m-arrow-trending-up')
+                ->color('success'),
+
+            Stat::make('Total Transactions Today', BkashTransaction::whereDate('created_at', today())->count())
+                ->description('All processed types')
+                ->color('info'),
         ];
     }
 }

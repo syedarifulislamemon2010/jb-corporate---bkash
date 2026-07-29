@@ -17,6 +17,7 @@ use Illuminate\Database\Eloquent\SoftDeletingScope;
 class BkashTransactionAuthorizationResource extends Resource
 {
     protected static ?string $model = BkashTransaction::class;
+    
 
     protected static string|BackedEnum|null $navigationIcon = 'heroicon-o-check-circle';
 
