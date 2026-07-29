@@ -64,7 +64,7 @@ class BkashTransactionAuthorizationsTable
 
                 TextColumn::make('approved_at')
                     ->label('Authorized At')
-                    ->dateTime('d M Y, h:i A')
+                    ->formatStateUsing(fn ($state) => $state ? Carbon::parse($state)->timezone('Asia/Dhaka')->format('d M Y, h:i A') : '-')
                     ->sortable(),
             ])
             ->filters([])
@@ -78,9 +78,9 @@ class BkashTransactionAuthorizationsTable
                     ->action(function (Collection $records) {
                         $records->each(function ($record) {
                             $record->update([
-                                'status_id'   => 1002, // Authorized Status
+                                'status_id'   => 1002,
                                 'approved_by' => Auth::user()->name ?? 'SYSTEM',
-                                'approved_at' => Carbon::now(),
+                                'approved_at' => Carbon::now('Asia/Dhaka'),
                             ]);
                         });
                     }),

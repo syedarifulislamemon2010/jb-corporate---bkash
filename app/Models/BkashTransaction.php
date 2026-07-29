@@ -15,6 +15,10 @@ class BkashTransaction extends Model
     protected $connection = 'oracle';
     protected $table = 'bkash_transactions';
     protected $primaryKey = 'id';
+    
+    // UUID-এর জন্য প্রাইমারি কি অটো-ইনক্রিমেন্ট নয়
+    public $incrementing = false;
+    protected $keyType = 'string';
 
     /**
      * The attributes that are mass assignable.
@@ -55,20 +59,23 @@ class BkashTransaction extends Model
     protected function casts(): array
     {
         return [
-            'create_date' => 'datetime',
-            'return_date' => 'datetime',
-            'approved_at' => 'datetime',
-            'confirmed_at' => 'datetime',
+            'create_date'       => 'datetime',
+            'return_date'       => 'datetime',
+            'approved_at'        => 'datetime',
+            'confirmed_at'       => 'datetime',
             'admin_approved_at' => 'datetime',
-            'cbs_success_at' => 'datetime',
+            'cbs_success_at'    => 'datetime',
         ];
     }
+
     protected static function boot()
     {
         parent::boot();
 
         static::creating(function (Model $model) {
-            $model->setAttribute($model->getKeyName(), (string)Str::orderedUuid());
+            if (empty($model->{$model->getKeyName()})) {
+                $model->{$model->getKeyName()} = (string) Str::orderedUuid();
+            }
         });
     }
 }

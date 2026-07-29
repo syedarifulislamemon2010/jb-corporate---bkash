@@ -64,7 +64,7 @@ class BkashTransactionConfirmationsTable
 
                 TextColumn::make('confirmed_at')
                     ->label('Confirmed At')
-                    ->dateTime('d M Y, h:i A')
+                    ->formatStateUsing(fn ($state) => $state ? Carbon::parse($state)->timezone('Asia/Dhaka')->format('d M Y, h:i A') : '-')
                     ->sortable(),
             ])
             ->filters([])
@@ -78,9 +78,9 @@ class BkashTransactionConfirmationsTable
                     ->action(function (Collection $records) {
                         $records->each(function ($record) {
                             $record->update([
-                                'status_id'    => 1003, // Confirmed Status
+                                'status_id'    => 1003,
                                 'confirmed_by' => Auth::user()->name ?? 'SYSTEM',
-                                'confirmed_at' => Carbon::now(),
+                                'confirmed_at' => Carbon::now('Asia/Dhaka'),
                             ]);
                         });
                     }),
