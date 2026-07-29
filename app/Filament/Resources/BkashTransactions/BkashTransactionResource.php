@@ -22,7 +22,9 @@ class BkashTransactionResource extends Resource
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedRectangleStack;
 
-    protected static ?string $recordTitleAttribute = 'Bkash Transaction';
+    protected static ?string $recordTitleAttribute = 'reference_id';
+
+    protected static ?string $navigationLabel = 'Bkash Transactions';
 
     public static function form(Schema $schema): Schema
     {

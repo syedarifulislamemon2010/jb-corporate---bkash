@@ -60,6 +60,16 @@ return [
             'report' => false,
         ],
 
+        'bkash_sftp' => [
+            'driver'   => 'sftp',
+            'host'     => '172.18.18.64',
+            'username' => 'testfrontend',
+            'password' => 'Dev@cell23',
+            'port'     => 22,
+            'root'     => '',
+            'timeout'  => 30,
+        ],
+
     ],
 
     /*

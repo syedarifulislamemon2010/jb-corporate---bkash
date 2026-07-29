@@ -7,13 +7,13 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Str;
 use App\Traits\UUID;
 
-class BkashTransaction extends Model
+class BkashTransactionBatch extends Model
 {
     use UUID;
     use SoftDeletes; 
 
     protected $connection = 'oracle';
-    protected $table = 'bkash_transactions';
+    protected $table = 'bkash_transaction_batch';
     protected $primaryKey = 'id';
 
     /**
@@ -22,7 +22,9 @@ class BkashTransaction extends Model
      * @var array<int, string>
      */
     protected $fillable = [
+        'file_name',
         'transaction_type',
+        'total_data',
         'reference_id',
         'create_date',
         'return_date',
@@ -47,22 +49,6 @@ class BkashTransaction extends Model
         'cbs_success_at',
     ];
 
-    /**
-     * Get the attributes that should be cast.
-     *
-     * @return array<string, string>
-     */
-    protected function casts(): array
-    {
-        return [
-            'create_date' => 'datetime',
-            'return_date' => 'datetime',
-            'approved_at' => 'datetime',
-            'confirmed_at' => 'datetime',
-            'admin_approved_at' => 'datetime',
-            'cbs_success_at' => 'datetime',
-        ];
-    }
     protected static function boot()
     {
         parent::boot();
@@ -70,5 +56,4 @@ class BkashTransaction extends Model
         static::creating(function (Model $model) {
             $model->setAttribute($model->getKeyName(), (string)Str::orderedUuid());
         });
-    }
 }
