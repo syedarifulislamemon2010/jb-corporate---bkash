@@ -1,0 +1,71 @@
+<?php
+
+namespace App\Filament\Resources\BkashTransactionConfirmations;
+
+use App\Filament\Resources\BkashTransactionConfirmations\Pages\ListBkashTransactionConfirmations;
+use App\Filament\Resources\BkashTransactionConfirmations\Schemas\BkashTransactionConfirmationForm;
+use App\Filament\Resources\BkashTransactionConfirmations\Tables\BkashTransactionConfirmationsTable;
+use App\Models\BkashTransaction;
+use BackedEnum;
+use Filament\Resources\Resource;
+use Filament\Schemas\Schema;
+use Filament\Tables\Table;
+use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\SoftDeletingScope;
+
+class BkashTransactionConfirmationResource extends Resource
+{
+    protected static ?string $model = BkashTransaction::class;
+
+    protected static string|BackedEnum|null $navigationIcon = 'heroicon-o-check-badge';
+
+    protected static ?string $navigationLabel = 'bKash Confirmation';
+
+    protected static ?string $modelLabel = 'bKash Transaction Confirmation';
+
+    public static function form(Schema $schema): Schema
+    {
+        return BkashTransactionConfirmationForm::configure($schema);
+    }
+
+    public static function table(Table $table): Table
+    {
+        return BkashTransactionConfirmationsTable::configure($table);
+    }
+
+    public static function getRelations(): array
+    {
+        return [];
+    }
+
+    public static function canCreate(): bool
+    {
+        return false;
+    }
+
+    public static function canEdit(Model $record): bool
+    {
+        return false;
+    }
+
+    public static function canDelete(Model $record): bool
+    {
+        return false;
+    }
+
+    public static function getPages(): array
+    {
+        return [
+            'index' => ListBkashTransactionConfirmations::route('/'),
+        ];
+    }
+
+    public static function getRecordRouteBindingEloquentQuery(): Builder
+    {
+        return parent::getRecordRouteBindingEloquentQuery()
+            ->withoutGlobalScopes([
+                SoftDeletingScope::class,
+            ]);
+    }
+}
