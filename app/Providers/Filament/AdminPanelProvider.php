@@ -32,15 +32,16 @@ class AdminPanelProvider extends PanelProvider
             ->colors([
                 'primary' => Color::Sky,
             ])
-            
             ->navigationGroups([
                 NavigationGroup::make()
-            ->label('bKash Management')
-            ->collapsible(true), 
+                    ->label('bKash Management')
+                    ->icon('heroicon-o-banknotes')
+                    ->collapsible(true),
                 NavigationGroup::make()
-            ->label('User Management')
-            ->collapsible(true), 
-])
+                    ->label('User Management')
+                    ->icon('heroicon-o-users')
+                    ->collapsible(true),
+            ])
             ->discoverResources(in: app_path('Filament/Resources'), for: 'App\Filament\Resources')
             ->discoverPages(in: app_path('Filament/Pages'), for: 'App\Filament\Pages')
             ->pages([

@@ -19,7 +19,6 @@ class BkashTransactionAuthorizationResource extends Resource
 
     protected static ?string $recordTitleAttribute = 'reference_id';
 
-   
     protected static \UnitEnum|string|null $navigationGroup = 'bKash Management';
 
     protected static ?string $navigationLabel = 'bKash Authorization';
@@ -28,7 +27,6 @@ class BkashTransactionAuthorizationResource extends Resource
 
     protected static \BackedEnum|string|null $navigationIcon = null;
 
-    
     public static function getEloquentQuery(): Builder
     {
         return parent::getEloquentQuery()

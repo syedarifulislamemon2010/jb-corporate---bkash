@@ -19,18 +19,16 @@ class BkashTransactionResource extends Resource
 
     protected static ?string $recordTitleAttribute = 'reference_id';
 
-    // ✅ Filament v5 এর টাইপ ম্যাপ অনুযায়ী সঠিক টাইপ ডিক্লেয়ারেশন
     protected static \UnitEnum|string|null $navigationGroup = 'bKash Management';
 
-    protected static ?string $navigationLabel = 'Bkash Transactions';
+    protected static ?string $navigationLabel = 'bKash Transactions';
+
+    protected static ?string $pluralModelLabel = 'bKash Transactions';
 
     protected static ?int $navigationSort = 1;
 
     protected static \BackedEnum|string|null $navigationIcon = null;
 
-    /**
-     * 🔍 Checker লেভেলের জন্য: status_id = 1000 (Pending for Checker)
-     */
     public static function getEloquentQuery(): Builder
     {
         return parent::getEloquentQuery()
