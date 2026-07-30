@@ -6,7 +6,6 @@ use App\Filament\Resources\BkashTransactions\Pages\ListBkashTransactions;
 use App\Filament\Resources\BkashTransactions\Schemas\BkashTransactionForm;
 use App\Filament\Resources\BkashTransactions\Tables\BkashTransactionsTable;
 use App\Models\BkashTransaction;
-use BackedEnum;
 use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
 use Filament\Tables\Table;
@@ -20,12 +19,14 @@ class BkashTransactionResource extends Resource
 
     protected static ?string $recordTitleAttribute = 'reference_id';
 
-    // 👈 আগের সাইডবার নাম অপরিবর্তিত রাখা হলো
+    // ✅ Filament v5 এর টাইপ ম্যাপ অনুযায়ী সঠিক টাইপ ডিক্লেয়ারেশন
+    protected static \UnitEnum|string|null $navigationGroup = 'bKash Management';
+
     protected static ?string $navigationLabel = 'Bkash Transactions';
 
     protected static ?int $navigationSort = 1;
 
-    protected static string|BackedEnum|null $navigationIcon = 'heroicon-o-credit-card';
+    protected static \BackedEnum|string|null $navigationIcon = null;
 
     /**
      * 🔍 Checker লেভেলের জন্য: status_id = 1000 (Pending for Checker)

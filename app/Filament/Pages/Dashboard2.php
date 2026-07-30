@@ -6,5 +6,5 @@ use Filament\Pages\Page;
 
 class Dashboard2 extends Page
 {
-    protected string $view = 'filament.pages.dashboard';
+    protected static bool $shouldRegisterNavigation = false;
 }

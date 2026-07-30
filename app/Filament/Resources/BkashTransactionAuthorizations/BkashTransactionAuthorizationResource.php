@@ -6,7 +6,6 @@ use App\Filament\Resources\BkashTransactionAuthorizations\Pages\ListBkashTransac
 use App\Filament\Resources\BkashTransactionAuthorizations\Schemas\BkashTransactionAuthorizationForm;
 use App\Filament\Resources\BkashTransactionAuthorizations\Tables\BkashTransactionAuthorizationsTable;
 use App\Models\BkashTransaction;
-use BackedEnum;
 use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
 use Filament\Tables\Table;
@@ -20,12 +19,14 @@ class BkashTransactionAuthorizationResource extends Resource
 
     protected static ?string $recordTitleAttribute = 'reference_id';
 
-    // 👈 আগের সাইডবার নাম অপরিবর্তিত রাখা হলো
+    // ✅ Filament v5 এর টাইপ ম্যাপ অনুযায়ী সঠিক টাইপ ডিক্লেয়ারেশন
+    protected static \UnitEnum|string|null $navigationGroup = 'bKash Management';
+
     protected static ?string $navigationLabel = 'bKash Authorization';
 
     protected static ?int $navigationSort = 2;
 
-    protected static string|BackedEnum|null $navigationIcon = 'heroicon-o-check-circle';
+    protected static \BackedEnum|string|null $navigationIcon = null;
 
     /**
      * 🔍 1st Authorizer লেভেলের জন্য: status_id = 1001 (Checked)
