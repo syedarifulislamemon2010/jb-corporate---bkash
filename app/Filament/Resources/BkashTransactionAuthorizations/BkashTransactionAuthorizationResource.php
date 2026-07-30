@@ -17,13 +17,35 @@ use Illuminate\Database\Eloquent\SoftDeletingScope;
 class BkashTransactionAuthorizationResource extends Resource
 {
     protected static ?string $model = BkashTransaction::class;
-    
+
+    protected static ?string $recordTitleAttribute = 'reference_id';
+
+    // 👈 আগের সাইডবার নাম অপরিবর্তিত রাখা হলো
+    protected static ?string $navigationLabel = 'bKash Authorization';
+
+    protected static ?int $navigationSort = 2;
 
     protected static string|BackedEnum|null $navigationIcon = 'heroicon-o-check-circle';
 
-    protected static ?string $navigationLabel = 'bKash Authorization';
+    /**
+     * 🔍 1st Authorizer লেভেলের জন্য: status_id = 1001 (Checked)
+     */
+    public static function getEloquentQuery(): Builder
+    {
+        return parent::getEloquentQuery()
+            ->where('status_id', 1001)
+            ->withoutGlobalScopes([
+                SoftDeletingScope::class,
+            ]);
+    }
 
-    protected static ?string $modelLabel = 'bKash Transaction Authorization';
+    public static function getRecordRouteBindingEloquentQuery(): Builder
+    {
+        return parent::getRecordRouteBindingEloquentQuery()
+            ->withoutGlobalScopes([
+                SoftDeletingScope::class,
+            ]);
+    }
 
     public static function form(Schema $schema): Schema
     {
@@ -60,13 +82,5 @@ class BkashTransactionAuthorizationResource extends Resource
         return [
             'index' => ListBkashTransactionAuthorizations::route('/'),
         ];
-    }
-
-    public static function getRecordRouteBindingEloquentQuery(): Builder
-    {
-        return parent::getRecordRouteBindingEloquentQuery()
-            ->withoutGlobalScopes([
-                SoftDeletingScope::class,
-            ]);
     }
 }

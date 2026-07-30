@@ -16,7 +16,6 @@ class BkashTransaction extends Model
     protected $table = 'bkash_transactions';
     protected $primaryKey = 'id';
     
-    // UUID-এর জন্য প্রাইমারি কি অটো-ইনক্রিমেন্ট নয়
     public $incrementing = false;
     protected $keyType = 'string';
 
@@ -26,29 +25,30 @@ class BkashTransaction extends Model
      * @var array<int, string>
      */
     protected $fillable = [
+        'file_name',
         'transaction_type',
         'reference_id',
-        'create_date',
-        'return_date',
-        'debit_account_title',
+        'txn_id',
         'debit_account_no',
-        'amount',
-        'debit_routing',
-        'credit_routing',
-        'credit_bank',
+        'debit_account_title',
         'credit_account_no',
         'credit_account_title',
-        'txn_id',
-        'reject_reason',
+        'amount',
+        'credit_routing',
+        'credit_bank',
         'status_id',
+        'reject_reason',
+        
+        // Workflow User & Timestamps
         'created_by',
-        'approved_by',
+        'checked_by',
+        'checked_at',
+        'approved_by_1',
+        'approved_at_1',
+        'approved_by_2',
+        'approved_at_2',
         'confirmed_by',
-        'admin_approved',
-        'approved_at',
         'confirmed_at',
-        'admin_approved_at',
-        'cbs_success_at',
     ];
 
     /**
@@ -59,12 +59,12 @@ class BkashTransaction extends Model
     protected function casts(): array
     {
         return [
-            'create_date'       => 'datetime',
-            'return_date'       => 'datetime',
-            'approved_at'        => 'datetime',
-            'confirmed_at'       => 'datetime',
-            'admin_approved_at' => 'datetime',
-            'cbs_success_at'    => 'datetime',
+            'create_date'   => 'datetime',
+            'return_date'   => 'datetime',
+            'checked_at'    => 'datetime',
+            'approved_at_1' => 'datetime',
+            'approved_at_2' => 'datetime',
+            'confirmed_at'  => 'datetime',
         ];
     }
 

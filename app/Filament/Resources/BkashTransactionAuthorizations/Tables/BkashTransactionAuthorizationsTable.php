@@ -15,74 +15,79 @@ class BkashTransactionAuthorizationsTable
     {
         return $table
             ->columns([
+                TextColumn::make('txn_id')
+                    ->label('Txn ID')
+                    ->searchable()
+                    ->sortable(),
+
                 TextColumn::make('reference_id')
-                    ->label('Reference ID')
+                    ->label('Ref No')
                     ->searchable()
                     ->sortable(),
 
                 TextColumn::make('transaction_type')
                     ->label('Type')
-                    ->badge()
-                    ->searchable()
-                    ->sortable(),
-
-                TextColumn::make('debit_account_title')
-                    ->label('Debit Title')
-                    ->searchable()
-                    ->toggleable(isToggledHiddenByDefault: true),
+                    ->badge(),
 
                 TextColumn::make('debit_account_no')
-                    ->label('Debit Acc')
+                    ->label('Debit Account')
+                    ->searchable(),
+
+                TextColumn::make('credit_account_title')
+                    ->label('Beneficiary Name')
                     ->searchable(),
 
                 TextColumn::make('credit_account_no')
-                    ->label('Credit Acc')
+                    ->label('Beneficiary Acc')
                     ->searchable(),
 
                 TextColumn::make('amount')
-                    ->label('Amount')
-                    ->numeric()
+                    ->label('Amount (BDT)')
+                    ->numeric(decimalPlaces: 2)
                     ->sortable(),
 
-                TextColumn::make('creditor_bank')
-                    ->label('Creditor Bank')
-                    ->searchable(),
+                TextColumn::make('credit_bank')
+                    ->label('Bank & Branch')
+                    ->searchable()
+                    ->toggleable(isToggledHiddenByDefault: true),
 
-                TextColumn::make('creditor_bank_branch')
-                    ->label('Branch')
+                TextColumn::make('credit_routing')
+                    ->label('Routing No')
                     ->searchable()
                     ->toggleable(isToggledHiddenByDefault: true),
 
                 TextColumn::make('status_id')
-                    ->label('Status ID')
+                    ->label('Status')
                     ->badge()
                     ->sortable(),
 
-                TextColumn::make('approved_by')
-                    ->label('Authorized By')
+                TextColumn::make('approved_by_1')
+                    ->label('1st Auth By')
                     ->searchable(),
 
-                TextColumn::make('approved_at')
-                    ->label('Authorized At')
+                TextColumn::make('approved_at_1')
+                    ->label('1st Auth At')
                     ->formatStateUsing(fn ($state) => $state ? Carbon::parse($state)->timezone('Asia/Dhaka')->format('d M Y, h:i A') : '-')
                     ->sortable(),
             ])
             ->filters([])
             ->actions([])
             ->bulkActions([
-                BulkAction::make('authorize_selected')
-                    ->label('Authorize Selected')
+                BulkAction::make('authorize_first_level')
+                    ->label('Authorize Selected (1st Approval)')
                     ->icon('heroicon-o-check-circle')
                     ->color('success')
                     ->requiresConfirmation()
                     ->action(function (Collection $records) {
                         $records->each(function ($record) {
                             $record->update([
-                                'status_id'   => 1002,
-                                'approved_by' => Auth::user()->name ?? 'SYSTEM',
-                                'approved_at' => Carbon::now('Asia/Dhaka'),
+                                'status_id'     => 1002, // 1st Authorized Status
+                                'approved_by_1' => Auth::user()->name ?? 'SYSTEM',
+                                'approved_at_1' => Carbon::now('Asia/Dhaka'),
                             ]);
                         });
+
+                        // ✉️ Trigger Notification Event Here (For Authorizer 1 Approval)
                     }),
             ]);
     }

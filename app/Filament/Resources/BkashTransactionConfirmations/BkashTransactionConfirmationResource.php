@@ -18,11 +18,32 @@ class BkashTransactionConfirmationResource extends Resource
 {
     protected static ?string $model = BkashTransaction::class;
 
-    protected static string|BackedEnum|null $navigationIcon = 'heroicon-o-check-badge';
+    protected static ?string $recordTitleAttribute = 'reference_id';
 
+  
     protected static ?string $navigationLabel = 'bKash Confirmation';
 
-    protected static ?string $modelLabel = 'bKash Transaction Confirmation';
+    protected static ?int $navigationSort = 3;
+
+    protected static string|BackedEnum|null $navigationIcon = 'heroicon-o-check-badge';
+
+   
+    public static function getEloquentQuery(): Builder
+    {
+        return parent::getEloquentQuery()
+            ->where('status_id', 1002)
+            ->withoutGlobalScopes([
+                SoftDeletingScope::class,
+            ]);
+    }
+
+    public static function getRecordRouteBindingEloquentQuery(): Builder
+    {
+        return parent::getRecordRouteBindingEloquentQuery()
+            ->withoutGlobalScopes([
+                SoftDeletingScope::class,
+            ]);
+    }
 
     public static function form(Schema $schema): Schema
     {
@@ -59,13 +80,5 @@ class BkashTransactionConfirmationResource extends Resource
         return [
             'index' => ListBkashTransactionConfirmations::route('/'),
         ];
-    }
-
-    public static function getRecordRouteBindingEloquentQuery(): Builder
-    {
-        return parent::getRecordRouteBindingEloquentQuery()
-            ->withoutGlobalScopes([
-                SoftDeletingScope::class,
-            ]);
     }
 }
