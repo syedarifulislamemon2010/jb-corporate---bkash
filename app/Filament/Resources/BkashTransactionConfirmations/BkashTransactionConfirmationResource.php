@@ -18,8 +18,7 @@ class BkashTransactionConfirmationResource extends Resource
     protected static ?string $model = BkashTransaction::class;
 
     protected static ?string $recordTitleAttribute = 'reference_id';
-
-    // ✅ Filament v5 এর টাইপ ম্যাপ অনুযায়ী সঠিক টাইপ ডিক্লেয়ারেশন
+  
     protected static \UnitEnum|string|null $navigationGroup = 'bKash Management';
 
     protected static ?string $navigationLabel = 'bKash Confirmation';

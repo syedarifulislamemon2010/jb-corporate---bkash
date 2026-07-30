@@ -32,14 +32,14 @@ class AdminPanelProvider extends PanelProvider
             ->colors([
                 'primary' => Color::Sky,
             ])
-            // ✅ bKash Management এবং User Management গ্রুপ সেট করা হলো
+            
             ->navigationGroups([
                 NavigationGroup::make()
             ->label('bKash Management')
-            ->collapsible(true), // 👈 ->icon(...) সরিয়ে ফেলা হয়েছে
+            ->collapsible(true), 
                 NavigationGroup::make()
             ->label('User Management')
-            ->collapsible(true), // 👈 ->icon(...) সরিয়ে ফেলা হয়েছে
+            ->collapsible(true), 
 ])
             ->discoverResources(in: app_path('Filament/Resources'), for: 'App\Filament\Resources')
             ->discoverPages(in: app_path('Filament/Pages'), for: 'App\Filament\Pages')

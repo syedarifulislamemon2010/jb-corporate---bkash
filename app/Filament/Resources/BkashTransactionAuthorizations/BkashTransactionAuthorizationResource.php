@@ -19,7 +19,7 @@ class BkashTransactionAuthorizationResource extends Resource
 
     protected static ?string $recordTitleAttribute = 'reference_id';
 
-    // ✅ Filament v5 এর টাইপ ম্যাপ অনুযায়ী সঠিক টাইপ ডিক্লেয়ারেশন
+   
     protected static \UnitEnum|string|null $navigationGroup = 'bKash Management';
 
     protected static ?string $navigationLabel = 'bKash Authorization';
@@ -28,9 +28,7 @@ class BkashTransactionAuthorizationResource extends Resource
 
     protected static \BackedEnum|string|null $navigationIcon = null;
 
-    /**
-     * 🔍 1st Authorizer লেভেলের জন্য: status_id = 1001 (Checked)
-     */
+    
     public static function getEloquentQuery(): Builder
     {
         return parent::getEloquentQuery()
