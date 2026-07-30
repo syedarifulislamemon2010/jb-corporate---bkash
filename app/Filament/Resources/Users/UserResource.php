@@ -2,7 +2,8 @@
 
 namespace App\Filament\Resources\Users;
 
-use App\Filament\Resources\Users\Pages;
+use App\Filament\Resources\Users\Pages\CreateUser;
+use App\Filament\Resources\Users\Pages\ListUsers;
 use App\Models\Organization;
 use App\Models\User;
 use Filament\Actions\EditAction;
@@ -58,10 +59,16 @@ class UserResource extends Resource
             ]);
     }
 
+    public static function canCreate(): bool
+    {
+        return true;
+    }
+
     public static function getPages(): array
     {
         return [
-            'index' => Pages\ListUsers::route('/'),
+            'index' => ListUsers::route('/'),
+            'create' => CreateUser::route('/create'),
         ];
     }
 }

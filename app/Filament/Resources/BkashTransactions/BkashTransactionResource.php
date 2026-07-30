@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources\BkashTransactions;
 
+use App\Filament\Resources\BkashTransactions\Pages\CreateBkashTransaction;
 use App\Filament\Resources\BkashTransactions\Pages\ListBkashTransactions;
 use App\Filament\Resources\BkashTransactions\Schemas\BkashTransactionForm;
 use App\Filament\Resources\BkashTransactions\Tables\BkashTransactionsTable;
@@ -63,7 +64,7 @@ class BkashTransactionResource extends Resource
 
     public static function canCreate(): bool
     {
-        return false;
+        return true;
     }
 
     public static function canEdit(Model $record): bool
@@ -80,6 +81,7 @@ class BkashTransactionResource extends Resource
     {
         return [
             'index' => ListBkashTransactions::route('/'),
+            'create' => CreateBkashTransaction::route('/create'),
         ];
     }
 }
