@@ -3,22 +3,24 @@
 namespace App\Jobs;
 
 use App\Models\Branch;
-use App\Models\Bank;
 use App\Models\BkashTransaction;
 use App\Models\BkashTransactionBatch;
+use App\Models\BkashFailedTransaction;
+use App\Services\NotificationService;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Queue\Queueable;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
-use Illuminate\Validation\ValidationException;
 use Maatwebsite\Excel\Facades\Excel;
-use Symfony\Component\HttpFoundation\Response;
 use Carbon\Carbon;
+use Illuminate\Support\Str;
 
 class ProcessBkashSftpFiles implements ShouldQueue
 {
     use Queueable;
+
+    private const DEBIT_ACCOUNTS_WHITELIST = ['0100202707747', '0100224107522'];
 
     public function __construct()
     {
@@ -26,217 +28,198 @@ class ProcessBkashSftpFiles implements ShouldQueue
 
     public function handle(): void
     {
-        try {
-            $file_list = Storage::disk('bkash_sftp')->allFiles('/var/www/html/beftn_bach_rtgs/storage/app/public/bkash/');
-            dd($file_list);
-            $dir = storage_path("app/public/Bkash_Files/");
+        Log::info("Starting bKash SFTP File Ingestion Scanner...");
 
-            if (!is_dir($dir)) {
-                mkdir($dir, 0777, true);
-            }
+        $folders = [
+            'Account to-Account' => 'A2A',
+            'a2a'                => 'A2A',
+            'BEFTN'              => 'BEFTN',
+            'beftn'              => 'BEFTN',
+            'RTGS'               => 'RTGS',
+            'rtgs'               => 'RTGS',
+        ];
 
-            foreach ($file_list as $key => $value) {
-                $filename = basename($value);
-                $topath = 'Bkash_Files/' . $filename;
-
-                Storage::disk('public')->put($topath, Storage::disk('bkash_sftp')->get($value));
-                $localFilePath = storage_path("app/public/Bkash_Files_Uploaded" . $topath);
-
-                if (File::exists($localFilePath)) {
-                    $this->uploadContent(new \Illuminate\Http\File($localFilePath));
-                }
-            }
-        } catch (\Exception $ex) {
-            Log::error($ex->getMessage());
-            throw new \Exception($ex->getMessage(), Response::HTTP_REQUEST_ENTITY_TOO_LARGE);
-        }
-    }
-
-    public function is_dir_empty($dir)
-    {
-        if (!is_readable($dir)) return NULL;
-        $handle = opendir($dir);
-        while (false !== ($entry = readdir($handle))) {
-            if ($entry != "." && $entry != "..") {
-                return FALSE;
-            }
-        }
-        return TRUE;
-    }
-
-    public function uploadContent($file)
-    {
-        if ($file) {
-            $datas = Excel::toCollection(collect([]), $file->getRealPath())->toArray();
-            $importData_arr = array_shift($datas);
-
-            $filename = $file->getFilename();
-            $fileType = explode('_', $filename)[0];
-            $extension = $file->getExtension();
-            $fileSize = $file->getSize();
-
-            $this->checkUploadedFileProperties($extension, $fileSize);
-
-            $filepath = storage_path("app/public/Bkash_Files_Uploaded/" . str_replace('-', '', Carbon::now()->toDateString()) . '/');
-            if (!is_dir($filepath)) {
-                mkdir($filepath, 0777, true);
-            }
-
-            File::copy($file->getRealPath(), $filepath . $filename);
-
-            $message = [];
-            $emptymessage = [];
-            $totaldebit = 0;
-
-            foreach ($importData_arr as $key => $importData) {
-                if ($key == 0) {
-                    continue;
-                } else {
-                    if (is_null($importData_arr[$key][0]) && !isset($importData_arr[$key][1]) && !isset($importData_arr[$key][2])
-                        && !isset($importData_arr[$key][3]) && !isset($importData_arr[$key][4])) {
-                        unset($importData_arr[$key]);
-                        continue;
-                    }
-
-                    for ($i = 0; $i < 5; $i++) {
-                        if (isset($importData[0]) && !preg_match('/^[a-zA-Z0-9.-]+$/', $importData[0])) {
-                            array_push($message, 'Invalid Data/Special Character at line no ' . ($key + 1) . ' and column no 1');
-                        } else if (isset($importData[$i]) && !preg_match('/^[a-zA-Z0-9 .\-\/]+$/', $importData[$i])) {
-                            array_push($message, 'Invalid Data/Special Character at line no ' . ($key + 1) . ' and column no ' . ($i + 1));
-                        }
-                        if (!isset($importData[$i])) {
-                            array_push($emptymessage, 'Empty Value found at line no ' . ($key + 1) . ' and column no ' . ($i + 1));
-                        }
-                    }
-
-                    if (count($emptymessage) > 0) {
-                        throw ValidationException::withMessages(['file' => $emptymessage]);
-                    }
-
-                    if (strlen($importData[0]) > 17) {
-                        array_push($message, 'Invalid Account No at line no ' . ($key + 1));
-                    }
-
-                    if ($routingNo) {
-                        $branch = Branch::where('routingno', $routingNo)->first();
-
-                        if (!isset($branch->branchname)) {
-                            array_push($message, 'Invalid Routing No at line no ' . ($key + 1));
-                        }
-                        if (isset($branch->branchname) && $branch->status == 0) {
-                            array_push($message, 'Branch is closed for Routing No at line no ' . ($key + 1));
-                        }
-                        if (substr($routingNo, 0, 3) == '135') {
-                            array_push($message, 'Janata Bank PLC. Routing No found at line no ' . ($key + 1));
-                        }
-                    }
-
-                    if ($amountVal != "" && $fileType == 'RTGS') {
-                        if (number_format((float)$amountVal, 2, '.', '') < 100000) {
-                            array_push($message, 'Invalid Amount found at line no ' . ($key + 1));
-                        } else {
-                            $totaldebit = bcadd($totaldebit, number_format((float)$amountVal, 2, '.', ''), 2);
-                        }
-                    }
-                }
-            }
-
-            if (count($message) > 0) {
-                throw ValidationException::withMessages(['file' => $message]);
-            }
-
+        foreach ($folders as $folderName => $channelType) {
             try {
-                $bkashBatch = new BkashTransactionBatch;
-                $bkashBatch->file_name = $filename;
-                $bkashBatch->transaction_type = $fileType;
-                $bkashBatch->status_id = 1001;
-                $bkashBatch->total_data = count($importData_arr);
-                $bkashBatch->create_date = Carbon::now()->toDateTimeString();
-                $bkashBatch->created_by = 'SYSTEM';
-                $bkashBatch->save();
+                $files = Storage::disk('public')->files("Bkash_Files/{$folderName}");
+                
+                // Fallback to general SFTP path if configured
+                if (empty($files) && Storage::disk('public')->exists("Bkash_Files")) {
+                    $files = Storage::disk('public')->files("Bkash_Files");
+                }
 
-                $batchId = $bkashBatch->id;
-
-                if ($fileType == 'JANATA') {
-                    foreach ($importData_arr as $key => $importData) {
-                        if ($key == 0) {
-                            continue;
-                        } else {
-                            $bkash = new BkashTransaction;
-                            $bkash->batch_id = $batchId;
-                            $bkash->reason = $importData[5] ?? null;
-                            $bkash->status_id = 1001;
-                            $bkash->create_date = Carbon::now()->toDateTimeString();
-                            $bkash->credit_account_title = $importData[1] ?? null;
-                            $bkash->credit_account_no = $importData[2] ?? null;
-                            $bkash->amount = (float)($importData[3] ?? 0);
-                            $bkash->debit_account_no = $importData[4] ?? null;
-                            $bkash->reference_id = $importData[0] ?? null;
-                            $bkash->created_by = 'SYSTEM';
-                            $bkash->save();
-                        }
-                    }
-                } else if ($fileType == 'BEFTN') {
-                    foreach ($importData_arr as $key => $importData) {
-                        if ($key == 0) {
-                            continue;
-                        } else {
-                            $bkash = new BkashTransaction;
-                            $bkash->batch_id = $batchId;
-                            $bkash->status_id = 1001;
-                            $bkash->create_date = Carbon::now()->toDateTimeString();
-                            $bkash->debit_account_title = $importData[1] ?? null;
-                            $bkash->credit_account_no = $importData[2] ?? null;
-                            $bkash->amount = (float)($importData[3] ?? 0);
-                            $bkash->debit_account_no = $importData[7] ?? null;
-                            $bkash->reference_id = $importData[0] ?? null;
-                            $bkash->credit_routing = $importData[4] ?? null;
-                            $bkash->credit_bank = $importData[5] ?? null;
-                            $bkash->credit_account_title = $importData[1] ?? null;
-                            $bkash->created_by = 'SYSTEM';
-                            $bkash->save();
-                        }
-                    }
-                } else if ($fileType == 'RTGS') {
-                    foreach ($importData_arr as $key => $importData) {
-                        if ($key == 0) {
-                            continue;
-                        } else {
-                            $bkash = new BkashTransaction;
-                            $bkash->batch_id = $batchId;
-                            $bkash->status_id = 1001;
-                            $bkash->create_date = Carbon::now()->toDateTimeString();
-                            $bkash->reference_id = $importData[8] ?? null;
-                            $bkash->credit_account_title = $importData[2] ?? null;
-                            $bkash->credit_account_no = $importData[3] ?? null;
-                            $bkash->credit_bank = substr($importData[5], 0, 3);
-                            $bkash->credit_routing = $importData[5] ?? null;
-                            $bkash->amount = (float)($importData[6] ?? 0);
-                            $bkash->debit_account_no = $importData[7] ?? null;
-                            $bkash->reason = $importData[1] ?? null;
-                            $bkash->created_by = 'SYSTEM';
-                            $bkash->save();
-                        }
-                    }
+                foreach ($files as $fileKey => $filePath) {
+                    $this->processSingleFile($filePath, $channelType);
                 }
             } catch (\Exception $e) {
-                Log::error($e->getMessage());
-                throw ValidationException::withMessages(['file' => 'Error! Please Try Again!']);
+                Log::error("Error scanning SFTP folder {$folderName}: " . $e->getMessage());
             }
         }
     }
 
-    public function checkUploadedFileProperties($extension, $fileSize)
+    private function processSingleFile(string $filePath, string $channelType): void
     {
-        $valid_extension = array("csv", "xls", "xlsx");
-        $maxFileSize = 102097152;
+        $fileName = basename($filePath);
+        $fullLocalPath = storage_path("app/public/" . $filePath);
 
-        if (in_array(strtolower($extension), $valid_extension)) {
-            if ($fileSize > $maxFileSize) {
-                throw new \Exception('File size too large.', Response::HTTP_REQUEST_ENTITY_TOO_LARGE);
-            }
-        } else {
-            throw new \Exception('Invalid file extension, only csv, xls or xlsx file allowed.', Response::HTTP_UNSUPPORTED_MEDIA_TYPE);
+        if (!File::exists($fullLocalPath)) {
+            return;
         }
+
+        // 1. Filename Uniqueness Check
+        if (BkashTransactionBatch::where('file_name', $fileName)->exists()) {
+            Log::warning("Skipping duplicate file: {$fileName}");
+            return;
+        }
+
+        // 2. Filename Format Regex Validation
+        if (!$this->validateFileNamePattern($fileName, $channelType)) {
+            Log::error("Invalid filename pattern for channel {$channelType}: {$fileName}");
+            return;
+        }
+
+        Log::info("Processing bKash File: {$fileName} [{ $channelType }]");
+
+        // Parse Excel Sheet
+        $sheets = Excel::toCollection(collect([]), $fullLocalPath)->toArray();
+        $importRows = array_shift($sheets);
+
+        if (empty($importRows)) {
+            Log::warning("Empty file encountered: {$fileName}");
+            return;
+        }
+
+        // Create Batch Record
+        $batch = BkashTransactionBatch::create([
+            'file_name'        => $fileName,
+            'transaction_type' => $channelType,
+            'total_data'       => 0,
+            'status_id'        => 1000, // Pending Checker
+            'created_by'       => 'SYSTEM',
+            'create_date'      => Carbon::now(),
+        ]);
+
+        $validCount = 0;
+        $totalAmount = 0.0;
+
+        foreach ($importRows as $index => $row) {
+            if ($index === 0) {
+                continue; // Skip Header Row
+            }
+
+            // Skip completely empty rows
+            if (empty(array_filter($row))) {
+                continue;
+            }
+
+            $rowValidation = $this->validateRowData($row, $channelType);
+
+            if ($rowValidation['is_valid']) {
+                $validCount++;
+                $amount = (float)($rowValidation['data']['amount']);
+                $totalAmount += $amount;
+
+                BkashTransaction::create([
+                    'batch_id'             => $batch->id,
+                    'file_name'            => $fileName,
+                    'transaction_type'     => $channelType,
+                    'reference_id'         => $rowValidation['data']['reference_id'],
+                    'txn_id'               => $rowValidation['data']['txn_id'],
+                    'debit_account_no'     => $rowValidation['data']['debit_account_no'],
+                    'debit_account_title'  => $rowValidation['data']['debit_account_title'],
+                    'credit_account_no'    => $rowValidation['data']['credit_account_no'],
+                    'credit_account_title' => $rowValidation['data']['credit_account_title'],
+                    'credit_routing'       => $rowValidation['data']['credit_routing'],
+                    'credit_bank'          => $rowValidation['data']['credit_bank'],
+                    'amount'               => $amount,
+                    'status_id'            => BkashTransaction::STATUS_PENDING_CHECKER,
+                    'created_by'           => 'SYSTEM',
+                    'create_date'          => Carbon::now(),
+                ]);
+            } else {
+                // Partial Processing: Store invalid row in Failed Log
+                BkashFailedTransaction::create([
+                    'batch_id'         => $batch->id,
+                    'file_name'        => $fileName,
+                    'row_number'       => $index + 1,
+                    'transaction_type' => $channelType,
+                    'reference_id'     => $rowValidation['data']['reference_id'] ?? null,
+                    'debit_account_no' => $rowValidation['data']['debit_account_no'] ?? null,
+                    'credit_account_no'=> $rowValidation['data']['credit_account_no'] ?? null,
+                    'amount'           => (float)($rowValidation['data']['amount'] ?? 0),
+                    'failure_code'     => 'VALIDATION_FAILED',
+                    'reject_reason'    => implode(', ', $rowValidation['errors']),
+                ]);
+            }
+        }
+
+        // Update Batch Totals
+        $batch->update([
+            'total_data' => $validCount,
+        ]);
+
+        // Trigger Stage 1 Notification (All Checkers)
+        if ($validCount > 0) {
+            NotificationService::dispatchStage1($fileName, $validCount, $totalAmount);
+        }
+
+        Log::info("Completed Processing File {$fileName}: {$validCount} valid transactions imported.");
+    }
+
+    private function validateFileNamePattern(string $fileName, string $channelType): bool
+    {
+        $patterns = [
+            'A2A'   => '/^JANATA_BANK_\d{4}_\d{2}_\d{2}_\d+Slot\d+\.(xls|xlsx)$/i',
+            'BEFTN' => '/^BEFTN_JANATA_BANK_\d{4}_\d{2}_\d{2}_\d+Slot\d+\.(xls|xlsx)$/i',
+            'RTGS'  => '/^RTGS_JANATA_BANK_\d{4}_\d{2}_\d{2}_\d+Slot\d+\.(xls|xlsx)$/i',
+        ];
+
+        return isset($patterns[$channelType]) ? (bool)preg_match($patterns[$channelType], $fileName) : true;
+    }
+
+    private function validateRowData(array $row, string $channelType): array
+    {
+        $errors = [];
+        
+        $refId        = trim((string)($row[0] ?? ''));
+        $beneName     = trim((string)($row[1] ?? ''));
+        $beneAccount  = trim((string)($row[2] ?? ''));
+        $amount       = (float)($row[3] ?? 0);
+        $routingNo    = trim((string)($row[4] ?? ''));
+        $bankName     = trim((string)($row[5] ?? ''));
+        $debitAccount = trim((string)($row[6] ?? $row[4] ?? ''));
+        $txnId        = trim((string)($row[7] ?? $row[8] ?? $refId));
+
+        if (empty($refId)) {
+            $errors[] = "Reference ID is missing";
+        }
+
+        if (empty($beneAccount)) {
+            $errors[] = "Beneficiary account is missing";
+        }
+
+        if ($amount <= 0) {
+            $errors[] = "Invalid transaction amount";
+        }
+
+        if ($channelType === 'RTGS' && $amount < 100000) {
+            $errors[] = "RTGS amount must be at least BDT 100,000";
+        }
+
+        return [
+            'is_valid' => empty($errors),
+            'errors'   => $errors,
+            'data'     => [
+                'reference_id'         => $refId,
+                'txn_id'               => $txnId ?: (string)Str::uuid(),
+                'debit_account_no'     => $debitAccount,
+                'debit_account_title'  => 'bKash Account',
+                'credit_account_no'    => $beneAccount,
+                'credit_account_title' => $beneName,
+                'credit_routing'       => $routingNo,
+                'credit_bank'          => $bankName,
+                'amount'               => $amount,
+            ],
+        ];
     }
 }

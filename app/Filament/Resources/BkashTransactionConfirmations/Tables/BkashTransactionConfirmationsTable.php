@@ -2,9 +2,13 @@
 
 namespace App\Filament\Resources\BkashTransactionConfirmations\Tables;
 
+use App\Models\BkashTransaction;
+use App\Services\NotificationService;
+use App\Jobs\ExecuteCbsSettlementJob;
 use Filament\Tables\Table;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Actions\BulkAction;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Facades\Auth;
 use Carbon\Carbon;
@@ -14,6 +18,9 @@ class BkashTransactionConfirmationsTable
     public static function configure(Table $table): Table
     {
         return $table
+            ->modifyQueryUsing(function (Builder $query) {
+                $query->where('status_id', BkashTransaction::STATUS_AUTH_1_APPROVED);
+            })
             ->columns([
                 TextColumn::make('txn_id')
                     ->label('Txn ID')
@@ -26,8 +33,14 @@ class BkashTransactionConfirmationsTable
                     ->sortable(),
 
                 TextColumn::make('transaction_type')
-                    ->label('Type')
-                    ->badge(),
+                    ->label('Channel')
+                    ->badge()
+                    ->color(fn (string $state): string => match ($state) {
+                        'A2A'   => 'success',
+                        'BEFTN' => 'warning',
+                        'RTGS'  => 'danger',
+                        default => 'gray',
+                    }),
 
                 TextColumn::make('debit_account_no')
                     ->label('Debit Account')
@@ -43,64 +56,45 @@ class BkashTransactionConfirmationsTable
 
                 TextColumn::make('amount')
                     ->label('Amount (BDT)')
-                    ->numeric(decimalPlaces: 2)
-                    ->sortable(),
-
-                TextColumn::make('credit_bank')
-                    ->label('Bank & Branch')
-                    ->searchable()
-                    ->toggleable(isToggledHiddenByDefault: true),
-
-                TextColumn::make('credit_routing')
-                    ->label('Routing No')
-                    ->searchable()
-                    ->toggleable(isToggledHiddenByDefault: true),
-
-                TextColumn::make('status_id')
-                    ->label('Status')
-                    ->badge()
+                    ->formatStateUsing(fn ($state) => BkashTransaction::formatBdtAmount((float)$state))
                     ->sortable(),
 
                 TextColumn::make('approved_by_1')
                     ->label('1st Auth By')
-                    ->searchable()
-                    ->toggleable(isToggledHiddenByDefault: true),
+                    ->searchable(),
 
                 TextColumn::make('approved_at_1')
                     ->label('1st Auth At')
                     ->formatStateUsing(fn ($state) => $state ? Carbon::parse($state)->timezone('Asia/Dhaka')->format('d M Y, h:i A') : '-')
-                    ->sortable()
-                    ->toggleable(isToggledHiddenByDefault: true),
-
-                TextColumn::make('approved_by_2')
-                    ->label('2nd Auth By')
-                    ->searchable(),
-
-                TextColumn::make('approved_at_2')
-                    ->label('2nd Auth At')
-                    ->formatStateUsing(fn ($state) => $state ? Carbon::parse($state)->timezone('Asia/Dhaka')->format('d M Y, h:i A') : '-')
                     ->sortable(),
             ])
-            ->filters([])
-            ->actions([])
             ->bulkActions([
                 BulkAction::make('authorize_final_level')
-                    ->label('Final Authorize Selected')
+                    ->label('Final Authorize Selected (Instantly Settle)')
                     ->icon('heroicon-o-check-badge')
                     ->color('primary')
                     ->requiresConfirmation()
                     ->action(function (Collection $records) {
-                        $records->each(function ($record) {
+                        $authorizerName2 = Auth::user()->name ?? 'Authorizer 2';
+                        $firstRecord = $records->first();
+                        $fileName = $firstRecord->file_name ?? 'bKash_File.xlsx';
+                        $totalTrn = $records->count();
+                        $totalAmount = (float)$records->sum('amount');
+                        $txnIds = $records->pluck('id')->toArray();
+
+                        $records->each(function ($record) use ($authorizerName2) {
                             $record->update([
-                                'status_id'     => 1003, // Final Authorized Status -> Sent to CBS
-                                'approved_by_2' => Auth::user()->name ?? 'SYSTEM',
-                                'approved_at_2' => Carbon::now('Asia/Dhaka'),
-                                'confirmed_by'  => Auth::user()->name ?? 'SYSTEM',
-                                'confirmed_at'  => Carbon::now('Asia/Dhaka'),
+                                'status_id'     => BkashTransaction::STATUS_FINAL_AUTHORIZED,
+                                'approved_by_2' => $authorizerName2,
+                                'approved_at_2' => Carbon::now(),
                             ]);
                         });
 
-                        // ✉️ Trigger Final Approval Notification & CBS Debit/Credit Processing Here
+                        // Dispatch Stage 4 Notification
+                        NotificationService::dispatchStage4($fileName, $totalTrn, $totalAmount, $authorizerName2);
+
+                        // Asynchronously Dispatch CBS / BACH Automated Settlement Job
+                        ExecuteCbsSettlementJob::dispatch($txnIds);
                     }),
             ]);
     }

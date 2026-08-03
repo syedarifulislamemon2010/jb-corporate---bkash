@@ -2,9 +2,12 @@
 
 namespace App\Filament\Resources\BkashTransactionAuthorizations\Tables;
 
+use App\Models\BkashTransaction;
+use App\Services\NotificationService;
 use Filament\Tables\Table;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Actions\BulkAction;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Facades\Auth;
 use Carbon\Carbon;
@@ -14,6 +17,9 @@ class BkashTransactionAuthorizationsTable
     public static function configure(Table $table): Table
     {
         return $table
+            ->modifyQueryUsing(function (Builder $query) {
+                $query->where('status_id', BkashTransaction::STATUS_CHECKED);
+            })
             ->columns([
                 TextColumn::make('txn_id')
                     ->label('Txn ID')
@@ -26,8 +32,14 @@ class BkashTransactionAuthorizationsTable
                     ->sortable(),
 
                 TextColumn::make('transaction_type')
-                    ->label('Type')
-                    ->badge(),
+                    ->label('Channel')
+                    ->badge()
+                    ->color(fn (string $state): string => match ($state) {
+                        'A2A'   => 'success',
+                        'BEFTN' => 'warning',
+                        'RTGS'  => 'danger',
+                        default => 'gray',
+                    }),
 
                 TextColumn::make('debit_account_no')
                     ->label('Debit Account')
@@ -43,35 +55,18 @@ class BkashTransactionAuthorizationsTable
 
                 TextColumn::make('amount')
                     ->label('Amount (BDT)')
-                    ->numeric(decimalPlaces: 2)
+                    ->formatStateUsing(fn ($state) => BkashTransaction::formatBdtAmount((float)$state))
                     ->sortable(),
 
-                TextColumn::make('credit_bank')
-                    ->label('Bank & Branch')
-                    ->searchable()
-                    ->toggleable(isToggledHiddenByDefault: true),
-
-                TextColumn::make('credit_routing')
-                    ->label('Routing No')
-                    ->searchable()
-                    ->toggleable(isToggledHiddenByDefault: true),
-
-                TextColumn::make('status_id')
-                    ->label('Status')
-                    ->badge()
-                    ->sortable(),
-
-                TextColumn::make('approved_by_1')
-                    ->label('1st Auth By')
+                TextColumn::make('checked_by')
+                    ->label('Checked By')
                     ->searchable(),
 
-                TextColumn::make('approved_at_1')
-                    ->label('1st Auth At')
+                TextColumn::make('checked_at')
+                    ->label('Checked At')
                     ->formatStateUsing(fn ($state) => $state ? Carbon::parse($state)->timezone('Asia/Dhaka')->format('d M Y, h:i A') : '-')
                     ->sortable(),
             ])
-            ->filters([])
-            ->actions([])
             ->bulkActions([
                 BulkAction::make('authorize_first_level')
                     ->label('Authorize Selected (1st Approval)')
@@ -79,15 +74,22 @@ class BkashTransactionAuthorizationsTable
                     ->color('success')
                     ->requiresConfirmation()
                     ->action(function (Collection $records) {
-                        $records->each(function ($record) {
+                        $authorizerName = Auth::user()->name ?? 'Authorizer 1';
+                        $firstRecord = $records->first();
+                        $fileName = $firstRecord->file_name ?? 'bKash_File.xlsx';
+                        $totalTrn = $records->count();
+                        $totalAmount = (float)$records->sum('amount');
+
+                        $records->each(function ($record) use ($authorizerName) {
                             $record->update([
-                                'status_id'     => 1002, // 1st Authorized Status
-                                'approved_by_1' => Auth::user()->name ?? 'SYSTEM',
-                                'approved_at_1' => Carbon::now('Asia/Dhaka'),
+                                'status_id'     => BkashTransaction::STATUS_AUTH_1_APPROVED,
+                                'approved_by_1' => $authorizerName,
+                                'approved_at_1' => Carbon::now(),
                             ]);
                         });
 
-                        // ✉️ Trigger Notification Event Here (For Authorizer 1 Approval)
+                        // Dispatch Stage 3 Notification
+                        NotificationService::dispatchStage3($fileName, $totalTrn, $totalAmount, $authorizerName);
                     }),
             ]);
     }
