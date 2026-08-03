@@ -139,13 +139,13 @@ class UploadBkashExcel extends Page implements HasForms
             }
 
             $rowArr      = array_values((array)$row);
-            $refId       = trim((string)($rowArr[0] ?? ''));
-            $beneName    = trim((string)($rowArr[1] ?? ''));
-            $beneAccount = trim((string)($rowArr[2] ?? ''));
+            $refId       = $this->cleanString($rowArr[0] ?? null, 100);
+            $beneName    = $this->cleanString($rowArr[1] ?? null, 255);
+            $beneAccount = $this->cleanString($rowArr[2] ?? null, 60);
             $amount      = (float)($rowArr[3] ?? 0);
-            $routingNo   = trim((string)($rowArr[4] ?? ''));
-            $bankName    = trim((string)($rowArr[5] ?? ''));
-            $debitAcc    = trim((string)($rowArr[6] ?? $rowArr[4] ?? '0100202707747'));
+            $routingNo   = $this->cleanString($rowArr[4] ?? null, 20);
+            $bankName    = $this->cleanString($rowArr[5] ?? null, 100);
+            $debitAcc    = $this->cleanString($rowArr[6] ?? $rowArr[4] ?? '0100202707747', 60);
 
             if ($refId && $beneAccount && $amount > 0) {
                 $validCount++;
@@ -157,7 +157,7 @@ class UploadBkashExcel extends Page implements HasForms
                     'transaction_type'     => $channelType,
                     'reference_id'         => $refId,
                     'txn_id'               => (string)Str::uuid(),
-                    'debit_account_no'     => $debitAcc,
+                    'debit_account_no'     => $debitAcc ?: '0100202707747',
                     'credit_account_no'    => $beneAccount,
                     'credit_account_title' => $beneName,
                     'credit_routing'       => $routingNo,
@@ -173,14 +173,15 @@ class UploadBkashExcel extends Page implements HasForms
                     'file_name'        => $fileName,
                     'row_number'       => $index + 1,
                     'transaction_type' => $channelType,
-                    'reference_id'     => $refId ?: null,
-                    'credit_account_no'=> $beneAccount ?: null,
+                    'reference_id'     => $refId ? Str::limit($refId, 100, '') : 'N/A',
+                    'credit_account_no'=> $beneAccount ? Str::limit($beneAccount, 50, '') : null,
                     'amount'           => $amount,
                     'failure_code'     => 'INVALID_ROW',
                     'reject_reason'    => 'Missing reference ID or invalid amount',
                 ]);
             }
         }
+
 
         $updateData = ['total_data' => $validCount];
         if (\Illuminate\Support\Facades\Schema::hasColumn('bkash_transaction_batch', 'total_amount')) {
@@ -227,4 +228,21 @@ class UploadBkashExcel extends Page implements HasForms
 
         return $importRows;
     }
+
+    private function cleanString(?string $value, int $maxLength = 100): ?string
+    {
+        if ($value === null) {
+            return null;
+        }
+
+        $clean = preg_replace('/[\x00-\x1F\x7F-\xFF]/', '', (string)$value);
+        $clean = trim($clean);
+
+        if (empty($clean)) {
+            return null;
+        }
+
+        return Str::limit($clean, $maxLength, '');
+    }
 }
+
