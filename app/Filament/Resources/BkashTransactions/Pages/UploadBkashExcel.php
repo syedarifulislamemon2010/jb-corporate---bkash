@@ -13,11 +13,13 @@ use Filament\Schemas\Components\Section;
 
 use Filament\Forms\Concerns\InteractsWithForms;
 use Filament\Forms\Contracts\HasForms;
-use Filament\Schemas\Schema;
 use Filament\Notifications\Notification;
 use Filament\Resources\Pages\Page;
 use Carbon\Carbon;
+
 use Illuminate\Support\Str;
+use Illuminate\Support\Facades\Storage;
+
 
 
 class UploadBkashExcel extends Page implements HasForms
@@ -67,11 +69,27 @@ class UploadBkashExcel extends Page implements HasForms
     public function submit(): void
     {
         $formData = $this->form->getState();
-        $filePath = storage_path('app/public/' . $formData['file']);
+        $relativeFile = $formData['file'] ?? '';
 
-        if (!file_exists($filePath)) {
+        $possiblePaths = [
+            Storage::disk('public')->path($relativeFile),
+            Storage::disk('local')->path($relativeFile),
+            storage_path('app/public/' . $relativeFile),
+            storage_path('app/' . $relativeFile),
+        ];
+
+        $filePath = null;
+        foreach ($possiblePaths as $candidate) {
+            if (file_exists($candidate)) {
+                $filePath = $candidate;
+                break;
+            }
+        }
+
+        if (!$filePath) {
             Notification::make()
                 ->title('File not found')
+                ->body('Uploaded file could not be located in storage. Please try re-selecting the file.')
                 ->danger()
                 ->send();
             return;
@@ -80,6 +98,7 @@ class UploadBkashExcel extends Page implements HasForms
         $fileName = basename($filePath);
         $channelType = $formData['channel_type'];
         $importRows = $this->parseRowsFromFile($filePath);
+
 
         if (empty($importRows)) {
             Notification::make()
