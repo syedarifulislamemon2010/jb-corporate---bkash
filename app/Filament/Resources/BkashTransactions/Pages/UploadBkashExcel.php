@@ -144,14 +144,14 @@ class UploadBkashExcel extends Page implements HasForms
             $rowArr = array_values((array)$row);
             $mapped = $this->mapRowData($headerRow, $rowArr);
 
-            $refId       = $mapped['reference_id'] ?? null;
-            $beneName    = $mapped['credit_account_title'] ?? null;
-            $beneAccount = $mapped['credit_account_no'] ?? null;
+            $refId       = $this->cleanString($mapped['reference_id'] ?? null, 100);
+            $beneName    = $this->cleanString($mapped['credit_account_title'] ?? null, 255);
+            $beneAccount = $this->cleanString($mapped['credit_account_no'] ?? null, 50);
             $amount      = (float)($mapped['amount'] ?? 0);
-            $routingNo   = $mapped['credit_routing'] ?? null;
-            $bankName    = $mapped['credit_bank'] ?? null;
-            $debitAcc    = $mapped['debit_account_no'] ?? '0100202707747';
-            $txnId       = $mapped['txn_id'] ?? (string)Str::uuid();
+            $routingNo   = $this->cleanString($mapped['credit_routing'] ?? null, 10);
+            $bankName    = $this->cleanString($mapped['credit_bank'] ?? null, 100);
+            $debitAcc    = $this->cleanString($mapped['debit_account_no'] ?? '0100202707747', 50);
+            $txnId       = $this->cleanString($mapped['txn_id'] ?? (string)Str::uuid(), 100);
 
             if ($refId && $beneAccount && $amount > 0) {
                 $validCount++;
@@ -160,18 +160,19 @@ class UploadBkashExcel extends Page implements HasForms
                 $txnData = [
                     'batch_id'             => $batch->id,
                     'transaction_type'     => $channelType,
-                    'reference_id'         => $refId,
-                    'txn_id'               => $txnId,
-                    'debit_account_no'     => $debitAcc ?: '0100202707747',
-                    'credit_account_no'    => $beneAccount,
-                    'credit_account_title' => $beneName,
-                    'credit_routing'       => $routingNo,
-                    'credit_bank'          => $bankName,
+                    'reference_id'         => Str::limit($refId, 100, ''),
+                    'txn_id'               => Str::limit($txnId, 100, ''),
+                    'debit_account_no'     => Str::limit($debitAcc ?: '0100202707747', 50, ''),
+                    'credit_account_no'    => Str::limit($beneAccount, 50, ''),
+                    'credit_account_title' => Str::limit($beneName, 255, ''),
+                    'credit_routing'       => $routingNo ? Str::limit($routingNo, 10, '') : null,
+                    'credit_bank'          => $bankName ? Str::limit($bankName, 100, '') : null,
                     'amount'               => $amount,
                     'status_id'            => BkashTransaction::STATUS_PENDING_CHECKER,
                     'created_by'           => auth()->user()->name ?? 'SYSTEM',
                     'create_date'          => Carbon::now(),
                 ];
+
 
                 if (\Illuminate\Support\Facades\Schema::hasColumn('bkash_transactions', 'file_name')) {
                     $txnData['file_name'] = $fileName;
