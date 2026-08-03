@@ -220,19 +220,28 @@ class UploadBkashExcel extends Page implements HasForms
     private function parseRowsFromFile(string $filePath): array
     {
         $importRows = [];
+        $ext = strtolower(pathinfo($filePath, PATHINFO_EXTENSION));
 
-        if (class_exists('Maatwebsite\Excel\Facades\Excel')) {
+        if (in_array($ext, ['xls', 'xlsx'])) {
             try {
-                $sheets = \Maatwebsite\Excel\Facades\Excel::toCollection(collect([]), $filePath)->toArray();
-                $importRows = array_shift($sheets) ?? [];
+                if (class_exists(\PhpOffice\PhpSpreadsheet\IOFactory::class)) {
+                    $spreadsheet = \PhpOffice\PhpSpreadsheet\IOFactory::load($filePath);
+                    $sheet = $spreadsheet->getActiveSheet();
+                    foreach ($sheet->toArray(null, true, true, false) as $row) {
+                        $importRows[] = $row;
+                    }
+                } elseif (class_exists('Maatwebsite\Excel\Facades\Excel')) {
+                    $sheets = \Maatwebsite\Excel\Facades\Excel::toCollection(collect([]), $filePath)->toArray();
+                    $importRows = array_shift($sheets) ?? [];
+                }
             } catch (\Throwable $e) {
                 $importRows = [];
             }
         }
 
-        if (empty($importRows) && is_file($filePath)) {
+        if (empty($importRows) && $ext === 'csv' && is_file($filePath)) {
             if (($handle = fopen($filePath, 'r')) !== false) {
-                while (($data = fgetcsv($handle, 1000, ',')) !== false) {
+                while (($data = fgetcsv($handle, 5000, ',')) !== false) {
                     $importRows[] = $data;
                 }
                 fclose($handle);
@@ -241,6 +250,7 @@ class UploadBkashExcel extends Page implements HasForms
 
         return $importRows;
     }
+
 
     private function cleanString(?string $value, int $maxLength = 100): ?string
     {
