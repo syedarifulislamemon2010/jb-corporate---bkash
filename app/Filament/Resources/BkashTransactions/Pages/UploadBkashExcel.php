@@ -82,7 +82,7 @@ class UploadBkashExcel extends Page implements HasForms
 
         $filePath = null;
         foreach ($possiblePaths as $candidate) {
-            if (file_exists($candidate)) {
+            if (is_file($candidate)) {
                 $filePath = $candidate;
                 break;
             }
@@ -100,6 +100,7 @@ class UploadBkashExcel extends Page implements HasForms
         $fileName = basename($filePath);
         $channelType = $formData['channel_type'];
         $importRows = $this->parseRowsFromFile($filePath);
+
 
 
         if (empty($importRows)) {
@@ -156,9 +157,8 @@ class UploadBkashExcel extends Page implements HasForms
                 $validCount++;
                 $totalAmount += $amount;
 
-                BkashTransaction::create([
+                $txnData = [
                     'batch_id'             => $batch->id,
-                    'file_name'            => $fileName,
                     'transaction_type'     => $channelType,
                     'reference_id'         => $refId,
                     'txn_id'               => $txnId,
@@ -171,7 +171,13 @@ class UploadBkashExcel extends Page implements HasForms
                     'status_id'            => BkashTransaction::STATUS_PENDING_CHECKER,
                     'created_by'           => auth()->user()->name ?? 'SYSTEM',
                     'create_date'          => Carbon::now(),
-                ]);
+                ];
+
+                if (\Illuminate\Support\Facades\Schema::hasColumn('bkash_transactions', 'file_name')) {
+                    $txnData['file_name'] = $fileName;
+                }
+
+                BkashTransaction::create($txnData);
             } else {
                 BkashFailedTransaction::create([
                     'batch_id'         => $batch->id,
@@ -223,7 +229,7 @@ class UploadBkashExcel extends Page implements HasForms
             }
         }
 
-        if (empty($importRows) && file_exists($filePath)) {
+        if (empty($importRows) && is_file($filePath)) {
             if (($handle = fopen($filePath, 'r')) !== false) {
                 while (($data = fgetcsv($handle, 1000, ',')) !== false) {
                     $importRows[] = $data;
