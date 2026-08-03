@@ -69,14 +69,6 @@ class AdminPanelProvider extends PanelProvider
             ->renderHook(
                 \Filament\View\PanelsRenderHook::HEAD_END,
                 fn () => view('filament.custom-styles')
-            )
-            ->renderHook(
-                \Filament\View\PanelsRenderHook::AUTH_LOGIN_FORM_BEFORE,
-                fn () => view('filament.login-header')
-            )
-            ->renderHook(
-                \Filament\View\PanelsRenderHook::AUTH_LOGIN_FORM_AFTER,
-                fn () => view('filament.login-footer')
             );
     }
 }
