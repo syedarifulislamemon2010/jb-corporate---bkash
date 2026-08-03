@@ -7,11 +7,10 @@ use App\Models\BkashTransaction;
 use App\Models\BkashTransactionBatch;
 use App\Services\NotificationService;
 use Filament\Actions\Action;
+use Filament\Actions\CreateAction;
 use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\Select;
 use Filament\Resources\Pages\ListRecords;
-use Illuminate\Support\Facades\Storage;
-use Maatwebsite\Excel\Facades\Excel;
 use Carbon\Carbon;
 use Illuminate\Support\Str;
 
@@ -22,6 +21,9 @@ class ListBkashTransactions extends ListRecords
     protected function getHeaderActions(): array
     {
         return [
+            CreateAction::make()
+                ->label('New Transaction'),
+
             Action::make('upload_excel')
                 ->label('Upload bKash Excel File')
                 ->icon('heroicon-o-document-arrow-up')
@@ -36,18 +38,21 @@ class ListBkashTransactions extends ListRecords
                         ])
                         ->required(),
                     FileUpload::make('file')
-                        ->label('Excel File (.xls / .xlsx)')
-                        ->acceptedFileTypes(['application/vnd.ms-excel', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'])
+                        ->label('Excel / CSV File')
                         ->directory('Bkash_Uploads')
                         ->required(),
                 ])
                 ->action(function (array $data) {
                     $filePath = storage_path('app/public/' . $data['file']);
+
+                    if (!file_exists($filePath)) {
+                        return;
+                    }
+
                     $fileName = basename($filePath);
                     $channelType = $data['channel_type'];
 
-                    $sheets = Excel::toCollection(collect([]), $filePath)->toArray();
-                    $importRows = array_shift($sheets);
+                    $importRows = $this->parseRowsFromFile($filePath);
 
                     if (empty($importRows)) {
                         return;
@@ -70,17 +75,18 @@ class ListBkashTransactions extends ListRecords
                     $totalAmount = 0.0;
 
                     foreach ($importRows as $index => $row) {
-                        if ($index === 0 || empty(array_filter($row))) {
+                        if ($index === 0 || empty(array_filter((array)$row))) {
                             continue;
                         }
 
-                        $refId       = trim((string)($row[0] ?? ''));
-                        $beneName    = trim((string)($row[1] ?? ''));
-                        $beneAccount = trim((string)($row[2] ?? ''));
-                        $amount      = (float)($row[3] ?? 0);
-                        $routingNo   = trim((string)($row[4] ?? ''));
-                        $bankName    = trim((string)($row[5] ?? ''));
-                        $debitAcc    = trim((string)($row[6] ?? $row[4] ?? '0100202707747'));
+                        $rowArr      = array_values((array)$row);
+                        $refId       = trim((string)($rowArr[0] ?? ''));
+                        $beneName    = trim((string)($rowArr[1] ?? ''));
+                        $beneAccount = trim((string)($rowArr[2] ?? ''));
+                        $amount      = (float)($rowArr[3] ?? 0);
+                        $routingNo   = trim((string)($rowArr[4] ?? ''));
+                        $bankName    = trim((string)($rowArr[5] ?? ''));
+                        $debitAcc    = trim((string)($rowArr[6] ?? $rowArr[4] ?? '0100202707747'));
 
                         if ($refId && $beneAccount && $amount > 0) {
                             $validCount++;
@@ -115,5 +121,30 @@ class ListBkashTransactions extends ListRecords
                     }
                 }),
         ];
+    }
+
+    private function parseRowsFromFile(string $filePath): array
+    {
+        $importRows = [];
+
+        if (class_exists('Maatwebsite\Excel\Facades\Excel')) {
+            try {
+                $sheets = \Maatwebsite\Excel\Facades\Excel::toCollection(collect([]), $filePath)->toArray();
+                $importRows = array_shift($sheets) ?? [];
+            } catch (\Throwable $e) {
+                $importRows = [];
+            }
+        }
+
+        if (empty($importRows) && file_exists($filePath)) {
+            if (($handle = fopen($filePath, 'r')) !== false) {
+                while (($data = fgetcsv($handle, 1000, ',')) !== false) {
+                    $importRows[] = $data;
+                }
+                fclose($handle);
+            }
+        }
+
+        return $importRows;
     }
 }
