@@ -29,9 +29,11 @@ class AdminPanelProvider extends PanelProvider
             ->id('admin')
             ->path('admin')
             ->login()
+            ->darkMode(false)
             ->colors([
                 'primary' => Color::Sky,
             ])
+
             ->navigationGroups([
                 NavigationGroup::make()
                     ->label('bKash Management')

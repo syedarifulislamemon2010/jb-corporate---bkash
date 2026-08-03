@@ -121,15 +121,14 @@ class UploadBkashExcel extends Page implements HasForms
             'create_date'      => Carbon::now(),
         ];
 
-        if (Schema::hasColumn('bkash_transaction_batch', 'sha256')) {
+        if (\Illuminate\Support\Facades\Schema::hasColumn('bkash_transaction_batch', 'sha256')) {
             $batchData['sha256'] = $sha256;
         }
-        if (Schema::hasColumn('bkash_transaction_batch', 'total_amount')) {
+        if (\Illuminate\Support\Facades\Schema::hasColumn('bkash_transaction_batch', 'total_amount')) {
             $batchData['total_amount'] = 0.00;
         }
 
         $batch = BkashTransactionBatch::create($batchData);
-
 
         $validCount = 0;
         $totalAmount = 0.0;
@@ -184,10 +183,11 @@ class UploadBkashExcel extends Page implements HasForms
         }
 
         $updateData = ['total_data' => $validCount];
-        if (Schema::hasColumn('bkash_transaction_batch', 'total_amount')) {
+        if (\Illuminate\Support\Facades\Schema::hasColumn('bkash_transaction_batch', 'total_amount')) {
             $updateData['total_amount'] = $totalAmount;
         }
         $batch->update($updateData);
+
 
 
         if ($validCount > 0) {
