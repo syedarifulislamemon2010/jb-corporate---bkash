@@ -30,7 +30,6 @@ class ExecuteCbsSettlementJob implements ShouldQueue
 
         foreach ($transactions as $txn) {
             try {
-                // Double Payment Defense Ledger Check
                 $attempt = PostingAttempt::firstOrCreate(
                     ['txn_id' => $txn->txn_id ?: $txn->id],
                     [
@@ -46,9 +45,8 @@ class ExecuteCbsSettlementJob implements ShouldQueue
                     continue;
                 }
 
-                // Execute Posting via Janata Bank CBS / BACH Interface
-                // In live production, this connects to Janata Bank T24 Direct API / BACH
                 $attempt->update(['outcome' => 'SUCCESS']);
+
 
                 $txn->update([
                     'status_id'      => BkashTransaction::STATUS_CBS_SUCCESS,

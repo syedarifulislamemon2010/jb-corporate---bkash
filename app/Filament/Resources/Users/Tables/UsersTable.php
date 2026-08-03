@@ -30,11 +30,12 @@ class UsersTable
                     ->searchable()
                     ->sortable(),
 
-                // Display Organization Name via Relationship
                 TextColumn::make('organizationRelation.name')
                     ->label('Organization')
                     ->searchable()
                     ->sortable(),
+
+
 
                 TextColumn::make('mobile_no')
                     ->searchable(),

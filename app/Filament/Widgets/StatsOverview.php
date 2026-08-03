@@ -10,9 +10,9 @@ class StatsOverview extends BaseWidget
 {
     protected function getStats(): array
     {
-        // Mock / Live CBS Account Balances for bKash Accounts
-        $tcsaBalance = 542000000.50; // Trust Cum Settlement Acc 0100202707747
-        $opsBalance  = 18500000.00;  // Operational Acc 0100224107522
+        $tcsaBalance = 542000000.50;
+        $opsBalance  = 18500000.00;
+
 
         $todaySettledVolume = (float)BkashTransaction::whereIn('status_id', [
             BkashTransaction::STATUS_FINAL_AUTHORIZED,

@@ -43,7 +43,6 @@ class ProcessBkashSftpFiles implements ShouldQueue
             try {
                 $files = Storage::disk('public')->files("Bkash_Files/{$folderName}");
                 
-                // Fallback to general SFTP path if configured
                 if (empty($files) && Storage::disk('public')->exists("Bkash_Files")) {
                     $files = Storage::disk('public')->files("Bkash_Files");
                 }
@@ -66,21 +65,18 @@ class ProcessBkashSftpFiles implements ShouldQueue
             return;
         }
 
-        // 1. Filename Uniqueness Check
         if (BkashTransactionBatch::where('file_name', $fileName)->exists()) {
             Log::warning("Skipping duplicate file: {$fileName}");
             return;
         }
 
-        // 2. Filename Format Regex Validation
         if (!$this->validateFileNamePattern($fileName, $channelType)) {
             Log::error("Invalid filename pattern for channel {$channelType}: {$fileName}");
             return;
         }
 
-        Log::info("Processing bKash File: {$fileName} [{ $channelType }]");
+        Log::info("Processing bKash File: {$fileName} [{$channelType}]");
 
-        // Parse Excel Sheet
         $sheets = Excel::toCollection(collect([]), $fullLocalPath)->toArray();
         $importRows = array_shift($sheets);
 
@@ -89,31 +85,27 @@ class ProcessBkashSftpFiles implements ShouldQueue
             return;
         }
 
-        // Calculate SHA-256 Checksum for file integrity audit
         $sha256 = hash_file('sha256', $fullLocalPath);
 
-        // Create Batch Record
         $batch = BkashTransactionBatch::create([
             'file_name'        => $fileName,
             'transaction_type' => $channelType,
             'sha256'           => $sha256,
             'total_data'       => 0,
             'total_amount'     => 0.00,
-            'status_id'        => 1000, // Pending Checker
+            'status_id'        => 1000,
             'created_by'       => 'SYSTEM',
             'create_date'      => Carbon::now(),
         ]);
-
 
         $validCount = 0;
         $totalAmount = 0.0;
 
         foreach ($importRows as $index => $row) {
             if ($index === 0) {
-                continue; // Skip Header Row
+                continue;
             }
 
-            // Skip completely empty rows
             if (empty(array_filter($row))) {
                 continue;
             }
@@ -143,7 +135,6 @@ class ProcessBkashSftpFiles implements ShouldQueue
                     'create_date'          => Carbon::now(),
                 ]);
             } else {
-                // Partial Processing: Store invalid row in Failed Log
                 BkashFailedTransaction::create([
                     'batch_id'         => $batch->id,
                     'file_name'        => $fileName,
@@ -159,17 +150,15 @@ class ProcessBkashSftpFiles implements ShouldQueue
             }
         }
 
-        // Update Batch Totals
         $batch->update([
             'total_data'   => $validCount,
             'total_amount' => $totalAmount,
         ]);
 
-
-        // Trigger Stage 1 Notification (All Checkers)
         if ($validCount > 0) {
             NotificationService::dispatchStage1($fileName, $validCount, $totalAmount);
         }
+
 
         Log::info("Completed Processing File {$fileName}: {$validCount} valid transactions imported.");
     }

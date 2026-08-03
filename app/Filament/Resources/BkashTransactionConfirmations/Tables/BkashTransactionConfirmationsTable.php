@@ -90,10 +90,8 @@ class BkashTransactionConfirmationsTable
                             ]);
                         });
 
-                        // Dispatch Stage 4 Notification
                         NotificationService::dispatchStage4($fileName, $totalTrn, $totalAmount, $authorizerName2);
 
-                        // Asynchronously Dispatch CBS / BACH Automated Settlement Job
                         ExecuteCbsSettlementJob::dispatch($txnIds);
                     }),
             ]);

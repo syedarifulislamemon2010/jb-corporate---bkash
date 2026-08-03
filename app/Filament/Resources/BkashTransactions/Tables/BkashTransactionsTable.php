@@ -104,7 +104,6 @@ class BkashTransactionsTable
                             ]);
                         });
 
-                        // Dispatch Stage 2 Notification
                         NotificationService::dispatchStage2($fileName, $totalTrn, $totalAmount, $checkerName);
                     }),
             ]);

@@ -20,10 +20,7 @@ class OrganizationResource extends Resource
 {
     protected static ?string $model = Organization::class;
 
-    // নেভিগেশন আইকন ও গ্রুপ সেটিংস
     protected static string|BackedEnum|null $navigationIcon = 'heroicon-m-building-library';
-    
-    // গ্লোবাল সার্চে অর্গানাইজেশনের নাম দেখানোর জন্য DB কলাম 'name' ব্যবহার করা হয়েছে
     protected static ?string $recordTitleAttribute = 'name';
 
     public static function form(Schema $schema): Schema
@@ -38,9 +35,7 @@ class OrganizationResource extends Resource
 
     public static function getRelations(): array
     {
-        return [
-            //
-        ];
+        return [];
     }
 
     public static function getPages(): array
@@ -52,9 +47,6 @@ class OrganizationResource extends Resource
         ];
     }
 
-    /**
-     * Soft Deleted রেকর্ড থাকলেও যেন Route Binding এডিটের সময় খুঁজে পায়
-     */
     public static function getRecordRouteBindingEloquentQuery(): Builder
     {
         return parent::getRecordRouteBindingEloquentQuery()

@@ -88,7 +88,6 @@ class BkashTransactionAuthorizationsTable
                             ]);
                         });
 
-                        // Dispatch Stage 3 Notification
                         NotificationService::dispatchStage3($fileName, $totalTrn, $totalAmount, $authorizerName);
                     }),
             ]);
