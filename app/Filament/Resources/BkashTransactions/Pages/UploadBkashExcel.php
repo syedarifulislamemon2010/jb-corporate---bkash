@@ -112,16 +112,24 @@ class UploadBkashExcel extends Page implements HasForms
 
         $sha256 = hash_file('sha256', $filePath);
 
-        $batch = BkashTransactionBatch::create([
+        $batchData = [
             'file_name'        => $fileName,
             'transaction_type' => $channelType,
-            'sha256'           => $sha256,
             'total_data'       => 0,
-            'total_amount'     => 0.00,
             'status_id'        => 1000,
             'created_by'       => auth()->user()->name ?? 'SYSTEM',
             'create_date'      => Carbon::now(),
-        ]);
+        ];
+
+        if (Schema::hasColumn('bkash_transaction_batch', 'sha256')) {
+            $batchData['sha256'] = $sha256;
+        }
+        if (Schema::hasColumn('bkash_transaction_batch', 'total_amount')) {
+            $batchData['total_amount'] = 0.00;
+        }
+
+        $batch = BkashTransactionBatch::create($batchData);
+
 
         $validCount = 0;
         $totalAmount = 0.0;
@@ -175,10 +183,12 @@ class UploadBkashExcel extends Page implements HasForms
             }
         }
 
-        $batch->update([
-            'total_data'   => $validCount,
-            'total_amount' => $totalAmount,
-        ]);
+        $updateData = ['total_data' => $validCount];
+        if (Schema::hasColumn('bkash_transaction_batch', 'total_amount')) {
+            $updateData['total_amount'] = $totalAmount;
+        }
+        $batch->update($updateData);
+
 
         if ($validCount > 0) {
             NotificationService::dispatchStage1($fileName, $validCount, $totalAmount);

@@ -1,5 +1,5 @@
 <style>
-    /* Sign-In Page Sky Blue Theme (Matching Image 3 & Image 4) */
+    /* Sign-In Page Sky Blue Theme */
     .fi-body-auth {
         background: linear-gradient(180deg, #a6ddf7 0%, #89d0f3 50%, #70c4ee 100%) !important;
         min-height: 100vh;
@@ -35,24 +35,46 @@
         box-shadow: 0 6px 16px rgba(0, 162, 232, 0.45) !important;
     }
 
-    /* 10/10 Modern Beast-Level Light Theme for Post-Login Dashboard & Portal (Matching Image 5) */
+    /* Uniform Modern Light Mode Corporate Theme (Matching Image 2) */
     body:not(.fi-body-auth) {
         background-color: #f8fafc !important;
         color: #0f172a !important;
     }
 
-    /* Sidebar Polish */
+    /* Top Navbar & Header */
+    header.fi-topbar {
+        background-color: #ffffff !important;
+        border-bottom: 1px solid #e2e8f0 !important;
+    }
+
+    .fi-topbar brand, 
+    .fi-topbar span,
+    .fi-header-heading {
+        color: #0f172a !important;
+        font-weight: 800 !important;
+    }
+
+    /* Sidebar Theme Polish (Matching Image 2) */
     aside.fi-sidebar {
         background-color: #ffffff !important;
         border-right: 1px solid #e2e8f0 !important;
-        box-shadow: 2px 0 10px rgba(0, 0, 0, 0.02) !important;
+        box-shadow: 2px 0 8px rgba(0, 0, 0, 0.02) !important;
     }
 
-    .fi-sidebar-nav {
-        padding: 1rem 0.5rem !important;
+    .fi-sidebar-header {
+        background-color: #ffffff !important;
+        border-bottom: 1px solid #f1f5f9 !important;
     }
 
-    .fi-sidebar-item-active a {
+    .fi-sidebar-item label,
+    .fi-sidebar-item span,
+    .fi-sidebar-group-label span {
+        color: #334155 !important;
+        font-weight: 600 !important;
+    }
+
+    .fi-sidebar-item-active a,
+    .fi-sidebar-item-active span {
         background-color: #e0f2fe !important;
         color: #0284c7 !important;
         font-weight: 700 !important;
@@ -64,48 +86,39 @@
         border-radius: 10px !important;
     }
 
-    /* Header & Navbar */
-    header.fi-topbar {
-        background-color: #ffffff !important;
-        border-bottom: 1px solid #e2e8f0 !important;
-    }
-
-    .fi-header-heading {
-        color: #0f172a !important;
-        font-weight: 800 !important;
-        letter-spacing: -0.025em !important;
-    }
-
-    /* Dashboard Widgets & Stat Cards */
+    /* Welcome Widget & Stat Widgets (Matching Image 2) */
+    .fi-wi-account-widget,
+    .fi-wi-filament-info-widget,
     .fi-wi-stats-overview-stat {
         background-color: #ffffff !important;
         border-radius: 16px !important;
         border: 1px solid #e2e8f0 !important;
-        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.04), 0 2px 4px -2px rgba(0, 0, 0, 0.03) !important;
-        transition: all 0.2s ease-in-out !important;
-        padding: 1.5rem !important;
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.04) !important;
+        color: #0f172a !important;
     }
 
-    .fi-wi-stats-overview-stat:hover {
-        transform: translateY(-2px) !important;
-        box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.08), 0 4px 6px -4px rgba(0, 0, 0, 0.04) !important;
+    .fi-wi-account-widget h2,
+    .fi-wi-account-widget span,
+    .fi-wi-filament-info-widget span,
+    .fi-wi-filament-info-widget div {
+        color: #0f172a !important;
     }
 
-    /* Tables & Content Cards */
+    .fi-wi-stats-overview-stat-value {
+        color: #0f172a !important;
+        font-weight: 800 !important;
+    }
+
+    .fi-wi-stats-overview-stat-label {
+        color: #64748b !important;
+        font-weight: 600 !important;
+    }
+
+    /* Tables */
     .fi-ta-content {
         background-color: #ffffff !important;
         border-radius: 16px !important;
         border: 1px solid #e2e8f0 !important;
         box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.03) !important;
-        overflow: hidden !important;
-    }
-
-    .fi-ta-header-cell {
-        background-color: #f8fafc !important;
-        color: #475569 !important;
-        font-weight: 700 !important;
-        text-transform: uppercase !important;
-        font-size: 0.75rem !important;
-        letter-spacing: 0.05em !important;
     }
 </style>
