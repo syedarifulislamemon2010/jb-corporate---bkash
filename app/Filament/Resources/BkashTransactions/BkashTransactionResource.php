@@ -4,6 +4,7 @@ namespace App\Filament\Resources\BkashTransactions;
 
 use App\Filament\Resources\BkashTransactions\Pages\CreateBkashTransaction;
 use App\Filament\Resources\BkashTransactions\Pages\ListBkashTransactions;
+use App\Filament\Resources\BkashTransactions\Pages\UploadBkashExcel;
 use App\Filament\Resources\BkashTransactions\Schemas\BkashTransactionForm;
 use App\Filament\Resources\BkashTransactions\Tables\BkashTransactionsTable;
 use App\Models\BkashTransaction;
@@ -67,8 +68,6 @@ class BkashTransactionResource extends Resource
         return true;
     }
 
-
-
     public static function canEdit(Model $record): bool
     {
         return false;
@@ -82,8 +81,9 @@ class BkashTransactionResource extends Resource
     public static function getPages(): array
     {
         return [
-            'index' => ListBkashTransactions::route('/'),
+            'index'  => ListBkashTransactions::route('/'),
             'create' => CreateBkashTransaction::route('/create'),
+            'upload' => UploadBkashExcel::route('/upload'),
         ];
     }
 }
