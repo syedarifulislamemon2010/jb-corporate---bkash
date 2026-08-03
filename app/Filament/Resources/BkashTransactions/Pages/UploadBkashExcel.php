@@ -12,11 +12,12 @@ use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Section;
 use Filament\Forms\Concerns\InteractsWithForms;
 use Filament\Forms\Contracts\HasForms;
-use Filament\Forms\Form;
+use Filament\Schemas\Schema;
 use Filament\Notifications\Notification;
 use Filament\Resources\Pages\Page;
 use Carbon\Carbon;
 use Illuminate\Support\Str;
+
 
 class UploadBkashExcel extends Page implements HasForms
 {
@@ -25,7 +26,6 @@ class UploadBkashExcel extends Page implements HasForms
     protected static string $resource = BkashTransactionResource::class;
 
     protected string $view = 'filament.resources.bkash-transactions.pages.upload-bkash-excel';
-
 
     protected static ?string $title = 'Upload bKash Excel File';
 
@@ -36,10 +36,10 @@ class UploadBkashExcel extends Page implements HasForms
         $this->form->fill();
     }
 
-    public function form(Form $form): Form
+    public function form(Schema $schema): Schema
     {
-        return $form
-            ->schema([
+        return $schema
+            ->components([
                 Section::make('Ingest bKash Settlement File')
                     ->description('Upload system-generated Excel file (A2A, BEFTN, RTGS) from Multi-Bank Tool (XLS) or Oracle ERP (XLSX).')
                     ->schema([
@@ -61,6 +61,7 @@ class UploadBkashExcel extends Page implements HasForms
             ])
             ->statePath('data');
     }
+
 
     public function submit(): void
     {
