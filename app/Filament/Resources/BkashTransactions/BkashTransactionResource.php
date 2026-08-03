@@ -64,8 +64,9 @@ class BkashTransactionResource extends Resource
 
     public static function canCreate(): bool
     {
-        return true;
+        return false; // Disabled because bKash transactions are automatically ingested from SFTP Excel files (A2A, BEFTN, RTGS)
     }
+
 
     public static function canEdit(Model $record): bool
     {
