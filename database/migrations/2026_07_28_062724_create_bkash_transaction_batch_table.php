@@ -6,27 +6,26 @@ use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
-    /**
-     * Run the migrations.
-     */
     public function up(): void
     {
         Schema::create('bkash_transaction_batch', function (Blueprint $table) {
             $table->uuid('id')->primary();
-            $table->string('file_name', 150);
+            $table->string('file_name', 255)->unique();
             $table->string('transaction_type', 20)->nullable(); 
-            $table->string('total_data', 10)->default('0');
-            $table->string('status_id', 10)->default('813');
+            $table->char('sha256', 64)->nullable(); // SHA-256 integrity hash
+            $table->integer('total_data')->default(0);
+            $table->decimal('total_amount', 18, 2)->default(0);
+            $table->integer('status_id')->default(1000);
             $table->string('created_by', 50)->nullable();
             $table->dateTime('create_date')->nullable();
             $table->timestamps();
             $table->softDeletes(); 
+
+            $table->index(['file_name']);
+            $table->index(['status_id']);
         });
     }
 
-    /**
-     * Reverse the migrations.
-     */
     public function down(): void
     {
         Schema::dropIfExists('bkash_transaction_batch');

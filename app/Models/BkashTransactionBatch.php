@@ -12,48 +12,50 @@ class BkashTransactionBatch extends Model
     use UUID;
     use SoftDeletes; 
 
-    protected $connection = 'oracle';
     protected $table = 'bkash_transaction_batch';
     protected $primaryKey = 'id';
+    public $incrementing = false;
+    protected $keyType = 'string';
 
-    /**
-     * The attributes that are mass assignable.
-     *
-     * @var array<int, string>
-     */
     protected $fillable = [
         'file_name',
         'transaction_type',
+        'sha256',
         'total_data',
-        'reference_id',
-        'create_date',
-        'return_date',
-        'debit_account_title',
-        'debit_account_no',
-        'amount',
-        'debit_routing',
-        'credit_routing',
-        'credit_bank',
-        'credit_account_no',
-        'credit_account_title',
-        'txn_id',
-        'reject_reason',
+        'total_amount',
         'status_id',
         'created_by',
-        'approved_by',
-        'confirmed_by',
-        'admin_approved',
-        'approved_at',
-        'confirmed_at',
-        'admin_approved_at',
-        'cbs_success_at',
+        'create_date',
     ];
+
+    protected function casts(): array
+    {
+        return [
+            'total_data'   => 'integer',
+            'total_amount' => 'decimal:2',
+            'status_id'    => 'integer',
+            'create_date'  => 'datetime',
+        ];
+    }
+
+    public function transactions()
+    {
+        return $this->hasMany(BkashTransaction::class, 'batch_id', 'id');
+    }
+
+    public function failedTransactions()
+    {
+        return $this->hasMany(BkashFailedTransaction::class, 'batch_id', 'id');
+    }
 
     protected static function boot()
     {
         parent::boot();
 
         static::creating(function (Model $model) {
-            $model->setAttribute($model->getKeyName(), (string)Str::orderedUuid());
+            if (empty($model->{$model->getKeyName()})) {
+                $model->{$model->getKeyName()} = (string) Str::orderedUuid();
+            }
         });
+    }
 }

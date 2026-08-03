@@ -89,15 +89,21 @@ class ProcessBkashSftpFiles implements ShouldQueue
             return;
         }
 
+        // Calculate SHA-256 Checksum for file integrity audit
+        $sha256 = hash_file('sha256', $fullLocalPath);
+
         // Create Batch Record
         $batch = BkashTransactionBatch::create([
             'file_name'        => $fileName,
             'transaction_type' => $channelType,
+            'sha256'           => $sha256,
             'total_data'       => 0,
+            'total_amount'     => 0.00,
             'status_id'        => 1000, // Pending Checker
             'created_by'       => 'SYSTEM',
             'create_date'      => Carbon::now(),
         ]);
+
 
         $validCount = 0;
         $totalAmount = 0.0;
@@ -155,8 +161,10 @@ class ProcessBkashSftpFiles implements ShouldQueue
 
         // Update Batch Totals
         $batch->update([
-            'total_data' => $validCount,
+            'total_data'   => $validCount,
+            'total_amount' => $totalAmount,
         ]);
+
 
         // Trigger Stage 1 Notification (All Checkers)
         if ($validCount > 0) {
