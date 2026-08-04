@@ -5,7 +5,7 @@ namespace App\Filament\Resources\BkashTransactions\Pages;
 use App\Filament\Resources\BkashTransactions\BkashTransactionResource;
 use Filament\Actions\Action;
 use Filament\Actions\CreateAction;
-use Filament\Resources\Components\Tab;
+use Filament\Schemas\Components\Tabs\Tab;
 use Filament\Resources\Pages\ListRecords;
 use Illuminate\Database\Eloquent\Builder;
 
