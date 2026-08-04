@@ -26,7 +26,7 @@ class BkashTransactionForm
                             ->options([
                                 'BEFTN' => 'BEFTN',
                                 'RTGS'  => 'RTGS',
-                                'A2A'   => 'A2A',
+                                'A2A'   => 'Account to Account (A2A)-Janata Bank PLC.',
                             ])
                             ->required()
                             ->live(),

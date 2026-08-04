@@ -51,7 +51,7 @@ class UploadBkashExcel extends Page implements HasForms
                         Select::make('channel_type')
                             ->label('Transaction Channel')
                             ->options([
-                                'A2A'   => 'Account to Account (A2A)',
+                                'A2A'   => 'Account to Account (A2A)-Janata Bank PLC.',
                                 'BEFTN' => 'BEFTN',
                                 'RTGS'  => 'RTGS',
                             ])

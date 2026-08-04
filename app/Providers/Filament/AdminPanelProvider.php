@@ -30,6 +30,8 @@ class AdminPanelProvider extends PanelProvider
             ->path('admin')
             ->login()
             ->sidebarCollapsibleOnDesktop()
+            ->databaseNotifications()
+            ->databaseNotificationsPolling('15s')
             ->colors([
                 'primary' => Color::Sky,
             ])
@@ -37,6 +39,10 @@ class AdminPanelProvider extends PanelProvider
                 NavigationGroup::make()
                     ->label('bKash Management')
                     ->icon('heroicon-o-banknotes')
+                    ->collapsible(true),
+                NavigationGroup::make()
+                    ->label('Transaction Management')
+                    ->icon('heroicon-o-currency-dollar')
                     ->collapsible(true),
                 NavigationGroup::make()
                     ->label('User Management')

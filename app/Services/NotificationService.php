@@ -4,11 +4,41 @@ namespace App\Services;
 
 use App\Models\BkashTransaction;
 use App\Models\NotificationOutbox;
+use App\Models\User;
+use Filament\Notifications\Notification;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
-use Illuminate\Support\Facades\Mail;
 
 class NotificationService
 {
+    /**
+     * Send Database Notifications to users in the same organization excluding the sender.
+     */
+    public static function sendOrganizationDatabaseNotification(string $title, string $body, ?User $senderUser = null): void
+    {
+        $sender = $senderUser ?? Auth::user();
+        if (!$sender) {
+            return;
+        }
+
+        $query = User::query()->where('id', '!=', $sender->id);
+
+        if ($sender->organization_id) {
+            $query->where('organization_id', $sender->organization_id);
+        }
+
+        $recipients = $query->get();
+
+        if ($recipients->isNotEmpty()) {
+            Notification::make()
+                ->title($title)
+                ->body($body)
+                ->icon('heroicon-o-bell')
+                ->info()
+                ->sendToDatabase($recipients);
+        }
+    }
+
     /**
      * Dispatch Stage 1: SFTP File Ingested -> Pending Checker
      */
@@ -22,6 +52,11 @@ class NotificationService
               . "Thank you\n\n"
               . "Best Regards,\n\n"
               . "JANATA BANK";
+
+        static::sendOrganizationDatabaseNotification(
+            "New bKash Settlement File Ingested: {$fileName}",
+            "Total Trn: {$totalTrn}, Total Amount: BDT {$formattedAmount}. Pending for Checker verification."
+        );
 
         return static::createOutbox('STAGE_1_SFTP', $fileName, $totalTrn, $totalAmount, null, 'ALL_CHECKERS', $body);
     }
@@ -39,6 +74,11 @@ class NotificationService
               . "Thank you\n\n"
               . "JANATA BANK";
 
+        static::sendOrganizationDatabaseNotification(
+            "Transactions Checked by {$checkerName}",
+            "File: {$fileName} | Total Trn: {$totalTrn}, Amount: BDT {$formattedAmount}. Pending Authorization."
+        );
+
         return static::createOutbox('STAGE_2_CHECKED', $fileName, $totalTrn, $totalAmount, $checkerName, 'ALL_CHECKERS_AND_AUTHORIZERS', $body);
     }
 
@@ -55,6 +95,11 @@ class NotificationService
               . "Thank you\n\n"
               . "JANATA BANK";
 
+        static::sendOrganizationDatabaseNotification(
+            "1st Authorization Completed by {$authorizerName1}",
+            "File: {$fileName} | Total Trn: {$totalTrn}, Amount: BDT {$formattedAmount}. Pending final approval."
+        );
+
         return static::createOutbox('STAGE_3_AUTH1', $fileName, $totalTrn, $totalAmount, $authorizerName1, 'ALL_CHECKERS_AND_AUTHORIZERS', $body);
     }
 
@@ -70,6 +115,11 @@ class NotificationService
               . "Total Trn: \"{$totalTrn}\", Total Amount: \"{$formattedAmount}\" is Authorized by \"{$authorizerName2}\" & is finally authorized.\n\n"
               . "Thank you\n\n"
               . "JANATA BANK";
+
+        static::sendOrganizationDatabaseNotification(
+            "Final Authorization Completed by {$authorizerName2}",
+            "File: {$fileName} | Total Trn: {$totalTrn}, Amount: BDT {$formattedAmount}. Settled."
+        );
 
         return static::createOutbox('STAGE_4_AUTH2', $fileName, $totalTrn, $totalAmount, $authorizerName2, 'ALL_CHECKERS_AND_AUTHORIZERS', $body);
     }
@@ -95,7 +145,6 @@ class NotificationService
             'email_payload'   => $messageText,
         ]);
 
-        // Attempt immediate dispatch asynchronously or log outbox
         Log::info("Notification Outbox Created [{$eventType}]: {$fileName}");
 
         return $outbox;

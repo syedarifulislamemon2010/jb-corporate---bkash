@@ -29,7 +29,7 @@ class BkashTransactionResource extends Resource
 
     protected static ?int $navigationSort = 1;
 
-    protected static \BackedEnum|string|null $navigationIcon = null;
+    protected static \BackedEnum|string|null $navigationIcon = 'heroicon-o-document-plus';
 
     public static function getEloquentQuery(): Builder
     {

@@ -23,6 +23,8 @@ class BkashReportsResource extends Resource
 
     protected static ?int $navigationSort = 5;
 
+    protected static \BackedEnum|string|null $navigationIcon = 'heroicon-o-chart-bar';
+
     public static function table(Table $table): Table
     {
         return $table
