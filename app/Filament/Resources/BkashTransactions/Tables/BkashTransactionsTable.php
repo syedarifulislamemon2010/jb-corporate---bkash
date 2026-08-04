@@ -25,11 +25,6 @@ class BkashTransactionsTable
                 $query->where('status_id', BkashTransaction::STATUS_PENDING_CHECKER);
             })
             ->columns([
-                TextColumn::make('txn_id')
-                    ->label('Txn ID')
-                    ->searchable()
-                    ->sortable(),
-
                 TextColumn::make('reference_id')
                     ->label('Ref No')
                     ->searchable()
@@ -45,34 +40,50 @@ class BkashTransactionsTable
                         default => 'gray',
                     }),
 
+                TextColumn::make('debit_account_title')
+                    ->label('Bank Account Name')
+                    ->searchable()
+                    ->toggleable(),
+
                 TextColumn::make('debit_account_no')
-                    ->label('Debit Account')
-                    ->searchable(),
-
-                TextColumn::make('credit_account_title')
-                    ->label('Beneficiary Name')
-                    ->searchable(),
-
-                TextColumn::make('credit_account_no')
-                    ->label('Beneficiary Acc')
-                    ->searchable(),
+                    ->label('Bank Account No')
+                    ->searchable()
+                    ->toggleable(),
 
                 TextColumn::make('amount')
                     ->label('Amount (BDT)')
                     ->formatStateUsing(fn ($state) => BkashTransaction::formatBdtAmount((float)$state))
                     ->sortable(),
 
-                TextColumn::make('credit_bank')
-                    ->label('Bank Name')
-                    ->searchable(),
+                TextColumn::make('debit_routing')
+                    ->label('Routing No')
+                    ->searchable()
+                    ->toggleable(),
 
                 TextColumn::make('credit_routing')
-                    ->label('Routing No')
-                    ->searchable(),
+                    ->label('Bank Name')
+                    ->searchable()
+                    ->toggleable(),
+
+                TextColumn::make('credit_bank')
+                    ->label('Branch Name')
+                    ->searchable()
+                    ->toggleable(),
+
+                TextColumn::make('credit_account_no')
+                    ->label('Debit Account')
+                    ->searchable()
+                    ->toggleable(),
+
+                TextColumn::make('txn_id')
+                    ->label('Txn ID')
+                    ->searchable()
+                    ->sortable(),
 
                 TextColumn::make('file_name')
                     ->label('File Name')
-                    ->searchable(),
+                    ->searchable()
+                    ->toggleable(isToggledHiddenByDefault: true),
             ])
             ->filters([
                 SelectFilter::make('transaction_type')

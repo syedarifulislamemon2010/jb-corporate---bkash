@@ -27,41 +27,69 @@ class BkashReportsResource extends Resource
     {
         return $table
             ->columns([
-                TextColumn::make('file_name')
-                    ->label('File Name')
-                    ->searchable()
+                // Date — shown in A2A (4th img) and RTGS/BEFTN (5th img) reports
+                TextColumn::make('create_date')
+                    ->label('Date')
+                    ->dateTime('d/m/Y')
                     ->sortable(),
 
-                TextColumn::make('txn_id')
-                    ->label('Txn ID / Ref')
-                    ->searchable()
-                    ->sortable(),
-
+                // Ref No — all channels
                 TextColumn::make('reference_id')
-                    ->label('Reference No')
-                    ->searchable(),
+                    ->label('Ref No.')
+                    ->searchable()
+                    ->sortable(),
 
+                // Channel badge
                 TextColumn::make('transaction_type')
                     ->label('Channel')
-                    ->badge(),
+                    ->badge()
+                    ->color(fn (string $state): string => match ($state) {
+                        'A2A'   => 'success',
+                        'BEFTN' => 'warning',
+                        'RTGS'  => 'danger',
+                        default => 'gray',
+                    }),
 
+                // Bank Account Name / A/C Name — all channels
+                TextColumn::make('debit_account_title')
+                    ->label('Bank Account Name')
+                    ->searchable(),
+
+                // Bank Account No / Beneficiary A/C No — all channels
                 TextColumn::make('debit_account_no')
-                    ->label('Debit Account')
+                    ->label('Bank Account No')
                     ->searchable(),
 
-                TextColumn::make('credit_account_title')
-                    ->label('Beneficiary Name')
-                    ->searchable(),
+                // Bank & Branch Name — RTGS/BEFTN (credit_routing = Bank Name)
+                TextColumn::make('credit_routing')
+                    ->label('Bank & Branch Name')
+                    ->searchable()
+                    ->toggleable(),
 
-                TextColumn::make('credit_account_no')
-                    ->label('Beneficiary Acc')
-                    ->searchable(),
+                // Routing Code — RTGS/BEFTN
+                TextColumn::make('debit_routing')
+                    ->label('Routing Code')
+                    ->searchable()
+                    ->toggleable(),
 
+                // Amount
                 TextColumn::make('amount')
                     ->label('Amount (BDT)')
                     ->formatStateUsing(fn ($state) => BkashTransaction::formatBdtAmount((float)$state))
                     ->sortable(),
 
+                // Debit Account — all channels
+                TextColumn::make('credit_account_no')
+                    ->label('Debit Account')
+                    ->searchable(),
+
+                // Txn ID — all channels
+                TextColumn::make('txn_id')
+                    ->label('Txn ID')
+                    ->searchable()
+                    ->sortable(),
+
+                // Settlement Status
                 TextColumn::make('status_id')
                     ->label('Settlement Status')
                     ->badge()
@@ -84,7 +112,8 @@ class BkashReportsResource extends Resource
                 TextColumn::make('updated_at')
                     ->label('Settled Date')
                     ->dateTime('d M Y, h:i A')
-                    ->sortable(),
+                    ->sortable()
+                    ->toggleable(isToggledHiddenByDefault: true),
             ])
             ->filters([
                 SelectFilter::make('transaction_type')
@@ -102,8 +131,8 @@ class BkashReportsResource extends Resource
                     ])
                     ->query(function (Builder $query, array $data): Builder {
                         return $query
-                            ->when($data['from_date'], fn (Builder $q, $date) => $q->whereDate('updated_at', '>=', $date))
-                            ->when($data['to_date'], fn (Builder $q, $date) => $q->whereDate('updated_at', '<=', $date));
+                            ->when($data['from_date'], fn (Builder $q, $date) => $q->whereDate('create_date', '>=', $date))
+                            ->when($data['to_date'], fn (Builder $q, $date) => $q->whereDate('create_date', '<=', $date));
                     }),
             ]);
     }

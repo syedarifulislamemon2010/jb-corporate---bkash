@@ -144,38 +144,42 @@ class UploadBkashExcel extends Page implements HasForms
             $rowArr = array_values((array)$row);
             $mapped = $this->mapRowData($headerRow, $rowArr);
 
-            $refId       = $this->cleanString($mapped['reference_id'] ?? null, 100);
-            $beneName    = $this->cleanString($mapped['credit_account_title'] ?? null, 255);
-            $beneAccount = $this->cleanString($mapped['credit_account_no'] ?? null, 50);
-            $amount      = (float)($mapped['amount'] ?? 0);
-            $routingNo   = $this->cleanString($mapped['credit_routing'] ?? null, 10);
-            $bankName    = $this->cleanString($mapped['credit_bank'] ?? null, 100);
-            $debitAcc    = $this->cleanString($mapped['debit_account_no'] ?? '0100202707747', 50);
-            $txnId       = $this->cleanString($mapped['txn_id'] ?? (string)Str::uuid(), 100);
+            $refId            = $this->cleanString($mapped['reference_id'] ?? null, 255);
+            $accountName      = $this->cleanString($mapped['debit_account_title'] ?? null, 150);
+            $accountNo        = $this->cleanString($mapped['debit_account_no'] ?? null, 100);
+            $amount           = (float)($mapped['amount'] ?? 0);
+            $routingNo        = $this->cleanString($mapped['debit_routing'] ?? null, 20);
+            $bankName         = $this->cleanString($mapped['credit_routing'] ?? null, 100);
+            $branchName       = $this->cleanString($mapped['credit_bank'] ?? null, 255);
+            $debitAccount     = $this->cleanString($mapped['credit_account_no'] ?? null, 100);
+            $txnId            = $this->cleanString($mapped['txn_id'] ?? (string)Str::uuid(), 100);
+            $createDate       = $mapped['create_date'] ?? null;
+            $rejectReason     = $this->cleanString($mapped['reject_reason'] ?? null, 255);
 
-            if ($refId && $beneAccount && $amount > 0) {
+            if ($refId && $amount > 0) {
                 $validCount++;
                 $totalAmount += $amount;
 
                 $txnData = [
                     'batch_id'             => $batch->id,
                     'transaction_type'     => $channelType,
-                    'reference_id'         => Str::limit($refId, 100, ''),
+                    'reference_id'         => Str::limit($refId, 255, ''),
                     'txn_id'               => Str::limit($txnId, 100, ''),
-                    'debit_account_no'     => Str::limit($debitAcc ?: '0100202707747', 50, ''),
-                    'credit_account_no'    => Str::limit($beneAccount, 50, ''),
-                    'credit_account_title' => Str::limit($beneName, 255, ''),
-                    'credit_routing'       => $routingNo ? Str::limit($routingNo, 10, '') : null,
-                    'credit_bank'          => $bankName ? Str::limit($bankName, 100, '') : null,
+                    'debit_account_title'  => $accountName ? Str::limit($accountName, 150, '') : null,
+                    'debit_account_no'     => $accountNo ? Str::limit($accountNo, 100, '') : null,
+                    'debit_routing'        => $routingNo ? Str::limit($routingNo, 20, '') : null,
+                    'credit_account_no'    => $debitAccount ? Str::limit($debitAccount, 100, '') : null,
+                    'credit_routing'       => $bankName ? Str::limit($bankName, 100, '') : null,
+                    'credit_bank'          => $branchName ? Str::limit($branchName, 255, '') : null,
                     'amount'               => $amount,
                     'status_id'            => BkashTransaction::STATUS_PENDING_CHECKER,
-                    'created_by'           => auth()->user()->name ?? 'SYSTEM',
-                    'create_date'          => Carbon::now(),
+                    'created_by'           => Str::limit(auth()->user()->name ?? 'SYSTEM', 255, ''),
+                    'create_date'          => $createDate ? Carbon::parse($createDate) : Carbon::now(),
+                    'file_name'            => $fileName,
                 ];
 
-
-                if (\Illuminate\Support\Facades\Schema::hasColumn('bkash_transactions', 'file_name')) {
-                    $txnData['file_name'] = $fileName;
+                if ($rejectReason) {
+                    $txnData['reject_reason'] = $rejectReason;
                 }
 
                 BkashTransaction::create($txnData);
@@ -186,13 +190,14 @@ class UploadBkashExcel extends Page implements HasForms
                     'row_number'       => $index + 1,
                     'transaction_type' => $channelType,
                     'reference_id'     => $refId ? Str::limit($refId, 100, '') : 'N/A',
-                    'credit_account_no'=> $beneAccount ? Str::limit($beneAccount, 50, '') : null,
+                    'credit_account_no'=> $debitAccount ? Str::limit($debitAccount, 50, '') : null,
                     'amount'           => $amount,
                     'failure_code'     => 'INVALID_ROW',
                     'reject_reason'    => 'Missing reference ID or invalid amount',
                 ]);
             }
         }
+
 
 
 
@@ -272,62 +277,91 @@ class UploadBkashExcel extends Page implements HasForms
     {
         $mapped = [];
 
+        // Header-to-DB-field mapping table (user-defined):
+        // Ref / Ref No = reference_id
+        // Date / Execution Date = create_date
+        // Return Date = return_date
+        // A/C Name / Bank_Account_Name / Bene. Name = debit_account_title
+        // Account No / Beneficiary A/C No / Bank Account Number / Bank_Account_No = debit_account_no
+        // Amount / Amount(BDT) / Amount in Taka = amount
+        // Routing Code / RoutingNumber / Bene. Routing No = debit_routing
+        // Bank Name / Bene. Bank Name = credit_routing
+        // Branch Name / Bene. Branch Name = credit_bank
+        // Bank & Branch Name = credit_routing (combined bank+branch)
+        // Debit Account = credit_account_no
+        // Txn ID = txn_id
+        // Reject Reason = reject_reason
+        // SL = SKIP (serial number)
+
         foreach ($headers as $colIndex => $headerName) {
-            $rawHeader = (string)$headerName;
+            $rawHeader = trim((string)$headerName);
             $cleanHeader = strtolower(preg_replace('/[^a-zA-Z0-9]/', '', $rawHeader));
             $val = $row[$colIndex] ?? null;
 
-            if ($cleanHeader === '') {
+            if ($cleanHeader === '' || $cleanHeader === 'sl') {
                 continue;
             }
 
-            if (in_array($cleanHeader, ['ref', 'refno', 'reference', 'referenceid', 'refid', 'externalref', 'instructionid', 'batchref'])) {
-                $mapped['reference_id'] = $this->cleanString((string)$val, 100);
+            // Ref / Ref No / Ref No. → reference_id
+            if (in_array($cleanHeader, ['ref', 'refno', 'reference', 'referenceid', 'refid'])) {
+                $mapped['reference_id'] = $this->cleanString((string)$val, 255);
             }
-            elseif (in_array($cleanHeader, ['txnid', 'transactionid', 'utr', 'transactionno', 'txid'])) {
+            // Date / Execution Date → create_date
+            elseif (in_array($cleanHeader, ['date', 'executiondate', 'createdate', 'transactiondate', 'txndate'])) {
+                $mapped['create_date'] = $val;
+            }
+            // Return Date → return_date
+            elseif (in_array($cleanHeader, ['returndate'])) {
+                $mapped['return_date'] = $val;
+            }
+            // A/C Name / Bank_Account_Name / Bene. Name / Bank Account Name → debit_account_title
+            elseif (in_array($cleanHeader, ['acname', 'bankaccountname', 'benename', 'beneficiaryname', 'accountname', 'beneaccountname'])) {
+                $mapped['debit_account_title'] = $this->cleanString((string)$val, 150);
+            }
+            // Account No / Beneficiary A/C No / Bank Account Number / Bank_Account_No → debit_account_no
+            elseif (in_array($cleanHeader, ['accountno', 'beneficiaryacno', 'bankaccountnumber', 'bankaccountno', 'beneaccountno', 'acno'])) {
+                $mapped['debit_account_no'] = $this->cleanString((string)$val, 100);
+            }
+            // Amount / Amount(BDT) / Amount in Taka → amount
+            elseif (in_array($cleanHeader, ['amount', 'amountbdt', 'amountintaka'])) {
+                $cleanVal = preg_replace('/[^0-9.]/', '', str_replace(',', '', (string)$val));
+                $mapped['amount'] = (float)$cleanVal;
+            }
+            // Routing Code / RoutingNumber / Bene. Routing No → debit_routing
+            elseif (in_array($cleanHeader, ['routingcode', 'routingnumber', 'beneroutingno', 'routingno'])) {
+                $mapped['debit_routing'] = $this->cleanString((string)$val, 20);
+            }
+            // Bank Name / Bene. Bank Name → credit_routing
+            elseif (in_array($cleanHeader, ['bankname', 'benebankname'])) {
+                $mapped['credit_routing'] = $this->cleanString((string)$val, 100);
+            }
+            // Branch Name / Bene. Branch Name → credit_bank
+            elseif (in_array($cleanHeader, ['branchname', 'benebranchname'])) {
+                $mapped['credit_bank'] = $this->cleanString((string)$val, 255);
+            }
+            // Bank & Branch Name (combined, used in RTGS) → credit_routing
+            elseif (in_array($cleanHeader, ['bankbranchname'])) {
+                $mapped['credit_routing'] = $this->cleanString((string)$val, 100);
+            }
+            // Debit Account → credit_account_no
+            elseif (in_array($cleanHeader, ['debitaccount', 'debitaccountno'])) {
+                $mapped['credit_account_no'] = $this->cleanString((string)$val, 100);
+            }
+            // Txn ID → txn_id
+            elseif (in_array($cleanHeader, ['txnid', 'transactionid'])) {
                 $mapped['txn_id'] = $this->cleanString((string)$val, 100);
             }
-            elseif (in_array($cleanHeader, ['acname', 'bankaccountname', 'benename', 'beneficiaryname', 'credittitle', 'accounttitle', 'title', 'beneaccountname'])) {
-                $mapped['credit_account_title'] = $this->cleanString((string)$val, 255);
-            }
-            elseif (in_array($cleanHeader, ['accountno', 'beneficiaryacno', 'bankaccountnumber', 'creditaccountno', 'creditaccount', 'beneaccount', 'beneaccountno'])) {
-                $mapped['credit_account_no'] = $this->cleanString((string)$val, 60);
-            }
-            elseif (in_array($cleanHeader, ['debitaccount', 'debitaccountno', 'sourceaccount', 'senderaccount', 'fromaccount'])) {
-                $mapped['debit_account_no'] = $this->cleanString((string)$val, 60);
-            }
-            elseif (in_array($cleanHeader, ['amount', 'amountbdt', 'amountintaka', 'trnamount', 'totalamount', 'sum', 'value'])) {
-                $mapped['amount'] = (float)preg_replace('/[^0-9.]/', '', (string)$val);
-            }
-            elseif (in_array($cleanHeader, ['routingcode', 'routingnumber', 'beneroutingno', 'routingno', 'creditrouting', 'routing'])) {
-                $mapped['credit_routing'] = $this->cleanString((string)$val, 20);
-            }
-            elseif (in_array($cleanHeader, ['bankname', 'benebankname', 'creditbank', 'bank'])) {
-                $mapped['credit_bank'] = $this->cleanString((string)$val, 100);
+            // Reject Reason → reject_reason
+            elseif (in_array($cleanHeader, ['rejectreason'])) {
+                $mapped['reject_reason'] = $this->cleanString((string)$val, 255);
             }
         }
 
-        if (empty($mapped['reference_id']) && isset($row[0])) {
-            $mapped['reference_id'] = $this->cleanString((string)$row[0], 100);
-        }
-        if (empty($mapped['credit_account_title']) && isset($row[1])) {
-            $mapped['credit_account_title'] = $this->cleanString((string)$row[1], 255);
-        }
-        if (empty($mapped['credit_account_no']) && isset($row[2])) {
-            $mapped['credit_account_no'] = $this->cleanString((string)$row[2], 60);
-        }
-        if (empty($mapped['amount']) && isset($row[3])) {
-            $mapped['amount'] = (float)preg_replace('/[^0-9.]/', '', (string)$row[3]);
-        }
-        if (empty($mapped['credit_routing']) && isset($row[4])) {
-            $mapped['credit_routing'] = $this->cleanString((string)$row[4], 20);
-        }
-        if (empty($mapped['credit_bank']) && isset($row[5])) {
-            $mapped['credit_bank'] = $this->cleanString((string)$row[5], 100);
-        }
+        // NO positional fallback — only header-based mapping to avoid garbage values
 
         return $mapped;
     }
+
 }
 
 
