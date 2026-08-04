@@ -19,7 +19,7 @@ class BkashTransactionConfirmationResource extends Resource
 
     protected static ?string $recordTitleAttribute = 'reference_id';
 
-    protected static \UnitEnum|string|null $navigationGroup = 'bKash Management';
+    protected static \UnitEnum|string|null $navigationGroup = 'Transaction Pipeline';
 
     protected static ?string $navigationLabel = 'Transaction Confirmation';
 

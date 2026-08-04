@@ -14,7 +14,7 @@ class BkashFailedTransactionResource extends Resource
 {
     protected static ?string $model = BkashFailedTransaction::class;
 
-    protected static \UnitEnum|string|null $navigationGroup = 'bKash Management';
+    protected static \UnitEnum|string|null $navigationGroup = 'Audits & Reports';
 
     protected static ?string $navigationLabel = 'Failed Transaction Report';
 

@@ -5,8 +5,8 @@ namespace App\Filament\Resources\BkashTransactions\Pages;
 use App\Filament\Resources\BkashTransactions\BkashTransactionResource;
 use Filament\Actions\Action;
 use Filament\Actions\CreateAction;
+use Filament\Resources\Components\Tab;
 use Filament\Resources\Pages\ListRecords;
-use Filament\Resources\Pages\ListRecords\Tab;
 use Illuminate\Database\Eloquent\Builder;
 
 class ListBkashTransactions extends ListRecords

@@ -37,16 +37,16 @@ class AdminPanelProvider extends PanelProvider
             ])
             ->navigationGroups([
                 NavigationGroup::make()
-                    ->label('bKash Management')
-                    ->icon('heroicon-o-banknotes')
-                    ->collapsible(true),
-                NavigationGroup::make()
-                    ->label('Transaction Management')
+                    ->label('Transaction Pipeline')
                     ->icon('heroicon-o-currency-dollar')
                     ->collapsible(true),
                 NavigationGroup::make()
-                    ->label('User Management')
-                    ->icon('heroicon-o-users')
+                    ->label('Audits & Reports')
+                    ->icon('heroicon-o-chart-bar')
+                    ->collapsible(true),
+                NavigationGroup::make()
+                    ->label('Administration')
+                    ->icon('heroicon-o-cog-6-tooth')
                     ->collapsible(true),
             ])
             ->discoverResources(in: app_path('Filament/Resources'), for: 'App\Filament\Resources')

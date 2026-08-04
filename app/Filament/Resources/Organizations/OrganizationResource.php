@@ -21,6 +21,7 @@ class OrganizationResource extends Resource
     protected static ?string $model = Organization::class;
 
     protected static string|BackedEnum|null $navigationIcon = 'heroicon-m-building-library';
+    protected static \UnitEnum|string|null $navigationGroup = 'Administration';
     protected static ?string $recordTitleAttribute = 'name';
 
     public static function form(Schema $schema): Schema
