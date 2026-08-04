@@ -33,6 +33,7 @@ class BkashTransaction extends Model
         'reference_id',
         'txn_id',
         'create_date',
+        'value_date',
         'return_date',
         'debit_account_no',
         'debit_account_title',
