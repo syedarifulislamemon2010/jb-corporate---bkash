@@ -19,9 +19,9 @@ class BkashTransactionAuthorizationResource extends Resource
 
     protected static ?string $recordTitleAttribute = 'reference_id';
 
-    protected static \UnitEnum|string|null $navigationGroup = 'bKash Management';
+    protected static \UnitEnum|string|null $navigationGroup = 'Transaction Management';
 
-    protected static ?string $navigationLabel = 'bKash Authorization';
+    protected static ?string $navigationLabel = 'Transaction Authorization';
 
     protected static ?int $navigationSort = 2;
 

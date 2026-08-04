@@ -23,9 +23,9 @@ class BkashTransactionResource extends Resource
 
     protected static \UnitEnum|string|null $navigationGroup = 'bKash Management';
 
-    protected static ?string $navigationLabel = 'bKash Transactions';
+    protected static ?string $navigationLabel = 'Create Transactions';
 
-    protected static ?string $pluralModelLabel = 'bKash Transactions';
+    protected static ?string $pluralModelLabel = 'Create Transactions';
 
     protected static ?int $navigationSort = 1;
 
