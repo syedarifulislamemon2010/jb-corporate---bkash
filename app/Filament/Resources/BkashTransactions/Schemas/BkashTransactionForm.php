@@ -26,52 +26,47 @@ class BkashTransactionForm
                             ->options([
                                 'BEFTN' => 'BEFTN',
                                 'RTGS'  => 'RTGS',
-                                'A2A'   => 'Account to Account (A2A)',
+                                'A2A'   => 'A2A',
                             ])
                             ->required()
                             ->live(),
 
                         TextInput::make('reference_id')
-                            ->label(fn (Get $get) => match ($get('transaction_type')) {
-                                'A2A'   => 'Ref',
-                                'RTGS'  => 'Ref / Ref No',
-                                default => 'Ref / Ref No',
-                            })
+                            ->label('Ref No')
                             ->required()
                             ->maxLength(255),
 
                         DatePicker::make('create_date')
-                            ->label('Date / Execution Date')
+                            ->label('Date')
                             ->default(now())
                             ->required(),
+
+                        TextInput::make('txn_id')
+                            ->label('Txn ID')
+                            ->placeholder('Auto-generated if left empty')
+                            ->maxLength(100),
                     ])
-                    ->columns(3),
+                    ->columns(4),
 
                 Section::make('Account & Banking Details')
                     ->schema([
                         TextInput::make('debit_account_title')
-                            ->label(fn (Get $get) => match ($get('transaction_type')) {
-                                'A2A'   => 'Bank_Account_Name',
-                                default => 'A/C Name / Bank_Account_Name / Bene. Name',
-                            })
+                            ->label('Bank Account Name')
                             ->required()
                             ->maxLength(255),
 
                         TextInput::make('debit_account_no')
-                            ->label(fn (Get $get) => match ($get('transaction_type')) {
-                                'A2A'   => 'Bank_Account_No',
-                                default => 'Account No / Beneficiary A/C No / Bank Account Number',
-                            })
+                            ->label('Bank Account No')
                             ->required()
                             ->maxLength(100),
 
                         TextInput::make('debit_routing')
-                            ->label('Routing Code / RoutingNumber / Bene. Routing No')
+                            ->label('Routing Number')
                             ->visible(fn (Get $get) => in_array($get('transaction_type'), ['BEFTN', 'RTGS']))
                             ->maxLength(20),
 
                         Select::make('credit_routing')
-                            ->label('Bank Name / Bene. Bank Name')
+                            ->label('Bank Name')
                             ->placeholder('Select Bank')
                             ->options(Bank::where('bankcode', '!=', 135)->where('status', 1)->orderBy('bankname')->pluck('bankname', 'bankcode'))
                             ->live()
@@ -79,7 +74,7 @@ class BkashTransactionForm
                             ->visible(fn (Get $get) => in_array($get('transaction_type'), ['BEFTN', 'RTGS'])),
 
                         Select::make('credit_bank')
-                            ->label('Branch Name / Bene. Branch Name')
+                            ->label('Branch Name')
                             ->placeholder('Select Branch')
                             ->searchable()
                             ->optionsLimit(5000)
@@ -104,10 +99,7 @@ class BkashTransactionForm
                             ->maxLength(100),
 
                         TextInput::make('amount')
-                            ->label(fn (Get $get) => match ($get('transaction_type')) {
-                                'A2A'   => 'Amount',
-                                default => 'Amount / Amount(BDT) / Amount in Taka',
-                            })
+                            ->label('Amount(BDT)')
                             ->required()
                             ->numeric()
                             ->rules(function (Get $get) {

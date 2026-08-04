@@ -51,12 +51,12 @@ class BkashTransactionsTable
                     ->toggleable(),
 
                 TextColumn::make('amount')
-                    ->label('Amount (BDT)')
+                    ->label('Amount(BDT)')
                     ->formatStateUsing(fn ($state) => BkashTransaction::formatBdtAmount((float)$state))
                     ->sortable(),
 
                 TextColumn::make('debit_routing')
-                    ->label('Routing No')
+                    ->label('Routing Number')
                     ->searchable()
                     ->toggleable(),
 
