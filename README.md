@@ -7,99 +7,94 @@ An enterprise-grade, high-security automated payment settlement portal built for
 
 ## 📌 1. Core Requirements & Functional Journey
 
-### A. Automated File Ingestion
+### A. Automated File Ingestion & Validation
 - **3-Folder SFTP Structure**: bKash system pushes Excel files (`.xls` from Multi-Bank Tool & `.xlsx` from Oracle ERP) to Janata Bank SFTP location containing 3 separate directories:
-  - `/Account to-Account`
+  - `/Account-to-Account`
   - `/BEFTN`
   - `/RTGS`
-- **15-Minute Polling**: Automated 15-minute background worker poller fetches, validates, and ingests files into the portal.
-- **Filename Regex & Uniqueness**:
+- **15-Minute Polling (`sftp:fetch-bkash-files`)**: Automated 15-minute background worker poller fetches, validates, and ingests files into the portal 7 days a week.
+- **Strict Filename Formats**:
   - A2A: `JANATA_BANK_YYYY_MM_DD_xSloty.xlsx`
   - BEFTN: `BEFTN_JANATA_BANK_YYYY_MM_DD_xSloty.xlsx`
   - RTGS: `RTGS_JANATA_BANK_YYYY_MM_DD_xSloty.xlsx`
+- **Validation Engine Rules**:
+  1. **File Uniqueness**: Enforces SHA256 integrity hash & file name uniqueness to reject duplicate files.
+  2. **Global Duplicate Txn ID**: Cross-verifies `txn_id` against the global ledger while allowing in-file duplicate accounts.
+  3. **Single Debit Account Rule**: Every transaction in a single file must share the exact same `credit_account_no`, which must match either bKash TCSA (`0100202707747`) or Operational Account (`0100224107522`).
+  4. **RTGS Minimum Threshold**: Enforces `amount >= 100,000 BDT` validation for RTGS transactions.
+  5. **Partial Processing Protocol**: Isolates dormant or invalid account rows directly into `bkash_failed_transactions` with detailed `reject_reason` descriptions, while processing all valid transactions instantly.
 
 ### B. Maker-Checker-Dual Authorizer Workflow
-- **bKash Checker**: Logs into portal via PC, laptop, or mobile to view files in 3 separate tabs, downloads Excel files to cross-check against email files, and approves.
-- **1st Authorizer**: Logs in and approves checked transactions.
-- **2nd Authorizer**: Logs in and provides final approval.
-- **Instant Automated Settlement**: Upon 2nd approval, funds are instantly debited from bKash's **Trust Cum Settlement Account (`0100202707747`)** or **Operational Account (`0100224107522`)** and credited to beneficiary accounts 7 days a week.
+- **bKash Checker**: Logs into portal via PC, laptop, or mobile to view files under separate dynamic tabs, downloads Excel files to cross-check against email files, and approves.
+- **1st Authorizer**: Logs in and approves checked transactions (`status_id = 1002`).
+- **2nd Authorizer**: Logs in and provides final approval (`status_id = 1003` -> `1004` CBS Settled).
+- **Instant Automated Settlement**: Upon 2nd approval, funds are instantly debited from bKash's **Trust Cum Settlement Account (`0100202707747`)** or **Operational Account (`0100224107522`)** and credited to beneficiary accounts line item by line item 7 days a week.
 
-### C. 4-Stage SMS & Email Journey Notifications
-SMS & Email notifications are sent to Checkers and Authorizers at 4 exact stages with **BDT Lakh/Crore comma-formatted totals** (e.g. `1,56,100.82` format):
-1. **Stage 1 (SFTP -> Portal)**: Sent to all bKash Checkers (*"File is pending for Checker"*).
-2. **Stage 2 (Checked by Checker)**: Sent to all Checkers & Authorizers (*"is checked by [Checker Name] & is pending for further Authorization"*).
-3. **Stage 3 (1st Authorizer Approved)**: Sent to all Checkers & Authorizers (*"is Authorized by [1st Authorizer Name] & is pending for final authorization"*).
-4. **Stage 4 (2nd Authorizer Approved)**: Sent to all Checkers & Authorizers (*"is Authorized by [2nd Authorizer Name] & is finally authorized"*).
-
-### D. Partial Processing & Erroneous Item Reporting
-- If a file contains invalid or dormant account entries, valid rows are processed smoothly while invalid rows are isolated into **Partial Failure Reports** detailing failure reasons.
-
-### E. Dashboard & Reports
-- **Live Account Balance Dashboard**: Real-time balance reflection for bKash TCSA (`0100202707747`) and Operational Account (`0100224107522`).
-- **Reports Download Tab**: Daily, Weekly, Monthly, Yearly Transaction Process Reports and Daily EFT Return Reports (with `TXN_ID` and `REF_NO`).
+### C. Multi-Channel Database & SMS/Email Notifications
+- **Organization-Scoped Database Notifications**: Using Filament Database Notifications (`databaseNotifications()`), real-time bell alerts are dispatched to all users in the maker's organization (excluding the maker).
+- **4-Stage SMS & Email Journey Notifications**: Alerts sent to Checkers and Authorizers at 4 exact stages with **BDT Lakh/Crore comma-formatted totals** (e.g., `1,56,100.82` format):
+  1. **Stage 1 (SFTP -> Portal)**: Sent to all bKash Checkers (*"File is pending for Checker"*).
+  2. **Stage 2 (Checked by Checker)**: Sent to all Checkers & Authorizers (*"is checked by [Checker Name] & is pending for further Authorization"*).
+  3. **Stage 3 (1st Authorizer Approved)**: Sent to all Checkers & Authorizers (*"is Authorized by [1st Authorizer Name] & is pending for final authorization"*).
+  4. **Stage 4 (2nd Authorizer Approved)**: Sent to all Checkers & Authorizers (*"is Authorized by [2nd Authorizer Name] & is finally authorized"*).
 
 ---
 
-## 🛠️ 2. Technology Stack & Overview
+## 🛠️ 2. Database Schema & Field Mapping (Strict Compliance)
 
-| Component | Technology | Description & Role |
-| :--- | :--- | :--- |
-| **Framework** | **Laravel 12.64.0 (PHP 8.2+)** | Enterprise PHP framework providing queue management, authentication, routing, and database abstraction. |
-| **Admin Panel** | **Filament v5.7.3** | High-performance, modern admin UI providing Maker-Checker tables, dashboard widgets, and role-based workflows. |
-| **Database** | **Oracle Database (12c/19c/21c)** | Oracle SQL Developer backend using `yajra/laravel-oci8` driver with strict `Decimal(18,2)` money precision and composite indexing. |
-| **Background Queues** | **Laravel Queues & Systemd Worker** | Asynchronous job execution for CBS settlement and notification dispatching. |
-| **SFTP Scanner** | **Flysystem SFTP v3 (`league/flysystem-sftp-v3`)** | Automated 15-minute background poller for SFTP directories. |
-| **Excel Parser** | **PhpSpreadsheet / Simple-Excel** | Cell-by-cell string preservation for account numbers and routing codes. |
-| **High-Precision Math**| **PHP BCMath (`bcadd`, `bcsub`)** | Eliminates floating-point rounding errors in monetary calculations. |
+| Field Label | Database Column (`snake_case`) | Data Type | Notes |
+| :--- | :--- | :--- | :--- |
+| **Ref / Ref No** | `reference_id` | `VARCHAR(255)` | Transmitted to Bangladesh Bank for BEFTN/RTGS |
+| **Date / Execution Date** | `create_date` | `TIMESTAMP` | Transaction execution date |
+| **Return Date** | `return_date` | `TIMESTAMP` | Nullable return timestamp |
+| **Bank Account Name / Bene. Name** | `debit_account_title` | `VARCHAR(150)` | Beneficiary account title |
+| **Bank Account No / Beneficiary A/C No** | `debit_account_no` | `VARCHAR(100)` | Beneficiary account number |
+| **Amount / Amount(BDT)** | `amount` | `DECIMAL(18,2)` | BDT monetary precision |
+| **Routing Code / Bene. Routing No** | `debit_routing` | `VARCHAR(20)` | 9-digit routing number |
+| **Bank Name / Bene. Bank Name** | `credit_routing` | `VARCHAR(100)` | Beneficiary bank name |
+| **Branch Name / Bene. Branch Name** | `credit_bank` | `VARCHAR(255)` | Beneficiary branch name |
+| **Debit Account** | `credit_account_no` | `VARCHAR(100)` | Originator bKash TCSA / Ops account |
+| **Txn ID** | `txn_id` | `VARCHAR(100)` | Unique global transaction identifier |
+| **Reject Reason** | `reject_reason` | `TEXT` | Failure cause description |
+| **Status ID** | `status_id` | `INTEGER` | Lifecycle state tracking |
+| **Audit Logs** | `created_by`, `approved_by`, `confirmed_by`, `admin_approved_by` | `VARCHAR(255)` | User action audit logs |
+| **Timestamps** | `approved_at`, `confirmed_at`, `admin_approved_at`, `cbs_success_at` | `TIMESTAMP` | Audit timestamps |
 
 ---
 
-## 🏗️ 3. Runtime Architecture & System Safety Rules
+## 🗺️ 3. Portal Navigation & UX Architecture
 
 ```
-┌─────────────────────────┐       ┌──────────────────────────┐       ┌────────────────────────┐
-│  bKash SFTP Server      │ ────▶ │ Ingestion Worker Job     │ ────▶ │  Oracle Database       │
-│  /a2a, /beftn, /rtgs    │       │ (ProcessBkashSftpFiles)  │       │  - BKASH_TRANSACTIONS  │
-└─────────────────────────┘       └──────────────────────────┘       │  - POSTING_ATTEMPTS    │
-                                                                     │  - NOTIFICATION_OUTBOX │
-┌─────────────────────────┐       ┌──────────────────────────┐       └───────────▲────────────┘
-│ Filament v3 Portal UI   │ ────▶ │ Asynchronous Settlement  │ ──────────────────┘
-│ (Web Process)           │       │ Job (ExecuteCbsSettlement│ ───▶ CBS / T24 Direct API
-└─────────────────────────┘       └──────────────────────────┘ ───▶ BACH Network
+├── Dashboard (Live TCSA 0100202707747 & Operational 0100224107522 Account Balance Widgets)
+├── Transaction Pipeline
+│   ├── Create Transactions
+│   │   ├── Dynamic Tabs: All Transmissions | Account to Account (A2A) - Janata Bank PLC. | BEFTN | RTGS
+│   │   └── Manual Creation & Bulk Excel Upload
+│   ├── Transaction Confirmation (Checker Verification Panel)
+│   └── Transaction Authorization (1st & 2nd Authorizer Approval Panel)
+├── Audits & Reports
+│   ├── Transaction Process & EFT Reports (Daily, Weekly, Monthly, Yearly Downloads)
+│   └── Failed Transaction Report (Partial Processing Errors & Dormant Accounts)
+└── Administration
+    ├── Organizations (bKash Corporate Profile & Account Tags)
+    └── Users (RBAC for Checkers & Authorizers)
 ```
 
-### Golden Architectural Safeguards:
-1. **Web vs Worker Process Isolation**: The Filament Web UI **never directly posts to CBS/T24/BACH**. Final 2nd approval writes to DB and dispatches `ExecuteCbsSettlementJob`, preventing browser disconnects from interrupting payment processing.
-2. **Double-Payment Defense (`POSTING_ATTEMPTS`)**: Ledger table enforcing unique constraint on `TXN_ID` (`ORA-00001` mechanism), guaranteeing no transaction is ever posted twice.
-3. **Transactional Notification Outbox (`NOTIFICATION_OUTBOX`)**: Notifications are queued transactionally alongside state changes, ensuring email/SMS gateway failures never roll back financial approvals.
-
 ---
 
-## 🗺️ 4. Portal Navigation & Routes Guide
-
-| Navigation Item | Route | Description |
-| :--- | :--- | :--- |
-| **Dashboard** | `/admin` | Live CBS Account Balances & Daily Settlement Metrics |
-| **bKash Transactions** | `/admin/bkash-transactions` | bKash Checker Table (Pending Verification) |
-| **New Transaction Form** | `/admin/bkash-transactions/create` | Single Manual Transaction Creation Form |
-| **Upload bKash Excel File** | `/admin/bkash-transactions/upload` | **Dedicated Full-Page Upload** for Bulk Excel Files |
-| **bKash Authorization** | `/admin/bkash-transaction-authorizations` | 1st Authorizer Approval Resource |
-| **bKash Confirmation** | `/admin/bkash-transaction-confirmations` | 2nd Authorizer Final Approval & Instant Settlement Resource |
-| **Failed Transaction Report** | `/admin/bkash-failed-transactions` | Partial Processing Error & Dormant Account Reports |
-| **Transaction & EFT Reports** | `/admin/bkash-reports` | Daily, Weekly, Monthly, Yearly Process & EFT Return Reports |
-
----
-
-## 🚀 5. Local Setup & Execution Guide
+## 🚀 4. Local Setup & Command Execution
 
 ```bash
-# 1. Run Database Migrations
+# 1. Run Database Migrations (including notifications table)
 php artisan migrate
 
-# 2. Create Filament Admin User (if needed)
-php artisan make:filament-user
+# 2. Clear & Optimize Application Caches
+php artisan optimize:clear
 
-# 3. Run Development Server and Background Queue Worker
+# 3. Test SFTP File Ingestion Scanner Command
+php artisan sftp:fetch-bkash-files
+
+# 4. Run Development Server
 composer run dev
 ```
 
