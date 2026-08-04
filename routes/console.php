@@ -8,4 +8,5 @@ use Illuminate\Support\Facades\Schedule;
 Artisan::command('inspire', function () {
     $this->comment(Inspiring::quote());
 })->purpose('Display an inspiring quote');
-Schedule::job(new ProcessBkashSftpFiles)->everyFiveMinutes();
+
+Schedule::command('sftp:fetch-bkash-files')->everyFifteenMinutes();

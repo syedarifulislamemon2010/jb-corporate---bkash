@@ -6,6 +6,8 @@ use App\Filament\Resources\BkashTransactions\BkashTransactionResource;
 use Filament\Actions\Action;
 use Filament\Actions\CreateAction;
 use Filament\Resources\Pages\ListRecords;
+use Filament\Resources\Pages\ListRecords\Tab;
+use Illuminate\Database\Eloquent\Builder;
 
 class ListBkashTransactions extends ListRecords
 {
@@ -22,6 +24,19 @@ class ListBkashTransactions extends ListRecords
                 ->icon('heroicon-o-document-arrow-up')
                 ->color('primary')
                 ->url(BkashTransactionResource::getUrl('upload')),
+        ];
+    }
+
+    public function getTabs(): array
+    {
+        return [
+            'all' => Tab::make('All Transmissions'),
+            'a2a' => Tab::make('Account to Account (A2A)')
+                ->modifyQueryUsing(fn (Builder $query) => $query->where('transaction_type', 'A2A')),
+            'beftn' => Tab::make('BEFTN Pipeline')
+                ->modifyQueryUsing(fn (Builder $query) => $query->where('transaction_type', 'BEFTN')),
+            'rtgs' => Tab::make('RTGS Premium')
+                ->modifyQueryUsing(fn (Builder $query) => $query->where('transaction_type', 'RTGS')),
         ];
     }
 }
