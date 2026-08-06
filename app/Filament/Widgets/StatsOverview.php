@@ -33,6 +33,7 @@ class StatsOverview extends BaseWidget
             Stat::make('Pending Checker', BkashTransaction::where('status_id', BkashTransaction::STATUS_PENDING_CHECKER)->count())
                 ->description('Awaiting Checker verification')
                 ->descriptionIcon('heroicon-m-clock')
+                ->url('/admin/bkash-transactions')
                 ->color('warning'),
 
             Stat::make('Pending Authorizations (Auth 1 & 2)', BkashTransaction::whereIn('status_id', [
@@ -41,6 +42,7 @@ class StatsOverview extends BaseWidget
             ])->count())
                 ->description('Awaiting Dual Approval')
                 ->descriptionIcon('heroicon-m-arrow-trending-up')
+                ->url('/admin/bkash-transaction-authorizations')
                 ->color('info'),
 
             Stat::make('Today Settled Volume', 'BDT ' . BkashTransaction::formatBdtAmount($todaySettledVolume))
