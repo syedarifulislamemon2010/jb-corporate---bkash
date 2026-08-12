@@ -4,6 +4,7 @@ namespace App\Filament\Resources\Users;
 
 use App\Filament\Resources\Users\Pages\CreateUser;
 use App\Filament\Resources\Users\Pages\ListUsers;
+use App\Filament\Resources\Users\Schemas\UserForm;
 use App\Models\Organization;
 use App\Models\User;
 use Filament\Actions\EditAction;
@@ -26,20 +27,7 @@ class UserResource extends Resource
 
     public static function form(Schema $schema): Schema
     {
-        return $schema
-            ->components([
-                TextInput::make('name')
-                    ->required(),
-                TextInput::make('email')
-                    ->email()
-                    ->required(),
-                TextInput::make('mobile_no'),
-                Select::make('organization')
-                    ->label('Organization')
-                    ->options(Organization::pluck('name', 'name'))
-                    ->searchable()
-                    ->preload(),
-            ]);
+        return UserForm::configure($schema);
     }
 
     public static function table(Table $table): Table
@@ -71,4 +59,15 @@ class UserResource extends Resource
             'create' => CreateUser::route('/create'),
         ];
     }
+
+    public static function shouldRegisterNavigation(): bool
+    {
+        return static::canViewAny();
+    }
+//    public static function canViewAny(): bool
+//    {
+//        return auth()->user()
+//            ?->hasOrganizationPermission('users.view') ?? false;
+//    }
+
 }

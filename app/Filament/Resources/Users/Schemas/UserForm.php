@@ -18,7 +18,7 @@ class UserForm
 
                 Select::make('organization')
                     ->label('Organization')
-                    ->relationship('organizationRelation', 'name')
+                    ->relationship('organizationRelation', 'label')
                     ->searchable()
                     ->preload()
                     ->native(false)
@@ -34,7 +34,10 @@ class UserForm
                     ->email()
                     ->required()
                     ->maxLength(255),
-
+                Select::make('roles')
+                    ->relationship('roles', 'name')
+                    ->multiple()
+                    ->preload(),
                 TextInput::make('password')
                     ->password()
                     ->required(fn (string $operation): bool => $operation === 'create')
