@@ -1,5 +1,6 @@
 <?php
 
+use Filament\Http\Middleware\AuthenticateSession;
 use Opcodes\LogViewer\Enums\SortingMethod;
 use Opcodes\LogViewer\Enums\SortingOrder;
 use Opcodes\LogViewer\Enums\Theme;
@@ -105,7 +106,7 @@ return [
     'middleware' => [
         'web',
         AuthorizeLogViewer::class,
-        \App\Http\Middleware\EnsureUserIsAdmin::class,
+        AuthenticateSession::class,
     ],
 
     /*
