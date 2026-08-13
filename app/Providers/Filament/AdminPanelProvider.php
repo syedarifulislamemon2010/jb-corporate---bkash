@@ -73,8 +73,9 @@ class AdminPanelProvider extends PanelProvider
                 \Filament\View\PanelsRenderHook::BODY_END,
                 fn () => view('filament.custom-styles')
             )
-            ->discoverWidgets(in: app_path('Filament/Widgets'), for: 'App\Filament\Widgets')
-            ->widgets([])
+            ->widgets([
+                \App\Filament\Widgets\StatsOverview::class,
+            ])
             ->plugins([
                 FilamentShieldPlugin::make()
                     ->gridColumns([

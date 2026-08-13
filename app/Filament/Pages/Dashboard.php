@@ -16,7 +16,6 @@ class Dashboard extends BaseDashboard
 
     /**
      * Override getWidgets to ONLY show our custom StatsOverview.
-     * This removes the default AccountWidget and FilamentInfoWidget.
      */
     public function getWidgets(): array
     {
@@ -26,8 +25,15 @@ class Dashboard extends BaseDashboard
     }
 
     /**
-     * Full-width layout for a premium dashboard experience.
+     * Override getVisibleWidgets to strictly return only StatsOverview.
      */
+    public function getVisibleWidgets(): array
+    {
+        return [
+            \App\Filament\Widgets\StatsOverview::class,
+        ];
+    }
+
     public function getColumns(): int | array
     {
         return 1;
