@@ -21,7 +21,6 @@ class Dashboard extends BaseDashboard
     {
         return [
             \App\Filament\Widgets\StatsOverview::class,
-            \App\Filament\Widgets\ChannelVolumeChart::class,
         ];
     }
 
@@ -29,7 +28,6 @@ class Dashboard extends BaseDashboard
     {
         return [
             \App\Filament\Widgets\StatsOverview::class,
-            \App\Filament\Widgets\ChannelVolumeChart::class,
         ];
     }
 

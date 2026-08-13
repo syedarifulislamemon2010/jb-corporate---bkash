@@ -77,7 +77,6 @@ class AdminPanelProvider extends PanelProvider
             )
             ->widgets([
                 \App\Filament\Widgets\StatsOverview::class,
-                \App\Filament\Widgets\ChannelVolumeChart::class,
             ])
             ->plugins([
                 FilamentShieldPlugin::make()
