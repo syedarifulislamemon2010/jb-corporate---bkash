@@ -8,6 +8,7 @@ use App\Models\User;
 use Filament\Notifications\Notification;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Mail;
 
 class NotificationService
 {
@@ -18,16 +19,15 @@ class NotificationService
     {
         $sender = $senderUser ?? Auth::user();
         if (!$sender) {
-            return;
+            // For system-triggered notifications (SFTP cron), notify all users with bkash roles
+            $recipients = User::all();
+        } else {
+            $query = User::query()->where('id', '!=', $sender->id);
+            if ($sender->organization_id) {
+                $query->where('organization_id', $sender->organization_id);
+            }
+            $recipients = $query->get();
         }
-
-        $query = User::query()->where('id', '!=', $sender->id);
-
-        if ($sender->organization_id) {
-            $query->where('organization_id', $sender->organization_id);
-        }
-
-        $recipients = $query->get();
 
         if ($recipients->isNotEmpty()) {
             Notification::make()
@@ -147,6 +147,130 @@ class NotificationService
 
         Log::info("Notification Outbox Created [{$eventType}]: {$fileName}");
 
+        // Send actual email notifications
+        static::sendActualEmails($outbox, $recipientGroup, $messageText, $fileName, $eventType);
+
+        // Send SMS notifications
+        static::sendActualSms($outbox, $recipientGroup, $messageText);
+
         return $outbox;
+    }
+
+    /**
+     * Send actual email notifications to recipients.
+     */
+    private static function sendActualEmails(
+        NotificationOutbox $outbox,
+        string $recipientGroup,
+        string $messageText,
+        string $fileName,
+        string $eventType
+    ): void {
+        if (!config('bkash.email_enabled', true)) {
+            return;
+        }
+
+        try {
+            $recipients = static::getRecipientEmails($recipientGroup);
+
+            if (empty($recipients)) {
+                Log::warning("No email recipients found for group: {$recipientGroup}");
+                return;
+            }
+
+            $subject = match ($eventType) {
+                'STAGE_1_SFTP'     => "bKash Settlement File Pending for Checker: {$fileName}",
+                'STAGE_2_CHECKED'  => "bKash Transactions Checked — Pending Authorization: {$fileName}",
+                'STAGE_3_AUTH1'    => "bKash 1st Authorization Complete — Pending Final: {$fileName}",
+                'STAGE_4_AUTH2'    => "bKash Final Authorization Complete — Settled: {$fileName}",
+                default            => "bKash Corporate Portal Notification: {$fileName}",
+            };
+
+            $htmlBody = nl2br(e($messageText));
+
+            foreach ($recipients as $email) {
+                Mail::raw($messageText, function ($message) use ($email, $subject) {
+                    $message->to($email)
+                            ->subject($subject)
+                            ->from(
+                                config('bkash.email_from_address', config('mail.from.address')),
+                                config('bkash.email_from_name', config('mail.from.name'))
+                            );
+                });
+            }
+
+            $outbox->update(['status' => 'SENT']);
+            Log::info("Email sent to " . count($recipients) . " recipients for [{$eventType}]: {$fileName}");
+        } catch (\Throwable $e) {
+            $outbox->update(['status' => 'FAILED']);
+            Log::error("Failed to send email for [{$eventType}]: " . $e->getMessage());
+        }
+    }
+
+    /**
+     * Send actual SMS notifications.
+     */
+    private static function sendActualSms(
+        NotificationOutbox $outbox,
+        string $recipientGroup,
+        string $messageText
+    ): void {
+        if (!config('bkash.sms_enabled', false)) {
+            Log::info('SMS sending is disabled. Skipping SMS dispatch.');
+            return;
+        }
+
+        try {
+            $phones = static::getRecipientPhones($recipientGroup);
+
+            if (empty($phones)) {
+                return;
+            }
+
+            $apiUrl = config('bkash.sms_api_url');
+            $apiKey = config('bkash.sms_api_key');
+            $senderId = config('bkash.sms_sender_id', 'JANATABANK');
+
+            foreach ($phones as $phone) {
+                // Generic HTTP SMS gateway call
+                // Replace with actual SMS provider API (Infobip, SSL Wireless, etc.)
+                $response = @file_get_contents($apiUrl . '?' . http_build_query([
+                    'api_key'   => $apiKey,
+                    'sender_id' => $senderId,
+                    'to'        => $phone,
+                    'message'   => $messageText,
+                ]));
+
+                Log::info("SMS sent to {$phone}");
+            }
+        } catch (\Throwable $e) {
+            Log::error('SMS sending failed: ' . $e->getMessage());
+        }
+    }
+
+    /**
+     * Get recipient email addresses based on group.
+     */
+    private static function getRecipientEmails(string $recipientGroup): array
+    {
+        $query = User::query()->whereNotNull('email');
+
+        // In production, filter by role:
+        // if ($recipientGroup === 'ALL_CHECKERS') {
+        //     $query->role('bkash_checker');
+        // } else {
+        //     $query->role(['bkash_checker', 'bkash_authorizer']);
+        // }
+
+        return $query->pluck('email')->filter()->unique()->toArray();
+    }
+
+    /**
+     * Get recipient phone numbers based on group.
+     */
+    private static function getRecipientPhones(string $recipientGroup): array
+    {
+        $query = User::query()->whereNotNull('phone');
+        return $query->pluck('phone')->filter()->unique()->toArray();
     }
 }

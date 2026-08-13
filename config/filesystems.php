@@ -62,11 +62,11 @@ return [
 
         'bkash_sftp' => [
             'driver'   => 'sftp',
-            'host'     => '172.18.18.64',
-            'username' => 'testfrontend',
-            'password' => 'Dev@cell23',
-            'port'     => 22,
-            'root'     => '',
+            'host'     => env('BKASH_SFTP_HOST', '172.18.18.64'),
+            'username' => env('BKASH_SFTP_USERNAME', 'testfrontend'),
+            'password' => env('BKASH_SFTP_PASSWORD', 'Dev@cell23'),
+            'port'     => (int) env('BKASH_SFTP_PORT', 22),
+            'root'     => env('BKASH_SFTP_ROOT', ''),
             'timeout'  => 30,
         ],
 
