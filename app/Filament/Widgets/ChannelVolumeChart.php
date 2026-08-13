@@ -7,11 +7,14 @@ use Filament\Widgets\ChartWidget;
 
 class ChannelVolumeChart extends ChartWidget
 {
-    protected static ?string $heading = 'Channel Settlement Distribution (Volume BDT)';
-
     protected static ?int $sort = 1;
 
     protected int | string | array $columnSpan = 'full';
+
+    public function getHeading(): ?string
+    {
+        return 'Channel Settlement Distribution (Volume BDT)';
+    }
 
     protected function getData(): array
     {

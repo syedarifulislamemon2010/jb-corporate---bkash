@@ -4,7 +4,7 @@
 <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 
 <style>
-    /* ===== JANATA BANK CORPORATE PORTAL — SPOTLIGHT SEARCH & FINTECH ENGINE ===== */
+    /* ===== JANATA BANK CORPORATE PORTAL — ALL-IN-ONE FINTECH ENGINE ===== */
 
     :root {
         --font-family-sans: 'Plus Jakarta Sans', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
@@ -41,6 +41,36 @@
         display: none !important;
         width: 0 !important;
         height: 0 !important;
+    }
+
+    /* ─── Live SFTP System Pulse Badge in Sidebar ─── */
+    .sftp-pulse-container {
+        padding: 10px 14px;
+        margin: 10px 14px;
+        border-radius: 10px;
+        background: rgba(16, 185, 129, 0.08);
+        border: 1px solid rgba(16, 185, 129, 0.2);
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        font-size: 0.75rem;
+        font-weight: 600;
+        color: #10b981;
+    }
+
+    .sftp-pulse-dot {
+        width: 8px;
+        height: 8px;
+        background-color: #10b981;
+        border-radius: 50%;
+        box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.7);
+        animation: sftpPulse 1.8s infinite;
+    }
+
+    @keyframes sftpPulse {
+        0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.7); }
+        70% { transform: scale(1); box-shadow: 0 0 0 8px rgba(16, 185, 129, 0); }
+        100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(16, 185, 129, 0); }
     }
 
     /* ─── Sidebar Item Wrapping & Ergonomics ─── */
@@ -315,6 +345,7 @@
 
 <script>
     document.addEventListener('DOMContentLoaded', function () {
+        // 1. Placeholder setup for Search
         const setPlaceholder = () => {
             const inputs = document.querySelectorAll('.fi-global-search-field input');
             inputs.forEach(input => {
@@ -324,19 +355,76 @@
         setPlaceholder();
         setTimeout(setPlaceholder, 1000);
 
-        // Click-to-copy handler
+        // 2. Inject SFTP System Pulse Badge into Sidebar Header
+        const injectPulseBadge = () => {
+            const sidebarHeader = document.querySelector('aside.fi-sidebar .fi-sidebar-header');
+            if (sidebarHeader && !document.querySelector('.sftp-pulse-container')) {
+                const badge = document.createElement('div');
+                badge.className = 'sftp-pulse-container';
+                badge.innerHTML = '<div class="sftp-pulse-dot"></div> <span>SFTP Engine: Active (15m scan)</span>';
+                sidebarHeader.appendChild(badge);
+            }
+        };
+        injectPulseBadge();
+        setTimeout(injectPulseBadge, 1200);
+
+        // 3. Banking Web Audio Sound Effect Helper
+        const playBankingChime = () => {
+            try {
+                const AudioCtx = window.AudioContext || window.webkitAudioContext;
+                if (!AudioCtx) return;
+                const ctx = new AudioCtx();
+                const osc = ctx.createOscillator();
+                const gain = ctx.createGain();
+                osc.type = 'sine';
+                osc.frequency.setValueAtTime(587.33, ctx.currentTime); // D5
+                osc.frequency.exponentialRampToValueAtTime(880, ctx.currentTime + 0.12); // A5
+                gain.gain.setValueAtTime(0.08, ctx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.25);
+                osc.connect(gain);
+                gain.connect(ctx.destination);
+                osc.start();
+                osc.stop(ctx.currentTime + 0.25);
+            } catch (e) {}
+        };
+
+        // 4. Click-to-copy handler
         document.addEventListener('click', function (e) {
             const cell = e.target.closest('.fi-ta-cell-text');
-            if (cell && (cell.textContent.includes('TXN') || cell.textContent.includes('JANATA') || cell.textContent.length > 8)) {
+            if (cell) {
                 const text = cell.textContent.trim();
-                if (text && text.length < 50) {
+                if (text && (text.startsWith('TXN') || text.startsWith('JANATA') || text.startsWith('BEFTN') || text.startsWith('RTGS') || (text.length >= 10 && !isNaN(text)))) {
                     navigator.clipboard.writeText(text).then(() => {
+                        playBankingChime();
                         if (typeof Filament !== 'undefined' && Filament.notify) {
-                            Filament.notify('success', 'Copied: ' + text);
+                            Filament.notify('success', 'Copied to Clipboard: ' + text);
                         }
                     }).catch(() => {});
                 }
             }
+        });
+
+        // 5. Power-User Keyboard Shortcuts (G+D = Dashboard, G+T = Transactions, G+R = Reports)
+        let keySequence = '';
+        let keyTimeout;
+        document.addEventListener('keydown', function (e) {
+            if (['INPUT', 'TEXTAREA'].includes(e.target.tagName)) return;
+            
+            clearTimeout(keyTimeout);
+            keySequence += e.key.toLowerCase();
+            
+            if (keySequence === 'gd') {
+                window.location.href = '/admin';
+                keySequence = '';
+            } else if (keySequence === 'gt') {
+                window.location.href = '/admin/bkash-transactions';
+                keySequence = '';
+            } else if (keySequence === 'gr') {
+                window.location.href = '/admin/bkash-reports';
+                keySequence = '';
+            }
+            
+            keyTimeout = setTimeout(() => { keySequence = ''; }, 600);
         });
     });
 </script>
