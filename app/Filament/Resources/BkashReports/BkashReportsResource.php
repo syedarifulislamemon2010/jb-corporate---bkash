@@ -13,6 +13,8 @@ use Illuminate\Database\Eloquent\Builder;
 
 class BkashReportsResource extends Resource
 {
+    protected static ?string $model = BkashTransaction::class;
+
     protected static ?string $recordTitleAttribute = 'reference_id';
 
     protected static array $globallySearchableAttributes = [
