@@ -17,6 +17,24 @@
         --jb-accent: #0ea5e9;
     }
 
+    /* ─── Hide Sidebar Scrollbars Completely ─── */
+    aside.fi-sidebar,
+    aside.fi-sidebar *,
+    .fi-sidebar-nav,
+    .fi-sidebar-nav * {
+        scrollbar-width: none !important;
+        -ms-overflow-style: none !important;
+    }
+
+    aside.fi-sidebar::-webkit-scrollbar,
+    aside.fi-sidebar *::-webkit-scrollbar,
+    .fi-sidebar-nav::-webkit-scrollbar,
+    .fi-sidebar-nav *::-webkit-scrollbar {
+        display: none !important;
+        width: 0 !important;
+        height: 0 !important;
+    }
+
     /* ─── Common Improvements ─── */
     .fi-sidebar-item a,
     .fi-sidebar-item button {
