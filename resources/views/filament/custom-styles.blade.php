@@ -89,6 +89,16 @@
         border-radius: 0.5rem !important;
         margin: 1px 0.5rem !important;
         transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1) !important;
+        white-space: normal !important;
+        line-height: 1.3 !important;
+        word-break: break-word !important;
+    }
+
+    .fi-sidebar-item-label {
+        white-space: normal !important;
+        line-height: 1.3 !important;
+        overflow: visible !important;
+        text-overflow: unset !important;
     }
 
     .fi-sidebar-item a:hover,
