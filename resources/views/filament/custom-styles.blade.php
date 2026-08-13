@@ -135,26 +135,36 @@
     }
 
     /* ─── Top Bar ─── */
+    .dark .fi-topbar,
     .fi-topbar {
-        background: #ffffff !important;
-        border-bottom: 1px solid #e2e8f0 !important;
-        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04) !important;
+        background: #0f172a !important;
+        border-bottom: 1px solid #1e293b !important;
     }
 
-    /* ─── Dashboard Page Title ─── */
-    .fi-header-heading {
-        font-weight: 800 !important;
-        color: #0f172a !important;
-        font-size: 1.5rem !important;
+    .dark .fi-topbar-item,
+    .fi-topbar a,
+    .fi-topbar button {
+        color: #94a3b8 !important;
     }
 
     /* ─── Stats Widget Cards ─── */
     .fi-wi-stats-overview-stat {
         border-radius: 1rem !important;
-        border: 1px solid #e2e8f0 !important;
-        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04) !important;
+        border: 1px solid #1e293b !important;
+        background: #0f172a !important;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2) !important;
         transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1) !important;
         overflow: hidden !important;
+    }
+
+    .fi-wi-stats-overview-stat-label {
+        color: #94a3b8 !important;
+        font-weight: 600 !important;
+    }
+
+    .fi-wi-stats-overview-stat-value {
+        color: #f8fafc !important;
+        font-weight: 800 !important;
     }
 
     .fi-wi-stats-overview-stat:hover {
