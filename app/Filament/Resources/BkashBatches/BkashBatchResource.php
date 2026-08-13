@@ -12,6 +12,8 @@ use Illuminate\Database\Eloquent\Model;
 
 class BkashBatchResource extends Resource
 {
+    protected static ?string $model = BkashTransactionBatch::class;
+
     protected static ?string $recordTitleAttribute = 'file_name';
 
     protected static array $globallySearchableAttributes = [
