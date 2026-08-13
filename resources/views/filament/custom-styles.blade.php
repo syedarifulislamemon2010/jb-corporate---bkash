@@ -1,6 +1,14 @@
 <style>
     /* ===== JANATA BANK CORPORATE PORTAL — PREMIUM FINTECH THEME ===== */
 
+    /* ─── Hide Default Filament Widgets ─── */
+    .fi-wi-account,
+    .fi-wi-filament-info,
+    [class*="AccountWidget"],
+    [class*="FilamentInfoWidget"] {
+        display: none !important;
+    }
+
     /* ─── Color Palette ─── */
     :root {
         --jb-primary: #0369a1;
