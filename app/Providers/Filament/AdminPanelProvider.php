@@ -69,6 +69,14 @@ class AdminPanelProvider extends PanelProvider
                 CustomDashboard::class,
             ])
             ->renderHook(
+                \Filament\View\PanelsRenderHook::HEAD_START,
+                fn (): string => '<style>
+                aside.fi-sidebar { background: #0f172a !important; }
+                .fi-sidebar-item-active a { background: #0284c7 !important; color: #fff !important; }
+                .fi-wi-account, .fi-wi-filament-info { display: none !important; }
+                </style>'
+            )
+            ->renderHook(
                 \Filament\View\PanelsRenderHook::BODY_END,
                 fn () => view('filament.custom-styles')
             )
