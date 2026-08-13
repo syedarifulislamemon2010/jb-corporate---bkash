@@ -38,32 +38,8 @@ class User extends Authenticatable implements FilamentUser
         ];
     }
 
-    /**
-     * Relationship with Organization Model
-     */
-    public function organizationRelation(): BelongsTo
-    {
-        return $this->belongsTo(Organization::class, 'organization', 'label');
-    }
-
     public function organization()
     {
         return $this->belongsTo(Organization::class, 'organization', 'label');
     }
-
-//    public function permissions()
-//    {
-//        return $this->belongsToMany(
-//            Permission::class,
-//            'organization_permissions'
-//        );
-//    }
-//
-//    public function hasOrganizationPermission(string $permission): bool
-//    {
-//        return $this->organization
-//            ->permissions()
-//            ->where('name', $permission)
-//            ->exists();
-//    }
 }

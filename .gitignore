@@ -28,3 +28,13 @@ Homestead.json
 .env.production
 .phpactor.json
 auth.json
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db

@@ -12,8 +12,6 @@ class EftReturn extends Model
 
     protected $table = 'eft_returns';
     protected $primaryKey = 'id';
-    public $incrementing = false;
-    protected $keyType = 'string';
 
     protected $fillable = [
         'txn_id',
@@ -32,16 +30,5 @@ class EftReturn extends Model
             'amount' => 'decimal:2',
             'returned_at' => 'datetime',
         ];
-    }
-
-    protected static function boot()
-    {
-        parent::boot();
-
-        static::creating(function (Model $model) {
-            if (empty($model->{$model->getKeyName()})) {
-                $model->{$model->getKeyName()} = (string) Str::orderedUuid();
-            }
-        });
     }
 }

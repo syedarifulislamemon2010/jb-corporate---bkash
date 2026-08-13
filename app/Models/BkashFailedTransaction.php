@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Str;
+use App\Models\BkashTransactionBatch;
 use App\Traits\UUID;
 
 class BkashFailedTransaction extends Model
@@ -12,8 +13,6 @@ class BkashFailedTransaction extends Model
 
     protected $table = 'bkash_failed_transactions';
     protected $primaryKey = 'id';
-    public $incrementing = false;
-    protected $keyType = 'string';
 
     protected $fillable = [
         'batch_id',
@@ -36,14 +35,8 @@ class BkashFailedTransaction extends Model
         ];
     }
 
-    protected static function boot()
+    public function batch(): \Illuminate\Database\Eloquent\Relations\BelongsTo
     {
-        parent::boot();
-
-        static::creating(function (Model $model) {
-            if (empty($model->{$model->getKeyName()})) {
-                $model->{$model->getKeyName()} = (string) Str::orderedUuid();
-            }
-        });
+        return $this->belongsTo(BkashTransactionBatch::class, 'batch_id');
     }
 }

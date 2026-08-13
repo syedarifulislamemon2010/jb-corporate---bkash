@@ -80,7 +80,8 @@ class StatsOverview extends BaseWidget
                 ])
                 ->sum('amount');
 
-            $initialBalance = $accountNumber === '0100202707747' ? 542000000.50 : 18500000.00;
+            $balances = config('bkash.initial_balances', []);
+            $initialBalance = (float) ($balances[$accountNumber] ?? 0.00);
 
             return $initialBalance - $totalDebited;
         } catch (\Throwable $e) {

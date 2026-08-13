@@ -110,3 +110,77 @@ composer run dev
 
 Visit the portal locally at:
 👉 **`http://127.0.0.1:8000/admin`** or **`http://127.0.0.1:8001/admin`**
+
+---
+
+## 🔧 7. Prerequisites & Environment Setup
+
+### Oracle OCI8 Instant Client
+This system requires Oracle Instant Client for the `yajra/laravel-oci8` package:
+
+1. Download Oracle Instant Client Basic + SDK from [Oracle Downloads](https://www.oracle.com/database/technologies/instant-client/downloads.html)
+2. Extract to `C:\oracle\instantclient_21_0` (Windows) or `/opt/oracle/instantclient_21_0` (Linux)
+3. Add the path to your system `PATH` environment variable
+4. Enable the `oci8` PHP extension in `php.ini`
+
+### Role-Based Access Control Setup
+```bash
+# Generate Filament Shield permissions for all resources
+php artisan shield:generate --all
+
+# Seed default roles (super_admin, bkash_checker, bkash_authorizer_1, bkash_authorizer_2)
+php artisan db:seed --class=ShieldSeeder
+
+# Create a super admin user
+php artisan shield:super-admin
+```
+
+---
+
+## 📐 8. System Architecture
+
+```mermaid
+flowchart TD
+    A[bKash System] -->|Push Excel Files| B[SFTP Server 172.18.18.64]
+    B -->|Every 15 min cron| C[sftp:fetch-bkash-files]
+    C -->|Download & Dispatch| D[ProcessBkashFileJob]
+    D -->|Parse & Validate| E[BkashExcelParserService]
+    E -->|Valid Rows| F[(bkash_transactions)]
+    E -->|Invalid Rows| G[(bkash_failed_transactions)]
+    D -->|Create Batch| H[(bkash_transaction_batch)]
+    D -->|Stage 1 Alert| I[NotificationService]
+    
+    F -->|Checker Verifies| J[Status 1001: Checked]
+    J -->|Stage 2 Alert| I
+    J -->|1st Authorizer| K[Status 1002: Auth 1]
+    K -->|Stage 3 Alert| I
+    K -->|2nd Authorizer| L[Status 1003: Final Auth]
+    L -->|Stage 4 Alert| I
+    L -->|CBS Settlement| M[ExecuteCbsSettlementJob]
+    M -->|Host-to-Host| N[Core Banking System]
+    
+    I -->|SMS + Email| O[Recipients]
+    
+    H -->|MT940 Generation| P[Mt940GeneratorService]
+    P -->|Upload .sta Files| B
+```
+
+---
+
+## 🔑 9. Environment Variables Reference
+
+| Variable | Default | Description |
+|:---------|:--------|:------------|
+| `DB_CONNECTION` | `oracle` | Primary database driver |
+| `BKASH_SFTP_HOST` | — | SFTP server IP for bKash files |
+| `BKASH_SFTP_USERNAME` | — | SFTP login username |
+| `BKASH_SFTP_PASSWORD` | — | SFTP login password |
+| `BKASH_SFTP_PORT` | `22` | SFTP port |
+| `BKASH_EMAIL_ENABLED` | `true` | Enable/disable email notifications |
+| `BKASH_SMS_ENABLED` | `false` | Enable/disable SMS notifications |
+| `BKASH_SMS_API_URL` | — | SMS gateway API endpoint |
+| `BKASH_SMS_API_KEY` | — | SMS gateway API key |
+| `BKASH_WHITELISTED_DEBIT_ACCOUNTS` | `0100202707747,0100224107522` | Allowed debit accounts |
+| `BKASH_RTGS_MIN_LIMIT` | `100000` | Minimum RTGS amount (BDT) |
+| `BKASH_TCSA_INITIAL_BALANCE` | `542000000.50` | TCSA account opening balance |
+| `BKASH_OPS_INITIAL_BALANCE` | `18500000.00` | Ops account opening balance |

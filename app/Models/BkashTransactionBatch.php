@@ -4,7 +4,9 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Support\Str;
+use App\Models\User;
 use App\Traits\UUID;
 
 class BkashTransactionBatch extends Model
@@ -14,8 +16,6 @@ class BkashTransactionBatch extends Model
 
     protected $table = 'bkash_transaction_batch';
     protected $primaryKey = 'id';
-    public $incrementing = false;
-    protected $keyType = 'string';
 
     protected $fillable = [
         'file_name',
@@ -38,24 +38,18 @@ class BkashTransactionBatch extends Model
         ];
     }
 
-    public function transactions()
+    public function transactions(): \Illuminate\Database\Eloquent\Relations\HasMany
     {
         return $this->hasMany(BkashTransaction::class, 'batch_id', 'id');
     }
 
-    public function failedTransactions()
+    public function failedTransactions(): \Illuminate\Database\Eloquent\Relations\HasMany
     {
         return $this->hasMany(BkashFailedTransaction::class, 'batch_id', 'id');
     }
 
-    protected static function boot()
+    public function creator(): \Illuminate\Database\Eloquent\Relations\BelongsTo
     {
-        parent::boot();
-
-        static::creating(function (Model $model) {
-            if (empty($model->{$model->getKeyName()})) {
-                $model->{$model->getKeyName()} = (string) Str::orderedUuid();
-            }
-        });
+        return $this->belongsTo(User::class, 'created_by', 'name');
     }
 }

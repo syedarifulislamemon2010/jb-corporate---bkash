@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Str;
+use App\Models\User;
 use App\Traits\UUID;
 
 class BkashTransaction extends Model
@@ -14,9 +15,6 @@ class BkashTransaction extends Model
 
     protected $table = 'bkash_transactions';
     protected $primaryKey = 'id';
-    
-    public $incrementing = false;
-    protected $keyType = 'string';
 
     // Status Constants
     public const STATUS_PENDING_CHECKER = 1000;
@@ -75,9 +73,24 @@ class BkashTransaction extends Model
         ];
     }
 
-    public function batch()
+    public function batch(): \Illuminate\Database\Eloquent\Relations\BelongsTo
     {
         return $this->belongsTo(BkashTransactionBatch::class, 'batch_id', 'id');
+    }
+
+    public function checkedByUser(): \Illuminate\Database\Eloquent\Relations\BelongsTo
+    {
+        return $this->belongsTo(User::class, 'checked_by', 'name');
+    }
+
+    public function approvedBy1User(): \Illuminate\Database\Eloquent\Relations\BelongsTo
+    {
+        return $this->belongsTo(User::class, 'approved_by_1', 'name');
+    }
+
+    public function approvedBy2User(): \Illuminate\Database\Eloquent\Relations\BelongsTo
+    {
+        return $this->belongsTo(User::class, 'approved_by_2', 'name');
     }
 
     /**
@@ -104,16 +117,5 @@ class BkashTransaction extends Model
         $formattedInteger = preg_replace('/\B(?=(\d{2})+(?!\d))/', ',', $otherNumbers) . $lastThree;
 
         return $formattedInteger . '.' . $decimalPart;
-    }
-
-    protected static function boot()
-    {
-        parent::boot();
-
-        static::creating(function (Model $model) {
-            if (empty($model->{$model->getKeyName()})) {
-                $model->{$model->getKeyName()} = (string) Str::orderedUuid();
-            }
-        });
     }
 }

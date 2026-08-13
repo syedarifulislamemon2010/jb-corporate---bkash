@@ -27,4 +27,11 @@ return [
     'email_enabled' => env('BKASH_EMAIL_ENABLED', true),
     'email_from_address' => env('BKASH_EMAIL_FROM', 'noreply@janatabank-bd.com'),
     'email_from_name' => env('BKASH_EMAIL_FROM_NAME', 'Janata Bank Corporate Portal'),
+
+    'whitelisted_debit_accounts' => env('BKASH_WHITELISTED_DEBIT_ACCOUNTS', '0100202707747,0100224107522'),
+    'rtgs_min_limit' => (int) env('BKASH_RTGS_MIN_LIMIT', 100000),
+    'initial_balances' => [
+        '0100202707747' => (float) env('BKASH_TCSA_INITIAL_BALANCE', 542000000.50),
+        '0100224107522' => (float) env('BKASH_OPS_INITIAL_BALANCE', 18500000.00),
+    ],
 ];

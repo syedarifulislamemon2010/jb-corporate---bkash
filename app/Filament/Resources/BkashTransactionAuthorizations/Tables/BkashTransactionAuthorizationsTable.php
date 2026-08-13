@@ -17,9 +17,6 @@ class BkashTransactionAuthorizationsTable
     public static function configure(Table $table): Table
     {
         return $table
-            ->modifyQueryUsing(function (Builder $query) {
-                $query->where('status_id', BkashTransaction::STATUS_CHECKED);
-            })
             ->columns([
                 TextColumn::make('txn_id')
                     ->label('Txn ID')

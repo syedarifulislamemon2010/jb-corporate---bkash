@@ -7,6 +7,7 @@ use App\Models\NotificationOutbox;
 use App\Models\User;
 use Filament\Notifications\Notification;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
 
@@ -186,8 +187,6 @@ class NotificationService
                 default            => "bKash Corporate Portal Notification: {$fileName}",
             };
 
-            $htmlBody = nl2br(e($messageText));
-
             foreach ($recipients as $email) {
                 Mail::raw($messageText, function ($message) use ($email, $subject) {
                     $message->to($email)
@@ -234,16 +233,27 @@ class NotificationService
             foreach ($phones as $phone) {
                 // Generic HTTP SMS gateway call
                 // Replace with actual SMS provider API (Infobip, SSL Wireless, etc.)
-                $response = @file_get_contents($apiUrl . '?' . http_build_query([
-                    'api_key'   => $apiKey,
-                    'sender_id' => $senderId,
-                    'to'        => $phone,
-                    'message'   => $messageText,
-                ]));
+                try {
+                    $response = Http::timeout(10)->get($apiUrl, [
+                        'api_key'   => $apiKey,
+                        'sender_id' => $senderId,
+                        'to'        => $phone,
+                        'message'   => $messageText,
+                    ]);
 
-                Log::info("SMS sent to {$phone}");
+                    if ($response->successful()) {
+                        Log::info("SMS sent to {$phone}");
+                    } else {
+                        Log::warning("SMS to {$phone} returned status: " . $response->status());
+                    }
+                } catch (\Throwable $smsEx) {
+                    Log::error("SMS to {$phone} failed: " . $smsEx->getMessage());
+                }
             }
+            
+            $outbox->update(['sms_status' => 'SENT']);
         } catch (\Throwable $e) {
+            $outbox->update(['sms_status' => 'FAILED']);
             Log::error('SMS sending failed: ' . $e->getMessage());
         }
     }

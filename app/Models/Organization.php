@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Models\User;
 use Illuminate\Database\Eloquent\Model;
 
 class Organization extends Model
@@ -15,4 +16,9 @@ class Organization extends Model
         'name','mobile_no','address','organization_type','ip_address',
         'status_id','created_by'
     ];
+
+    public function users(): \Illuminate\Database\Eloquent\Relations\HasMany
+    {
+        return $this->hasMany(User::class, 'organization_id');
+    }
 }

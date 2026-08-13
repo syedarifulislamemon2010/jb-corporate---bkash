@@ -10,6 +10,26 @@ class BkashExcelParserService
 {
     private const DEBIT_ACCOUNTS_WHITELIST = ['0100202707747', '0100224107522'];
 
+    /** @var array Pre-fetched existing txn_ids for batch duplicate checking */
+    private static array $existingTxnIds = [];
+
+    /**
+     * Pre-fetch existing transaction IDs for batch duplicate checking.
+     * Call this before processing rows to avoid N+1 queries.
+     */
+    public static function prefetchExistingTxnIds(array $txnIds): void
+    {
+        static::$existingTxnIds = BkashTransaction::whereIn('txn_id', $txnIds)
+            ->pluck('txn_id')
+            ->toArray();
+    }
+
+    private static function getWhitelistedAccounts(): array
+    {
+        $csv = config('bkash.whitelisted_debit_accounts', '0100202707747,0100224107522');
+        return array_map('trim', explode(',', $csv));
+    }
+
     /**
      * Parse Excel/CSV file into array of rows.
      * Supports XLS, XLSX, CSV formats.
@@ -177,20 +197,20 @@ class BkashExcelParserService
             }
 
             // Whitelist check
-            if (empty($errors) && !in_array($debitAccount, self::DEBIT_ACCOUNTS_WHITELIST)) {
+            if (empty($errors) && !in_array($debitAccount, static::getWhitelistedAccounts())) {
                 $errors[] = "Debit account {$debitAccount} is neither TCSA nor Operational Account.";
                 $failureCode = 'INVALID_DEBIT_ACC';
             }
         }
 
-        // Duplicate Transaction ID check
-        if (empty($errors) && $txnId && BkashTransaction::where('txn_id', $txnId)->exists()) {
+        // Duplicate Transaction ID check (uses pre-fetched set for performance)
+        if (empty($errors) && $txnId && in_array($txnId, static::$existingTxnIds)) {
             $errors[] = "Global Duplicate Transaction ID {$txnId} blocked.";
             $failureCode = 'DUPLICATE_TXN_ID';
         }
 
         // RTGS Minimum Limit
-        if (empty($errors) && $channelType === 'RTGS' && $amount < 100000) {
+        if (empty($errors) && $channelType === 'RTGS' && $amount < config('bkash.rtgs_min_limit', 100000)) {
             $errors[] = 'RTGS amount must be at least BDT 1,00,000.';
             $failureCode = 'RTGS_MIN_LIMIT';
         }
@@ -226,6 +246,6 @@ class BkashExcelParserService
      */
     public static function getDebitAccountsWhitelist(): array
     {
-        return self::DEBIT_ACCOUNTS_WHITELIST;
+        return static::getWhitelistedAccounts();
     }
 }

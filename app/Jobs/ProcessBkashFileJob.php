@@ -11,6 +11,7 @@ use App\Services\SftpFileTransferService;
 use Carbon\Carbon;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Queue\Queueable;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
 
@@ -73,8 +74,21 @@ class ProcessBkashFileJob implements ShouldQueue
         $headerRow = array_values((array) ($importRows[0] ?? []));
         $detectedDebitAccount = null;
 
-        foreach ($importRows as $index => $row) {
-            if ($index === 0 || empty(array_filter((array) $row))) {
+        // Pre-fetch existing txn_ids to avoid N+1 queries
+        $allTxnIds = [];
+        foreach ($importRows as $idx => $r) {
+            if ($idx === 0) continue;
+            $rowArr = array_values((array) $r);
+            $m = BkashExcelParserService::mapRowData($headerRow, $rowArr);
+            if (!empty($m['txn_id'])) {
+                $allTxnIds[] = $m['txn_id'];
+            }
+        }
+        BkashExcelParserService::prefetchExistingTxnIds($allTxnIds);
+
+        DB::transaction(function () use ($importRows, $fileName, $batch, &$validCount, &$totalAmount, $headerRow, &$detectedDebitAccount) {
+            foreach ($importRows as $index => $row) {
+                if ($index === 0 || empty(array_filter((array) $row))) {
                 continue;
             }
 
@@ -135,6 +149,7 @@ class ProcessBkashFileJob implements ShouldQueue
                 ]);
             }
         }
+        });
 
         // Update batch totals
         $batch->update([
@@ -156,5 +171,11 @@ class ProcessBkashFileJob implements ShouldQueue
     public function failed(\Throwable $exception): void
     {
         Log::error("ProcessBkashFileJob FAILED for {$this->localFilePath}: " . $exception->getMessage());
+        
+        // Mark batch as failed if it was created
+        $fileName = basename($this->localFilePath);
+        BkashTransactionBatch::where('file_name', $fileName)
+            ->where('status_id', BkashTransaction::STATUS_PENDING_CHECKER)
+            ->update(['status_id' => 9000]); // REJECTED/FAILED
     }
 }

@@ -12,8 +12,6 @@ class NotificationOutbox extends Model
 
     protected $table = 'notification_outbox';
     protected $primaryKey = 'id';
-    public $incrementing = false;
-    protected $keyType = 'string';
 
     protected $fillable = [
         'event_type',
@@ -33,16 +31,5 @@ class NotificationOutbox extends Model
             'total_amount' => 'decimal:2',
             'total_trn'    => 'integer',
         ];
-    }
-
-    protected static function boot()
-    {
-        parent::boot();
-
-        static::creating(function (Model $model) {
-            if (empty($model->{$model->getKeyName()})) {
-                $model->{$model->getKeyName()} = (string) Str::orderedUuid();
-            }
-        });
     }
 }

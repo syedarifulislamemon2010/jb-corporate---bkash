@@ -10,6 +10,15 @@ use Illuminate\Support\Facades\Storage;
 class Mt940GeneratorService
 {
     /**
+     * Limit string length safely.
+     */
+    private static function strLimit(?string $value, int $limit = 100, string $end = ''): string
+    {
+        if ($value === null) return '';
+        return \Illuminate\Support\Str::limit($value, $limit, $end);
+    }
+
+    /**
      * Generate SWIFT MT940 Customer Statement File for a given bank account number.
      *
      * SWIFT MT940 Format Structure:
@@ -26,7 +35,7 @@ class Mt940GeneratorService
         $targetDate = $date ?? Carbon::today();
         $dateFormatted = $targetDate->format('ymd');
         $dateFull = $targetDate->format('Y-m-d');
-        $refNumber = 'JB' . $targetDate->format('Ymd') . rand(100, 999);
+        $refNumber = 'JB' . $targetDate->format('Ymd') . \Illuminate\Support\Str::random(8);
 
         // Fetch settled transactions for this account on target date
         $transactions = BkashTransaction::where(function ($q) use ($accountNumber) {
@@ -66,7 +75,7 @@ class Mt940GeneratorService
             $mt940 .= ":61:{$dateFormatted}{$targetDate->format('md')}{$sign}NBNK{$amountStr}NONREF//{$txnRef}\r\n";
 
             // Details :86:
-            $narrative = StrLimit("TRN/{$txn->transaction_type}/REF:{$txnRef}/ACC:{$txn->debit_account_no}", 65);
+            $narrative = static::strLimit("TRN/{$txn->transaction_type}/REF:{$txnRef}/ACC:{$txn->debit_account_no}", 65);
             $mt940 .= ":86:{$narrative}\r\n";
 
             if ($isDebit) {
@@ -91,8 +100,4 @@ class Mt940GeneratorService
 
         return $mt940;
     }
-}
-
-function StrLimit(string $val, int $limit): string {
-    return strlen($val) > $limit ? substr($val, 0, $limit) : $val;
 }
