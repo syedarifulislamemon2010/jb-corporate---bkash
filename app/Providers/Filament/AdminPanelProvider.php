@@ -69,7 +69,7 @@ class AdminPanelProvider extends PanelProvider
                 CustomDashboard::class,
             ])
             ->renderHook(
-                \Filament\View\PanelsRenderHook::HEAD_END,
+                \Filament\View\PanelsRenderHook::BODY_END,
                 fn () => view('filament.custom-styles')
             )
             ->discoverWidgets(in: app_path('Filament/Widgets'), for: 'App\Filament\Widgets')
