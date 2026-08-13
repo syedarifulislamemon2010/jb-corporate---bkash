@@ -84,7 +84,6 @@ class AdminPanelProvider extends PanelProvider
             ->widgets([])
             ->plugins([
                 FilamentShieldPlugin::make()
-                    ->navigationGroup('Administration')
                     ->gridColumns([
                         'default' => 1,
                         'sm' => 2,
