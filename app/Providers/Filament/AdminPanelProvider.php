@@ -30,6 +30,7 @@ class AdminPanelProvider extends PanelProvider
             ->path('admin')
             ->login()
             ->brandName('JB Corporate')
+            ->favicon(asset('favicon.svg'))
             ->sidebarCollapsibleOnDesktop()
             ->sidebarWidth('17rem')
             ->databaseNotifications()
