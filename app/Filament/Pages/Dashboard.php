@@ -21,16 +21,15 @@ class Dashboard extends BaseDashboard
     {
         return [
             \App\Filament\Widgets\StatsOverview::class,
+            \App\Filament\Widgets\ChannelVolumeChart::class,
         ];
     }
 
-    /**
-     * Override getVisibleWidgets to strictly return only StatsOverview.
-     */
     public function getVisibleWidgets(): array
     {
         return [
             \App\Filament\Widgets\StatsOverview::class,
+            \App\Filament\Widgets\ChannelVolumeChart::class,
         ];
     }
 

@@ -87,6 +87,16 @@
         box-shadow: 0 20px 40px -15px rgba(0, 0, 0, 0.25) !important;
     }
 
+    /* Click-to-copy Toast Badge */
+    .copyable-cell {
+        cursor: pointer;
+        transition: color 0.15s ease;
+    }
+    .copyable-cell:hover {
+        color: #0284c7 !important;
+        text-decoration: underline;
+    }
+
     /* ─── LIGHT THEME ENGINE ─── */
     html:not(.dark) body {
         background-color: #f8fafc !important;
@@ -313,5 +323,20 @@
         };
         setPlaceholder();
         setTimeout(setPlaceholder, 1000);
+
+        // Click-to-copy handler
+        document.addEventListener('click', function (e) {
+            const cell = e.target.closest('.fi-ta-cell-text');
+            if (cell && (cell.textContent.includes('TXN') || cell.textContent.includes('JANATA') || cell.textContent.length > 8)) {
+                const text = cell.textContent.trim();
+                if (text && text.length < 50) {
+                    navigator.clipboard.writeText(text).then(() => {
+                        if (typeof Filament !== 'undefined' && Filament.notify) {
+                            Filament.notify('success', 'Copied: ' + text);
+                        }
+                    }).catch(() => {});
+                }
+            }
+        });
     });
 </script>
