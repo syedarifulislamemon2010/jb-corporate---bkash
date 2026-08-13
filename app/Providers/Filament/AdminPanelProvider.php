@@ -35,6 +35,7 @@ class AdminPanelProvider extends PanelProvider
             ->sidebarWidth('17rem')
             ->databaseNotifications()
             ->databaseNotificationsPolling('15s')
+            ->globalSearchKeybindings(['command+k', 'ctrl+k'])
             ->colors([
                 'primary' => Color::Sky,
                 'danger'  => Color::Rose,

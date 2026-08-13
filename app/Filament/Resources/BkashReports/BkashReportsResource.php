@@ -13,7 +13,27 @@ use Illuminate\Database\Eloquent\Builder;
 
 class BkashReportsResource extends Resource
 {
-    protected static ?string $model = BkashTransaction::class;
+    protected static ?string $recordTitleAttribute = 'reference_id';
+
+    protected static array $globallySearchableAttributes = [
+        'reference_id',
+        'txn_id',
+        'debit_account_no',
+        'debit_account_title',
+        'credit_account_no',
+        'file_name',
+    ];
+
+    public static function getGlobalSearchResultDetails(\Illuminate\Database\Eloquent\Model $record): array
+    {
+        return [
+            'Txn ID'   => $record->txn_id ?? 'N/A',
+            'Channel'  => $record->transaction_type,
+            'Amount'   => 'BDT ' . \App\Models\BkashTransaction::formatBdtAmount((float) $record->amount),
+            'Account'  => $record->debit_account_no ?? 'N/A',
+            'File'     => $record->file_name ?? 'N/A',
+        ];
+    }
 
     protected static \UnitEnum|string|null $navigationGroup = 'Audits & Reports';
 

@@ -12,7 +12,23 @@ use Illuminate\Database\Eloquent\Model;
 
 class BkashBatchResource extends Resource
 {
-    protected static ?string $model = BkashTransactionBatch::class;
+    protected static ?string $recordTitleAttribute = 'file_name';
+
+    protected static array $globallySearchableAttributes = [
+        'file_name',
+        'created_by',
+        'sha256',
+    ];
+
+    public static function getGlobalSearchResultDetails(Model $record): array
+    {
+        return [
+            'Channel'  => $record->transaction_type,
+            'Total Trn'=> $record->total_data,
+            'Amount'   => 'BDT ' . BkashTransaction::formatBdtAmount((float) $record->total_amount),
+            'Created By' => $record->created_by,
+        ];
+    }
 
     protected static \UnitEnum|string|null $navigationGroup = 'Audits & Reports';
 
