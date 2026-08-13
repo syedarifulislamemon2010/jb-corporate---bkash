@@ -33,7 +33,7 @@ class AdminPanelProvider extends PanelProvider
             ->sidebarCollapsibleOnDesktop()
             ->sidebarWidth('17rem')
             ->databaseNotifications()
-            ->databaseNotificationsPolling('15s')
+            ->databaseNotificationsPolling('60s')
             ->colors([
                 'primary' => Color::Sky,
                 'danger'  => Color::Rose,
