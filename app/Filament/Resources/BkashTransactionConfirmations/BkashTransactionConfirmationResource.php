@@ -29,6 +29,8 @@ class BkashTransactionConfirmationResource extends Resource
 
     protected static \BackedEnum|string|null $navigationIcon = 'heroicon-o-clipboard-document-check';
 
+    protected static ?string $navigationIconColor = 'success';
+
     public static function getEloquentQuery(): Builder
     {
         return parent::getEloquentQuery()

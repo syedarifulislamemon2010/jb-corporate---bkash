@@ -28,7 +28,7 @@
                 onclick="window.location.reload()"
                 class="inline-flex items-center justify-center gap-2 px-4 py-2 text-xs font-bold text-slate-200 bg-slate-800 hover:bg-slate-700 active:bg-slate-900 border border-slate-700 rounded-xl transition duration-150 shadow-sm"
             >
-                <x-heroicon-o-arrow-path class="w-4 h-4 text-slate-400 shrink-0" style="width:16px;height:16px;" />
+                <x-filament::icon icon="heroicon-o-arrow-path" class="w-4 h-4 text-slate-400" />
                 <span>Refresh</span>
             </button>
         </div>
@@ -36,8 +36,8 @@
         <!-- 2. URGENCY ACTION BANNER (Conditional) -->
         @if ($urgency)
             <div class="relative overflow-hidden rounded-2xl bg-amber-500/10 border border-amber-500/30 p-4 sm:p-5 flex items-center gap-4 text-amber-500 shadow-sm">
-                <div class="p-2.5 rounded-xl bg-amber-500/20 text-amber-400 shrink-0">
-                    <x-heroicon-o-exclamation-triangle class="w-6 h-6 shrink-0" style="width:24px;height:24px;" />
+                <div class="p-2.5 rounded-xl bg-amber-500/20 text-amber-400 flex-shrink-0">
+                    <x-filament::icon icon="heroicon-o-exclamation-triangle" class="w-6 h-6 text-amber-400" />
                 </div>
                 <div class="flex-1 min-w-0">
                     <p class="text-sm sm:text-base font-bold tracking-tight text-amber-400">
@@ -60,7 +60,7 @@
             >
                 <div class="flex items-center justify-between">
                     <div class="flex items-center gap-2 text-amber-400">
-                        <x-heroicon-o-shield-check class="w-5 h-5 shrink-0" style="width:20px;height:20px;" />
+                        <x-filament::icon icon="heroicon-o-shield-check" class="w-5 h-5 text-amber-400" />
                         <span class="text-xs font-bold uppercase tracking-wider text-slate-300">Pending checker</span>
                     </div>
                 </div>
@@ -81,7 +81,7 @@
             >
                 <div class="flex items-center justify-between">
                     <div class="flex items-center gap-2 text-amber-400">
-                        <x-heroicon-o-key class="w-5 h-5 shrink-0" style="width:20px;height:20px;" />
+                        <x-filament::icon icon="heroicon-o-key" class="w-5 h-5 text-amber-400" />
                         <span class="text-xs font-bold uppercase tracking-wider text-slate-300">Pending authorization</span>
                     </div>
                 </div>
@@ -99,7 +99,7 @@
             <div class="p-5 rounded-2xl bg-slate-900/60 dark:bg-slate-900 border border-slate-800 shadow-sm">
                 <div class="flex items-center justify-between">
                     <div class="flex items-center gap-2 text-emerald-400">
-                        <x-heroicon-o-check-circle class="w-5 h-5 shrink-0" style="width:20px;height:20px;" />
+                        <x-filament::icon icon="heroicon-o-check-circle" class="w-5 h-5 text-emerald-400" />
                         <span class="text-xs font-bold uppercase tracking-wider text-slate-300">Settled today</span>
                     </div>
                 </div>
@@ -169,7 +169,7 @@
             <div class="flex items-center justify-between">
                 <div class="flex items-center gap-3">
                     <div class="p-2 rounded-xl {{ $exceptions['is_clean'] ? 'bg-emerald-500/10 text-emerald-400' : 'bg-rose-500/10 text-rose-400' }}">
-                        <x-heroicon-o-exclamation-triangle class="w-5 h-5 shrink-0" style="width:20px;height:20px;" />
+                        <x-filament::icon icon="heroicon-o-exclamation-triangle" class="w-5 h-5" />
                     </div>
                     <div>
                         <div class="text-xs font-bold uppercase tracking-wider text-slate-300">
@@ -230,7 +230,7 @@
                 </div>
 
                 <div class="mt-6 flex items-center gap-1.5 text-xs font-bold text-emerald-400">
-                    <x-heroicon-m-arrow-trending-up class="w-4 h-4 shrink-0" style="width:16px;height:16px;" />
+                    <x-filament::icon icon="heroicon-m-arrow-trending-up" class="w-4 h-4 text-emerald-400" />
                     <span>↗ {{ $balances['ops']['change_pct'] }}% vs yesterday</span>
                 </div>
             </div>
@@ -240,7 +240,7 @@
         <!-- 7. MT940 STATEMENT STATUS STRIP -->
         <div class="p-4 rounded-2xl bg-slate-900/40 dark:bg-slate-900/60 border border-slate-800/80 flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs">
             <div class="flex items-center gap-2 text-slate-300 font-bold">
-                <x-heroicon-o-document-text class="w-4 h-4 text-sky-400 shrink-0" style="width:16px;height:16px;" />
+                <x-filament::icon icon="heroicon-o-document-text" class="w-4 h-4 text-sky-400" />
                 <span>MT940 SFTP Delivery Status:</span>
             </div>
             <div class="flex flex-wrap items-center gap-4 text-slate-400">
@@ -266,7 +266,7 @@
                 @foreach ($activities as $act)
                     <div class="py-3.5 flex items-center justify-between gap-4 first:pt-0 last:pb-0">
                         <div class="flex items-center gap-3">
-                            <x-dynamic-component :component="$act['icon']" class="w-4 h-4 {{ $act['color'] }} shrink-0" style="width:16px;height:16px;min-width:16px;min-height:16px;" />
+                            <x-filament::icon :icon="$act['icon']" class="w-4 h-4 {{ $act['color'] }} flex-shrink-0" />
                             <span class="text-xs sm:text-sm font-medium text-slate-200">
                                 {{ $act['title'] }}
                             </span>

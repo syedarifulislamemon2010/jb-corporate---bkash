@@ -24,6 +24,8 @@ class BkashFailedTransactionResource extends Resource
 
     protected static \BackedEnum|string|null $navigationIcon = 'heroicon-o-exclamation-triangle';
 
+    protected static ?string $navigationIconColor = 'danger';
+
     public static function table(Table $table): Table
     {
         return $table
