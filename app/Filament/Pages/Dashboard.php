@@ -48,18 +48,26 @@ class Dashboard extends BaseDashboard
      */
     public function getLastSynced(): array
     {
-        $latestBatch = BkashTransactionBatch::latest('created_at')->first();
-        if (!$latestBatch) {
+        $latestBatchDate = BkashTransactionBatch::latest('created_at')->value('created_at');
+        $latestTxnDate   = BkashTransaction::latest('created_at')->value('created_at');
+        $latestNotifDate = NotificationOutbox::latest('created_at')->value('created_at');
+
+        $latestSyncDate = collect([$latestBatchDate, $latestTxnDate, $latestNotifDate])
+            ->filter()
+            ->map(fn ($d) => $d instanceof Carbon ? $d : Carbon::parse($d))
+            ->max();
+
+        if (!$latestSyncDate) {
             return [
                 'formatted'  => 'No sync yet',
                 'is_delayed' => false,
             ];
         }
 
-        $diffInMinutes = (int) $latestBatch->created_at->diffInMinutes(now());
+        $diffInMinutes = (int) $latestSyncDate->diffInMinutes(now());
 
         return [
-            'formatted'  => $latestBatch->created_at->format('d M Y, h:i:s A'),
+            'formatted'  => $latestSyncDate->format('d M Y, h:i:s A'),
             'is_delayed' => $diffInMinutes >= 20,
         ];
     }

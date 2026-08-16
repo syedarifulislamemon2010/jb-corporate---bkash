@@ -60,7 +60,7 @@ class AdminPanelProvider extends PanelProvider
             ])
             ->navigationItems([
                 NavigationItem::make('Log Viewer')
-                    ->url('admin/log-viewer', shouldOpenInNewTab: true)
+                    ->url('/admin/log-viewer', shouldOpenInNewTab: true)
                     ->icon('heroicon-o-command-line')
                     ->group('Administration')
                     ->sort(10),
