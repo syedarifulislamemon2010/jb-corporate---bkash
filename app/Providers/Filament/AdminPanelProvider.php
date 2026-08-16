@@ -46,19 +46,15 @@ class AdminPanelProvider extends PanelProvider
             ->navigationGroups([
                 NavigationGroup::make()
                     ->label('Filament Shield')
-                    ->icon('heroicon-o-shield-check')
                     ->collapsible(true),
                 NavigationGroup::make()
                     ->label('Transaction Pipeline')
-                    ->icon('heroicon-o-banknotes')
                     ->collapsible(true),
                 NavigationGroup::make()
                     ->label('Audits & Reports')
-                    ->icon('heroicon-o-chart-bar')
                     ->collapsible(true),
                 NavigationGroup::make()
                     ->label('Administration')
-                    ->icon('heroicon-o-cog-6-tooth')
                     ->collapsible(true)
                     ->collapsed(true),
             ])

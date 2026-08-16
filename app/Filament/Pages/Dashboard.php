@@ -15,13 +15,18 @@ class Dashboard extends BaseDashboard
 {
     protected static \BackedEnum|string|null $navigationIcon = 'heroicon-o-squares-2x2';
 
-    protected static ?string $title = 'bKash Settlement Dashboard';
+    protected static ?string $title = '';
 
     protected static ?string $navigationLabel = 'Dashboard';
 
     protected static ?int $navigationSort = -2;
 
     protected string $view = 'filament.pages.dashboard';
+
+    public function getTitle(): \Illuminate\Contracts\Support\Htmlable|string
+    {
+        return '';
+    }
 
     public function getHeaderWidgets(): array
     {
@@ -39,7 +44,7 @@ class Dashboard extends BaseDashboard
     }
 
     /**
-     * Get SFTP Last Synced status & timestamp.
+     * Get SFTP Last Synced status & timestamp with date/month/year/time(h:m:s).
      */
     public function getLastSynced(): array
     {
@@ -54,7 +59,7 @@ class Dashboard extends BaseDashboard
         $diffInMinutes = (int) $latestBatch->created_at->diffInMinutes(now());
 
         return [
-            'formatted'  => $latestBatch->created_at->format('h:i A'),
+            'formatted'  => $latestBatch->created_at->format('d M Y, h:i:s A'),
             'is_delayed' => $diffInMinutes > 20,
         ];
     }

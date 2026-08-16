@@ -17,7 +17,7 @@
         -moz-osx-font-smoothing: grayscale;
     }
 
-    /* ─── DASHBOARD LAYOUT & CARD ENGINE (Vite-Independent) ─── */
+    /* ─── DASHBOARD LAYOUT & CARD ENGINE (Theme-Aware: Light/Dark) ─── */
     .db-grid-3 {
         display: grid;
         grid-template-columns: repeat(1, minmax(0, 1fr));
@@ -40,17 +40,23 @@
         }
     }
 
+    /* Light Theme (Default) */
     .db-card {
-        background-color: #0f172a;
-        border: 1px solid #1e293b;
+        background-color: #ffffff;
+        border: 1px solid #e2e8f0;
         border-radius: 1rem;
         padding: 1.25rem;
-        box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1);
+        box-shadow: 0 1px 3px 0 rgba(15, 23, 42, 0.03);
+    }
+
+    .db-card-inner {
+        background-color: #f8fafc;
+        border: 1px solid #e2e8f0;
     }
 
     .db-card-warning {
-        background-color: rgba(15, 23, 42, 0.8);
-        border: 1px solid rgba(245, 158, 11, 0.4);
+        background-color: #ffffff;
+        border: 1px solid rgba(245, 158, 11, 0.5);
         border-radius: 1rem;
         padding: 1.25rem;
         transition: all 0.2s ease;
@@ -58,12 +64,13 @@
         text-decoration: none;
     }
     .db-card-warning:hover {
-        border-color: rgba(245, 158, 11, 0.8);
+        border-color: rgba(245, 158, 11, 0.9);
+        box-shadow: 0 4px 12px rgba(245, 158, 11, 0.08);
     }
 
     .db-card-danger {
-        background-color: rgba(15, 23, 42, 0.8);
-        border: 1px solid rgba(244, 63, 94, 0.4);
+        background-color: #ffffff;
+        border: 1px solid rgba(244, 63, 94, 0.5);
         border-radius: 1rem;
         padding: 1rem 1.25rem;
         display: block;
@@ -71,14 +78,92 @@
     }
 
     .db-banner-warning {
-        background-color: rgba(245, 158, 11, 0.1);
-        border: 1px solid rgba(245, 158, 11, 0.3);
+        background-color: #fef3c7;
+        border: 1px solid #fde68a;
         border-radius: 1rem;
         padding: 1rem 1.25rem;
         display: flex;
         align-items: center;
         gap: 1rem;
-        color: #f59e0b;
+        color: #92400e;
+    }
+
+    .db-text-heading {
+        color: #0f172a;
+    }
+
+    .db-text-val {
+        font-size: 1.875rem;
+        line-height: 2.25rem;
+        font-weight: 800;
+        color: #0f172a;
+    }
+
+    .db-text-sub {
+        color: #64748b;
+    }
+
+    .db-strip {
+        background-color: #f8fafc;
+        border: 1px solid #e2e8f0;
+        border-radius: 1rem;
+        padding: 1rem 1.25rem;
+        display: flex;
+        flex-direction: column;
+        gap: 0.75rem;
+        color: #334155;
+    }
+    @media (min-width: 640px) {
+        .db-strip {
+            flex-direction: row;
+            align-items: center;
+            justify-content: space-between;
+        }
+    }
+
+    /* Dark Theme Overrides (html.dark) */
+    html.dark .db-card {
+        background-color: #0f172a !important;
+        border-color: #1e293b !important;
+    }
+
+    html.dark .db-card-inner {
+        background-color: rgba(2, 6, 23, 0.4) !important;
+        border-color: rgba(30, 41, 59, 0.8) !important;
+    }
+
+    html.dark .db-card-warning {
+        background-color: rgba(15, 23, 42, 0.8) !important;
+        border-color: rgba(245, 158, 11, 0.4) !important;
+    }
+
+    html.dark .db-card-danger {
+        background-color: rgba(15, 23, 42, 0.8) !important;
+        border-color: rgba(244, 63, 94, 0.4) !important;
+    }
+
+    html.dark .db-banner-warning {
+        background-color: rgba(245, 158, 11, 0.1) !important;
+        border-color: rgba(245, 158, 11, 0.3) !important;
+        color: #f59e0b !important;
+    }
+
+    html.dark .db-text-heading {
+        color: #ffffff !important;
+    }
+
+    html.dark .db-text-val {
+        color: #ffffff !important;
+    }
+
+    html.dark .db-text-sub {
+        color: #94a3b8 !important;
+    }
+
+    html.dark .db-strip {
+        background-color: rgba(15, 23, 42, 0.6) !important;
+        border-color: #1e293b !important;
+        color: #94a3b8 !important;
     }
 
     .db-flex-between {
@@ -102,30 +187,6 @@
         display: flex;
         align-items: center;
         gap: 0.75rem;
-    }
-
-    .db-text-val {
-        font-size: 1.875rem;
-        line-height: 2.25rem;
-        font-weight: 800;
-        color: #ffffff;
-    }
-
-    .db-strip {
-        background-color: rgba(15, 23, 42, 0.6);
-        border: 1px solid #1e293b;
-        border-radius: 1rem;
-        padding: 1rem 1.25rem;
-        display: flex;
-        flex-direction: column;
-        gap: 0.75rem;
-    }
-    @media (min-width: 640px) {
-        .db-strip {
-            flex-direction: row;
-            align-items: center;
-            justify-content: space-between;
-        }
     }
 
     /* ─── Hide Default Filament Widgets ─── */
