@@ -18,8 +18,8 @@
                 <h1 class="db-text-heading" style="font-size: 1.75rem; font-weight: 800; letter-spacing: -0.025em; margin: 0;">
                     bKash settlement dashboard
                 </h1>
-                <div class="db-flex-gap-2" style="padding: 0.25rem 0.75rem; border-radius: 9999px; font-size: 0.75rem; font-weight: 600; {{ $lastSynced['is_delayed'] ? 'background: rgba(244,63,94,0.1); color: #f43f5e; border: 1px solid rgba(244,63,94,0.3);' : 'background: rgba(16,185,129,0.1); color: #059669; border: 1px solid rgba(16,185,129,0.3);' }}">
-                    <span style="width: 8px; height: 8px; border-radius: 50%; display: inline-block; {{ $lastSynced['is_delayed'] ? 'background-color: #f43f5e;' : 'background-color: #10b981;' }}"></span>
+                <div class="db-flex-gap-2" style="padding: 0.25rem 0.75rem; border-radius: 9999px; font-size: 0.75rem; font-weight: 700; {{ $lastSynced['is_delayed'] ? 'background: rgba(239,68,68,0.15); color: #dc2626; border: 1px solid rgba(239,68,68,0.5);' : 'background: rgba(16,185,129,0.15); color: #047857; border: 1px solid rgba(16,185,129,0.5);' }}">
+                    <span style="width: 8px; height: 8px; border-radius: 50%; display: inline-block; {{ $lastSynced['is_delayed'] ? 'background-color: #ef4444;' : 'background-color: #10b981;' }}"></span>
                     <span>Last synced: {{ $lastSynced['formatted'] }}</span>
                 </div>
             </div>

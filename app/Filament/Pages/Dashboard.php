@@ -60,7 +60,7 @@ class Dashboard extends BaseDashboard
 
         return [
             'formatted'  => $latestBatch->created_at->format('d M Y, h:i:s A'),
-            'is_delayed' => $diffInMinutes > 20,
+            'is_delayed' => $diffInMinutes >= 20,
         ];
     }
 
@@ -284,7 +284,7 @@ class Dashboard extends BaseDashboard
 
             $activities[] = [
                 'title'     => $stageLabel,
-                'time'      => $n->created_at->format('h:i A'),
+                'time'      => $n->created_at->format('d M Y, h:i:s A'),
                 'icon'      => $icon,
                 'color'     => $color,
             ];
@@ -295,7 +295,7 @@ class Dashboard extends BaseDashboard
         foreach ($eftReturns as $eft) {
             $activities[] = [
                 'title' => "EFT return processed, ref {$eft->reference_id}",
-                'time'  => $eft->created_at ? $eft->created_at->format('h:i A') : 'Today',
+                'time'  => $eft->created_at ? $eft->created_at->format('d M Y, h:i:s A') : Carbon::now()->format('d M Y, h:i:s A'),
                 'icon'  => 'heroicon-o-arrow-uturn-left',
                 'color' => 'text-amber-500 dark:text-amber-400',
             ];
@@ -303,22 +303,23 @@ class Dashboard extends BaseDashboard
 
         // Fallback default activities if empty
         if (empty($activities)) {
+            $todayDate = Carbon::now()->format('d M Y');
             $activities = [
                 [
                     'title' => 'EFT return processed, ref TXN-88213',
-                    'time'  => '10:42 AM',
+                    'time'  => "{$todayDate}, 10:42:15 AM",
                     'icon'  => 'heroicon-o-arrow-uturn-left',
                     'color' => 'text-amber-500 dark:text-amber-400',
                 ],
                 [
                     'title' => 'Transaction TXN-88190 failed, insufficient balance',
-                    'time'  => '09:58 AM',
+                    'time'  => "{$todayDate}, 09:58:20 AM",
                     'icon'  => 'heroicon-o-x-circle',
                     'color' => 'text-rose-500 dark:text-rose-400',
                 ],
                 [
                     'title' => 'Batch file BATCH-0417 confirmed by checker',
-                    'time'  => '09:20 AM',
+                    'time'  => "{$todayDate}, 09:20:05 AM",
                     'icon'  => 'heroicon-o-check',
                     'color' => 'text-emerald-500 dark:text-emerald-400',
                 ],
