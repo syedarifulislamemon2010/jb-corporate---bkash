@@ -17,6 +17,17 @@
         -moz-osx-font-smoothing: grayscale;
     }
 
+    /* ─── PREVENT OVERSIZED SVG ICON EXPLOSION ─── */
+    svg {
+        display: inline-block;
+        vertical-align: middle;
+    }
+    
+    svg.w-4 { width: 1rem !important; height: 1rem !important; min-width: 1rem !important; min-height: 1rem !important; }
+    svg.w-5 { width: 1.25rem !important; height: 1.25rem !important; min-width: 1.25rem !important; min-height: 1.25rem !important; }
+    svg.w-6 { width: 1.5rem !important; height: 1.5rem !important; min-width: 1.5rem !important; min-height: 1.5rem !important; }
+    svg.w-8 { width: 2rem !important; height: 2rem !important; min-width: 2rem !important; min-height: 2rem !important; }
+
     /* ─── Hide Default Filament Widgets ─── */
     .fi-wi-account,
     .fi-wi-filament-info,
