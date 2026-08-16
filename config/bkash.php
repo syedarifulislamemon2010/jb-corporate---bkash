@@ -30,8 +30,9 @@ return [
 
     'whitelisted_debit_accounts' => env('BKASH_WHITELISTED_DEBIT_ACCOUNTS', '0100202707747,0100224107522'),
     'rtgs_min_limit' => (int) env('BKASH_RTGS_MIN_LIMIT', 100000),
+    'enabled_channels' => ['A2A'], // Phased rollout: A2A live first, BEFTN & RTGS coming in phase 2 & 3
     'initial_balances' => [
-        '0100202707747' => (float) env('BKASH_TCSA_INITIAL_BALANCE', 542000000.50),
-        '0100224107522' => (float) env('BKASH_OPS_INITIAL_BALANCE', 18500000.00),
+        '0100202707747' => (float) env('BKASH_TCSA_INITIAL_BALANCE', 5420000000.50),
+        '0100224107522' => (float) env('BKASH_OPS_INITIAL_BALANCE', 185000000.00),
     ],
 ];

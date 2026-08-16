@@ -45,8 +45,12 @@ class AdminPanelProvider extends PanelProvider
             ])
             ->navigationGroups([
                 NavigationGroup::make()
+                    ->label('Filament Shield')
+                    ->icon('heroicon-o-shield-check')
+                    ->collapsible(true),
+                NavigationGroup::make()
                     ->label('Transaction Pipeline')
-                    ->icon('heroicon-o-currency-dollar')
+                    ->icon('heroicon-o-banknotes')
                     ->collapsible(true),
                 NavigationGroup::make()
                     ->label('Audits & Reports')
@@ -61,7 +65,7 @@ class AdminPanelProvider extends PanelProvider
             ->navigationItems([
                 NavigationItem::make('Log Viewer')
                     ->url('admin/log-viewer', shouldOpenInNewTab: true)
-                    ->icon('heroicon-o-presentation-chart-line')
+                    ->icon('heroicon-o-command-line')
                     ->group('Administration')
                     ->sort(10),
             ])
@@ -80,6 +84,7 @@ class AdminPanelProvider extends PanelProvider
             ])
             ->plugins([
                 FilamentShieldPlugin::make()
+                    ->navigationIcon('heroicon-o-identification')
                     ->gridColumns([
                         'default' => 1,
                         'sm' => 2,

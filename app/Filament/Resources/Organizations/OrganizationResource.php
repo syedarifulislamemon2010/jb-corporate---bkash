@@ -21,7 +21,7 @@ class OrganizationResource extends Resource implements HasShieldPermissions
 {
     protected static ?string $model = Organization::class;
 
-    protected static string|BackedEnum|null $navigationIcon = 'heroicon-m-building-library';
+    protected static string|BackedEnum|null $navigationIcon = 'heroicon-o-building-library';
     protected static \UnitEnum|string|null $navigationGroup = 'Administration';
     protected static ?string $recordTitleAttribute = 'name';
 

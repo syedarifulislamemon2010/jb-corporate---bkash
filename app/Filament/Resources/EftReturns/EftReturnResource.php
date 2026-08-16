@@ -23,7 +23,7 @@ class EftReturnResource extends Resource
 
     protected static ?int $navigationSort = 5;
 
-    protected static \BackedEnum|string|null $navigationIcon = 'heroicon-o-arrow-uturn-left';
+    protected static \BackedEnum|string|null $navigationIcon = 'heroicon-o-receipt-refund';
 
     public static function table(Table $table): Table
     {
