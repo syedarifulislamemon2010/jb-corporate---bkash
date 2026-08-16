@@ -17,6 +17,117 @@
         -moz-osx-font-smoothing: grayscale;
     }
 
+    /* ─── DASHBOARD LAYOUT & CARD ENGINE (Vite-Independent) ─── */
+    .db-grid-3 {
+        display: grid;
+        grid-template-columns: repeat(1, minmax(0, 1fr));
+        gap: 1.25rem;
+    }
+    @media (min-width: 768px) {
+        .db-grid-3 {
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+        }
+    }
+
+    .db-grid-2-1 {
+        display: grid;
+        grid-template-columns: repeat(1, minmax(0, 1fr));
+        gap: 1.25rem;
+    }
+    @media (min-width: 1024px) {
+        .db-grid-2-1 {
+            grid-template-columns: 2fr 1fr;
+        }
+    }
+
+    .db-card {
+        background-color: #0f172a;
+        border: 1px solid #1e293b;
+        border-radius: 1rem;
+        padding: 1.25rem;
+        box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1);
+    }
+
+    .db-card-warning {
+        background-color: rgba(15, 23, 42, 0.8);
+        border: 1px solid rgba(245, 158, 11, 0.4);
+        border-radius: 1rem;
+        padding: 1.25rem;
+        transition: all 0.2s ease;
+        display: block;
+        text-decoration: none;
+    }
+    .db-card-warning:hover {
+        border-color: rgba(245, 158, 11, 0.8);
+    }
+
+    .db-card-danger {
+        background-color: rgba(15, 23, 42, 0.8);
+        border: 1px solid rgba(244, 63, 94, 0.4);
+        border-radius: 1rem;
+        padding: 1rem 1.25rem;
+        display: block;
+        text-decoration: none;
+    }
+
+    .db-banner-warning {
+        background-color: rgba(245, 158, 11, 0.1);
+        border: 1px solid rgba(245, 158, 11, 0.3);
+        border-radius: 1rem;
+        padding: 1rem 1.25rem;
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        color: #f59e0b;
+    }
+
+    .db-flex-between {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+    }
+
+    .db-flex-center {
+        display: flex;
+        align-items: center;
+    }
+
+    .db-flex-gap-2 {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .db-flex-gap-3 {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+    }
+
+    .db-text-val {
+        font-size: 1.875rem;
+        line-height: 2.25rem;
+        font-weight: 800;
+        color: #ffffff;
+    }
+
+    .db-strip {
+        background-color: rgba(15, 23, 42, 0.6);
+        border: 1px solid #1e293b;
+        border-radius: 1rem;
+        padding: 1rem 1.25rem;
+        display: flex;
+        flex-direction: column;
+        gap: 0.75rem;
+    }
+    @media (min-width: 640px) {
+        .db-strip {
+            flex-direction: row;
+            align-items: center;
+            justify-content: space-between;
+        }
+    }
+
     /* ─── Hide Default Filament Widgets ─── */
     .fi-wi-account,
     .fi-wi-filament-info,
