@@ -100,40 +100,33 @@ class Dashboard extends BaseDashboard
      */
     public function getChannelStats(): array
     {
-        $enabled = config('bkash.enabled_channels', ['A2A']);
+        $enabled = config('bkash.enabled_channels', ['A2A', 'BEFTN', 'RTGS']);
+        $channels = ['A2A', 'BEFTN', 'RTGS'];
+        $stats = [];
 
-        // A2A stats (Phase 1 — always active)
-        $a2aPendingChecker = BkashTransactionBatch::where('transaction_type', 'A2A')
-            ->where('status_id', BkashTransaction::STATUS_PENDING_CHECKER)->count();
-        $a2aPendingAuth    = BkashTransactionBatch::where('transaction_type', 'A2A')
-            ->whereIn('status_id', [BkashTransaction::STATUS_CHECKED, BkashTransaction::STATUS_AUTH_1_APPROVED])->count();
-        $a2aSettledToday   = BkashTransactionBatch::where('transaction_type', 'A2A')
-            ->whereIn('status_id', [BkashTransaction::STATUS_FINAL_AUTHORIZED, BkashTransaction::STATUS_CBS_SUCCESS])
-            ->whereDate('updated_at', today())->count();
+        foreach ($channels as $channel) {
+            $pendingChecker = BkashTransactionBatch::where('transaction_type', $channel)
+                ->where('status_id', BkashTransaction::STATUS_PENDING_CHECKER)->count();
+            $pendingAuth = BkashTransactionBatch::where('transaction_type', $channel)
+                ->whereIn('status_id', [BkashTransaction::STATUS_CHECKED, BkashTransaction::STATUS_AUTH_1_APPROVED])->count();
+            $settledToday = BkashTransactionBatch::where('transaction_type', $channel)
+                ->whereIn('status_id', [BkashTransaction::STATUS_FINAL_AUTHORIZED, BkashTransaction::STATUS_CBS_SUCCESS])
+                ->whereDate('updated_at', today())->count();
 
-        return [
-            'A2A' => [
-                'is_live'         => in_array('A2A', $enabled),
-                'pending_checker' => $a2aPendingChecker,
-                'pending_auth'    => $a2aPendingAuth,
-                'settled_today'   => $a2aSettledToday,
-                'label'           => 'Phase 1 · Live',
-            ],
-            'BEFTN' => [
-                'is_live'         => in_array('BEFTN', $enabled),
-                'pending_checker' => 0,
-                'pending_auth'    => 0,
-                'settled_today'   => 0,
-                'label'           => 'Coming in Phase 2',
-            ],
-            'RTGS' => [
-                'is_live'         => in_array('RTGS', $enabled),
-                'pending_checker' => 0,
-                'pending_auth'    => 0,
-                'settled_today'   => 0,
-                'label'           => 'Coming in Phase 3',
-            ],
-        ];
+            $stats[$channel] = [
+                'is_live'         => in_array($channel, $enabled),
+                'pending_checker' => $pendingChecker,
+                'pending_auth'    => $pendingAuth,
+                'settled_today'   => $settledToday,
+                'label'           => match($channel) {
+                    'A2A'   => 'Live',
+                    'BEFTN' => 'Live',
+                    'RTGS'  => 'Live',
+                },
+            ];
+        }
+
+        return $stats;
     }
 
     /**
