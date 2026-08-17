@@ -506,12 +506,28 @@
         border: 1px solid #1e293b !important;
     }
 
-    /* Table Improvements */
-    .fi-ta-header-cell-label {
-        font-size: 0.75rem !important;
-        text-transform: uppercase !important;
-        letter-spacing: 0.05em !important;
-        font-weight: 700 !important;
+    /* ─── ROLE PERMISSION-MATRIX UI REINFORCEMENTS ─── */
+    .fi-fo-checkbox-list label span {
+        white-space: normal !important;
+        word-break: normal !important;
+        overflow-wrap: normal !important;
+        hyphens: manual !important;
+        line-height: 1.35 !important;
+        display: inline-block !important;
+    }
+
+    .fi-fo-checkbox-list {
+        gap: 0.875rem 1rem !important;
+    }
+
+    /* Top Select All Toggle Caption Separator */
+    .shield-select-all-separator {
+        margin-top: 1rem;
+        margin-bottom: 0.5rem;
+        border-bottom: 1px solid #e2e8f0;
+    }
+    html.dark .shield-select-all-separator {
+        border-color: #1e293b;
     }
 </style>
 
