@@ -18,7 +18,7 @@
                 <h1 class="db-text-heading" style="font-size: 1.75rem; font-weight: 800; letter-spacing: -0.025em; margin: 0;">
                     bKash settlement dashboard
                 </h1>
-                <div class="db-flex-gap-2" style="padding: 0.25rem 0.75rem; border-radius: 9999px; font-size: 0.75rem; font-weight: 800; {{ $lastSynced['is_delayed'] ? 'background: #fee2e2; color: #991b1b; border: 1px solid #f87171;' : 'background: #d1fae5; color: #065f46; border: 1px solid #34d399;' }}">
+                <div class="db-flex-gap-2" style="padding: 0.25rem 0.75rem; border-radius: 9999px; font-size: 0.75rem; font-weight: 800; {{ $lastSynced['is_delayed'] ? 'background: rgba(239,68,68,0.15); color: #dc2626; border: 1px solid rgba(239,68,68,0.4);' : 'background: rgba(16,185,129,0.15); color: #059669; border: 1px solid rgba(16,185,129,0.4);' }}">
                     <span style="width: 8px; height: 8px; border-radius: 50%; display: inline-block; {{ $lastSynced['is_delayed'] ? 'background-color: #dc2626;' : 'background-color: #10b981;' }}"></span>
                     <span class="db-tabular">Last synced: {{ $lastSynced['formatted'] }}</span>
                 </div>
@@ -26,10 +26,9 @@
 
             <button 
                 onclick="window.location.reload()"
-                class="db-flex-gap-2"
-                style="padding: 0.5rem 1rem; font-size: 0.75rem; font-weight: 700; color: #334155; background-color: #ffffff; border: 1px solid #cbd5e1; border-radius: 0.75rem; cursor: pointer; transition: all 0.15s ease;"
+                class="db-btn-refresh"
             >
-                <x-filament::icon icon="heroicon-o-arrow-path" class="w-4 h-4 text-slate-500" />
+                <x-filament::icon icon="heroicon-o-arrow-path" class="w-4 h-4 text-slate-400" />
                 <span>Refresh</span>
             </button>
         </div>
@@ -66,7 +65,7 @@
                     <div class="db-text-val db-tabular">
                         {{ $actionStats['pending_checker']['files'] }}
                     </div>
-                    <div style="margin-top: 0.5rem; font-size: 0.75rem; font-weight: 600; color: #1e3a5f;">
+                    <div class="db-link-action" style="margin-top: 0.5rem;">
                         Awaiting verification →
                     </div>
                 </div>
@@ -84,7 +83,7 @@
                     <div class="db-text-val db-tabular">
                         {{ $actionStats['pending_auth']['files'] }}
                     </div>
-                    <div style="margin-top: 0.5rem; font-size: 0.75rem; font-weight: 600; color: #1e3a5f;">
+                    <div class="db-link-action" style="margin-top: 0.5rem;">
                         Dual approval (auth 1 and 2) →
                     </div>
                 </div>
@@ -121,7 +120,7 @@
                     <div class="db-card">
                         <div class="db-flex-between" style="margin-bottom: 0.75rem;">
                             <span class="db-text-heading" style="font-size: 1rem; font-weight: 800;">{{ $channel }} Payment Mode</span>
-                            <span style="padding: 0.125rem 0.625rem; border-radius: 9999px; font-size: 0.625rem; font-weight: 700; text-transform: uppercase; background: rgba(16,185,129,0.1); color: #059669; border: 1px solid rgba(16,185,129,0.3);">
+                            <span style="padding: 0.125rem 0.625rem; border-radius: 9999px; font-size: 0.625rem; font-weight: 700; text-transform: uppercase; background: rgba(16,185,129,0.15); color: #059669; border: 1px solid rgba(16,185,129,0.35);">
                                 {{ $info['label'] }}
                             </span>
                         </div>
@@ -130,9 +129,9 @@
                                 <div class="db-text-sub" style="font-size: 0.75rem; font-weight: 500;">Checker</div>
                                 <div class="db-tabular" style="font-size: 1rem; font-weight: 700; color: #d97706; margin-top: 0.125rem;">{{ $info['pending_checker'] }}</div>
                             </div>
-                            <div style="border-left: 1px solid #e2e8f0; border-right: 1px solid #e2e8f0;">
+                            <div style="border-left: 1px solid rgba(148,163,184,0.2); border-right: 1px solid rgba(148,163,184,0.2);">
                                 <div class="db-text-sub" style="font-size: 0.75rem; font-weight: 500;">Auth</div>
-                                <div class="db-tabular" style="font-size: 1rem; font-weight: 700; color: #1e3a5f; margin-top: 0.125rem;">{{ $info['pending_auth'] }}</div>
+                                <div class="db-tabular" style="font-size: 1rem; font-weight: 700; color: var(--color-signature-accent); margin-top: 0.125rem;">{{ $info['pending_auth'] }}</div>
                             </div>
                             <div>
                                 <div class="db-text-sub" style="font-size: 0.75rem; font-weight: 500;">Settled</div>
@@ -144,7 +143,7 @@
                     <div class="db-card" style="opacity: 0.6;">
                         <div class="db-flex-between" style="margin-bottom: 0.75rem;">
                             <span class="db-text-sub" style="font-size: 1rem; font-weight: 800;">{{ $channel }} Payment Mode</span>
-                            <span style="padding: 0.125rem 0.625rem; border-radius: 9999px; font-size: 0.625rem; font-weight: 700; text-transform: uppercase; background: #f1f5f9; color: #64748b; border: 1px solid #cbd5e1;">
+                            <span class="db-text-sub" style="padding: 0.125rem 0.625rem; border-radius: 9999px; font-size: 0.625rem; font-weight: 700; text-transform: uppercase; background: rgba(148,163,184,0.15); border: 1px solid rgba(148,163,184,0.3);">
                                 {{ $info['label'] }}
                             </span>
                         </div>
@@ -160,7 +159,7 @@
         <a href="/admin/bkash-failed-transactions" class="{{ $exceptions['is_clean'] ? 'db-card' : 'db-card-danger' }}" style="text-decoration: none;">
             <div class="db-flex-between">
                 <div class="db-flex-gap-3">
-                    <div style="padding: 0.5rem; border-radius: 0.75rem; {{ $exceptions['is_clean'] ? 'background: rgba(16,185,129,0.1); color: #059669;' : 'background: rgba(244,63,94,0.1); color: #e11d48;' }}">
+                    <div style="padding: 0.5rem; border-radius: 0.75rem; {{ $exceptions['is_clean'] ? 'background: rgba(16,185,129,0.15); color: #059669;' : 'background: rgba(244,63,94,0.15); color: #e11d48;' }}">
                         <x-filament::icon icon="heroicon-o-exclamation-triangle" class="w-5 h-5" />
                     </div>
                     <div>
@@ -172,7 +171,7 @@
                         </div>
                     </div>
                 </div>
-                <div style="font-size: 0.75rem; font-weight: 700; color: #1e3a5f;">
+                <div class="db-link-action" style="font-weight: 700;">
                     View Report →
                 </div>
             </div>
@@ -185,18 +184,18 @@
             <div class="db-card-hero">
                 <div class="db-flex-between" style="margin-bottom: 0.75rem; flex-wrap: wrap; gap: 0.5rem;">
                     <div>
-                        <h3 class="db-text-sub" style="font-size: 0.875rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; margin: 0; color: #1e3a5f;">TCSA live balance</h3>
+                        <h3 class="db-text-sub" style="font-size: 0.875rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; margin: 0; color: var(--color-signature-accent);">TCSA live balance</h3>
                         <p class="db-text-sub db-tabular" style="font-size: 0.75rem; font-weight: 500; margin: 0.125rem 0 0 0;">
                             {{ $balances['tcsa']['account'] }} · {{ $balances['tcsa']['label'] }}
                         </p>
                     </div>
-                    <span class="db-tabular" style="padding: 0.125rem 0.625rem; border-radius: 9999px; font-size: 0.625rem; font-weight: 700; background: rgba(30,58,95,0.08); color: #1e3a5f; border: 1px solid rgba(30,58,95,0.2);">
+                    <span class="db-tabular" style="padding: 0.125rem 0.625rem; border-radius: 9999px; font-size: 0.625rem; font-weight: 700; background: rgba(74,111,165,0.15); color: var(--color-signature-accent); border: 1px solid rgba(74,111,165,0.3);">
                         Value date: {{ $balances['tcsa']['value_date'] }}
                     </span>
                 </div>
 
                 <div style="margin-top: 1rem; margin-bottom: 0.5rem;">
-                    <div class="db-text-val db-tabular" style="font-size: 2.25rem; letter-spacing: -0.03em; color: #0f172a;">
+                    <div class="db-text-val db-tabular" style="font-size: 2.25rem; letter-spacing: -0.03em;">
                         BDT {{ \App\Models\BkashTransaction::formatBdtAmount($balances['tcsa']['balance']) }}
                     </div>
                 </div>
@@ -240,7 +239,7 @@
                     <div class="db-flex-gap-2 db-tabular">
                         <span>{{ $stmt['account'] }}:</span>
                         <span class="db-text-heading" style="font-weight: 600;">{{ $stmt['timestamp'] }}</span>
-                        <span style="padding: 0.125rem 0.5rem; border-radius: 0.25rem; font-size: 0.625rem; font-weight: 700; background: rgba(16,185,129,0.1); color: #059669; border: 1px solid rgba(16,185,129,0.3);">
+                        <span style="padding: 0.125rem 0.5rem; border-radius: 0.25rem; font-size: 0.625rem; font-weight: 700; background: rgba(16,185,129,0.15); color: #059669; border: 1px solid rgba(16,185,129,0.35);">
                             {{ $stmt['status'] }}
                         </span>
                     </div>
@@ -256,7 +255,7 @@
 
             <div style="display: flex; flex-direction: column;">
                 @foreach ($activities as $index => $act)
-                    <div class="db-flex-between" style="padding: 0.875rem 0; {{ $index > 0 ? 'border-top: 1px solid #e2e8f0;' : '' }}">
+                    <div class="db-flex-between" style="padding: 0.875rem 0; {{ $index > 0 ? 'border-top: 1px solid rgba(148,163,184,0.2);' : '' }}">
                         <div class="db-flex-gap-3">
                             <x-filament::icon :icon="$act['icon']" class="w-4 h-4 {{ $act['color'] }} flex-shrink-0" />
                             <span class="db-text-heading" style="font-size: 0.8125rem; font-weight: 500;">

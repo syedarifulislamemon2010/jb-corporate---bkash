@@ -15,6 +15,14 @@
         --color-signature-accent: #1E3A5F;
     }
 
+    html.dark, .dark {
+        --color-base-surface: #0B0F19;
+        --color-card-surface: #0F172A;
+        --color-primary-ink: #F8FAFC;
+        --color-secondary-ink: #94A3B8;
+        --color-signature-accent: #4A6FA5;
+    }
+
     body, button, input, select, textarea, .fi-body {
         font-family: var(--font-family-sans) !important;
         letter-spacing: -0.01em;
@@ -24,6 +32,12 @@
 
     .fi-main-ctn, main.fi-main {
         background-color: var(--color-base-surface) !important;
+    }
+    html.dark .fi-main-ctn,
+    html.dark main.fi-main,
+    .dark .fi-main-ctn,
+    .dark main.fi-main {
+        background-color: #0B0F19 !important;
     }
 
     /* ─── TABULAR NUMERAL ENGINE ─── */
@@ -144,6 +158,16 @@
         color: #64748b;
     }
 
+    .db-link-action {
+        color: var(--color-signature-accent);
+        font-size: 0.75rem;
+        font-weight: 600;
+        transition: opacity 0.15s ease;
+    }
+    .db-link-action:hover {
+        opacity: 0.85;
+    }
+
     .db-strip {
         background-color: #f8fafc;
         border: 1px solid #e2e8f0;
@@ -162,24 +186,52 @@
         }
     }
 
+    .db-btn-refresh {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 0.5rem 1rem;
+        font-size: 0.75rem;
+        font-weight: 700;
+        color: #334155;
+        background-color: #ffffff;
+        border: 1px solid #cbd5e1;
+        border-radius: 0.75rem;
+        cursor: pointer;
+        transition: all 0.15s ease;
+    }
+
     /* Dark Theme Overrides (html.dark) */
+    html.dark .db-card-hero {
+        background-color: #0f172a !important;
+        border-color: #1e293b !important;
+        border-left: 4px solid var(--color-signature-accent) !important;
+        box-shadow: 0 4px 20px -2px rgba(0, 0, 0, 0.4), 0 2px 6px -1px rgba(0, 0, 0, 0.2) !important;
+    }
+
     html.dark .db-card {
         background-color: #0f172a !important;
         border-color: #1e293b !important;
+        box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.2) !important;
+    }
+
+    html.dark .db-card-zero {
+        background-color: #0f172a !important;
+        border: 1px dashed #334155 !important;
     }
 
     html.dark .db-card-inner {
-        background-color: rgba(2, 6, 23, 0.4) !important;
-        border-color: rgba(30, 41, 59, 0.8) !important;
+        background-color: rgba(2, 6, 23, 0.5) !important;
+        border-color: #1e293b !important;
     }
 
     html.dark .db-card-warning {
-        background-color: rgba(15, 23, 42, 0.8) !important;
+        background-color: #0f172a !important;
         border-color: rgba(245, 158, 11, 0.4) !important;
     }
 
     html.dark .db-card-danger {
-        background-color: rgba(15, 23, 42, 0.8) !important;
+        background-color: #0f172a !important;
         border-color: rgba(244, 63, 94, 0.4) !important;
     }
 
@@ -190,11 +242,11 @@
     }
 
     html.dark .db-text-heading {
-        color: #ffffff !important;
+        color: #f8fafc !important;
     }
 
     html.dark .db-text-val {
-        color: #ffffff !important;
+        color: #f8fafc !important;
     }
 
     html.dark .db-text-sub {
@@ -202,9 +254,49 @@
     }
 
     html.dark .db-strip {
-        background-color: rgba(15, 23, 42, 0.6) !important;
+        background-color: #0f172a !important;
         border-color: #1e293b !important;
         color: #94a3b8 !important;
+    }
+
+    html.dark .db-btn-refresh {
+        background-color: #0f172a !important;
+        border-color: #334155 !important;
+        color: #e2e8f0 !important;
+    }
+
+    /* ─── Role Permission Matrix Section Badges ─── */
+    .shield-badge-neutral {
+        background: #f1f5f9;
+        color: #64748b;
+        border: 1px solid #cbd5e1;
+    }
+    html.dark .shield-badge-neutral {
+        background: rgba(148, 163, 184, 0.15) !important;
+        color: #94a3b8 !important;
+        border-color: rgba(148, 163, 184, 0.3) !important;
+    }
+
+    .shield-badge-info {
+        background: #e0f2fe;
+        color: #0369a1;
+        border: 1px solid #7dd3fc;
+    }
+    html.dark .shield-badge-info {
+        background: rgba(74, 111, 165, 0.25) !important;
+        color: #93c5fd !important;
+        border-color: rgba(74, 111, 165, 0.5) !important;
+    }
+
+    .shield-badge-success {
+        background: #d1fae5;
+        color: #047857;
+        border: 1px solid #34d399;
+    }
+    html.dark .shield-badge-success {
+        background: rgba(16, 185, 129, 0.2) !important;
+        color: #34d399 !important;
+        border-color: rgba(16, 185, 129, 0.4) !important;
     }
 
     .db-flex-between {

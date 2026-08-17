@@ -186,15 +186,15 @@ class RoleResource extends Resource
                 $count = is_array($state) ? count($state) : 0;
                 $total = count($entity['permissions']);
 
-                $badgeStyle = match (true) {
-                    $count === 0 => 'background: #f1f5f9; color: #64748b; border: 1px solid #cbd5e1;',
-                    $count >= $total => 'background: #d1fae5; color: #047857; border: 1px solid #34d399;',
-                    default => 'background: #e0f2fe; color: #0369a1; border: 1px solid #7dd3fc;',
+                $badgeClass = match (true) {
+                    $count === 0 => 'shield-badge-neutral',
+                    $count >= $total => 'shield-badge-success',
+                    default => 'shield-badge-info',
                 };
 
                 $badgeHtml = sprintf(
-                    '<span style="padding: 0.125rem 0.5rem; border-radius: 9999px; font-size: 0.75rem; font-weight: 700; margin-left: 0.5rem; display: inline-block; %s">%d/%d</span>',
-                    $badgeStyle,
+                    '<span class="%s" style="padding: 0.125rem 0.5rem; border-radius: 9999px; font-size: 0.75rem; font-weight: 700; margin-left: 0.5rem; display: inline-block;">%d/%d</span>',
+                    $badgeClass,
                     $count,
                     $total
                 );
