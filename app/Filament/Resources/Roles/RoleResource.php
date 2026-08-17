@@ -174,33 +174,35 @@ class RoleResource extends Resource
 
     public static function getCustomCardSectionForResource(array $entity): Section
     {
-        $sectionLabel = strval(
-            static::shield()->hasLocalizedPermissionLabels()
-                ? FilamentShield::getLocalizedResourceLabel($entity['resourceFqcn'])
-                : $entity['model']
-        );
+        return Section::make()
+            ->heading(function ($get) use ($entity): HtmlString {
+                $sectionLabel = strval(
+                    static::shield()->hasLocalizedPermissionLabels()
+                        ? FilamentShield::getLocalizedResourceLabel($entity['resourceFqcn'])
+                        : $entity['model']
+                );
 
-        return Section::make($sectionLabel)
+                $state = $get($entity['resourceFqcn']) ?? [];
+                $count = is_array($state) ? count($state) : 0;
+                $total = count($entity['permissions']);
+
+                $badgeStyle = match (true) {
+                    $count === 0 => 'background: #f1f5f9; color: #64748b; border: 1px solid #cbd5e1;',
+                    $count >= $total => 'background: #d1fae5; color: #047857; border: 1px solid #34d399;',
+                    default => 'background: #e0f2fe; color: #0369a1; border: 1px solid #7dd3fc;',
+                };
+
+                $badgeHtml = sprintf(
+                    '<span style="padding: 0.125rem 0.5rem; border-radius: 9999px; font-size: 0.75rem; font-weight: 700; margin-left: 0.5rem; display: inline-block; %s">%d/%d</span>',
+                    $badgeStyle,
+                    $count,
+                    $total
+                );
+
+                return new HtmlString('<span>' . e($sectionLabel) . '</span> ' . $badgeHtml);
+            })
             ->description(fn (): HtmlString => new HtmlString('<span style="word-break: break-word;">' . Utils::showModelPath($entity['modelFqcn']) . '</span>'))
             ->compact()
-            ->badge(function ($get) use ($entity): string {
-                $state = $get($entity['resourceFqcn']) ?? [];
-                $count = is_array($state) ? count($state) : 0;
-                $total = count($entity['permissions']);
-                return "{$count}/{$total}";
-            })
-            ->badgeColor(function ($get) use ($entity): string {
-                $state = $get($entity['resourceFqcn']) ?? [];
-                $count = is_array($state) ? count($state) : 0;
-                $total = count($entity['permissions']);
-                if ($count === 0) {
-                    return 'gray';
-                }
-                if ($count >= $total) {
-                    return 'success';
-                }
-                return 'info';
-            })
             ->schema([
                 static::getCustomCheckBoxListComponentForResource($entity),
             ])
