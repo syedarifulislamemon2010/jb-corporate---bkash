@@ -29,9 +29,11 @@ class BkashFailedTransactionResource extends Resource
     public static function table(Table $table): Table
     {
         return $table
+            ->defaultSort('created_at', 'desc')
             ->defaultPaginationPageOption(50)
             ->paginated([10, 20, 50, 100, 200])
             ->columns([
+                // 1. Continuous Serial Number
                 TextColumn::make('index')
                     ->label('#')
                     ->state(function (TextColumn $component, $record, Table $table): string {
@@ -45,47 +47,64 @@ class BkashFailedTransactionResource extends Resource
                     })
                     ->alignCenter(),
 
+                // 2. Failed At (Moved forward for operational relevance)
+                TextColumn::make('created_at')
+                    ->label('Failed At')
+                    ->dateTime('d M Y, h:i A')
+                    ->sortable(),
+
+                // 3. File Name
                 TextColumn::make('file_name')
                     ->label('File Name')
                     ->searchable()
                     ->sortable(),
 
+                // 4. Row No
                 TextColumn::make('row_number')
                     ->label('Row No')
                     ->alignRight()
                     ->sortable(),
 
-                TextColumn::make('transaction_type')
-                    ->label('Channel')
-                    ->badge(),
-
-                TextColumn::make('reference_id')
-                    ->label('Ref No')
+                // 5. Reason for Failure / Dormant — Native danger token
+                TextColumn::make('reject_reason')
+                    ->label('Reason for Failure / Dormant')
+                    ->wrap()
+                    ->badge()
+                    ->color('danger')
                     ->searchable(),
 
+                // 6. Channel
+                TextColumn::make('transaction_type')
+                    ->label('Channel')
+                    ->badge()
+                    ->color(fn (string $state): string => match ($state) {
+                        'A2A'   => 'success',
+                        'BEFTN' => 'warning',
+                        'RTGS'  => 'danger',
+                        default => 'gray',
+                    }),
+
+                // 7. Ref No
+                TextColumn::make('reference_id')
+                    ->label('Ref No')
+                    ->searchable()
+                    ->sortable(),
+
+                // 8. Debit Account
                 TextColumn::make('debit_account_no')
                     ->label('Debit Account')
                     ->searchable(),
 
+                // 9. Beneficiary Account
                 TextColumn::make('credit_account_no')
                     ->label('Beneficiary Account')
                     ->searchable(),
 
+                // 10. Amount (BDT)
                 TextColumn::make('amount')
                     ->label('Amount (BDT)')
                     ->formatStateUsing(fn ($state) => BkashTransaction::formatBdtAmount((float)$state))
                     ->alignRight()
-                    ->sortable(),
-
-                TextColumn::make('reject_reason')
-                    ->label('Reason for Failure / Dormant')
-                    ->wrap()
-                    ->color('danger')
-                    ->searchable(),
-
-                TextColumn::make('created_at')
-                    ->label('Failed At')
-                    ->dateTime('d M Y, h:i A')
                     ->sortable(),
             ])
             ->filters([
