@@ -240,6 +240,19 @@ class RoleResource extends Resource
     {
         return $table
             ->columns([
+                TextColumn::make('index')
+                    ->label('#')
+                    ->state(function (TextColumn $component, $record, Table $table): string {
+                        $paginator = $table->getRecords();
+                        if ($paginator instanceof \Illuminate\Contracts\Pagination\LengthAwarePaginator || $paginator instanceof \Illuminate\Contracts\Pagination\Paginator) {
+                            $offset = ($paginator->currentPage() - 1) * $paginator->perPage();
+                            $index = array_search($record->getKey(), $paginator->pluck($record->getKeyName())->toArray(), true);
+                            return (string) ($offset + ($index !== false ? $index + 1 : 1));
+                        }
+                        return '1';
+                    })
+                    ->alignCenter(),
+
                 TextColumn::make('name')
                     ->weight(FontWeight::Medium)
                     ->label(__('filament-shield::filament-shield.column.name'))
