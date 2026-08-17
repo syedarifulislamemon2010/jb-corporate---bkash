@@ -20,7 +20,7 @@
                 </h1>
                 <div class="db-flex-gap-2" style="padding: 0.25rem 0.75rem; border-radius: 9999px; font-size: 0.75rem; font-weight: 800; {{ $lastSynced['is_delayed'] ? 'background: #fee2e2; color: #991b1b; border: 1px solid #f87171;' : 'background: #d1fae5; color: #065f46; border: 1px solid #34d399;' }}">
                     <span style="width: 8px; height: 8px; border-radius: 50%; display: inline-block; {{ $lastSynced['is_delayed'] ? 'background-color: #dc2626;' : 'background-color: #10b981;' }}"></span>
-                    <span>Last synced: {{ $lastSynced['formatted'] }}</span>
+                    <span class="db-tabular">Last synced: {{ $lastSynced['formatted'] }}</span>
                 </div>
             </div>
 
@@ -42,7 +42,7 @@
                 </div>
                 <div style="flex: 1; min-width: 0;">
                     <p style="font-size: 0.95rem; font-weight: 700; margin: 0;">
-                        {{ $urgency['total'] }} {{ Str::plural('file', $urgency['total']) }} need your action today: {{ $urgency['pending_checker'] }} checker {{ Str::plural('verification', $urgency['pending_checker']) }}, {{ $urgency['pending_auth'] }} dual {{ Str::plural('approval', $urgency['pending_auth']) }}
+                        <span class="db-tabular">{{ $urgency['total'] }}</span> {{ Str::plural('file', $urgency['total']) }} need your action today: <span class="db-tabular">{{ $urgency['pending_checker'] }}</span> checker {{ Str::plural('verification', $urgency['pending_checker']) }}, <span class="db-tabular">{{ $urgency['pending_auth'] }}</span> dual {{ Str::plural('approval', $urgency['pending_auth']) }}
                     </p>
                     <p style="font-size: 0.75rem; opacity: 0.85; margin: 0.125rem 0 0 0;">
                         Please review and clear pending files to complete automated CBS settlement.
@@ -51,10 +51,10 @@
             </div>
         @endif
 
-        <!-- 3. ACTION ROW CARDS (File-level pending & Settled Today) -->
+        <!-- 3. ACTION ROW CARDS (Tier 2 Action-Required & Tier 3/Zero-State) -->
         <div class="db-grid-3">
 
-            <!-- Card 1: Pending Checker -->
+            <!-- Card 1: Pending Checker (Tier 2 Action Required) -->
             <a href="{{ $actionStats['pending_checker']['url'] }}" class="db-card-warning">
                 <div class="db-flex-between">
                     <div class="db-flex-gap-2" style="color: #d97706;">
@@ -63,16 +63,16 @@
                     </div>
                 </div>
                 <div style="margin-top: 0.75rem;">
-                    <div class="db-text-val">
+                    <div class="db-text-val db-tabular">
                         {{ $actionStats['pending_checker']['files'] }}
                     </div>
-                    <div style="margin-top: 0.5rem; font-size: 0.75rem; font-weight: 600; color: #0284c7;">
+                    <div style="margin-top: 0.5rem; font-size: 0.75rem; font-weight: 600; color: #1e3a5f;">
                         Awaiting verification →
                     </div>
                 </div>
             </a>
 
-            <!-- Card 2: Pending Authorization -->
+            <!-- Card 2: Pending Authorization (Tier 2 Action Required) -->
             <a href="{{ $actionStats['pending_auth']['url'] }}" class="db-card-warning">
                 <div class="db-flex-between">
                     <div class="db-flex-gap-2" style="color: #d97706;">
@@ -81,17 +81,17 @@
                     </div>
                 </div>
                 <div style="margin-top: 0.75rem;">
-                    <div class="db-text-val">
+                    <div class="db-text-val db-tabular">
                         {{ $actionStats['pending_auth']['files'] }}
                     </div>
-                    <div style="margin-top: 0.5rem; font-size: 0.75rem; font-weight: 600; color: #0284c7;">
+                    <div style="margin-top: 0.5rem; font-size: 0.75rem; font-weight: 600; color: #1e3a5f;">
                         Dual approval (auth 1 and 2) →
                     </div>
                 </div>
             </a>
 
-            <!-- Card 3: Settled Today -->
-            <div class="db-card">
+            <!-- Card 3: Settled Today (Tier 3 with Zero-State treatment if 0) -->
+            <div class="{{ $actionStats['settled_today']['amount'] > 0 ? 'db-card' : 'db-card-zero' }}">
                 <div class="db-flex-between">
                     <div class="db-flex-gap-2" style="color: #059669;">
                         <x-filament::icon icon="heroicon-o-check-circle" class="w-5 h-5 text-emerald-500" />
@@ -99,12 +99,12 @@
                     </div>
                 </div>
                 <div style="margin-top: 0.75rem;">
-                    <div class="db-text-val">
+                    <div class="db-text-val db-tabular">
                         BDT {{ \App\Models\BkashTransaction::formatBdtAmount($actionStats['settled_today']['amount']) }}
                     </div>
                     <div class="db-text-sub" style="margin-top: 0.375rem; font-size: 0.75rem; font-weight: 500;">
                         @if ($actionStats['settled_today']['count'] > 0)
-                            {{ $actionStats['settled_today']['count'] }} {{ Str::plural('transaction', $actionStats['settled_today']['count']) }} settled today
+                            <span class="db-tabular">{{ $actionStats['settled_today']['count'] }}</span> {{ Str::plural('transaction', $actionStats['settled_today']['count']) }} settled today
                         @else
                             No transactions processed yet
                         @endif
@@ -114,7 +114,7 @@
 
         </div>
 
-        <!-- 4. PHASED ROLLOUT CHANNEL ROW (A2A / BEFTN / RTGS) -->
+        <!-- 4. PHASED ROLLOUT CHANNEL ROW (Tier 3 Informational) -->
         <div class="db-grid-3">
             @foreach ($channelStats as $channel => $info)
                 @if ($info['is_live'])
@@ -128,15 +128,15 @@
                         <div class="db-card-inner" style="display: grid; grid-template-columns: repeat(3, 1fr); text-align: center; padding: 0.5rem 0; border-radius: 0.75rem;">
                             <div>
                                 <div class="db-text-sub" style="font-size: 0.75rem; font-weight: 500;">Checker</div>
-                                <div style="font-size: 1rem; font-weight: 700; color: #d97706; margin-top: 0.125rem;">{{ $info['pending_checker'] }}</div>
+                                <div class="db-tabular" style="font-size: 1rem; font-weight: 700; color: #d97706; margin-top: 0.125rem;">{{ $info['pending_checker'] }}</div>
                             </div>
                             <div style="border-left: 1px solid #e2e8f0; border-right: 1px solid #e2e8f0;">
                                 <div class="db-text-sub" style="font-size: 0.75rem; font-weight: 500;">Auth</div>
-                                <div style="font-size: 1rem; font-weight: 700; color: #0284c7; margin-top: 0.125rem;">{{ $info['pending_auth'] }}</div>
+                                <div class="db-tabular" style="font-size: 1rem; font-weight: 700; color: #1e3a5f; margin-top: 0.125rem;">{{ $info['pending_auth'] }}</div>
                             </div>
                             <div>
                                 <div class="db-text-sub" style="font-size: 0.75rem; font-weight: 500;">Settled</div>
-                                <div style="font-size: 1rem; font-weight: 700; color: #059669; margin-top: 0.125rem;">{{ $info['settled_today'] }}</div>
+                                <div class="db-tabular" style="font-size: 1rem; font-weight: 700; color: #059669; margin-top: 0.125rem;">{{ $info['settled_today'] }}</div>
                             </div>
                         </div>
                     </div>
@@ -156,7 +156,7 @@
             @endforeach
         </div>
 
-        <!-- 5. EXCEPTIONS ROW (Failed / Partial Transactions) -->
+        <!-- 5. EXCEPTIONS ROW (Tier 3 Informational) -->
         <a href="/admin/bkash-failed-transactions" class="{{ $exceptions['is_clean'] ? 'db-card' : 'db-card-danger' }}" style="text-decoration: none;">
             <div class="db-flex-between">
                 <div class="db-flex-gap-3">
@@ -167,36 +167,36 @@
                         <div class="db-text-sub" style="font-size: 0.75rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em;">
                             Failed / Partial Transactions Today
                         </div>
-                        <div class="db-text-heading" style="font-size: 0.875rem; font-weight: 600; margin-top: 0.125rem;">
+                        <div class="db-text-heading db-tabular" style="font-size: 0.875rem; font-weight: 600; margin-top: 0.125rem;">
                             {{ $exceptions['description'] }}
                         </div>
                     </div>
                 </div>
-                <div style="font-size: 0.75rem; font-weight: 700; color: #0284c7;">
+                <div style="font-size: 0.75rem; font-weight: 700; color: #1e3a5f;">
                     View Report →
                 </div>
             </div>
         </a>
 
-        <!-- 6. BALANCE ROW (TCSA + Operational Accounts) -->
+        <!-- 6. BALANCE ROW (Tier 1 Hero TCSA + Tier 3 Operational Balance) -->
         <div class="db-grid-2-1">
 
-            <!-- TCSA Live Balance Card (2 Cols) -->
-            <div class="db-card" style="position: relative; overflow: hidden;">
+            <!-- TCSA Live Balance Card (TIER 1: SIGNATURE HERO CARD) -->
+            <div class="db-card-hero">
                 <div class="db-flex-between" style="margin-bottom: 0.75rem; flex-wrap: wrap; gap: 0.5rem;">
                     <div>
-                        <h3 class="db-text-sub" style="font-size: 0.875rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; margin: 0;">TCSA live balance</h3>
-                        <p class="db-text-sub" style="font-size: 0.75rem; font-weight: 500; margin: 0.125rem 0 0 0;">
+                        <h3 class="db-text-sub" style="font-size: 0.875rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; margin: 0; color: #1e3a5f;">TCSA live balance</h3>
+                        <p class="db-text-sub db-tabular" style="font-size: 0.75rem; font-weight: 500; margin: 0.125rem 0 0 0;">
                             {{ $balances['tcsa']['account'] }} · {{ $balances['tcsa']['label'] }}
                         </p>
                     </div>
-                    <span style="padding: 0.125rem 0.625rem; border-radius: 9999px; font-size: 0.625rem; font-weight: 700; background: rgba(56,189,248,0.1); color: #0284c7; border: 1px solid rgba(56,189,248,0.3);">
+                    <span class="db-tabular" style="padding: 0.125rem 0.625rem; border-radius: 9999px; font-size: 0.625rem; font-weight: 700; background: rgba(30,58,95,0.08); color: #1e3a5f; border: 1px solid rgba(30,58,95,0.2);">
                         Value date: {{ $balances['tcsa']['value_date'] }}
                     </span>
                 </div>
 
                 <div style="margin-top: 1rem; margin-bottom: 0.5rem;">
-                    <div class="db-text-val" style="font-size: 2rem; letter-spacing: -0.025em;">
+                    <div class="db-text-val db-tabular" style="font-size: 2.25rem; letter-spacing: -0.03em; color: #0f172a;">
                         BDT {{ \App\Models\BkashTransaction::formatBdtAmount($balances['tcsa']['balance']) }}
                     </div>
                 </div>
@@ -209,19 +209,19 @@
                 </div>
             </div>
 
-            <!-- Operational Balance Card (1 Col) -->
+            <!-- Operational Balance Card (Tier 3 Informational) -->
             <div class="db-card" style="display: flex; flex-direction: column; justify-content: space-between;">
                 <div>
                     <h3 class="db-text-sub" style="font-size: 0.875rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; margin: 0;">Operational balance</h3>
-                    <p class="db-text-sub" style="font-size: 0.75rem; font-weight: 500; margin: 0.125rem 0 0 0;">
+                    <p class="db-text-sub db-tabular" style="font-size: 0.75rem; font-weight: 500; margin: 0.125rem 0 0 0;">
                         {{ $balances['ops']['account'] }}
                     </p>
-                    <div class="db-text-val" style="margin-top: 1.25rem; font-size: 1.75rem; letter-spacing: -0.025em;">
+                    <div class="db-text-val db-tabular" style="margin-top: 1.25rem; font-size: 1.75rem; letter-spacing: -0.025em;">
                         BDT {{ \App\Models\BkashTransaction::formatBdtAmount($balances['ops']['balance']) }}
                     </div>
                 </div>
 
-                <div class="db-flex-gap-2" style="margin-top: 1.5rem; font-size: 0.75rem; font-weight: 700; color: #059669;">
+                <div class="db-flex-gap-2 db-tabular" style="margin-top: 1.5rem; font-size: 0.75rem; font-weight: 700; color: #059669;">
                     <x-filament::icon icon="heroicon-m-arrow-trending-up" class="w-4 h-4 text-emerald-600" />
                     <span>↗ {{ $balances['ops']['change_pct'] }}% vs yesterday</span>
                 </div>
@@ -229,15 +229,15 @@
 
         </div>
 
-        <!-- 7. MT940 STATEMENT STATUS STRIP -->
+        <!-- 7. MT940 STATEMENT STATUS STRIP (Tier 3 Informational) -->
         <div class="db-strip">
             <div class="db-flex-gap-2" style="font-weight: 700;">
-                <x-filament::icon icon="heroicon-o-document-text" class="w-4 h-4 text-sky-500" />
+                <x-filament::icon icon="heroicon-o-document-text" class="w-4 h-4 text-sky-600" />
                 <span>MT940 SFTP Delivery Status:</span>
             </div>
             <div style="display: flex; flex-wrap: wrap; align-items: center; gap: 1rem; font-size: 0.75rem;">
                 @foreach ($mt940 as $stmt)
-                    <div class="db-flex-gap-2">
+                    <div class="db-flex-gap-2 db-tabular">
                         <span>{{ $stmt['account'] }}:</span>
                         <span class="db-text-heading" style="font-weight: 600;">{{ $stmt['timestamp'] }}</span>
                         <span style="padding: 0.125rem 0.5rem; border-radius: 0.25rem; font-size: 0.625rem; font-weight: 700; background: rgba(16,185,129,0.1); color: #059669; border: 1px solid rgba(16,185,129,0.3);">
@@ -248,7 +248,7 @@
             </div>
         </div>
 
-        <!-- 8. RECENT ACTIVITY FEED (4-Stage Notification Vocabulary) -->
+        <!-- 8. RECENT ACTIVITY FEED (Tier 3 Informational with Tabular Timestamps) -->
         <div class="db-card">
             <h3 class="db-text-sub" style="font-size: 0.875rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; margin: 0 0 1rem 0;">
                 Recent activity
@@ -263,7 +263,7 @@
                                 {{ $act['title'] }}
                             </span>
                         </div>
-                        <span class="db-text-sub" style="font-size: 0.75rem; font-weight: 600; white-space: nowrap;">
+                        <span class="db-text-sub db-tabular" style="font-size: 0.75rem; font-weight: 600; white-space: nowrap;">
                             {{ $act['time'] }}
                         </span>
                     </div>

@@ -4,10 +4,15 @@
 <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 
 <style>
-    /* ===== JANATA BANK CORPORATE PORTAL — ALL-IN-ONE FINTECH ENGINE ===== */
+    /* ===== JANATA BANK CORPORATE PORTAL — VISUAL DESIGN TOKEN SYSTEM ===== */
 
     :root {
         --font-family-sans: 'Plus Jakarta Sans', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+        --color-base-surface: #F8FAFC;
+        --color-card-surface: #FFFFFF;
+        --color-primary-ink: #0F172A;
+        --color-secondary-ink: #64748B;
+        --color-signature-accent: #1E3A5F;
     }
 
     body, button, input, select, textarea, .fi-body {
@@ -17,7 +22,17 @@
         -moz-osx-font-smoothing: grayscale;
     }
 
-    /* ─── DASHBOARD LAYOUT & CARD ENGINE (Theme-Aware: Light/Dark) ─── */
+    .fi-main-ctn, main.fi-main {
+        background-color: var(--color-base-surface) !important;
+    }
+
+    /* ─── TABULAR NUMERAL ENGINE ─── */
+    .db-text-val, .db-tabular, .db-stat-num, [data-tabular-num] {
+        font-variant-numeric: tabular-nums !important;
+        font-feature-settings: "tnum" 1 !important;
+    }
+
+    /* ─── DASHBOARD LAYOUT & CARD ENGINE ─── */
     .db-grid-3 {
         display: grid;
         grid-template-columns: repeat(1, minmax(0, 1fr));
@@ -40,32 +55,57 @@
         }
     }
 
-    /* Light Theme (Default) */
+    /* ─── 3-TIER ELEVATION HIERARCHY ─── */
+
+    /* TIER 1: SIGNATURE HERO CARD (TCSA Live Balance) */
+    .db-card-hero {
+        background-color: #ffffff;
+        border: 1px solid #e2e8f0;
+        border-left: 4px solid var(--color-signature-accent) !important;
+        border-radius: 1rem;
+        padding: 1.5rem;
+        box-shadow: 0 4px 20px -2px rgba(15, 23, 42, 0.08), 0 2px 6px -1px rgba(15, 23, 42, 0.04);
+        position: relative;
+        overflow: hidden;
+    }
+
+    /* TIER 2: ACTION REQUIRED (Pending Checker / Auth) */
+    .db-card-warning {
+        background-color: #ffffff;
+        border: 1px solid rgba(217, 119, 6, 0.45);
+        border-radius: 1rem;
+        padding: 1.25rem;
+        box-shadow: 0 1px 3px 0 rgba(15, 23, 42, 0.03);
+        transition: box-shadow 0.15s ease, border-color 0.15s ease;
+        display: block;
+        text-decoration: none;
+    }
+    .db-card-warning:hover {
+        border-color: rgba(217, 119, 6, 0.8);
+        box-shadow: 0 4px 14px rgba(217, 119, 6, 0.08);
+    }
+
+    /* TIER 3: BASELINE INFORMATIONAL (Quiet) */
     .db-card {
         background-color: #ffffff;
         border: 1px solid #e2e8f0;
         border-radius: 1rem;
         padding: 1.25rem;
-        box-shadow: 0 1px 3px 0 rgba(15, 23, 42, 0.03);
+        box-shadow: 0 1px 2px 0 rgba(15, 23, 42, 0.03);
+    }
+
+    /* ZERO-STATE DASHED CARD */
+    .db-card-zero {
+        background-color: #ffffff;
+        border: 1px dashed #cbd5e1 !important;
+        border-radius: 1rem;
+        padding: 1.25rem;
+        box-shadow: none !important;
     }
 
     .db-card-inner {
         background-color: #f8fafc;
         border: 1px solid #e2e8f0;
-    }
-
-    .db-card-warning {
-        background-color: #ffffff;
-        border: 1px solid rgba(245, 158, 11, 0.5);
-        border-radius: 1rem;
-        padding: 1.25rem;
-        transition: all 0.2s ease;
-        display: block;
-        text-decoration: none;
-    }
-    .db-card-warning:hover {
-        border-color: rgba(245, 158, 11, 0.9);
-        box-shadow: 0 4px 12px rgba(245, 158, 11, 0.08);
     }
 
     .db-card-danger {
@@ -97,6 +137,7 @@
         line-height: 2.25rem;
         font-weight: 800;
         color: #0f172a;
+        font-variant-numeric: tabular-nums !important;
     }
 
     .db-text-sub {
