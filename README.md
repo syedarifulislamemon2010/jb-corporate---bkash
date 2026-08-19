@@ -22,26 +22,69 @@ A state-of-the-art, enterprise-grade automated payment settlement portal enginee
 
 ---
 
-## 🔌 2. CBS / BEFTN / RTGS / A2A API Integration Architecture
+## 🔌 2. CBS / BEFTN / RTGS / A2A API Architecture
 
 The portal features an automated **`CbsApiService`** client that interfaces with the Bank's Host-to-Host clearing server at `http://172.18.18.64`:
 
+### Complete End-to-End Architectural Flow
+
 ```mermaid
 flowchart TD
-    A[Authorizer Approves in Portal] --> B[ExecuteCbsSettlementJob]
-    B --> C[CbsApiService]
-    C -->|Authenticate| D[POST /api/login]
-    D -->|JWT Bearer Token| C
-    C -->|Channel: BEFTN/RTGS| E[POST /api/bkash-transactions]
-    C -->|Channel: A2A Probashi| F[POST /api/probashi-card-info]
-    E & F -->|200 OK Response| G[Status 1004: CBS / BACH Settled]
-    E & F -->|Failure / Timeout| H[Log in posting_attempts & Alert]
+    subgraph UI ["1. Portal Frontend (Filament Admin)"]
+        A["2nd Authorizer Reviews Batch"] --> B["Click 'Final Authorize Selected (Instantly Settle)'"]
+    end
+
+    subgraph Controller ["2. Controller & Table Action"]
+        B --> C["BkashTransactionConfirmationsTable.php"]
+        C --> D["Update Status: 1003 (Final Authorized)"]
+        C --> E["NotificationService: Stage 4 Alert"]
+        C --> F["ExecuteCbsSettlementJob::dispatchSync()"]
+    end
+
+    subgraph Service ["3. CBS Service Layer (CbsApiService.php)"]
+        F --> G["Check / Refresh JWT Bearer Token in Cache"]
+        G -->|Token Expired / Missing| H["POST /api/login (User: API)"]
+        H -->|Bearer Token Received| I["Cache Token for 50 Minutes"]
+        G -->|Valid Token Found| I
+        I --> J{"Identify Channel"}
+        J -->|BEFTN or RTGS| K["Map Payload for /api/bkash-transactions"]
+        J -->|A2A / Probashi| L["Map Payload for /api/probashi-card-info"]
+    end
+
+    subgraph BankServer ["4. Janata Bank CBS Server (172.18.18.64)"]
+        K -->|HTTP POST + Bearer Token| M["BEFTN/RTGS Core Gateway"]
+        L -->|HTTP POST + Bearer Token| N["A2A Probashi Card Gateway"]
+        M & N -->|HTTP 200 OK + responseId| O["Transaction Generated Successfully"]
+    end
+
+    subgraph Database ["5. Ledger & Audit Persistence"]
+        O --> P["Update bkash_transactions -> Status 1004 (CBS / BACH Settled)"]
+        O --> Q["Record responseId & payload in posting_attempts table"]
+        P --> R["Real-time Reflection on Dashboard & EFT Reports Table"]
+    end
 ```
+
+---
+
+### Exact Field Mapping Matrix (Postman Spec vs System Architecture)
+
+| Postman Field | Database Column | Service Mapping (`CbsApiService.php`) | Description |
+| :--- | :--- | :--- | :--- |
+| `uniqueId` | `txn_id` / `reference_id` | `(string) ($txn->txn_id ?: $txn->reference_id)` | Unique global transaction identifier |
+| `debitAccount` | `credit_account_no` | `(string) $txn->credit_account_no` | bKash TCSA (`0100202707747`) / Ops Account (`0100224107522`) |
+| `creditAccount` | `debit_account_no` | `(string) $txn->debit_account_no` | Beneficiary bank account number |
+| `creditAccountTitle` | `debit_account_title` | `(string) $txn->debit_account_title` | Beneficiary account title |
+| `creditRoutingNo` | `debit_routing` | `(string) ($txn->debit_routing ?: $txn->credit_routing)` | Beneficiary bank 9-digit routing number |
+| `amount` | `amount` | `(float) $txn->amount` | Monetary value in BDT |
+| `remarks` | — | `"bKash {$txn->transaction_type} Settlement - Ref: {$txn->reference_id}"` | Transaction narrative description |
+| `type` | `transaction_type` | `2` for BEFTN, `3` for RTGS | API channel routing code |
+
+---
 
 ### API Endpoints Reference
 
 #### 1. Authentication (`POST /api/login`)
-- **URL**: `http://172.18.18.64/api/login`
+- **Endpoint**: `http://172.18.18.64/api/login`
 - **Request Body**:
   ```json
   {
@@ -49,10 +92,10 @@ flowchart TD
       "password": "Admin@123"
   }
   ```
-- **Response**: Returns JWT Bearer token cached for 50 minutes.
+- **Response**: Returns JWT Bearer token cached in Redis/File cache for 50 minutes.
 
 #### 2. BEFTN & RTGS Settlement (`POST /api/bkash-transactions`)
-- **URL**: `http://172.18.18.64/api/bkash-transactions`
+- **Endpoint**: `http://172.18.18.64/api/bkash-transactions`
 - **Headers**: `Authorization: Bearer {token}`
 - **Request Payload**:
   ```json
@@ -62,15 +105,23 @@ flowchart TD
       "creditAccount": "4512442413566",
       "creditAccountTitle": "ABSUR HOSSAIN",
       "creditRoutingNo": "315260856",
-      "amount": 500,
+      "amount": 500.00,
       "remarks": "bKash BEFTN Settlement - Ref: RM41107",
       "type": 2
   }
   ```
-  *(Note: `type = 2` for BEFTN, `type = 3` for RTGS)*
+- **Response Example**:
+  ```json
+  {
+      "responseCode": 200,
+      "message": "Transaction Generated Successfully!",
+      "uniqueId": "BKS20260819001",
+      "responseId": "B13526231A112463"
+  }
+  ```
 
 #### 3. A2A / Probashi Card Transfer (`POST /api/probashi-card-info`)
-- **URL**: `http://172.18.18.64/api/probashi-card-info`
+- **Endpoint**: `http://172.18.18.64/api/probashi-card-info`
 - **Headers**: `Authorization: Bearer {token}`
 - **Request Payload**:
   ```json
@@ -88,6 +139,18 @@ flowchart TD
       "qr_image": "/9j/4AAQ..."
   }
   ```
+
+---
+
+### Instant CLI Connectivity Test Command
+
+Run the dedicated built-in tester to verify API connectivity and response from the terminal:
+
+```bash
+php artisan cbs:test-api
+```
+
+*(For login authentication check only: `php artisan cbs:test-api --dry-run`)*
 
 ---
 
