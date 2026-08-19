@@ -1,7 +1,7 @@
 # Janata Bank Corporate Payment Portal
 ## Enterprise bKash Automated Host-to-Host (H2H) Payment Settlement System
 
-A state-of-the-art, enterprise-grade automated payment settlement portal engineered for **Janata Bank PLC.** to ingest, validate, dual-authorize, and execute instant Host-to-Host (H2H) settlements for **bKash Limited** across **Account to Account (A2A)**, **BEFTN**, and **RTGS** channels.
+An enterprise-grade automated payment settlement portal engineered for **Janata Bank PLC.** to ingest, validate, dual-authorize, and execute instant Host-to-Host (H2H) settlements for **bKash Limited** across **Account to Account (A2A)**, **BEFTN**, and **RTGS** channels.
 
 ---
 
@@ -10,7 +10,7 @@ A state-of-the-art, enterprise-grade automated payment settlement portal enginee
 | Requirement Dimension | Business Specification | Architectural Implementation |
 | :--- | :--- | :--- |
 | **Phase-by-Phase H2H Rollout** | Phase 1: A2A (7 days/week) $\rightarrow$ Phase 2: BEFTN $\rightarrow$ Phase 3: RTGS | Configurable channel pipelines with dynamic tabs and dedicated validation rules |
-| **SFTP 15-Min File Ingestion** | Fetch instruction files every 15 minutes, 7 days a week from 3 folders | Automated `sftp:fetch-bkash-files` cron job scanning `/Account-to-Account`, `/BEFTN`, `/RTGS` |
+| **SFTP 15-Min File Ingestion** | Fetch instruction files every 15 minutes, 7 days a week from designated source folders | Automated `sftp:fetch-bkash-files` cron job scanning `/Account-to-Account`, `/BEFTN`, `/RTGS` |
 | **Dual Source File Formats** | Multi-Bank Tool (`.xls`) and Oracle ERP (`.xlsx`) | Cell-by-cell string preservation via `PhpSpreadsheet` & `IOFactory` parser |
 | **Value Date & Holiday Processing** | Accurate calendar/value date visibility for post-banking hours & holiday runs | Database `value_date` column tracking execution vs settlement dates |
 | **MT940 SWIFT Statements** | SWIFT MT940 statement delivery to SFTP for TCSA & Ops accounts | `Mt940GeneratorService` generating `:20:`, `:25:`, `:28C:`, `:60F:`, `:61:`, `:86:`, `:62F:` formatted `.sta` files |
@@ -24,9 +24,9 @@ A state-of-the-art, enterprise-grade automated payment settlement portal enginee
 
 ## 🔌 2. CBS / BEFTN / RTGS / A2A API Architecture
 
-The portal features an automated **`CbsApiService`** client that interfaces with the Bank's Host-to-Host clearing server at `http://172.18.18.64`:
+The portal features an automated **`CbsApiService`** client that interfaces with the Bank's Host-to-Host clearing server:
 
-### Complete End-to-End Architectural Flow
+### Architectural Workflow
 
 ```mermaid
 flowchart TD
@@ -43,7 +43,7 @@ flowchart TD
 
     subgraph Service ["3. CBS Service Layer (CbsApiService.php)"]
         F --> G["Check / Refresh JWT Bearer Token in Cache"]
-        G -->|Token Expired / Missing| H["POST /api/login (User: API)"]
+        G -->|Token Expired / Missing| H["POST /api/login"]
         H -->|Bearer Token Received| I["Cache Token for 50 Minutes"]
         G -->|Valid Token Found| I
         I --> J{"Identify Channel"}
@@ -51,7 +51,7 @@ flowchart TD
         J -->|A2A / Probashi| L["Map Payload for /api/probashi-card-info"]
     end
 
-    subgraph BankServer ["4. Janata Bank CBS Server (172.18.18.64)"]
+    subgraph BankServer ["4. Janata Bank CBS Clearing Server"]
         K -->|HTTP POST + Bearer Token| M["BEFTN/RTGS Core Gateway"]
         L -->|HTTP POST + Bearer Token| N["A2A Probashi Card Gateway"]
         M & N -->|HTTP 200 OK + responseId| O["Transaction Generated Successfully"]
@@ -60,18 +60,18 @@ flowchart TD
     subgraph Database ["5. Ledger & Audit Persistence"]
         O --> P["Update bkash_transactions -> Status 1004 (CBS / BACH Settled)"]
         O --> Q["Record responseId & payload in posting_attempts table"]
-        P --> R["Real-time Reflection on Dashboard & EFT Reports Table"]
+        P --> R["Real-time Reflection on Dashboard & Reports Table"]
     end
 ```
 
 ---
 
-### Exact Field Mapping Matrix (Postman Spec vs System Architecture)
+### Field Mapping Matrix
 
 | Postman Field | Database Column | Service Mapping (`CbsApiService.php`) | Description |
 | :--- | :--- | :--- | :--- |
 | `uniqueId` | `txn_id` / `reference_id` | `(string) ($txn->txn_id ?: $txn->reference_id)` | Unique global transaction identifier |
-| `debitAccount` | `credit_account_no` | `(string) $txn->credit_account_no` | bKash TCSA (`0100202707747`) / Ops Account (`0100224107522`) |
+| `debitAccount` | `credit_account_no` | `(string) $txn->credit_account_no` | bKash TCSA / Ops Account |
 | `creditAccount` | `debit_account_no` | `(string) $txn->debit_account_no` | Beneficiary bank account number |
 | `creditAccountTitle` | `debit_account_title` | `(string) $txn->debit_account_title` | Beneficiary account title |
 | `creditRoutingNo` | `debit_routing` | `(string) ($txn->debit_routing ?: $txn->credit_routing)` | Beneficiary bank 9-digit routing number |
@@ -84,27 +84,27 @@ flowchart TD
 ### API Endpoints Reference
 
 #### 1. Authentication (`POST /api/login`)
-- **Endpoint**: `http://172.18.18.64/api/login`
+- **Endpoint**: `{BASE_URL}/api/login`
 - **Request Body**:
   ```json
   {
-      "username": "API",
-      "password": "Admin@123"
+      "username": "<API_USERNAME>",
+      "password": "<API_PASSWORD>"
   }
   ```
-- **Response**: Returns JWT Bearer token cached in Redis/File cache for 50 minutes.
+- **Response**: Returns JWT Bearer token cached in cache store for 50 minutes.
 
 #### 2. BEFTN & RTGS Settlement (`POST /api/bkash-transactions`)
-- **Endpoint**: `http://172.18.18.64/api/bkash-transactions`
+- **Endpoint**: `{BASE_URL}/api/bkash-transactions`
 - **Headers**: `Authorization: Bearer {token}`
 - **Request Payload**:
   ```json
   {
-      "uniqueId": "BKS20260819001",
-      "debitAccount": "0100202707747",
-      "creditAccount": "4512442413566",
-      "creditAccountTitle": "ABSUR HOSSAIN",
-      "creditRoutingNo": "315260856",
+      "uniqueId": "BKS2026XXXXXXXX",
+      "debitAccount": "0100XXXXXXXXX",
+      "creditAccount": "4512XXXXXXXXX",
+      "creditAccountTitle": "BENEFICIARY_ACCOUNT_TITLE",
+      "creditRoutingNo": "315XXXXXX",
       "amount": 500.00,
       "remarks": "bKash BEFTN Settlement - Ref: RM41107",
       "type": 2
@@ -115,42 +115,42 @@ flowchart TD
   {
       "responseCode": 200,
       "message": "Transaction Generated Successfully!",
-      "uniqueId": "BKS20260819001",
-      "responseId": "B13526231A112463"
+      "uniqueId": "BKS2026XXXXXXXX",
+      "responseId": "B135XXXXXXXXXXXX"
   }
   ```
 
 #### 3. A2A / Probashi Card Transfer (`POST /api/probashi-card-info`)
-- **Endpoint**: `http://172.18.18.64/api/probashi-card-info`
+- **Endpoint**: `{BASE_URL}/api/probashi-card-info`
 - **Headers**: `Authorization: Bearer {token}`
 - **Request Payload**:
   ```json
   {
-      "bmet_id": "BMET20260802001",
-      "account_no": "0100229766842",
-      "card_title": "G S KIBRIA",
-      "visa_number": "EA1204512",
-      "visa_issue_date": "2025-01-01",
+      "bmet_id": "BMET2026XXXXXXXX",
+      "account_no": "0100XXXXXXXXX",
+      "card_title": "CARD_HOLDER_NAME",
+      "visa_number": "EAXXXXXXXX",
+      "visa_issue_date": "YYYY-MM-DD",
       "visa_issue_place": "DHAKA",
-      "passport_number": "5214512344",
-      "recruiting_licence_no": "112233",
+      "passport_number": "XXXXXXXXXX",
+      "recruiting_licence_no": "XXXXXX",
       "destination_country": "USA",
-      "customer_image": "/9j/4AAQ...",
-      "qr_image": "/9j/4AAQ..."
+      "customer_image": "<BASE64_IMAGE>",
+      "qr_image": "<BASE64_IMAGE>"
   }
   ```
 
 ---
 
-### Instant CLI Connectivity Test Command
+### CLI Connectivity Tester
 
-Run the dedicated built-in tester to verify API connectivity and response from the terminal:
+Run the built-in command to verify API connectivity from the terminal:
 
 ```bash
 php artisan cbs:test-api
 ```
 
-*(For login authentication check only: `php artisan cbs:test-api --dry-run`)*
+*(For login check only: `php artisan cbs:test-api --dry-run`)*
 
 ---
 
@@ -160,14 +160,14 @@ php artisan cbs:test-api
    - **A2A**: `JANATA_BANK_YYYY_MM_DD_xSloty.xlsx`
    - **BEFTN**: `BEFTN_JANATA_BANK_YYYY_MM_DD_xSloty.xlsx`
    - **RTGS**: `RTGS_JANATA_BANK_YYYY_MM_DD_xSloty.xlsx` *(where x, y are integer slot numbers)*
-2. **Single Debit Account Rule**: Every single transaction inside a file must originate from the exact same debit account (`credit_account_no`), which must strictly belong to either bKash **Trust Cum Settlement Account (`0100202707747`)** or **Operational Account (`0100224107522`)**.
+2. **Single Debit Account Rule**: Every single transaction inside a file must originate from the exact same debit account (`credit_account_no`), which must strictly belong to either bKash **Trust Cum Settlement Account** or **Operational Account**.
 3. **Global `txn_id` Uniqueness**: Cross-checks `txn_id` against the historical ledger while explicitly allowing duplicate accounts inside a single file.
 4. **RTGS Threshold Enforcement**: Mandatory rule requiring `amount >= 100,000 BDT` for RTGS transactions.
 5. **Partial Processing Protocol**: Erroneous or dormant account rows are automatically isolated into `bkash_failed_transactions` with clear `reject_reason` descriptions, while all valid rows settle instantly without manual bank intervention.
 
 ---
 
-## 📐 4. Database Schema & Field Mapping (Strict Compliance)
+## 📐 4. Database Schema & Field Mapping
 
 | Field Label | Database Column (`snake_case`) | Data Type | Functional Description |
 | :--- | :--- | :--- | :--- |
@@ -208,7 +208,7 @@ All notifications format monetary values with standard comma separation (e.g., `
 ## 🗺️ 6. Portal Navigation & UX Architecture
 
 ```
-├── Dashboard (Live TCSA 0100202707747 & Operational 0100224107522 Account Balance Widgets)
+├── Dashboard (Live TCSA & Operational Account Balance Widgets)
 ├── Transaction Pipeline
 │   ├── Create Transactions
 │   │   ├── Dynamic Tabs: All Transmissions | Account to Account (A2A) - Janata Bank PLC. | BEFTN | RTGS
@@ -231,7 +231,7 @@ All notifications format monetary values with standard comma separation (e.g., `
 ## 🚀 7. Setup & Execution Commands
 
 ```bash
-# 1. Run Database Migrations (including audit columns & notifications table)
+# 1. Run Database Migrations
 php artisan migrate
 
 # 2. Clear & Optimize Application Caches
@@ -254,16 +254,16 @@ Visit the portal locally at:
 | Variable | Default | Description |
 |:---------|:--------|:------------|
 | `DB_CONNECTION` | `oracle` | Primary database driver |
-| `BKASH_CBS_API_BASE_URL` | `http://172.18.18.64` | CBS Host-to-Host API base URL |
-| `BKASH_CBS_API_USERNAME` | `API` | CBS API username |
-| `BKASH_CBS_API_PASSWORD` | `Admin@123` | CBS API password |
-| `BKASH_SFTP_HOST` | — | SFTP server IP for bKash files |
+| `BKASH_CBS_API_BASE_URL` | — | CBS Host-to-Host API base URL |
+| `BKASH_CBS_API_USERNAME` | — | CBS API username |
+| `BKASH_CBS_API_PASSWORD` | — | CBS API password |
+| `BKASH_SFTP_HOST` | — | SFTP server host/IP |
 | `BKASH_SFTP_USERNAME` | — | SFTP login username |
 | `BKASH_SFTP_PASSWORD` | — | SFTP login password |
 | `BKASH_SFTP_PORT` | `22` | SFTP port |
 | `BKASH_EMAIL_ENABLED` | `true` | Enable/disable email notifications |
 | `BKASH_SMS_ENABLED` | `false` | Enable/disable SMS notifications |
-| `BKASH_WHITELISTED_DEBIT_ACCOUNTS` | `0100202707747,0100224107522` | Allowed debit accounts |
+| `BKASH_WHITELISTED_DEBIT_ACCOUNTS` | — | Allowed debit accounts |
 | `BKASH_RTGS_MIN_LIMIT` | `100000` | Minimum RTGS amount (BDT) |
-| `BKASH_TCSA_INITIAL_BALANCE` | `5420000000.50` | TCSA account opening balance |
-| `BKASH_OPS_INITIAL_BALANCE` | `185000000.00` | Ops account opening balance |
+| `BKASH_TCSA_INITIAL_BALANCE` | — | TCSA account opening balance |
+| `BKASH_OPS_INITIAL_BALANCE` | — | Ops account opening balance |
