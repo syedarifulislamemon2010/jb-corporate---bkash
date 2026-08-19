@@ -11,6 +11,24 @@ return [
 
     /*
     |--------------------------------------------------------------------------
+    | CBS / BACH / BEFTN / RTGS Host-to-Host API Configuration
+    |--------------------------------------------------------------------------
+    */
+    'cbs_api' => [
+        'base_url'       => env('BKASH_CBS_API_BASE_URL', 'http://172.18.18.64'),
+        'username'       => env('BKASH_CBS_API_USERNAME', 'API'),
+        'password'       => env('BKASH_CBS_API_PASSWORD', 'Admin@123'),
+        'timeout'        => (int) env('BKASH_CBS_API_TIMEOUT', 30),
+        'retry_attempts' => (int) env('BKASH_CBS_API_RETRY', 3),
+        'endpoints'      => [
+            'login'        => '/api/login',
+            'transactions' => '/api/bkash-transactions',
+            'a2a_probashi' => '/api/probashi-card-info',
+        ],
+    ],
+
+    /*
+    |--------------------------------------------------------------------------
     | SMS Gateway Configuration
     |--------------------------------------------------------------------------
     */

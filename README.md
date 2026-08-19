@@ -15,13 +15,83 @@ A state-of-the-art, enterprise-grade automated payment settlement portal enginee
 | **Value Date & Holiday Processing** | Accurate calendar/value date visibility for post-banking hours & holiday runs | Database `value_date` column tracking execution vs settlement dates |
 | **MT940 SWIFT Statements** | SWIFT MT940 statement delivery to SFTP for TCSA & Ops accounts | `Mt940GeneratorService` generating `:20:`, `:25:`, `:28C:`, `:60F:`, `:61:`, `:86:`, `:62F:` formatted `.sta` files |
 | **Dual Signatory Workflow** | bKash Checker $\rightarrow$ 1st Authorizer $\rightarrow$ 2nd Authorizer (Final CBS Settlement) | Role-based status lifecycle (`1000` Pending $\rightarrow$ `1001` Checked $\rightarrow$ `1002` Auth 1 $\rightarrow$ `1004` CBS Settled) |
+| **CBS / BACH API Integration** | Real-time Host-to-Host settlement via REST APIs (BEFTN, RTGS, A2A) | `CbsApiService` with automated JWT Bearer token management and `ExecuteCbsSettlementJob` |
 | **Multi-Stage SMS & Email Alerts** | Broadcast exact SMS & Email templates across 4 journey stages | `NotificationService` with BDT Lakh/Crore comma-formatted amounts and counts |
 | **Line-Item Bank Statement** | Single debit line items per transaction (No bulk/consolidated debits) | Individual CBS host-to-host debit-credit posting entries per row |
 | **Central Bank Routing** | Share `reference_id` instead of `txn_id` with Bangladesh Bank for BEFTN/RTGS | Gateway payload transformer swapping transaction keys for external clearing |
 
 ---
 
-## 🛠️ 2. Validation & Business Logic Engine
+## 🔌 2. CBS / BEFTN / RTGS / A2A API Integration Architecture
+
+The portal features an automated **`CbsApiService`** client that interfaces with the Bank's Host-to-Host clearing server at `http://172.18.18.64`:
+
+```mermaid
+flowchart TD
+    A[Authorizer Approves in Portal] --> B[ExecuteCbsSettlementJob]
+    B --> C[CbsApiService]
+    C -->|Authenticate| D[POST /api/login]
+    D -->|JWT Bearer Token| C
+    C -->|Channel: BEFTN/RTGS| E[POST /api/bkash-transactions]
+    C -->|Channel: A2A Probashi| F[POST /api/probashi-card-info]
+    E & F -->|200 OK Response| G[Status 1004: CBS / BACH Settled]
+    E & F -->|Failure / Timeout| H[Log in posting_attempts & Alert]
+```
+
+### API Endpoints Reference
+
+#### 1. Authentication (`POST /api/login`)
+- **URL**: `http://172.18.18.64/api/login`
+- **Request Body**:
+  ```json
+  {
+      "username": "API",
+      "password": "Admin@123"
+  }
+  ```
+- **Response**: Returns JWT Bearer token cached for 50 minutes.
+
+#### 2. BEFTN & RTGS Settlement (`POST /api/bkash-transactions`)
+- **URL**: `http://172.18.18.64/api/bkash-transactions`
+- **Headers**: `Authorization: Bearer {token}`
+- **Request Payload**:
+  ```json
+  {
+      "uniqueId": "BKS20260819001",
+      "debitAccount": "0100202707747",
+      "creditAccount": "4512442413566",
+      "creditAccountTitle": "ABSUR HOSSAIN",
+      "creditRoutingNo": "315260856",
+      "amount": 500,
+      "remarks": "bKash BEFTN Settlement - Ref: RM41107",
+      "type": 2
+  }
+  ```
+  *(Note: `type = 2` for BEFTN, `type = 3` for RTGS)*
+
+#### 3. A2A / Probashi Card Transfer (`POST /api/probashi-card-info`)
+- **URL**: `http://172.18.18.64/api/probashi-card-info`
+- **Headers**: `Authorization: Bearer {token}`
+- **Request Payload**:
+  ```json
+  {
+      "bmet_id": "BMET20260802001",
+      "account_no": "0100229766842",
+      "card_title": "G S KIBRIA",
+      "visa_number": "EA1204512",
+      "visa_issue_date": "2025-01-01",
+      "visa_issue_place": "DHAKA",
+      "passport_number": "5214512344",
+      "recruiting_licence_no": "112233",
+      "destination_country": "USA",
+      "customer_image": "/9j/4AAQ...",
+      "qr_image": "/9j/4AAQ..."
+  }
+  ```
+
+---
+
+## 🛠️ 3. Validation & Business Logic Engine
 
 1. **File Uniqueness**: Enforces SHA256 integrity hash & file name uniqueness matching naming conventions:
    - **A2A**: `JANATA_BANK_YYYY_MM_DD_xSloty.xlsx`
@@ -34,7 +104,7 @@ A state-of-the-art, enterprise-grade automated payment settlement portal enginee
 
 ---
 
-## 📐 3. Database Schema & Field Mapping (Strict Compliance)
+## 📐 4. Database Schema & Field Mapping (Strict Compliance)
 
 | Field Label | Database Column (`snake_case`) | Data Type | Functional Description |
 | :--- | :--- | :--- | :--- |
@@ -57,7 +127,7 @@ A state-of-the-art, enterprise-grade automated payment settlement portal enginee
 
 ---
 
-## 📲 4. Multi-Stage Notification Journey (SMS & Email Templates)
+## 📲 5. Multi-Stage Notification Journey (SMS & Email Templates)
 
 All notifications format monetary values with standard comma separation (e.g., `1,56,100.82`):
 
@@ -72,7 +142,7 @@ All notifications format monetary values with standard comma separation (e.g., `
 
 ---
 
-## 🗺️ 5. Portal Navigation & UX Architecture
+## 🗺️ 6. Portal Navigation & UX Architecture
 
 ```
 ├── Dashboard (Live TCSA 0100202707747 & Operational 0100224107522 Account Balance Widgets)
@@ -83,16 +153,19 @@ All notifications format monetary values with standard comma separation (e.g., `
 │   ├── Transaction Confirmation (Checker Verification Queue)
 │   └── Transaction Authorization (1st & 2nd Authorizer Approval Queue)
 ├── Audits & Reports
+│   ├── Batch File History (Comprehensive Ingestion Log & Settlement Overview)
 │   ├── Transaction Process & EFT Reports (Daily, Weekly, Monthly, Yearly Processed Reports)
-│   └── Failed Transaction Report (Real-time breakdown of partial processing errors & reasons)
+│   ├── Failed Transaction Report (Real-time breakdown of partial processing errors & reasons)
+│   └── EFT Return Report (Returned transaction audit log)
 └── Administration
     ├── Organizations (bKash Corporate Profile & Account Tags)
-    └── Users (RBAC for bKash Checkers & Authorizers)
+    ├── Users (RBAC for bKash Checkers & Authorizers)
+    └── Roles (Filament Shield Multi-Tier Permission Matrix)
 ```
 
 ---
 
-## 🚀 6. Setup & Execution Commands
+## 🚀 7. Setup & Execution Commands
 
 ```bash
 # 1. Run Database Migrations (including audit columns & notifications table)
@@ -113,74 +186,21 @@ Visit the portal locally at:
 
 ---
 
-## 🔧 7. Prerequisites & Environment Setup
-
-### Oracle OCI8 Instant Client
-This system requires Oracle Instant Client for the `yajra/laravel-oci8` package:
-
-1. Download Oracle Instant Client Basic + SDK from [Oracle Downloads](https://www.oracle.com/database/technologies/instant-client/downloads.html)
-2. Extract to `C:\oracle\instantclient_21_0` (Windows) or `/opt/oracle/instantclient_21_0` (Linux)
-3. Add the path to your system `PATH` environment variable
-4. Enable the `oci8` PHP extension in `php.ini`
-
-### Role-Based Access Control Setup
-```bash
-# Generate Filament Shield permissions for all resources
-php artisan shield:generate --all
-
-# Seed default roles (super_admin, bkash_checker, bkash_authorizer_1, bkash_authorizer_2)
-php artisan db:seed --class=ShieldSeeder
-
-# Create a super admin user
-php artisan shield:super-admin
-```
-
----
-
-## 📐 8. System Architecture
-
-```mermaid
-flowchart TD
-    A[bKash System] -->|Push Excel Files| B[SFTP Server 172.18.18.64]
-    B -->|Every 15 min cron| C[sftp:fetch-bkash-files]
-    C -->|Download & Dispatch| D[ProcessBkashFileJob]
-    D -->|Parse & Validate| E[BkashExcelParserService]
-    E -->|Valid Rows| F[(bkash_transactions)]
-    E -->|Invalid Rows| G[(bkash_failed_transactions)]
-    D -->|Create Batch| H[(bkash_transaction_batch)]
-    D -->|Stage 1 Alert| I[NotificationService]
-    
-    F -->|Checker Verifies| J[Status 1001: Checked]
-    J -->|Stage 2 Alert| I
-    J -->|1st Authorizer| K[Status 1002: Auth 1]
-    K -->|Stage 3 Alert| I
-    K -->|2nd Authorizer| L[Status 1003: Final Auth]
-    L -->|Stage 4 Alert| I
-    L -->|CBS Settlement| M[ExecuteCbsSettlementJob]
-    M -->|Host-to-Host| N[Core Banking System]
-    
-    I -->|SMS + Email| O[Recipients]
-    
-    H -->|MT940 Generation| P[Mt940GeneratorService]
-    P -->|Upload .sta Files| B
-```
-
----
-
-## 🔑 9. Environment Variables Reference
+## 🔑 8. Environment Variables Reference
 
 | Variable | Default | Description |
 |:---------|:--------|:------------|
 | `DB_CONNECTION` | `oracle` | Primary database driver |
+| `BKASH_CBS_API_BASE_URL` | `http://172.18.18.64` | CBS Host-to-Host API base URL |
+| `BKASH_CBS_API_USERNAME` | `API` | CBS API username |
+| `BKASH_CBS_API_PASSWORD` | `Admin@123` | CBS API password |
 | `BKASH_SFTP_HOST` | — | SFTP server IP for bKash files |
 | `BKASH_SFTP_USERNAME` | — | SFTP login username |
 | `BKASH_SFTP_PASSWORD` | — | SFTP login password |
 | `BKASH_SFTP_PORT` | `22` | SFTP port |
 | `BKASH_EMAIL_ENABLED` | `true` | Enable/disable email notifications |
 | `BKASH_SMS_ENABLED` | `false` | Enable/disable SMS notifications |
-| `BKASH_SMS_API_URL` | — | SMS gateway API endpoint |
-| `BKASH_SMS_API_KEY` | — | SMS gateway API key |
 | `BKASH_WHITELISTED_DEBIT_ACCOUNTS` | `0100202707747,0100224107522` | Allowed debit accounts |
 | `BKASH_RTGS_MIN_LIMIT` | `100000` | Minimum RTGS amount (BDT) |
-| `BKASH_TCSA_INITIAL_BALANCE` | `542000000.50` | TCSA account opening balance |
-| `BKASH_OPS_INITIAL_BALANCE` | `18500000.00` | Ops account opening balance |
+| `BKASH_TCSA_INITIAL_BALANCE` | `5420000000.50` | TCSA account opening balance |
+| `BKASH_OPS_INITIAL_BALANCE` | `185000000.00` | Ops account opening balance |

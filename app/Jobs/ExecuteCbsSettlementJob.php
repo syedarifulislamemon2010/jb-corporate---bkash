@@ -4,6 +4,7 @@ namespace App\Jobs;
 
 use App\Models\BkashTransaction;
 use App\Models\PostingAttempt;
+use App\Services\CbsApiService;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Queue\Queueable;
 use Illuminate\Support\Facades\Log;
@@ -20,9 +21,9 @@ class ExecuteCbsSettlementJob implements ShouldQueue
         $this->transactionIds = $transactionIds;
     }
 
-    public function handle(): void
+    public function handle(CbsApiService $cbsApiService): void
     {
-        Log::info("Starting CBS / BACH Automated Settlement Execution for " . count($this->transactionIds) . " transactions...");
+        Log::info("ExecuteCbsSettlementJob: Starting CBS / BACH automated settlement execution for " . count($this->transactionIds) . " transactions...");
 
         $transactions = BkashTransaction::whereIn('id', $this->transactionIds)
             ->where('status_id', BkashTransaction::STATUS_FINAL_AUTHORIZED)
@@ -45,15 +46,32 @@ class ExecuteCbsSettlementJob implements ShouldQueue
                     continue;
                 }
 
-                $attempt->update(['outcome' => 'SUCCESS']);
+                // Call the CBS API Service
+                $result = $cbsApiService->settleTransaction($txn);
 
+                if ($result['success']) {
+                    $attempt->update([
+                        'outcome'       => 'SUCCESS',
+                        'response_code' => (string) $result['status_code'],
+                        'response_body' => is_array($result['response']) ? json_encode($result['response']) : (string)$result['response'],
+                    ]);
 
-                $txn->update([
-                    'status_id'      => BkashTransaction::STATUS_CBS_SUCCESS,
-                    'cbs_success_at' => Carbon::now(),
-                ]);
+                    $txn->update([
+                        'status_id'      => BkashTransaction::STATUS_CBS_SUCCESS,
+                        'cbs_success_at' => Carbon::now(),
+                    ]);
 
-                Log::info("Successfully settled transaction: {$txn->reference_id} [{$txn->amount} BDT]");
+                    Log::info("Successfully settled transaction via CBS API: {$txn->reference_id} [{$txn->amount} BDT]");
+                } else {
+                    $attempt->update([
+                        'outcome'       => 'FAILED',
+                        'response_code' => (string) $result['status_code'],
+                        'response_body' => is_array($result['response']) ? json_encode($result['response']) : (string)$result['response'],
+                        'error_message' => $result['message'],
+                    ]);
+
+                    Log::error("CBS API posting failed for Txn {$txn->reference_id}: {$result['message']}");
+                }
 
             } catch (\Exception $e) {
                 Log::error("Failed settling transaction {$txn->id}: " . $e->getMessage());
