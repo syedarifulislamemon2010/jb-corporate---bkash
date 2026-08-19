@@ -105,7 +105,7 @@ class BkashTransactionConfirmationsTable
 
                         NotificationService::dispatchStage4($fileName, $totalTrn, $totalAmount, $authorizerName2);
 
-                        ExecuteCbsSettlementJob::dispatch($txnIds);
+                        ExecuteCbsSettlementJob::dispatchSync($txnIds);
                     }),
             ]);
     }
