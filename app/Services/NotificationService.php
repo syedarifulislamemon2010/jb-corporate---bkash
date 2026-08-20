@@ -151,8 +151,8 @@ class NotificationService
         // Send actual email notifications
         static::sendActualEmails($outbox, $recipientGroup, $messageText, $fileName, $eventType);
 
-        // Send SMS notifications
-        static::sendActualSms($outbox, $recipientGroup, $messageText);
+        // Send SMS notifications using exact registered bank template types (14 to 17)
+        static::sendActualSms($outbox, $recipientGroup, $eventType, $fileName, $totalTrn, BkashTransaction::formatBdtAmount($totalAmount), $actorName);
 
         return $outbox;
     }
@@ -212,7 +212,11 @@ class NotificationService
     private static function sendActualSms(
         NotificationOutbox $outbox,
         string $recipientGroup,
-        string $messageText
+        string $eventType,
+        string $fileName,
+        int $totalTrn,
+        string $formattedAmount,
+        ?string $actorName = null
     ): void {
         if (!config('bkash.sms_enabled', true)) {
             Log::info('SMS sending is disabled. Skipping SMS dispatch.');
@@ -227,10 +231,26 @@ class NotificationService
                 return;
             }
 
+            // Map event type to bank template type
+            $templateType = match ($eventType) {
+                'STAGE_1_SFTP'  => 14,
+                'STAGE_2_CHECKED' => 15,
+                'STAGE_3_AUTH1'   => 16,
+                'STAGE_4_AUTH2'   => 17,
+                default           => 14,
+            };
+
             foreach ($phones as $phone) {
                 try {
-                    $response = \App\Helper\SMSGenerateHelper::sendDirectSms($phone, $messageText);
-                    Log::info("SMS Gateway: Dispatched SMS to {$phone}");
+                    $response = \App\Helper\SMSGenerateHelper::generate(
+                        mobile: $phone,
+                        password: (string) ($actorName ?? ''),
+                        type: $templateType,
+                        account: $fileName,
+                        bankbic: (string) $totalTrn,
+                        amount: $formattedAmount
+                    );
+                    Log::info("SMS Gateway: Dispatched Template [Type {$templateType}] to {$phone}");
                 } catch (\Throwable $smsEx) {
                     Log::error("SMS to {$phone} failed: " . $smsEx->getMessage());
                 }
@@ -249,23 +269,18 @@ class NotificationService
     private static function getRecipientEmails(string $recipientGroup): array
     {
         $query = User::query()->whereNotNull('email');
-
-        // In production, filter by role:
-        // if ($recipientGroup === 'ALL_CHECKERS') {
-        //     $query->role('bkash_checker');
-        // } else {
-        //     $query->role(['bkash_checker', 'bkash_authorizer']);
-        // }
-
         return $query->pluck('email')->filter()->unique()->toArray();
     }
 
     /**
-     * Get recipient phone numbers based on group.
+     * Get recipient phone numbers based on group (checks mobile_no first, then phone).
      */
     private static function getRecipientPhones(string $recipientGroup): array
     {
-        $query = User::query()->whereNotNull('phone');
-        return $query->pluck('phone')->filter()->unique()->toArray();
+        $phones = User::query()->whereNotNull('mobile_no')->pluck('mobile_no')->toArray();
+        if (empty($phones)) {
+            $phones = User::query()->whereNotNull('phone')->pluck('phone')->toArray();
+        }
+        return array_values(array_unique(array_filter($phones)));
     }
 }

@@ -16,9 +16,23 @@ use Illuminate\Support\Facades\Log;
 class SMSGenerateHelper extends Controller
 {
     /**
-     * Send structured SMS based on predefined bank template types (1 to 13).
+     * Send structured SMS based on predefined bank template types (1 to 17).
+     *
+     * Types:
+     * 1:  User Creation / Temporary Password
+     * 2:  Password Reset
+     * 3:  Account Update
+     * 4:  Password Reset OTP
+     * 5:  RTGS Credit Confirmation
+     * 6:  EFT Return Reason
+     * 7:  RTGS Return Reason
+     * 8-13: Debit Card & Green PIN Notifications
+     * 14: bKash Stage 1: SFTP File Ingested (Pending Checker)
+     * 15: bKash Stage 2: Checked by Checker (Pending Authorizer)
+     * 16: bKash Stage 3: 1st Authorized (Pending Final Authorizer)
+     * 17: bKash Stage 4: 2nd Authorized (Final Settle Complete)
      */
-    public static function generate($mobile, $password, $type, $account = "", $bankbic = "", $amount = "", $date = "", $time = "", $reason = "")
+    public static function generate($mobile, $password = "", $type = 1, $account = "", $bankbic = "", $amount = "", $date = "", $time = "", $reason = "")
     {
         try {
             $client = new Client();
@@ -30,7 +44,7 @@ class SMSGenerateHelper extends Controller
                 'Content-Type'  => 'application/json',
             ];
 
-            if ($type == 1) { // Account Create
+            if ($type == 1) { // User Account Create
                 $message = "Dear User, your account has been created in JB Nikash Solution and your temporary password is " . $password;
             } else if ($type == 2) { // Password reset
                 $message = "Dear User, your account password has been reset in JB Nikash Solution and your temporary password is " . $password;
@@ -56,6 +70,14 @@ class SMSGenerateHelper extends Controller
                 $message = "Dear Customer, your card has been delivered. Use the following link to activate your card and set your PIN: https://www.jb.com.bd/services/greenPin";
             } else if ($type == 13) {
                 $message = "Dear Sir, sufficient balance is not available in your account to deduct card maintenance fee. Please deposit card maintenance fee or your card will be closed.";
+            } else if ($type == 14) { // bKash Stage 1: SFTP File Upload Ingested
+                $message = "Dear Sir/Madam, File Name: \"" . $account . "\" Total Trn: \"" . $bankbic . "\", Total Amount: \"" . $amount . "\". File is pending for Checker. Please Check this file. Thank you. Best Regards, JANATA BANK";
+            } else if ($type == 15) { // bKash Stage 2: Checked by Checker
+                $message = "Dear Sir/Madam, File Name: \"" . $account . "\" Total Trn: \"" . $bankbic . "\", Total Amount: \"" . $amount . "\" is checked by \"" . $password . "\" & is pending for further Authorization/Approval. Thank you. JANATA BANK";
+            } else if ($type == 16) { // bKash Stage 3: 1st Authorize Approved
+                $message = "Dear Sir/Madam, File Name: \"" . $account . "\" Total Trn: \"" . $bankbic . "\", Total Amount: \"" . $amount . "\" is Authorized by \"" . $password . "\" & is pending for further Authorization/Approval or final authorization. Thank you. JANATA BANK";
+            } else if ($type == 17) { // bKash Stage 4: 2nd Authorize Approved (Finalized)
+                $message = "Dear Sir/Madam, File Name: \"" . $account . "\" Total Trn: \"" . $bankbic . "\", Total Amount: \"" . $amount . "\" is Authorized by \"" . $password . "\" & is finally authorized. Thank you. JANATA BANK";
             } else {
                 $message = (string) $password;
             }
@@ -69,6 +91,8 @@ class SMSGenerateHelper extends Controller
             $res = $client->sendAsync($request)->wait();
             $out = json_decode($res->getBody());
 
+            Log::info("SMS Gateway: Dispatched Template [Type {$type}] to {$mobile}");
+
             return $out;
         } catch (\Exception $ex) {
             static::logSmsError($ex);
@@ -80,7 +104,7 @@ class SMSGenerateHelper extends Controller
     }
 
     /**
-     * Send direct/custom message text via Janata Bank SMS API Gateway.
+     * Send direct message text via Janata Bank SMS API Gateway.
      */
     public static function sendDirectSms(string $mobile, string $message)
     {
