@@ -29,13 +29,13 @@ return [
 
     /*
     |--------------------------------------------------------------------------
-    | SMS Gateway Configuration
+    | Janata Bank SMS API Gateway Configuration
     |--------------------------------------------------------------------------
     */
-    'sms_enabled' => env('BKASH_SMS_ENABLED', false),
-    'sms_api_url' => env('BKASH_SMS_API_URL', ''),
-    'sms_api_key' => env('BKASH_SMS_API_KEY', ''),
-    'sms_sender_id' => env('BKASH_SMS_SENDER_ID', 'JANATABANK'),
+    'sms_enabled'     => env('BKASH_SMS_ENABLED', true),
+    'sms_api_url'     => env('BKASH_SMS_API_URL', 'http://172.17.20.17/JBSmsApi/Send'),
+    'sms_auth_header' => env('BKASH_SMS_AUTH_HEADER', 'Basic YmFjaCZydGdzOjMhYiRjJWgmTSZSc0d0MlNxciop'),
+    'sms_sender_id'   => env('BKASH_SMS_SENDER_ID', 'JANATABANK'),
 
     /*
     |--------------------------------------------------------------------------

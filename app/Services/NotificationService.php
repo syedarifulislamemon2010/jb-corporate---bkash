@@ -207,14 +207,14 @@ class NotificationService
     }
 
     /**
-     * Send actual SMS notifications.
+     * Send actual SMS notifications via Janata Bank SMS API Gateway.
      */
     private static function sendActualSms(
         NotificationOutbox $outbox,
         string $recipientGroup,
         string $messageText
     ): void {
-        if (!config('bkash.sms_enabled', false)) {
+        if (!config('bkash.sms_enabled', true)) {
             Log::info('SMS sending is disabled. Skipping SMS dispatch.');
             return;
         }
@@ -223,29 +223,14 @@ class NotificationService
             $phones = static::getRecipientPhones($recipientGroup);
 
             if (empty($phones)) {
+                Log::info("No recipient phone numbers found for group [{$recipientGroup}]. Skipping SMS.");
                 return;
             }
 
-            $apiUrl = config('bkash.sms_api_url');
-            $apiKey = config('bkash.sms_api_key');
-            $senderId = config('bkash.sms_sender_id', 'JANATABANK');
-
             foreach ($phones as $phone) {
-                // Generic HTTP SMS gateway call
-                // Replace with actual SMS provider API (Infobip, SSL Wireless, etc.)
                 try {
-                    $response = Http::timeout(10)->get($apiUrl, [
-                        'api_key'   => $apiKey,
-                        'sender_id' => $senderId,
-                        'to'        => $phone,
-                        'message'   => $messageText,
-                    ]);
-
-                    if ($response->successful()) {
-                        Log::info("SMS sent to {$phone}");
-                    } else {
-                        Log::warning("SMS to {$phone} returned status: " . $response->status());
-                    }
+                    $response = \App\Helper\SMSGenerateHelper::sendDirectSms($phone, $messageText);
+                    Log::info("SMS Gateway: Dispatched SMS to {$phone}");
                 } catch (\Throwable $smsEx) {
                     Log::error("SMS to {$phone} failed: " . $smsEx->getMessage());
                 }
