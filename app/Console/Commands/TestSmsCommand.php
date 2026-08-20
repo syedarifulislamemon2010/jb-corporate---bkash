@@ -7,9 +7,9 @@ use Illuminate\Console\Command;
 
 class TestSmsCommand extends Command
 {
-    protected $signature = 'cbs:test-sms {mobile? : Recipient mobile number (e.g. 017XXXXXXXX)}';
+    protected $signature = 'cbs:test-sms {mobile? : Recipient mobile number} {--type=1 : Template type (1=Account Create, 5=RTGS Confirmation, 6=EFT Return, 7=RTGS Return)}';
 
-    protected $description = 'Test Janata Bank SMS Gateway API via SMSGenerateHelper.';
+    protected $description = 'Test Janata Bank SMS Gateway API with registered bank templates.';
 
     public function handle(): int
     {
@@ -24,16 +24,29 @@ class TestSmsCommand extends Command
             return Command::FAILURE;
         }
 
+        $type = (int) $this->option('type');
         $apiUrl = config('bkash.sms_api_url', 'http://172.17.20.17/JBSmsApi/Send');
+        
         $this->line("Target Gateway URL: <comment>{$apiUrl}</comment>");
         $this->line("Recipient Mobile:   <comment>{$mobile}</comment>");
+        $this->line("Template Type:      <comment>Type {$type}</comment>");
         $this->newLine();
 
-        $testMessage = "Dear User, this is a test SMS from Janata Bank Corporate Portal bKash Settlement System. Time: " . date('Y-m-d h:i:s A');
+        $this->info("👉 Dispatching SMS via SMSGenerateHelper::generate()...");
 
-        $this->info("👉 Dispatching SMS via SMSGenerateHelper::sendDirectSms()...");
-
-        $response = SMSGenerateHelper::sendDirectSms($mobile, $testMessage);
+        if ($type == 5) {
+            // RTGS Credit Confirmation
+            $response = SMSGenerateHelper::generate($mobile, '', 5, '0100229766842', 'JANATA BANK', '500 BDT', date('Y-m-d'), date('h:i A'));
+        } elseif ($type == 6) {
+            // EFT Return Reason
+            $response = SMSGenerateHelper::generate($mobile, '', 6, '0100229766842', 'JANATA BANK', '500 BDT', date('Y-m-d'), '', 'Invalid Routing');
+        } elseif ($type == 7) {
+            // RTGS Return Reason
+            $response = SMSGenerateHelper::generate($mobile, '', 7, '0100229766842', 'JANATA BANK', '500 BDT', date('Y-m-d'), '', 'Account Closed');
+        } else {
+            // Default: Type 1 (Account Create)
+            $response = SMSGenerateHelper::generate($mobile, 'Temp@' . rand(1000, 9999), 1);
+        }
 
         $this->newLine();
         $this->info("=================================================");
@@ -43,10 +56,10 @@ class TestSmsCommand extends Command
         $this->line(json_encode($response, JSON_PRETTY_PRINT));
         $this->newLine();
 
-        if (isset($response->responseCode) && $response->responseCode == 400) {
-            $this->warn("⚠️ SMS Gateway returned an error or network timeout.");
+        if (isset($response->StatusCode) && $response->StatusCode == 1) {
+            $this->info("✅ SMS SENT SUCCESSFULLY! (SmsID: {$response->SmsID})");
         } else {
-            $this->info("✅ SMS request processed successfully!");
+            $this->warn("⚠️ Gateway Response: " . ($response->Message ?? $response->StatusText ?? 'Error'));
         }
 
         return Command::SUCCESS;
