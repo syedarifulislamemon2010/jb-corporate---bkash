@@ -91,8 +91,8 @@ class FetchSftpFilesCommand extends Command
                 }
             }
 
-            // Step 3: Dispatch processing job to queue
-            ProcessBkashFileJob::dispatch($localPath, $channelType, 'SFTP_CRON');
+            // Step 3: Process file immediately into database
+            ProcessBkashFileJob::dispatchSync($localPath, $channelType, 'SFTP_CRON');
 
             $this->info("Dispatched job for: {$fileName} [Channel: {$channelType}] (Source Folder: {$folderName})");
 

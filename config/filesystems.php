@@ -66,7 +66,7 @@ return [
             'username' => env('BKASH_SFTP_USERNAME', 'testfrontend'),
             'password' => env('BKASH_SFTP_PASSWORD', 'Dev@cell23'),
             'port'     => (int) env('BKASH_SFTP_PORT', 22),
-            'root'     => env('BKASH_SFTP_ROOT', ''),
+            'root'     => env('BKASH_SFTP_ROOT', '/'),
             'timeout'  => 30,
         ],
 
