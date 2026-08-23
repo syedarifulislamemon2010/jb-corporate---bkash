@@ -49,7 +49,7 @@ return [
     'email_from_address' => env('BKASH_EMAIL_FROM', 'noreply@janatabank-bd.com'),
     'email_from_name' => env('BKASH_EMAIL_FROM_NAME', 'Janata Bank Corporate Portal'),
 
-    'whitelisted_debit_accounts' => env('BKASH_WHITELISTED_DEBIT_ACCOUNTS', '0100202707747,0100224107522'),
+    'whitelisted_debit_accounts' => env('BKASH_WHITELISTED_DEBIT_ACCOUNTS', '0100202707747,0100224107522,111613120722698,111613134119657'),
     'rtgs_min_limit' => (int) env('BKASH_RTGS_MIN_LIMIT', 100000),
     'enabled_channels' => ['A2A', 'BEFTN', 'RTGS'], // All 3 payment channels active
     'initial_balances' => [
