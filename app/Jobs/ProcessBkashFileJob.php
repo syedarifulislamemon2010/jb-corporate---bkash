@@ -103,6 +103,7 @@ class ProcessBkashFileJob implements ShouldQueue
             );
 
             $refId        = BkashExcelParserService::cleanString($mapped['reference_id'] ?? null, 255);
+            $bbRef        = BkashExcelParserService::cleanString($mapped['bb_reference_number'] ?? null, 100);
             $accountName  = BkashExcelParserService::cleanString($mapped['debit_account_title'] ?? null, 150);
             $accountNo    = BkashExcelParserService::cleanString($mapped['debit_account_no'] ?? null, 100);
             $amount       = (float) ($mapped['amount'] ?? 0);
@@ -122,6 +123,7 @@ class ProcessBkashFileJob implements ShouldQueue
                     'file_name'            => $fileName,
                     'transaction_type'     => $this->channelType,
                     'reference_id'         => Str::limit($refId, 255, ''),
+                    'bb_reference_number'  => $bbRef ? Str::limit($bbRef, 100, '') : null,
                     'txn_id'               => Str::limit($txnId, 100, ''),
                     'debit_account_title'  => $accountName ? Str::limit($accountName, 150, '') : null,
                     'debit_account_no'     => $accountNo ? Str::limit($accountNo, 100, '') : null,

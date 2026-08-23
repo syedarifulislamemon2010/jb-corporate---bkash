@@ -29,6 +29,7 @@ class BkashTransaction extends Model
         'file_name',
         'transaction_type',
         'reference_id',
+        'bb_reference_number',
         'txn_id',
         'create_date',
         'value_date',

@@ -127,6 +127,8 @@ class BkashExcelParserService
 
             if (in_array($cleanHeader, ['ref', 'refno', 'reference', 'referenceid', 'refid'])) {
                 $mapped['reference_id'] = static::cleanString((string) $val, 255);
+            } elseif (in_array($cleanHeader, ['bbreferencenumber', 'bbreference', 'bbref', 'bbrefno', 'bbrefid', 'referencenumber'])) {
+                $mapped['bb_reference_number'] = static::cleanString((string) $val, 100);
             } elseif (in_array($cleanHeader, ['date', 'executiondate', 'createdate', 'transactiondate', 'txndate'])) {
                 $mapped['create_date'] = $val;
             } elseif (in_array($cleanHeader, ['returndate'])) {
