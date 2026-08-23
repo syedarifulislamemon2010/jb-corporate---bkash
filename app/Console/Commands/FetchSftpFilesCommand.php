@@ -13,65 +13,88 @@ class FetchSftpFilesCommand extends Command
 {
     protected $signature = 'sftp:fetch-bkash-files {--dry-run : List files without processing}';
 
-    protected $description = 'Fetch bKash Excel files from SFTP server, download locally, and dispatch processing jobs.';
+    protected $description = 'Fetch bKash Excel files from multi-folder SFTP server (A2A, BEFTN, RTGS), download locally, and dispatch processing jobs.';
 
     public function handle(SftpFileTransferService $sftpService): int
     {
-        $this->info('Starting bKash SFTP file scanner...');
-        Log::info('SFTP Scanner: Starting scan cycle.');
+        $this->info('Starting bKash multi-folder SFTP file scanner...');
+        Log::info('SFTP Scanner: Starting multi-folder scan cycle (A2A, BEFTN, RTGS + Root).');
 
-        $remoteFiles = $sftpService->fetchNewFiles();
+        $remoteFileItems = $sftpService->fetchNewFiles();
 
-        if ($remoteFiles->isEmpty()) {
-            $this->info('No new files found on SFTP server.');
+        if ($remoteFileItems->isEmpty()) {
+            $this->info('No new files found across any SFTP folder.');
             Log::info('SFTP Scanner: No new files found.');
             return Command::SUCCESS;
         }
 
-        $this->info("Found {$remoteFiles->count()} file(s) on SFTP server.");
+        $this->info("Found {$remoteFileItems->count()} file(s) across SFTP directories.");
 
         if ($this->option('dry-run')) {
-            $remoteFiles->each(fn (string $f) => $this->line(' - ' . basename($f)));
+            $remoteFileItems->each(function ($item) {
+                $path = is_array($item) ? ($item['remote_path'] ?? '') : (string) $item;
+                $folder = is_array($item) ? ($item['folder'] ?? 'UNKNOWN') : 'N/A';
+                $hint = is_array($item) ? ($item['channel_hint'] ?? 'AUTO') : 'AUTO';
+                $this->line(" - [" . basename($path) . "] from folder: <comment>{$folder}</comment> (channel hint: {$hint})");
+            });
             return Command::SUCCESS;
         }
 
         $processed = 0;
         $skipped = 0;
 
-        foreach ($remoteFiles as $remoteFilePath) {
+        foreach ($remoteFileItems as $item) {
+            $remoteFilePath = is_array($item) ? ($item['remote_path'] ?? '') : (string) $item;
+            $folderHint     = is_array($item) ? ($item['channel_hint'] ?? 'AUTO') : 'AUTO';
+            $folderName     = is_array($item) ? ($item['folder'] ?? 'ROOT') : 'ROOT';
+
+            if (empty($remoteFilePath)) {
+                continue;
+            }
+
             $fileName = basename($remoteFilePath);
 
             // Skip already-ingested files
             if (BkashTransactionBatch::where('file_name', $fileName)->exists()) {
-                $this->warn("Skipping duplicate: {$fileName}");
+                $this->warn("Skipping duplicate: {$fileName} (from {$folderName})");
                 Log::warning("SFTP Scanner: Duplicate file skipped — {$fileName}");
 
-                // Still move it out of source folder
+                // Still move it out of source folder to prevent infinite loop
                 $sftpService->moveToUploaded($remoteFilePath);
                 $skipped++;
                 continue;
             }
 
-            // Step 1: Download to local
+            // Step 1: Download to local landing directory
             $localPath = $sftpService->downloadToLocal($remoteFilePath);
 
             if (!$localPath) {
-                $this->error("Failed to download: {$fileName}");
+                $this->error("Failed to download: {$fileName} from {$folderName}");
                 continue;
             }
 
-            // Step 2: Detect channel type from filename
-            $channelType = BkashExcelParserService::detectChannelType($fileName);
+            // Step 2: Channel Identification & Defense-in-Depth Cross-Validation
+            $filenameChannel = BkashExcelParserService::detectChannelType($fileName);
+            $channelType = $folderHint;
 
-            if ($channelType === 'UNKNOWN') {
-                $this->warn("Unknown channel type for: {$fileName}, defaulting to A2A");
-                $channelType = 'A2A';
+            if ($folderHint === 'AUTO') {
+                // Legacy root source: determine directly from filename
+                $channelType = $filenameChannel !== 'UNKNOWN' ? $filenameChannel : 'A2A';
+            } else {
+                // Subfolder source: use folder hint as primary, cross-validate with filename
+                if ($filenameChannel !== 'UNKNOWN' && $filenameChannel !== $folderHint) {
+                    $this->warn("Channel mismatch for {$fileName}: Folder is [{$folderHint}] but filename pattern is [{$filenameChannel}]. Prioritizing filename regex for safety.");
+                    Log::warning("SFTP Scanner: Channel mismatch for {$fileName}. Folder: [{$folderHint}], Filename: [{$filenameChannel}]. Using {$filenameChannel}.");
+                    $channelType = $filenameChannel;
+                } else {
+                    $channelType = $folderHint;
+                }
             }
 
             // Step 3: Dispatch processing job to queue
             ProcessBkashFileJob::dispatch($localPath, $channelType, 'SFTP_CRON');
 
-            $this->info("Dispatched job for: {$fileName} [{$channelType}]");
+            $this->info("Dispatched job for: {$fileName} [Channel: {$channelType}] (Source Folder: {$folderName})");
 
             // Step 4: Move file on SFTP to uploaded folder
             $sftpService->moveToUploaded($remoteFilePath);

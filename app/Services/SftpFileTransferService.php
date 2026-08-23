@@ -12,11 +12,11 @@ class SftpFileTransferService
     protected string $localDisk = 'public';
 
     /**
-     * Get the remote source path from config.
+     * Get the remote root source path from config.
      */
     public function getRemoteSourcePath(): string
     {
-        return rtrim(config('bkash.sftp_source_path', '/var/www/html/beftn-bach-rtgs/storage/app/public/bkash'), '/');
+        return rtrim((string) config('bkash.sftp_source_path', '/var/www/html/beftn-bach-rtgs/storage/app/public/bkash'), '/');
     }
 
     /**
@@ -24,7 +24,40 @@ class SftpFileTransferService
      */
     public function getRemoteUploadedPath(): string
     {
-        return rtrim(config('bkash.sftp_uploaded_path', '/var/www/html/beftn-bach-rtgs/storage/app/public/bkash_uploaded'), '/');
+        return rtrim((string) config('bkash.sftp_uploaded_path', '/var/www/html/beftn-bach-rtgs/storage/app/public/bkash_uploaded'), '/');
+    }
+
+    /**
+     * Get the remote Account-to-Account subfolder path.
+     */
+    public function getRemoteA2aPath(): string
+    {
+        if ($configured = config('bkash.sftp_a2a_path')) {
+            return rtrim((string) $configured, '/');
+        }
+        return $this->getRemoteSourcePath() . '/Account to-Account';
+    }
+
+    /**
+     * Get the remote BEFTN subfolder path.
+     */
+    public function getRemoteBeftnPath(): string
+    {
+        if ($configured = config('bkash.sftp_beftn_path')) {
+            return rtrim((string) $configured, '/');
+        }
+        return $this->getRemoteSourcePath() . '/BEFTN';
+    }
+
+    /**
+     * Get the remote RTGS subfolder path.
+     */
+    public function getRemoteRtgsPath(): string
+    {
+        if ($configured = config('bkash.sftp_rtgs_path')) {
+            return rtrim((string) $configured, '/');
+        }
+        return $this->getRemoteSourcePath() . '/RTGS';
     }
 
     /**
@@ -44,23 +77,80 @@ class SftpFileTransferService
     }
 
     /**
-     * Fetch list of new files from SFTP source directory.
-     * Returns collection of remote file paths.
+     * Fetch list of new files across all 3 dedicated subfolders (A2A, BEFTN, RTGS)
+     * as well as the legacy flat source folder for 100% backward compatibility.
+     *
+     * Returns Collection of items:
+     * [
+     *    'remote_path'  => string,
+     *    'channel_hint' => 'A2A'|'BEFTN'|'RTGS'|'AUTO',
+     *    'folder'       => 'Account-to-Account'|'BEFTN'|'RTGS'|'ROOT',
+     * ]
      */
     public function fetchNewFiles(): Collection
     {
-        try {
-            $sourcePath = $this->getRemoteSourcePath();
-            $files = Storage::disk($this->sftpDisk)->files($sourcePath);
+        $allFiles = collect();
+        $seenPaths = [];
 
-            return collect($files)->filter(function (string $filePath) {
-                $ext = strtolower(pathinfo($filePath, PATHINFO_EXTENSION));
-                return in_array($ext, ['xls', 'xlsx', 'csv']);
-            })->values();
-        } catch (\Throwable $e) {
-            Log::error('SFTP: Failed to list remote files: ' . $e->getMessage());
-            return collect();
+        // Define folders to scan: [Folder Name => [Path, Channel Hint]]
+        $targetFolders = [
+            'Account-to-Account' => [$this->getRemoteA2aPath(), 'A2A'],
+            'BEFTN'              => [$this->getRemoteBeftnPath(), 'BEFTN'],
+            'RTGS'               => [$this->getRemoteRtgsPath(), 'RTGS'],
+        ];
+
+        // 1. Scan 3 dedicated subfolders
+        foreach ($targetFolders as $folderName => [$folderPath, $channelHint]) {
+            try {
+                if (Storage::disk($this->sftpDisk)->exists($folderPath)) {
+                    $files = Storage::disk($this->sftpDisk)->files($folderPath);
+                    foreach ($files as $filePath) {
+                        if ($this->isProcessableFile($filePath) && !isset($seenPaths[$filePath])) {
+                            $seenPaths[$filePath] = true;
+                            $allFiles->push([
+                                'remote_path'  => $filePath,
+                                'channel_hint' => $channelHint,
+                                'folder'       => $folderName,
+                            ]);
+                        }
+                    }
+                }
+            } catch (\Throwable $e) {
+                Log::warning("SFTP: Failed to scan subfolder [{$folderName}] at {$folderPath}: " . $e->getMessage());
+            }
         }
+
+        // 2. Scan legacy root source folder (Backward Compatibility fallback)
+        try {
+            $rootSource = $this->getRemoteSourcePath();
+            if (Storage::disk($this->sftpDisk)->exists($rootSource)) {
+                $rootFiles = Storage::disk($this->sftpDisk)->files($rootSource);
+                foreach ($rootFiles as $filePath) {
+                    // Only process files directly in root (not in already-scanned subdirectories)
+                    if ($this->isProcessableFile($filePath) && !isset($seenPaths[$filePath])) {
+                        $seenPaths[$filePath] = true;
+                        $allFiles->push([
+                            'remote_path'  => $filePath,
+                            'channel_hint' => 'AUTO',
+                            'folder'       => 'ROOT',
+                        ]);
+                    }
+                }
+            }
+        } catch (\Throwable $e) {
+            Log::warning("SFTP: Failed to scan legacy root source at {$rootSource}: " . $e->getMessage());
+        }
+
+        return $allFiles;
+    }
+
+    /**
+     * Check if a file has a valid spreadsheet/CSV extension.
+     */
+    protected function isProcessableFile(string $filePath): bool
+    {
+        $ext = strtolower(pathinfo($filePath, PATHINFO_EXTENSION));
+        return in_array($ext, ['xls', 'xlsx', 'csv']);
     }
 
     /**
@@ -90,7 +180,7 @@ class SftpFileTransferService
 
             $localFullPath = Storage::disk($this->localDisk)->path($localRelativePath);
 
-            Log::info("SFTP: Downloaded {$fileName} to local storage.");
+            Log::info("SFTP: Downloaded {$fileName} to local storage from {$remoteFilePath}.");
 
             return $localFullPath;
         } catch (\Throwable $e) {
@@ -100,8 +190,8 @@ class SftpFileTransferService
     }
 
     /**
-     * Move a file on the SFTP server from source to uploaded folder.
-     * This clears the source folder after successful download.
+     * Move a file on the SFTP server from source/subfolder to uploaded folder.
+     * This clears the source location after successful download.
      */
     public function moveToUploaded(string $remoteFilePath): bool
     {
@@ -118,7 +208,7 @@ class SftpFileTransferService
 
             Storage::disk($this->sftpDisk)->move($remoteFilePath, $uploadedPath);
 
-            Log::info("SFTP: Moved {$fileName} to uploaded folder.");
+            Log::info("SFTP: Moved {$fileName} to uploaded folder: {$uploadedPath}");
             return true;
         } catch (\Throwable $e) {
             Log::error("SFTP: Failed to move {$remoteFilePath} to uploaded: " . $e->getMessage());

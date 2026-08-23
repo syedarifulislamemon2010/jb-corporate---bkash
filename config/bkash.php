@@ -8,6 +8,9 @@ return [
     */
     'sftp_source_path' => env('BKASH_SFTP_SOURCE_PATH', '/var/www/html/beftn-bach-rtgs/storage/app/public/bkash'),
     'sftp_uploaded_path' => env('BKASH_SFTP_UPLOADED_PATH', '/var/www/html/beftn-bach-rtgs/storage/app/public/bkash_uploaded'),
+    'sftp_a2a_path' => env('BKASH_SFTP_A2A_PATH', null),
+    'sftp_beftn_path' => env('BKASH_SFTP_BEFTN_PATH', null),
+    'sftp_rtgs_path' => env('BKASH_SFTP_RTGS_PATH', null),
 
     /*
     |--------------------------------------------------------------------------
