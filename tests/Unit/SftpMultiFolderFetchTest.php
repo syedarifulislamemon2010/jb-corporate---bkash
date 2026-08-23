@@ -77,4 +77,38 @@ class SftpMultiFolderFetchTest extends TestCase
         $this->assertTrue(BkashExcelParserService::validateFileName('BEFTN_JANATA_BANK_2026_08_23_1Slot1.xlsx', 'BEFTN'));
         $this->assertTrue(BkashExcelParserService::validateFileName('RTGS_JANATA_BANK_2026_08_23_1Slot1.xlsx', 'RTGS'));
     }
+
+    public function test_single_debit_account_file_validation_passes(): void
+    {
+        $headers = ['Ref No', 'Debit Account', 'Amount', 'Bank Account Name', 'Bank Account No'];
+        $rows = [
+            $headers,
+            ['REF001', '0100202707747', '500', 'Customer 1', '4512442413566'],
+            ['REF002', '0100202707747', '1000', 'Customer 2', '4512442413567'],
+        ];
+
+        $result = BkashExcelParserService::validateFileLevelDebitAccounts($rows, $headers);
+
+        $this->assertTrue($result['is_valid']);
+        $this->assertEquals(['0100202707747'], $result['debit_accounts']);
+        $this->assertNull($result['error_message']);
+    }
+
+    public function test_multi_debit_account_file_validation_fails(): void
+    {
+        $headers = ['Ref No', 'Debit Account', 'Amount', 'Bank Account Name', 'Bank Account No'];
+        $rows = [
+            $headers,
+            ['REF001', '0100202707747', '500', 'Customer 1', '4512442413566'],
+            ['REF002', '0100224107522', '1000', 'Customer 2', '4512442413567'], // Different debit account!
+        ];
+
+        $result = BkashExcelParserService::validateFileLevelDebitAccounts($rows, $headers);
+
+        $this->assertFalse($result['is_valid']);
+        $this->assertCount(2, $result['debit_accounts']);
+        $this->assertStringContainsString('File contains multiple debit accounts', $result['error_message']);
+        $this->assertStringContainsString('0100202707747', $result['error_message']);
+        $this->assertStringContainsString('0100224107522', $result['error_message']);
+    }
 }

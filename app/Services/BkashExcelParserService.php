@@ -244,6 +244,47 @@ class BkashExcelParserService
     }
 
     /**
+     * Validate Single Debit Account rule at the file level before processing rows.
+     *
+     * @return array ['is_valid' => bool, 'debit_accounts' => array, 'error_message' => string|null]
+     */
+    public static function validateFileLevelDebitAccounts(array $importRows, array $headerRow): array
+    {
+        $detectedAccounts = [];
+
+        foreach ($importRows as $index => $row) {
+            if ($index === 0 || empty(array_filter((array) $row))) {
+                continue;
+            }
+
+            $rowArr = array_values((array) $row);
+            $mapped = static::mapRowData($headerRow, $rowArr);
+            $debitAcc = static::cleanString($mapped['credit_account_no'] ?? null, 100);
+
+            if (!empty($debitAcc)) {
+                $detectedAccounts[$debitAcc] = true;
+            }
+        }
+
+        $uniqueAccounts = array_keys($detectedAccounts);
+
+        if (count($uniqueAccounts) > 1) {
+            $accountsStr = implode(', ', $uniqueAccounts);
+            return [
+                'is_valid'       => false,
+                'debit_accounts' => $uniqueAccounts,
+                'error_message'  => "File contains multiple debit accounts: {$accountsStr} — expected single debit account per file.",
+            ];
+        }
+
+        return [
+            'is_valid'       => true,
+            'debit_accounts' => $uniqueAccounts,
+            'error_message'  => null,
+        ];
+    }
+
+    /**
      * Get whitelisted debit accounts.
      */
     public static function getDebitAccountsWhitelist(): array

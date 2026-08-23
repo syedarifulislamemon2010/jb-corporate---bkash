@@ -110,6 +110,21 @@ class UploadBkashExcel extends Page implements HasForms
             return;
         }
 
+        $headerRow = array_values((array)($importRows[0] ?? []));
+
+        // File-Level Validation - Single Debit Account Rule
+        $fileLevelValidation = BkashExcelParserService::validateFileLevelDebitAccounts($importRows, $headerRow);
+
+        if (!$fileLevelValidation['is_valid']) {
+            Notification::make()
+                ->title('Upload Rejected: Multiple Debit Accounts')
+                ->body($fileLevelValidation['error_message'])
+                ->danger()
+                ->persistent()
+                ->send();
+            return;
+        }
+
         $sha256 = hash_file('sha256', $filePath);
 
         $batchData = [
@@ -132,8 +147,6 @@ class UploadBkashExcel extends Page implements HasForms
 
         $validCount = 0;
         $totalAmount = 0.0;
-
-        $headerRow = array_values((array)($importRows[0] ?? []));
 
         foreach ($importRows as $index => $row) {
             if ($index === 0 || empty(array_filter((array)$row))) {

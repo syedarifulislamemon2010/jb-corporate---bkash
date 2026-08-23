@@ -57,7 +57,48 @@ class ProcessBkashFileJob implements ShouldQueue
 
         $sha256 = hash_file('sha256', $this->localFilePath);
 
-        // Create batch record
+        $headerRow = array_values((array) ($importRows[0] ?? []));
+
+        // Step 1: File-Level Validation - Single Debit Account Rule
+        $fileLevelValidation = BkashExcelParserService::validateFileLevelDebitAccounts($importRows, $headerRow);
+
+        if (!$fileLevelValidation['is_valid']) {
+            $errorMsg = $fileLevelValidation['error_message'];
+            Log::error("ProcessBkashFileJob: File {$fileName} rejected. {$errorMsg}");
+
+            // Create batch marked as rejected
+            $batch = BkashTransactionBatch::create([
+                'file_name'        => $fileName,
+                'transaction_type' => $this->channelType,
+                'sha256'           => $sha256,
+                'total_data'       => 0,
+                'total_amount'     => 0.00,
+                'status_id'        => BkashTransaction::STATUS_REJECTED,
+                'created_by'       => $this->createdBy,
+                'create_date'      => Carbon::now(),
+            ]);
+
+            // Create failed transaction record so checker/admin sees the file-level error on UI
+            BkashFailedTransaction::create([
+                'batch_id'          => $batch->id,
+                'file_name'         => $fileName,
+                'row_number'        => 0,
+                'transaction_type'  => $this->channelType,
+                'reference_id'      => 'FILE_LEVEL_ERROR',
+                'debit_account_no'  => null,
+                'credit_account_no' => implode(', ', $fileLevelValidation['debit_accounts']),
+                'amount'            => 0.00,
+                'failure_code'      => 'MULTI_DEBIT_ACC',
+                'reject_reason'     => $errorMsg,
+            ]);
+
+            // Archive the processed file locally
+            (new SftpFileTransferService())->archiveLocalFile($this->localFilePath);
+
+            return;
+        }
+
+        // Create batch record for valid single debit account file
         $batch = BkashTransactionBatch::create([
             'file_name'        => $fileName,
             'transaction_type' => $this->channelType,
@@ -71,7 +112,6 @@ class ProcessBkashFileJob implements ShouldQueue
 
         $validCount = 0;
         $totalAmount = 0.00;
-        $headerRow = array_values((array) ($importRows[0] ?? []));
         $detectedDebitAccount = null;
 
         // Pre-fetch existing txn_ids to avoid N+1 queries
@@ -165,9 +205,9 @@ class ProcessBkashFileJob implements ShouldQueue
         }
 
         // Archive the processed file locally
-        (new SftpFileTransferService())->archiveLocalFile($this->localFilePath);
-
-        Log::info("ProcessBkashFileJob: Completed {$fileName} — {$validCount} valid, " . ($index - $validCount) . " failed.");
+        $totalProcessedRows = max(0, count($importRows) - 1);
+        $failedCount = max(0, $totalProcessedRows - $validCount);
+        Log::info("ProcessBkashFileJob: Completed {$fileName} — {$validCount} valid, {$failedCount} failed.");
     }
 
     public function failed(\Throwable $exception): void
