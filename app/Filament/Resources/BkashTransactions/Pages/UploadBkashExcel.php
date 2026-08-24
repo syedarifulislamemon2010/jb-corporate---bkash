@@ -154,7 +154,7 @@ class UploadBkashExcel extends Page implements HasForms
             }
 
             $rowArr = array_values((array)$row);
-            $mapped = BkashExcelParserService::mapRowData($headerRow, $rowArr);
+            $mapped = BkashExcelParserService::mapRowData($headerRow, $rowArr, $channelType);
 
             $refId            = BkashExcelParserService::cleanString($mapped['reference_id'] ?? null, 255);
             $accountName      = BkashExcelParserService::cleanString($mapped['debit_account_title'] ?? null, 150);
@@ -172,10 +172,14 @@ class UploadBkashExcel extends Page implements HasForms
                 $validCount++;
                 $totalAmount += $amount;
 
+                $parsedDate = $createDate ? Carbon::parse($createDate) : Carbon::now();
+
                 $txnData = [
                     'batch_id'             => $batch->id,
+                    'row_sequence'         => $index,
                     'transaction_type'     => $channelType,
                     'reference_id'         => Str::limit($refId, 255, ''),
+                    'bb_reference_number'  => $bbRef ? Str::limit($bbRef, 100, '') : null,
                     'txn_id'               => Str::limit($txnId, 100, ''),
                     'debit_account_title'  => $accountName ? Str::limit($accountName, 150, '') : null,
                     'debit_account_no'     => $accountNo ? Str::limit($accountNo, 100, '') : null,
@@ -186,7 +190,8 @@ class UploadBkashExcel extends Page implements HasForms
                     'amount'               => $amount,
                     'status_id'            => BkashTransaction::STATUS_PENDING_CHECKER,
                     'created_by'           => Str::limit(auth()->user()->name ?? 'SYSTEM', 255, ''),
-                    'create_date'          => $createDate ? Carbon::parse($createDate) : Carbon::now(),
+                    'create_date'          => $parsedDate,
+                    'value_date'           => $parsedDate->toDateString(),
                     'file_name'            => $fileName,
                 ];
 

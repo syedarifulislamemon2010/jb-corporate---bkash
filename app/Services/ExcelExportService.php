@@ -130,6 +130,110 @@ class ExcelExportService
         }, 200, $headers);
     }
 
+    /**
+     * Export transactions as 2-sheet XLSX format for Checker cross-checking.
+     * Matches exact sample file format:
+     * Sheet 1: "RTGS & BEFTN"
+     * Sheet 2: "Account to Account"
+     */
+    public static function exportCheckerReportXlsx(
+        Collection $transactions,
+        string $fileName = 'Transaction_Process_Report.xlsx'
+    ): StreamedResponse {
+        $spreadsheet = new \PhpOffice\PhpSpreadsheet\Spreadsheet();
+
+        // -------------------------------------------------------------
+        // Sheet 1: RTGS & BEFTN
+        // -------------------------------------------------------------
+        $sheet1 = $spreadsheet->getActiveSheet();
+        $sheet1->setTitle('RTGS & BEFTN');
+
+        $headers1 = [
+            'Date',
+            'Ref No.',
+            'A/C Name',
+            'Beneficiary A/C No',
+            'Bank & Branch Name',
+            'Routing Code',
+            'Amount(BDT)',
+            'Debit Account',
+            'Txn ID',
+        ];
+
+        foreach ($headers1 as $colIdx => $h) {
+            $colLetter = \PhpOffice\PhpSpreadsheet\Cell\Coordinate::stringFromColumnIndex($colIdx + 1);
+            $sheet1->setCellValue("{$colLetter}1", $h);
+            $sheet1->getStyle("{$colLetter}1")->getFont()->setBold(true);
+        }
+
+        $row1 = 2;
+        $rtgsBeftnTxns = $transactions->filter(fn($t) => in_array($t->transaction_type, ['RTGS', 'BEFTN']));
+        foreach ($rtgsBeftnTxns as $t) {
+            $bankBranch = trim(($t->credit_routing ? $t->credit_routing . ' ' : '') . ($t->credit_bank ?? ''));
+            $sheet1->setCellValue("A{$row1}", $t->create_date?->format('d/m/Y') ?? $t->created_at?->format('d/m/Y'));
+            $sheet1->setCellValue("B{$row1}", $t->bb_reference_number ?: $t->reference_id);
+            $sheet1->setCellValue("C{$row1}", $t->debit_account_title);
+            $sheet1->setCellValueExplicit("D{$row1}", (string) $t->debit_account_no, \PhpOffice\PhpSpreadsheet\Cell\DataType::TYPE_STRING);
+            $sheet1->setCellValue("E{$row1}", $bankBranch);
+            $sheet1->setCellValueExplicit("F{$row1}", (string) $t->debit_routing, \PhpOffice\PhpSpreadsheet\Cell\DataType::TYPE_STRING);
+            $sheet1->setCellValue("G{$row1}", (float) $t->amount);
+            $sheet1->setCellValueExplicit("H{$row1}", (string) $t->credit_account_no, \PhpOffice\PhpSpreadsheet\Cell\DataType::TYPE_STRING);
+            $sheet1->setCellValue("I{$row1}", $t->txn_id);
+            $row1++;
+        }
+
+        // -------------------------------------------------------------
+        // Sheet 2: Account to Account
+        // -------------------------------------------------------------
+        $sheet2 = $spreadsheet->createSheet();
+        $sheet2->setTitle('Account to Account');
+
+        $headers2 = [
+            'Date',
+            'Ref. No.',
+            'Bank Account Name',
+            'Bank Account Number',
+            'Amount in Taka',
+            'Debit Account',
+            'Txn ID',
+        ];
+
+        foreach ($headers2 as $colIdx => $h) {
+            $colLetter = \PhpOffice\PhpSpreadsheet\Cell\Coordinate::stringFromColumnIndex($colIdx + 1);
+            $sheet2->setCellValue("{$colLetter}1", $h);
+            $sheet2->getStyle("{$colLetter}1")->getFont()->setBold(true);
+        }
+
+        $row2 = 2;
+        $a2aTxns = $transactions->filter(fn($t) => $t->transaction_type === 'A2A');
+        foreach ($a2aTxns as $t) {
+            $sheet2->setCellValue("A{$row2}", $t->create_date?->format('d/m/Y') ?? $t->created_at?->format('d/m/Y'));
+            $sheet2->setCellValue("B{$row2}", $t->reference_id);
+            $sheet2->setCellValue("C{$row2}", $t->debit_account_title);
+            $sheet2->setCellValueExplicit("D{$row2}", (string) $t->debit_account_no, \PhpOffice\PhpSpreadsheet\Cell\DataType::TYPE_STRING);
+            $sheet2->setCellValue("E{$row2}", (float) $t->amount);
+            $sheet2->setCellValueExplicit("F{$row2}", (string) $t->credit_account_no, \PhpOffice\PhpSpreadsheet\Cell\DataType::TYPE_STRING);
+            $sheet2->setCellValue("G{$row2}", $t->txn_id);
+            $row2++;
+        }
+
+        // Set active sheet back to first sheet
+        $spreadsheet->setActiveSheetIndex(0);
+
+        $headers = [
+            'Content-Type' => 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+            'Content-Disposition' => "attachment; filename=\"{$fileName}\"",
+            'Pragma' => 'no-cache',
+            'Cache-Control' => 'must-revalidate, post-check=0, pre-check=0',
+            'Expires' => '0',
+        ];
+
+        return response()->stream(function () use ($spreadsheet) {
+            $writer = new \PhpOffice\PhpSpreadsheet\Writer\Xlsx($spreadsheet);
+            $writer->save('php://output');
+        }, 200, $headers);
+    }
+
     private static function statusLabel(int $statusId): string
     {
         return match ($statusId) {

@@ -28,9 +28,23 @@ class ListBkashTransactions extends ListRecords
                 ->color('primary')
                 ->url(BkashTransactionResource::getUrl('upload')),
 
-            Action::make('download_csv')
-                ->label('Download for Cross-Check')
+            Action::make('export_excel')
+                ->label('Export Report (Excel)')
                 ->icon('heroicon-o-arrow-down-tray')
+                ->color('success')
+                ->action(function () {
+                    $transactions = BkashTransaction::where('status_id', BkashTransaction::STATUS_PENDING_CHECKER)
+                        ->orderBy('create_date', 'desc')
+                        ->get();
+
+                    $fileName = 'Transaction_Process_Report_' . now()->format('Ymd_His') . '.xlsx';
+
+                    return ExcelExportService::exportCheckerReportXlsx($transactions, $fileName);
+                }),
+
+            Action::make('download_csv')
+                ->label('Export CSV')
+                ->icon('heroicon-o-document-text')
                 ->color('gray')
                 ->action(function () {
                     $transactions = BkashTransaction::where('status_id', BkashTransaction::STATUS_PENDING_CHECKER)

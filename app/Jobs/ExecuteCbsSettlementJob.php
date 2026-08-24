@@ -27,6 +27,8 @@ class ExecuteCbsSettlementJob implements ShouldQueue
 
         $transactions = BkashTransaction::whereIn('id', $this->transactionIds)
             ->where('status_id', BkashTransaction::STATUS_FINAL_AUTHORIZED)
+            ->orderBy('row_sequence', 'asc')
+            ->orderBy('id', 'asc')
             ->get();
 
         foreach ($transactions as $txn) {

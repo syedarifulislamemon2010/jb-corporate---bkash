@@ -27,6 +27,7 @@ class BkashTransaction extends Model
     protected $fillable = [
         'batch_id',
         'file_name',
+        'row_sequence',
         'transaction_type',
         'reference_id',
         'bb_reference_number',

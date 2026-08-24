@@ -119,7 +119,7 @@ class ProcessBkashFileJob implements ShouldQueue
         foreach ($importRows as $idx => $r) {
             if ($idx === 0) continue;
             $rowArr = array_values((array) $r);
-            $m = BkashExcelParserService::mapRowData($headerRow, $rowArr);
+            $m = BkashExcelParserService::mapRowData($headerRow, $rowArr, $this->channelType);
             if (!empty($m['txn_id'])) {
                 $allTxnIds[] = $m['txn_id'];
             }
@@ -133,7 +133,7 @@ class ProcessBkashFileJob implements ShouldQueue
             }
 
             $rowArr = array_values((array) $row);
-            $mapped = BkashExcelParserService::mapRowData($headerRow, $rowArr);
+            $mapped = BkashExcelParserService::mapRowData($headerRow, $rowArr, $this->channelType);
 
             // Validate row
             $validation = BkashExcelParserService::validateRow(
@@ -158,9 +158,12 @@ class ProcessBkashFileJob implements ShouldQueue
                 $validCount++;
                 $totalAmount += $amount;
 
+                $parsedDate = $createDate ? Carbon::parse($createDate) : Carbon::now();
+
                 BkashTransaction::create([
                     'batch_id'             => $batch->id,
                     'file_name'            => $fileName,
+                    'row_sequence'         => $index,
                     'transaction_type'     => $this->channelType,
                     'reference_id'         => Str::limit($refId, 255, ''),
                     'bb_reference_number'  => $bbRef ? Str::limit($bbRef, 100, '') : null,
@@ -174,7 +177,8 @@ class ProcessBkashFileJob implements ShouldQueue
                     'amount'               => $amount,
                     'status_id'            => BkashTransaction::STATUS_PENDING_CHECKER,
                     'created_by'           => $this->createdBy,
-                    'create_date'          => $createDate ? Carbon::parse($createDate) : Carbon::now(),
+                    'create_date'          => $parsedDate,
+                    'value_date'           => $parsedDate->toDateString(),
                 ]);
             } else {
                 BkashFailedTransaction::create([
