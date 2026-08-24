@@ -31,9 +31,8 @@ class CheckerExcelExportTest extends TestCase
             'txn_id'              => 'TXN_BEFTN_01',
             'debit_account_title' => 'Jane Smith',
             'debit_account_no'    => '2050123456789',
-            'debit_routing'       => '125260856',
-            'credit_routing'      => 'Islami Bank',
-            'credit_bank'         => 'Gulshan Branch',
+            'credit_routing'      => '125260856',
+            'credit_bank'         => 'Islami Bank Gulshan Branch',
             'amount'              => 15000.00,
             'credit_account_no'   => '0100202707747',
         ]);
@@ -46,9 +45,8 @@ class CheckerExcelExportTest extends TestCase
             'txn_id'              => 'TXN_RTGS_01',
             'debit_account_title' => 'Acme Corp',
             'debit_account_no'    => '3050123456789',
-            'debit_routing'       => '225260856',
-            'credit_routing'      => 'City Bank',
-            'credit_bank'         => 'Principal Branch',
+            'credit_routing'      => '225260856',
+            'credit_bank'         => 'City Bank Principal Branch',
             'amount'              => 250000.00,
             'credit_account_no'   => '0100224107522',
         ]);

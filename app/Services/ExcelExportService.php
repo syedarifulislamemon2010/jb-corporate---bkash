@@ -169,13 +169,14 @@ class ExcelExportService
         $row1 = 2;
         $rtgsBeftnTxns = $transactions->filter(fn($t) => in_array($t->transaction_type, ['RTGS', 'BEFTN']));
         foreach ($rtgsBeftnTxns as $t) {
-            $bankBranch = trim(($t->credit_routing ? $t->credit_routing . ' ' : '') . ($t->credit_bank ?? ''));
+            $bankBranch = $t->credit_bank ?: ($t->credit_routing ?: '');
+            $routingCode = $t->credit_routing ?: ($t->debit_routing ?: '');
             $sheet1->setCellValue("A{$row1}", $t->create_date?->format('d/m/Y') ?? $t->created_at?->format('d/m/Y'));
             $sheet1->setCellValue("B{$row1}", $t->bb_reference_number ?: $t->reference_id);
             $sheet1->setCellValue("C{$row1}", $t->debit_account_title);
             $sheet1->setCellValueExplicit("D{$row1}", (string) $t->debit_account_no, \PhpOffice\PhpSpreadsheet\Cell\DataType::TYPE_STRING);
             $sheet1->setCellValue("E{$row1}", $bankBranch);
-            $sheet1->setCellValueExplicit("F{$row1}", (string) $t->debit_routing, \PhpOffice\PhpSpreadsheet\Cell\DataType::TYPE_STRING);
+            $sheet1->setCellValueExplicit("F{$row1}", (string) $routingCode, \PhpOffice\PhpSpreadsheet\Cell\DataType::TYPE_STRING);
             $sheet1->setCellValue("G{$row1}", (float) $t->amount);
             $sheet1->setCellValueExplicit("H{$row1}", (string) $t->credit_account_no, \PhpOffice\PhpSpreadsheet\Cell\DataType::TYPE_STRING);
             $sheet1->setCellValue("I{$row1}", $t->txn_id);

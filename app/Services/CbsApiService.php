@@ -129,7 +129,7 @@ class CbsApiService
         $debitAcc = $txn->credit_account_no ?: '0100202707747'; // Default to bKash TCSA
         $creditAcc = $txn->debit_account_no;
         $creditTitle = $txn->debit_account_title ?: 'bKash Beneficiary';
-        $routingNo = $txn->debit_routing ?: ($txn->credit_routing ?: '315260856');
+        $routingNo = $txn->credit_routing ?: ($txn->debit_routing ?: '315260856');
 
         $payload = [
             'uniqueId'           => (string) ($txn->txn_id ?: $txn->reference_id),

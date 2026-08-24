@@ -148,14 +148,12 @@ class BkashExcelParserService
                 $cleanVal = preg_replace('/[^0-9.]/', '', str_replace(',', '', (string) $val));
                 $mapped['amount'] = (float) $cleanVal;
             } elseif (in_array($cleanHeader, ['routingcode', 'routingnumber', 'beneroutingno', 'routingno'])) {
-                // Note: This is the beneficiary/credit-side routing number from the sample files
-                $mapped['debit_routing'] = static::cleanString((string) $val, 20);
-            } elseif (in_array($cleanHeader, ['bankname', 'benebankname'])) {
-                $mapped['credit_routing'] = static::cleanString((string) $val, 100);
-            } elseif (in_array($cleanHeader, ['branchname', 'benebranchname'])) {
+                // Beneficiary Routing Number (Credit-side routing)
+                $routingVal = static::cleanString((string) $val, 20);
+                $mapped['credit_routing'] = $routingVal;
+                $mapped['debit_routing']  = $routingVal; // Backward compatibility
+            } elseif (in_array($cleanHeader, ['bankname', 'benebankname', 'branchname', 'benebranchname', 'bankbranchname'])) {
                 $mapped['credit_bank'] = static::cleanString((string) $val, 255);
-            } elseif (in_array($cleanHeader, ['bankbranchname'])) {
-                $mapped['credit_routing'] = static::cleanString((string) $val, 100);
             } elseif (in_array($cleanHeader, ['debitaccount', 'debitaccountno'])) {
                 $mapped['credit_account_no'] = static::cleanString((string) $val, 100);
             } elseif (in_array($cleanHeader, ['txnid', 'transactionid'])) {

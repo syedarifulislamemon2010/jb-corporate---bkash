@@ -146,4 +146,16 @@ class SftpMultiFolderFetchTest extends TestCase
         $this->assertFalse($result['is_valid']);
         $this->assertEquals('INVALID_ACCOUNT_NO', $result['failure_code']);
     }
+
+    public function test_routing_field_mapping_to_credit_routing(): void
+    {
+        $headers = ['Ref No', 'Debit Account', 'Amount', 'Bank Account Name', 'Bank Account No', 'Routing Code', 'Bank & Branch Name'];
+        $row = ['REF_RTGS_88', '0100202707747', '500000', 'Customer 1', '4512442413566', '225260856', 'City Bank Principal Branch'];
+
+        $mapped = BkashExcelParserService::mapRowData($headers, $row, 'RTGS');
+
+        // Assert Routing Code maps to credit_routing (beneficiary routing)
+        $this->assertEquals('225260856', $mapped['credit_routing']);
+        $this->assertEquals('City Bank Principal Branch', $mapped['credit_bank']);
+    }
 }
