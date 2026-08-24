@@ -110,6 +110,15 @@ class BkashTransactionsTable
                     ]),
             ])
             ->toolbarActions([
+                BulkAction::make('export_selected_excel')
+                    ->label('Export Selected (Excel)')
+                    ->icon('heroicon-o-arrow-down-tray')
+                    ->color('info')
+                    ->action(function (Collection $records) {
+                        $fileName = 'Transaction_Process_Report_' . now()->format('Ymd_His') . '.xlsx';
+                        return ExcelExportService::exportCheckerReportXlsx($records, $fileName);
+                    }),
+
                 BulkAction::make('check_selected')
                     ->label('Check Selected Transactions')
                     ->icon('heroicon-o-check-circle')
