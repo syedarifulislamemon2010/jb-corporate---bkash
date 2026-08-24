@@ -106,25 +106,24 @@ class CbsApiService
             ];
         }
 
-        $channel = strtoupper((string) $txn->transaction_type);
-
-        // Select endpoint based on channel type
-        if ($channel === 'A2A') {
-            return $this->postA2aTransaction($txn, $token);
-        }
-
         return $this->postBatchTransaction($txn, $token);
     }
 
     /**
-     * Post BEFTN or RTGS transaction to /api/bkash-transactions
+     * Post A2A (type 1), BEFTN (type 2), or RTGS (type 3) transaction to /api/bkash-transactions
      */
     protected function postBatchTransaction(BkashTransaction $txn, string $token): array
     {
         $endpoint = $this->baseUrl . config('bkash.cbs_api.endpoints.transactions', '/api/bkash-transactions');
 
-        // Channel code: 2 for BEFTN, 3 for RTGS
-        $channelCode = strtoupper((string)$txn->transaction_type) === 'RTGS' ? 3 : 2;
+        // Channel code: 1 for A2A, 2 for BEFTN, 3 for RTGS
+        $channelType = strtoupper((string) $txn->transaction_type);
+        $channelCode = match ($channelType) {
+            'A2A'   => 1,
+            'BEFTN' => 2,
+            'RTGS'  => 3,
+            default => 1,
+        };
 
         $debitAcc = $txn->credit_account_no ?: '0100202707747'; // Default to bKash TCSA
         $creditAcc = $txn->debit_account_no;
@@ -143,7 +142,7 @@ class CbsApiService
         ];
 
         try {
-            Log::info("CBS API: Posting {$txn->transaction_type} Txn {$txn->reference_id} to {$endpoint}");
+            Log::info("CBS API: Posting {$txn->transaction_type} Txn {$txn->reference_id} [Type {$channelCode}] to {$endpoint}");
 
             $response = Http::withToken($token)
                 ->timeout($this->timeout)
@@ -167,56 +166,6 @@ class CbsApiService
             ];
         } catch (\Throwable $e) {
             Log::error("CBS API: Network exception posting Txn {$txn->reference_id}: " . $e->getMessage());
-
-            return [
-                'success'     => false,
-                'status_code' => 500,
-                'response'    => null,
-                'message'     => 'API Network Error: ' . $e->getMessage(),
-            ];
-        }
-    }
-
-    /**
-     * Post A2A / Probashi Card transaction to /api/probashi-card-info
-     */
-    protected function postA2aTransaction(BkashTransaction $txn, string $token): array
-    {
-        $endpoint = $this->baseUrl . config('bkash.cbs_api.endpoints.a2a_probashi', '/api/probashi-card-info');
-
-        $payload = [
-            'bmet_id'               => (string) ($txn->reference_id ?: 'BMET_' . $txn->id),
-            'account_no'            => (string) ($txn->debit_account_no ?: $txn->credit_account_no),
-            'card_title'            => (string) ($txn->debit_account_title ?: 'G S KIBRIA'),
-            'visa_number'           => (string) ($txn->visa_number ?? 'EA1204512'),
-            'visa_issue_date'       => (string) ($txn->visa_issue_date ?? now()->format('Y-m-d')),
-            'visa_issue_place'      => (string) ($txn->visa_issue_place ?? 'DHAKA'),
-            'passport_number'       => (string) ($txn->passport_number ?? '5214512344'),
-            'recruiting_licence_no' => (string) ($txn->recruiting_licence_no ?? '112233'),
-            'destination_country'   => (string) ($txn->destination_country ?? 'USA'),
-            'customer_image'        => (string) ($txn->customer_image ?? ''),
-            'qr_image'              => (string) ($txn->qr_image ?? ''),
-        ];
-
-        try {
-            Log::info("CBS API: Posting A2A Txn {$txn->reference_id} to {$endpoint}");
-
-            $response = Http::withToken($token)
-                ->timeout($this->timeout)
-                ->retry($this->retryAttempts, 1000)
-                ->post($endpoint, $payload);
-
-            $isSuccess = $response->successful();
-            $data = $response->json() ?? $response->body();
-
-            return [
-                'success'     => $isSuccess,
-                'status_code' => $response->status(),
-                'response'    => $data,
-                'message'     => $isSuccess ? 'A2A transaction posted successfully.' : ($response->json('message') ?? 'A2A API rejected transaction.'),
-            ];
-        } catch (\Throwable $e) {
-            Log::error("CBS API: Network exception posting A2A Txn {$txn->reference_id}: " . $e->getMessage());
 
             return [
                 'success'     => false,

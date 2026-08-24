@@ -205,7 +205,11 @@ class ProcessBkashFileJob implements ShouldQueue
 
         // Send notifications
         if ($validCount > 0) {
-            NotificationService::dispatchStage1($fileName, $validCount, $totalAmount);
+            $uploaderUser = is_numeric($this->createdBy)
+                ? \App\Models\User::find((int) $this->createdBy)
+                : \App\Models\User::where('name', $this->createdBy)->first();
+
+            NotificationService::dispatchStage1($fileName, $validCount, $totalAmount, $uploaderUser);
         }
 
         // Archive the processed file locally

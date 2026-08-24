@@ -43,13 +43,13 @@ class BkashTransactionResource extends Resource
 
     protected static \UnitEnum|string|null $navigationGroup = 'Transaction Pipeline';
 
-    protected static ?string $navigationLabel = 'Create Transactions';
+    protected static ?string $navigationLabel = 'Upload & Verify Files';
 
-    protected static ?string $pluralModelLabel = 'Create Transactions';
+    protected static ?string $pluralModelLabel = 'Upload & Verify Files';
 
     protected static ?int $navigationSort = 1;
 
-    protected static \BackedEnum|string|null $navigationIcon = 'heroicon-o-document-plus';
+    protected static \BackedEnum|string|null $navigationIcon = 'heroicon-o-document-arrow-up';
 
     public static function getEloquentQuery(): Builder
     {
@@ -85,7 +85,7 @@ class BkashTransactionResource extends Resource
 
     public static function canCreate(): bool
     {
-        return true;
+        return false;
     }
 
     public static function canEdit(Model $record): bool
@@ -102,7 +102,6 @@ class BkashTransactionResource extends Resource
     {
         return [
             'index'  => ListBkashTransactions::route('/'),
-            'create' => CreateBkashTransaction::route('/create'),
             'upload' => UploadBkashExcel::route('/upload'),
         ];
     }

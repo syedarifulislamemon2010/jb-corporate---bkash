@@ -125,21 +125,24 @@ class BkashTransactionsTable
                     ->color('success')
                     ->requiresConfirmation()
                     ->action(function (Collection $records) {
-                        $checkerName = Auth::user()->name ?? 'Checker User';
+                        $currentUser = Auth::user();
+                        $checkerName = $currentUser->name ?? 'Checker User';
+                        $checkerId   = $currentUser->id ?? null;
                         $firstRecord = $records->first();
                         $fileName = $firstRecord->file_name ?? 'bKash_File.xlsx';
                         $totalTrn = $records->count();
                         $totalAmount = (float)$records->sum('amount');
 
-                        $records->each(function ($record) use ($checkerName) {
+                        $records->each(function ($record) use ($checkerName, $checkerId) {
                             $record->update([
-                                'status_id'  => BkashTransaction::STATUS_CHECKED,
-                                'checked_by' => $checkerName,
-                                'checked_at' => Carbon::now(),
+                                'status_id'     => BkashTransaction::STATUS_CHECKED,
+                                'checked_by'    => $checkerName,
+                                'checked_by_id' => $checkerId,
+                                'checked_at'    => Carbon::now(),
                             ]);
                         });
 
-                        NotificationService::dispatchStage2($fileName, $totalTrn, $totalAmount, $checkerName);
+                        NotificationService::dispatchStage2($fileName, $totalTrn, $totalAmount, $checkerName, $currentUser);
                     }),
             ]);
     }

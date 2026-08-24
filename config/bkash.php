@@ -26,7 +26,6 @@ return [
         'endpoints'      => [
             'login'        => '/api/login',
             'transactions' => '/api/bkash-transactions',
-            'a2a_probashi' => '/api/probashi-card-info',
         ],
     ],
 

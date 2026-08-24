@@ -87,21 +87,53 @@ class BkashTransactionAuthorizationsTable
                     ->color('success')
                     ->requiresConfirmation()
                     ->action(function (Collection $records) {
-                        $authorizerName = Auth::user()->name ?? 'Authorizer 1';
+                        $currentUser = Auth::user();
+                        $currentUserId = $currentUser->id ?? null;
+                        $currentUserName = $currentUser->name ?? 'Authorizer 1';
+
+                        // 3-Person Segregation of Duties Check
+                        $unauthorizedRecords = $records->filter(function ($record) use ($currentUserId, $currentUserName) {
+                            return ($currentUserId && $record->checked_by_id === $currentUserId) ||
+                                   ($record->checked_by && $record->checked_by === $currentUserName);
+                        });
+
+                        if ($unauthorizedRecords->isNotEmpty()) {
+                            \Filament\Notifications\Notification::make()
+                                ->title('Authorization Blocked (Segregation of Duties)')
+                                ->body('You checked this file; you cannot also provide 1st Authorization on it.')
+                                ->danger()
+                                ->persistent()
+                                ->send();
+
+                            // Filter to only records that this user did NOT check
+                            $records = $records->diff($unauthorizedRecords);
+                        }
+
+                        if ($records->isEmpty()) {
+                            return;
+                        }
+
                         $firstRecord = $records->first();
                         $fileName = $firstRecord->file_name ?? 'bKash_File.xlsx';
                         $totalTrn = $records->count();
                         $totalAmount = (float)$records->sum('amount');
 
-                        $records->each(function ($record) use ($authorizerName) {
+                        $records->each(function ($record) use ($currentUserName, $currentUserId) {
                             $record->update([
-                                'status_id'     => BkashTransaction::STATUS_AUTH_1_APPROVED,
-                                'approved_by_1' => $authorizerName,
-                                'approved_at_1' => Carbon::now(),
+                                'status_id'        => BkashTransaction::STATUS_AUTH_1_APPROVED,
+                                'approved_by_1'    => $currentUserName,
+                                'approved_by_1_id' => $currentUserId,
+                                'approved_at_1'    => Carbon::now(),
                             ]);
                         });
 
-                        NotificationService::dispatchStage3($fileName, $totalTrn, $totalAmount, $authorizerName);
+                        \Filament\Notifications\Notification::make()
+                            ->title('1st Level Authorized')
+                            ->body("Successfully authorized {$totalTrn} transactions.")
+                            ->success()
+                            ->send();
+
+                        NotificationService::dispatchStage3($fileName, $totalTrn, $totalAmount, $currentUserName, $currentUser);
                     }),
             ]);
     }

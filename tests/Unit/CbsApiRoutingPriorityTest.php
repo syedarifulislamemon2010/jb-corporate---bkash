@@ -15,9 +15,9 @@ class CbsApiRoutingPriorityTest extends TestCase
     public function test_cbs_settlement_sends_credit_routing_as_primary_routing_no(): void
     {
         Http::fake([
-            '*/api/token' => Http::response([
+            '*/api/login' => Http::response([
                 'status' => 'APPROVED',
-                'data'   => ['token' => 'mock_jwt_token_123'],
+                'token'  => 'mock_jwt_token_123',
             ], 200),
             '*/api/bkash-transactions' => Http::response([
                 'status'  => 'APPROVED',
@@ -56,9 +56,9 @@ class CbsApiRoutingPriorityTest extends TestCase
     public function test_cbs_settlement_uses_debit_routing_as_backward_compatible_fallback(): void
     {
         Http::fake([
-            '*/api/token' => Http::response([
+            '*/api/login' => Http::response([
                 'status' => 'APPROVED',
-                'data'   => ['token' => 'mock_jwt_token_123'],
+                'token'  => 'mock_jwt_token_123',
             ], 200),
             '*/api/bkash-transactions' => Http::response([
                 'status'  => 'APPROVED',
@@ -92,6 +92,50 @@ class CbsApiRoutingPriorityTest extends TestCase
                 return isset($payload['creditRoutingNo']) && $payload['creditRoutingNo'] === '125260856';
             }
             return true;
+        });
+    }
+
+    public function test_a2a_transaction_settles_via_bkash_transactions_endpoint_with_type_1(): void
+    {
+        Http::fake([
+            '*/api/login' => Http::response([
+                'status' => 'APPROVED',
+                'token'  => 'mock_jwt_token_123',
+            ], 200),
+            '*/api/bkash-transactions' => Http::response([
+                'status'  => 'APPROVED',
+                'message' => 'A2A transaction posted successfully.',
+            ], 200),
+        ]);
+
+        $txn = BkashTransaction::create([
+            'transaction_type'    => 'A2A',
+            'reference_id'        => 'REF_A2A_UNIFIED_01',
+            'txn_id'              => 'TXN_A2A_UNIFIED_01',
+            'amount'              => 14137.17,
+            'credit_account_no'   => '0100202707747',
+            'debit_account_no'    => '0100224107522',
+            'debit_account_title' => 'Janata Bank Beneficiary',
+            'status_id'           => BkashTransaction::STATUS_FINAL_AUTHORIZED,
+        ]);
+
+        $service = new CbsApiService();
+        $result = $service->settleTransaction($txn);
+
+        $this->assertTrue($result['success']);
+
+        // Assert that request went to /api/bkash-transactions with type = 1
+        Http::assertSent(function ($request) {
+            if (str_contains($request->url(), '/api/bkash-transactions')) {
+                $payload = $request->data();
+                return isset($payload['type']) && $payload['type'] === 1 && $payload['amount'] == 14137.17;
+            }
+            return false;
+        });
+
+        // Assert Probashi card endpoint was NEVER called
+        Http::assertNotSent(function ($request) {
+            return str_contains($request->url(), 'probashi-card-info');
         });
     }
 }

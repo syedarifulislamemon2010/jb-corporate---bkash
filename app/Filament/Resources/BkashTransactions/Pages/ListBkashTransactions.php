@@ -19,9 +19,6 @@ class ListBkashTransactions extends ListRecords
     protected function getHeaderActions(): array
     {
         return [
-            CreateAction::make()
-                ->label('New Transaction'),
-
             Action::make('upload_excel')
                 ->label('Upload bKash Excel File')
                 ->icon('heroicon-o-document-arrow-up')

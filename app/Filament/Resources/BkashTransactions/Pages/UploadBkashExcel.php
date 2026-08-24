@@ -190,6 +190,7 @@ class UploadBkashExcel extends Page implements HasForms
                     'amount'               => $amount,
                     'status_id'            => BkashTransaction::STATUS_PENDING_CHECKER,
                     'created_by'           => Str::limit(auth()->user()->name ?? 'SYSTEM', 255, ''),
+                    'created_by_id'        => auth()->id(),
                     'create_date'          => $parsedDate,
                     'value_date'           => $parsedDate->toDateString(),
                     'file_name'            => $fileName,
@@ -215,19 +216,14 @@ class UploadBkashExcel extends Page implements HasForms
             }
         }
 
-
-
-
         $updateData = ['total_data' => $validCount];
         if (\Illuminate\Support\Facades\Schema::hasColumn('bkash_transaction_batch', 'total_amount')) {
             $updateData['total_amount'] = $totalAmount;
         }
         $batch->update($updateData);
 
-
-
         if ($validCount > 0) {
-            NotificationService::dispatchStage1($fileName, $validCount, $totalAmount);
+            NotificationService::dispatchStage1($fileName, $validCount, $totalAmount, auth()->user());
         }
 
         Notification::make()
