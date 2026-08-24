@@ -109,22 +109,21 @@ class SendDailyEftReturnReportCommand extends Command
         $fromAddress = config('bkash.email_from_address', 'noreply@janatabank-bd.com');
         $fromName    = config('bkash.email_from_name', 'Janata Bank Corporate Portal');
 
-        try {
-            Mail::send([], [], function ($message) use ($recipients, $fromAddress, $fromName, $targetDate, $filePath, $fileName, $returns) {
-                $totalAmount = number_format($returns->sum('amount'), 2);
-                $body = "Dear Sir/Madam,\n\n"
-                      . "Please find attached the Daily EFT Return Report for {$targetDate}.\n\n"
-                      . "Summary:\n"
-                      . "- Total Returned Transactions: {$returns->count()}\n"
-                      . "- Total Returned Amount: BDT {$totalAmount}\n\n"
-                      . "Thank you.\n\n"
-                      . "Best Regards,\n"
-                      . "Janata Bank PLC";
+        $totalAmount = number_format($returns->sum('amount'), 2);
+        $body = "Dear Sir/Madam,\n\n"
+              . "Please find attached the Daily EFT Return Report for {$targetDate}.\n\n"
+              . "Summary:\n"
+              . "- Total Returned Transactions: {$returns->count()}\n"
+              . "- Total Returned Amount: BDT {$totalAmount}\n\n"
+              . "Thank you.\n\n"
+              . "Best Regards,\n"
+              . "Janata Bank PLC";
 
+        try {
+            Mail::raw($body, function ($message) use ($recipients, $fromAddress, $fromName, $targetDate, $filePath, $fileName) {
                 $message->from($fromAddress, $fromName)
                     ->to($recipients)
                     ->subject("Daily EFT Return Report - {$targetDate} [Janata Bank Corporate Portal]")
-                    ->text($body)
                     ->attach($filePath, [
                         'as'   => $fileName,
                         'mime' => 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
