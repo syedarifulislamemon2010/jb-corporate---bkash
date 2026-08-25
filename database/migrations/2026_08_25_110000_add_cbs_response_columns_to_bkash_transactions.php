@@ -12,9 +12,15 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('bkash_transactions', function (Blueprint $table) {
-            $table->string('response_id', 100)->nullable()->index();
-            $table->string('confirmed_by', 50)->nullable();
-            $table->dateTime('confirmed_at')->nullable();
+            if (!Schema::hasColumn('bkash_transactions', 'response_id')) {
+                $table->string('response_id', 100)->nullable()->index();
+            }
+            if (!Schema::hasColumn('bkash_transactions', 'confirmed_by')) {
+                $table->string('confirmed_by', 50)->nullable();
+            }
+            if (!Schema::hasColumn('bkash_transactions', 'confirmed_at')) {
+                $table->dateTime('confirmed_at')->nullable();
+            }
         });
     }
 
@@ -24,8 +30,15 @@ return new class extends Migration
     public function down(): void
     {
         Schema::table('bkash_transactions', function (Blueprint $table) {
-            $table->dropIndex(['response_id']);
-            $table->dropColumn(['response_id', 'confirmed_by', 'confirmed_at']);
+            if (Schema::hasColumn('bkash_transactions', 'response_id')) {
+                $table->dropColumn('response_id');
+            }
+            if (Schema::hasColumn('bkash_transactions', 'confirmed_by')) {
+                $table->dropColumn('confirmed_by');
+            }
+            if (Schema::hasColumn('bkash_transactions', 'confirmed_at')) {
+                $table->dropColumn('confirmed_at');
+            }
         });
     }
 };

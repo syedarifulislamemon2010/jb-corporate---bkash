@@ -242,9 +242,16 @@ class Dashboard extends BaseDashboard
         $statuses = [];
 
         foreach ($accounts as $accNo => $label) {
-            $latestLog = \App\Models\Mt940DeliveryLog::where('account_no', $accNo)
-                ->latest('delivered_at')
-                ->first();
+            $latestLog = null;
+            try {
+                if (\Illuminate\Support\Facades\Schema::hasTable('mt940_delivery_logs')) {
+                    $latestLog = \App\Models\Mt940DeliveryLog::where('account_no', $accNo)
+                        ->latest('delivered_at')
+                        ->first();
+                }
+            } catch (\Throwable $e) {
+                $latestLog = null;
+            }
 
             if ($latestLog) {
                 $statuses[] = [
