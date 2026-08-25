@@ -7,66 +7,48 @@ use App\Models\BkashTransaction;
 use App\Models\BkashTransactionBatch;
 use App\Models\EftReturn;
 use App\Models\NotificationOutbox;
+use Filament\Pages\Page;
 use Carbon\Carbon;
-use Filament\Pages\Dashboard as BaseDashboard;
-use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Str;
 
-class Dashboard extends BaseDashboard
+class Dashboard extends Page
 {
-    protected static \BackedEnum|string|null $navigationIcon = 'heroicon-o-squares-2x2';
-
-    protected static ?string $title = '';
-
-    protected static ?string $navigationLabel = 'Dashboard';
-
-    protected static ?int $navigationSort = -2;
+    protected static \BackedEnum|string|null $navigationIcon = 'heroicon-o-home';
 
     protected string $view = 'filament.pages.dashboard';
 
-    public function getTitle(): \Illuminate\Contracts\Support\Htmlable|string
-    {
-        return '';
-    }
+    protected static ?string $title = 'bKash Settlement Dashboard';
 
-    public function getHeaderWidgets(): array
-    {
-        return [];
-    }
+    protected static ?string $navigationLabel = 'Dashboard';
 
-    public function getFooterWidgets(): array
-    {
-        return [];
-    }
-
-    public function getColumns(): int | array
-    {
-        return 1;
-    }
+    protected static ?int $navigationSort = 0;
 
     /**
-     * Get SFTP Last Synced status & timestamp with date/month/year/time(h:m:s).
+     * Compute "Last synced" time dynamically from the latest activity across key tables.
      */
     public function getLastSynced(): array
     {
-        $latestBatchDate = BkashTransactionBatch::latest('created_at')->value('created_at');
-        $latestTxnDate   = BkashTransaction::latest('created_at')->value('created_at');
-        $latestNotifDate = NotificationOutbox::latest('created_at')->value('created_at');
+        $timestamps = [
+            BkashTransactionBatch::latest('created_at')->value('created_at'),
+            BkashTransaction::latest('created_at')->value('created_at'),
+            NotificationOutbox::latest('created_at')->value('created_at'),
+        ];
 
-        $latestSyncDate = collect([$latestBatchDate, $latestTxnDate, $latestNotifDate])
-            ->filter()
-            ->map(fn ($d) => $d instanceof Carbon ? $d : Carbon::parse($d))
-            ->max();
+        $validTimestamps = array_filter($timestamps);
 
-        if (!$latestSyncDate) {
-            return [
-                'formatted'  => 'No sync yet',
-                'is_delayed' => false,
-            ];
+        if (empty($validTimestamps)) {
+            $latestSyncDate = Carbon::now()->timezone('Asia/Dhaka');
+        } else {
+            $latestSyncDate = collect($validTimestamps)
+                ->map(fn($ts) => Carbon::parse($ts)->timezone('Asia/Dhaka'))
+                ->max();
         }
 
-        $diffInMinutes = (int) $latestSyncDate->diffInMinutes(now());
+        $diffInMinutes = Carbon::now()->timezone('Asia/Dhaka')->diffInMinutes($latestSyncDate);
 
         return [
+            'raw'        => $latestSyncDate,
+            'diff'       => $latestSyncDate->diffForHumans(),
             'formatted'  => $latestSyncDate->format('d M Y, h:i:s A'),
             'is_delayed' => $diffInMinutes >= 20,
         ];
@@ -77,21 +59,18 @@ class Dashboard extends BaseDashboard
      */
     public function getUrgencyBanner(): ?array
     {
-        $pendingCheckerFiles = BkashTransactionBatch::where('status_id', BkashTransaction::STATUS_PENDING_CHECKER)->count();
-        $pendingAuthFiles    = BkashTransactionBatch::whereIn('status_id', [
-            BkashTransaction::STATUS_CHECKED,
-            BkashTransaction::STATUS_AUTH_1_APPROVED,
-        ])->count();
+        $pendingAuthFiles    = BkashTransactionBatch::where('status_id', BkashTransaction::STATUS_PENDING_AUTHORIZATION)->count();
+        $pendingConfirmFiles = BkashTransactionBatch::where('status_id', BkashTransaction::STATUS_AUTHORIZED)->count();
 
-        $totalUrgent = $pendingCheckerFiles + $pendingAuthFiles;
+        $totalUrgent = $pendingAuthFiles + $pendingConfirmFiles;
         if ($totalUrgent <= 0) {
             return null;
         }
 
         return [
             'total'           => $totalUrgent,
-            'pending_checker' => $pendingCheckerFiles,
             'pending_auth'    => $pendingAuthFiles,
+            'pending_confirm' => $pendingConfirmFiles,
         ];
     }
 
@@ -105,18 +84,18 @@ class Dashboard extends BaseDashboard
         $stats = [];
 
         foreach ($channels as $channel) {
-            $pendingChecker = BkashTransactionBatch::where('transaction_type', $channel)
-                ->where('status_id', BkashTransaction::STATUS_PENDING_CHECKER)->count();
             $pendingAuth = BkashTransactionBatch::where('transaction_type', $channel)
-                ->whereIn('status_id', [BkashTransaction::STATUS_CHECKED, BkashTransaction::STATUS_AUTH_1_APPROVED])->count();
+                ->where('status_id', BkashTransaction::STATUS_PENDING_AUTHORIZATION)->count();
+            $pendingConfirm = BkashTransactionBatch::where('transaction_type', $channel)
+                ->where('status_id', BkashTransaction::STATUS_AUTHORIZED)->count();
             $settledToday = BkashTransactionBatch::where('transaction_type', $channel)
                 ->whereIn('status_id', [BkashTransaction::STATUS_FINAL_AUTHORIZED, BkashTransaction::STATUS_CBS_SUCCESS])
                 ->whereDate('updated_at', today())->count();
 
             $stats[$channel] = [
                 'is_live'         => in_array($channel, $enabled),
-                'pending_checker' => $pendingChecker,
                 'pending_auth'    => $pendingAuth,
+                'pending_confirm' => $pendingConfirm,
                 'settled_today'   => $settledToday,
                 'label'           => match($channel) {
                     'A2A'   => 'Live',
@@ -134,12 +113,11 @@ class Dashboard extends BaseDashboard
      */
     public function getActionStats(): array
     {
-        $pendingCheckerFiles = BkashTransactionBatch::where('status_id', BkashTransaction::STATUS_PENDING_CHECKER)->count();
-        $pendingCheckerTrns  = BkashTransaction::where('status_id', BkashTransaction::STATUS_PENDING_CHECKER)->count();
+        $pendingAuthFiles = BkashTransactionBatch::where('status_id', BkashTransaction::STATUS_PENDING_AUTHORIZATION)->count();
+        $pendingAuthTrns  = BkashTransaction::where('status_id', BkashTransaction::STATUS_PENDING_AUTHORIZATION)->count();
 
-        $pendingAuth1Files = BkashTransactionBatch::where('status_id', BkashTransaction::STATUS_CHECKED)->count();
-        $pendingAuth2Files = BkashTransactionBatch::where('status_id', BkashTransaction::STATUS_AUTH_1_APPROVED)->count();
-        $totalPendingAuth  = $pendingAuth1Files + $pendingAuth2Files;
+        $pendingConfirmFiles = BkashTransactionBatch::where('status_id', BkashTransaction::STATUS_AUTHORIZED)->count();
+        $pendingConfirmTrns  = BkashTransaction::where('status_id', BkashTransaction::STATUS_AUTHORIZED)->count();
 
         $settledTodayAmount = (float) BkashTransaction::whereIn('status_id', [
             BkashTransaction::STATUS_FINAL_AUTHORIZED,
@@ -152,16 +130,15 @@ class Dashboard extends BaseDashboard
         ])->whereDate('updated_at', today())->count();
 
         return [
-            'pending_checker' => [
-                'files'       => $pendingCheckerFiles,
-                'trns'        => $pendingCheckerTrns,
-                'url'         => '/admin/bkash-transactions',
-            ],
             'pending_auth' => [
-                'files'       => $totalPendingAuth,
-                'auth1_files' => $pendingAuth1Files,
-                'auth2_files' => $pendingAuth2Files,
+                'files'       => $pendingAuthFiles,
+                'trns'        => $pendingAuthTrns,
                 'url'         => '/admin/bkash-transaction-authorizations',
+            ],
+            'pending_confirm' => [
+                'files'       => $pendingConfirmFiles,
+                'trns'        => $pendingConfirmTrns,
+                'url'         => '/admin/bkash-transaction-confirmations',
             ],
             'settled_today' => [
                 'amount'      => $settledTodayAmount,
@@ -180,51 +157,45 @@ class Dashboard extends BaseDashboard
         if ($failedCount === 0) {
             return [
                 'count'       => 0,
-                'description' => 'No failed transactions today',
                 'is_clean'    => true,
+                'headline'    => 'Clean run today — 0 failed records',
+                'subtext'     => 'All ingested files processed without format or routing errors.',
+                'action_label'=> null,
+                'action_url'  => null,
             ];
         }
 
-        $a2aFailed   = BkashFailedTransaction::where('transaction_type', 'A2A')->whereDate('created_at', today())->count();
-        $beftnFailed = BkashFailedTransaction::where('transaction_type', 'BEFTN')->whereDate('created_at', today())->count();
-        $rtgsFailed  = BkashFailedTransaction::where('transaction_type', 'RTGS')->whereDate('created_at', today())->count();
-
-        $parts = [];
-        if ($a2aFailed > 0) $parts[] = "{$a2aFailed} A2A";
-        if ($beftnFailed > 0) $parts[] = "{$beftnFailed} BEFTN";
-        if ($rtgsFailed > 0) $parts[] = "{$rtgsFailed} RTGS";
-
         return [
             'count'       => $failedCount,
-            'description' => implode(' · ', $parts) ?: "{$failedCount} failed today",
             'is_clean'    => false,
+            'headline'    => "{$failedCount} " . Str::plural('transaction', $failedCount) . " flagged today",
+            'subtext'     => 'Invalid routing, missing account details, or duplicate records require review.',
+            'action_label'=> 'View Error Report →',
+            'action_url'  => '/admin/bkash-reports',
         ];
     }
 
     /**
-     * Get TCSA and Operational Account Balances.
+     * Get Account Balances.
      */
     public function getBalances(): array
     {
-        $tcsaAccount = '0100202707747';
-        $opsAccount  = '0100224107522';
-
-        $tcsaBalance = $this->calculateBalance($tcsaAccount);
-        $opsBalance  = $this->calculateBalance($opsAccount);
-
         return [
             'tcsa' => [
-                'account'    => $tcsaAccount,
-                'label'      => 'Trust cum settlement account',
-                'balance'    => $tcsaBalance,
-                'value_date' => Carbon::now()->format('d M Y'),
-                'sparkline'  => [35, 42, 40, 50, 48, 55, 60, 64],
+                'name'         => 'bKash Settlement Account (TCSA)',
+                'account'      => '0100202707747',
+                'balance'      => $this->calculateBalance('0100202707747'),
+                'is_low'       => false,
+                'badge'        => 'Main Pool',
+                'badge_color'  => 'info',
             ],
             'ops' => [
-                'account'    => $opsAccount,
-                'label'      => 'Operational account',
-                'balance'    => $opsBalance,
-                'change_pct' => 2.1,
+                'name'         => 'Janata Operational Account',
+                'account'      => '0100224107522',
+                'balance'      => $this->calculateBalance('0100224107522'),
+                'is_low'       => false,
+                'badge'        => 'Ops Reserve',
+                'badge_color'  => 'success',
             ],
         ];
     }
@@ -274,7 +245,7 @@ class Dashboard extends BaseDashboard
     }
 
     /**
-     * Get Recent Activities matching 4-stage notification vocabulary.
+     * Get Recent Activities matching 2-stage notification vocabulary.
      */
     public function getRecentActivities(): array
     {
@@ -284,16 +255,16 @@ class Dashboard extends BaseDashboard
         $notifications = NotificationOutbox::latest()->take(6)->get();
         foreach ($notifications as $n) {
             $stageLabel = match ($n->event_type) {
-                'STAGE_1_SFTP'    => "File received — pending checker ({$n->file_name})",
-                'STAGE_2_CHECKED' => "Checked by {$n->actor_name} — pending authorization ({$n->file_name})",
-                'STAGE_3_AUTH1'   => "Authorized by {$n->actor_name} (Auth 1) — pending final authorization ({$n->file_name})",
-                'STAGE_4_AUTH2'   => "Authorized by {$n->actor_name} (Auth 2) — finally authorized ({$n->file_name})",
+                'STAGE_1_SFTP'    => "File received — pending authorization ({$n->file_name})",
+                'STAGE_2_CHECKED' => "Authorized by {$n->actor_name} — pending confirmation ({$n->file_name})",
+                'STAGE_3_AUTH1'   => "Authorized by {$n->actor_name} — pending confirmation ({$n->file_name})",
+                'STAGE_4_AUTH2'   => "Confirmed by {$n->actor_name} — settled ({$n->file_name})",
                 default           => "Notification sent for {$n->file_name}",
             };
 
             $icon = match ($n->event_type) {
                 'STAGE_1_SFTP'    => 'heroicon-o-inbox-arrow-down',
-                'STAGE_2_CHECKED' => 'heroicon-o-shield-check',
+                'STAGE_2_CHECKED' => 'heroicon-o-key',
                 'STAGE_3_AUTH1'   => 'heroicon-o-key',
                 'STAGE_4_AUTH2'   => 'heroicon-o-check-badge',
                 default           => 'heroicon-o-bell',
@@ -339,9 +310,8 @@ class Dashboard extends BaseDashboard
             $balances = config('bkash.initial_balances', []);
             $initialBalance = (float) ($balances[$accountNumber] ?? 0.00);
 
-            return max(0, $initialBalance - $totalDebited);
+            return max(0.0, $initialBalance - $totalDebited);
         } catch (\Throwable $e) {
-            Log::error("Failed to calculate balance for {$accountNumber}: " . $e->getMessage());
             return 0.00;
         }
     }

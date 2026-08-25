@@ -19,22 +19,6 @@ class BkashTransactionAuthorizationsTable
         return $table
             ->defaultPaginationPageOption(50)
             ->paginated([10, 20, 50, 100, 200])
-            ->checkIfRecordIsSelectableUsing(function (BkashTransaction $record): bool {
-                $currentUser = Auth::user();
-                if (!$currentUser) {
-                    return false;
-                }
-
-                // Disable selection if current user checked this transaction
-                if ($currentUser->id && $record->checked_by_id && (int) $record->checked_by_id === (int) $currentUser->id) {
-                    return false;
-                }
-                if ($currentUser->name && $record->checked_by && $record->checked_by === $currentUser->name) {
-                    return false;
-                }
-
-                return true;
-            })
             ->columns([
                 TextColumn::make('index')
                     ->label('#')
@@ -87,43 +71,21 @@ class BkashTransactionAuthorizationsTable
                     ->alignRight()
                     ->sortable(),
 
-                TextColumn::make('checked_by')
-                    ->label('Checked By')
-                    ->searchable(),
-
-                TextColumn::make('checked_at')
-                    ->label('Checked At')
-                    ->formatStateUsing(fn ($state) => $state ? Carbon::parse($state)->timezone('Asia/Dhaka')->format('d M Y, h:i A') : '-')
+                TextColumn::make('create_date')
+                    ->label('File Date')
+                    ->dateTime('d M Y, h:i A')
                     ->sortable(),
             ])
             ->bulkActions([
-                BulkAction::make('authorize_first_level')
-                    ->label('Authorize Selected (1st Approval)')
+                BulkAction::make('authorize_selected')
+                    ->label('Authorize Selected')
                     ->icon('heroicon-o-check-circle')
                     ->color('warning')
                     ->requiresConfirmation()
                     ->action(function (Collection $records) {
                         $currentUser = Auth::user();
                         $currentUserId = $currentUser->id ?? null;
-                        $currentUserName = $currentUser->name ?? 'Authorizer 1';
-
-                        // 3-Person Segregation of Duties Check
-                        $unauthorizedRecords = $records->filter(function ($record) use ($currentUserId, $currentUserName) {
-                            return ($currentUserId && $record->checked_by_id === $currentUserId) ||
-                                   ($record->checked_by && $record->checked_by === $currentUserName);
-                        });
-
-                        if ($unauthorizedRecords->isNotEmpty()) {
-                            \Filament\Notifications\Notification::make()
-                                ->title('Authorization Blocked (Segregation of Duties)')
-                                ->body('You checked this file; you cannot also provide 1st Authorization on it.')
-                                ->danger()
-                                ->persistent()
-                                ->send();
-
-                            // Filter to only records that this user did NOT check
-                            $records = $records->diff($unauthorizedRecords);
-                        }
+                        $currentUserName = $currentUser->name ?? 'Authorizer';
 
                         if ($records->isEmpty()) {
                             return;
@@ -136,7 +98,7 @@ class BkashTransactionAuthorizationsTable
 
                         $records->each(function ($record) use ($currentUserName, $currentUserId) {
                             $record->update([
-                                'status_id'        => BkashTransaction::STATUS_AUTH_1_APPROVED,
+                                'status_id'        => BkashTransaction::STATUS_AUTHORIZED,
                                 'approved_by_1'    => $currentUserName,
                                 'approved_by_1_id' => $currentUserId,
                                 'approved_at_1'    => Carbon::now(),
@@ -144,12 +106,12 @@ class BkashTransactionAuthorizationsTable
                         });
 
                         \Filament\Notifications\Notification::make()
-                            ->title('1st Level Authorized')
-                            ->body("Successfully authorized {$totalTrn} transactions.")
+                            ->title('Transactions Authorized')
+                            ->body("Successfully authorized {$totalTrn} transactions. Pending confirmation.")
                             ->success()
                             ->send();
 
-                        NotificationService::dispatchStage3($fileName, $totalTrn, $totalAmount, $currentUserName, $currentUser);
+                        NotificationService::dispatchStage2($fileName, $totalTrn, $totalAmount, $currentUserName, $currentUser);
                     }),
             ]);
     }
