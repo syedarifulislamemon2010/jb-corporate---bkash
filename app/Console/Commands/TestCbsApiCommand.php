@@ -51,7 +51,7 @@ class TestCbsApiCommand extends Command
         // 2. Test BEFTN Transaction Posting
         $this->info("👉 Step 2: Testing BEFTN Transaction Endpoint (POST /api/bkash-transactions)...");
 
-        $txn = BkashTransaction::where('status_id', 1004)->get();
+        $txn = BkashTransaction::where('status_id', 1003)->get();
 
         if(count($txn) > 0) {
             foreach ($txn as $transaction) {
@@ -59,7 +59,7 @@ class TestCbsApiCommand extends Command
 
                 if ($result['success']) {
                     if ($result['response']['responseCode'] === 200 || $result['response']['responseCode'] === 201) {
-                        BkashTransaction::where('id', $transaction->id)->update(['status_id' => 1005, 'response_id' => $result['response']['responseId']]);
+                        BkashTransaction::where('id', $transaction->id)->where('status_id', 1003)->update(['status_id' => 1004, 'response_id' => $result['response']['responseId']]);
                     }
                     $this->info("✅ Transaction Posting SUCCESSFUL!");
                     $this->line("   HTTP Status: <comment>{$result['status_code']}</comment>");

@@ -184,18 +184,24 @@ class Dashboard extends Page
             'tcsa' => [
                 'name'         => 'bKash Settlement Account (TCSA)',
                 'account'      => '0100202707747',
+                'label'        => '0100202707747',
+                'value_date'   => Carbon::now()->toDateString(),
                 'balance'      => $this->calculateBalance('0100202707747'),
                 'is_low'       => false,
                 'badge'        => 'Main Pool',
                 'badge_color'  => 'info',
+                'change_pct'   => '1%',
             ],
             'ops' => [
                 'name'         => 'Janata Operational Account',
                 'account'      => '0100224107522',
+                'label'        => '0100224107522',
+                'value_date'   => Carbon::now()->toDateString(),
                 'balance'      => $this->calculateBalance('0100224107522'),
                 'is_low'       => false,
                 'badge'        => 'Ops Reserve',
                 'badge_color'  => 'success',
+                'change_pct'   => '1%',
             ],
         ];
     }
