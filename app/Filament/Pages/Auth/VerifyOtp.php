@@ -81,9 +81,7 @@ class VerifyOtp extends SimplePage implements HasForms
         RateLimiter::clear($lockoutKey);
         Cache::forget("otp_reset_{$mobileNo}");
 
-        $user = User::where('mobile_no', $mobileNo)
-            ->orWhere('phone', $mobileNo)
-            ->first();
+        $user = User::where('mobile_no', $mobileNo)->first();
 
         if (!$user) {
             Notification::make()

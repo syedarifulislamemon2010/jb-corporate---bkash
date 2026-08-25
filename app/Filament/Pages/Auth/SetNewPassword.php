@@ -59,9 +59,7 @@ class SetNewPassword extends SimplePage implements HasForms
         ]);
 
         $mobileNo = trim($this->mobile_no);
-        $user = User::where('mobile_no', $mobileNo)
-            ->orWhere('phone', $mobileNo)
-            ->first();
+        $user = User::where('mobile_no', $mobileNo)->first();
 
         if (!$user) {
             Notification::make()

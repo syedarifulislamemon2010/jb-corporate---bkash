@@ -62,9 +62,7 @@ class ForgotPasswordMobile extends SimplePage implements HasForms
         RateLimiter::hit($rateLimitKey, 60);
 
         // Security: Check if user exists (Do not reveal whether user exists in notification)
-        $user = User::where('mobile_no', $mobileNo)
-            ->orWhere('phone', $mobileNo)
-            ->first();
+        $user = User::where('mobile_no', $mobileNo)->first();
 
         if ($user) {
             // Generate 6-digit secure numeric OTP
