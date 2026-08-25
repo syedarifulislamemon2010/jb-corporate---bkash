@@ -3,6 +3,7 @@
 namespace App\Filament\Resources\BkashTransactionAuthorizations\Tables;
 
 use App\Models\BkashTransaction;
+use App\Models\User;
 use App\Services\NotificationService;
 use Filament\Tables\Table;
 use Filament\Tables\Columns\TextColumn;
@@ -92,6 +93,8 @@ class BkashTransactionAuthorizationsTable
                         $fileName = $firstRecord->file_name ?? 'bKash_File.xlsx';
                         $totalTrn = $records->count();
                         $totalAmount = (float)$records->sum('amount');
+
+                        $receiver = User::where('organization', Auth::user()->organization)->pluck('mobile_no','id');
 
                         $records->each(function ($record) use ($authorizerName) {
                             $record->update([
