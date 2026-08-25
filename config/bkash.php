@@ -59,6 +59,14 @@ return [
         '2026-12-16', // Victory Day
         '2026-12-25', // Christmas Day
     ],
+
+    /*
+    |--------------------------------------------------------------------------
+    | CBS Inbound Asynchronous Callback API Key
+    |--------------------------------------------------------------------------
+    */
+    'cbs_callback_api_key' => env('CBS_CALLBACK_API_KEY', 'cbs-secret-callback-key-2026'),
+
     'whitelisted_debit_accounts' => env('BKASH_WHITELISTED_DEBIT_ACCOUNTS', '0100202707747,0100224107522,111613120722698,111613134119657'),
     'rtgs_min_limit' => (int) env('BKASH_RTGS_MIN_LIMIT', 100000),
     'enabled_channels' => ['A2A', 'BEFTN', 'RTGS'], // All 3 payment channels active

@@ -22,6 +22,8 @@ class BkashTransaction extends Model
     public const STATUS_AUTH_1_APPROVED = 1002;
     public const STATUS_FINAL_AUTHORIZED = 1003;
     public const STATUS_CBS_SUCCESS = 1004;
+    public const STATUS_CBS_RESPONSE_SUCCESS = 1006;
+    public const STATUS_CBS_RESPONSE_FAILED  = 1007;
     public const STATUS_REJECTED = 9000;
 
     protected $fillable = [
@@ -46,6 +48,9 @@ class BkashTransaction extends Model
         'status_id',
         'reject_reason',
         'reason',
+        'response_id',
+        'confirmed_by',
+        'confirmed_at',
         
         // Workflow Users & Timestamps
         'created_by',
@@ -80,6 +85,7 @@ class BkashTransaction extends Model
             'approved_at_2'     => 'datetime',
             'admin_approved_at' => 'datetime',
             'cbs_success_at'    => 'datetime',
+            'confirmed_at'      => 'datetime',
         ];
     }
 
