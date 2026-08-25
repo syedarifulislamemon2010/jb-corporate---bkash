@@ -71,6 +71,13 @@ class BkashReportsResource extends Resource
                     ->dateTime('d/m/Y')
                     ->sortable(),
 
+                // 2b. Value Date — Calendar/Value Date visibility
+                TextColumn::make('value_date')
+                    ->label('Value Date')
+                    ->date('d/m/Y')
+                    ->sortable()
+                    ->toggleable(),
+
                 // 3. Ref No.
                 TextColumn::make('reference_id')
                     ->label('Ref No.')
@@ -171,15 +178,28 @@ class BkashReportsResource extends Resource
                         'RTGS'  => 'RTGS',
                     ]),
 
-                Filter::make('date_range')
+                Filter::make('create_date_range')
+                    ->label('Filter by Create Date')
                     ->form([
-                        DatePicker::make('from_date')->label('From Date'),
-                        DatePicker::make('to_date')->label('To Date'),
+                        DatePicker::make('from_create_date')->label('From Create Date'),
+                        DatePicker::make('to_create_date')->label('To Create Date'),
                     ])
                     ->query(function (Builder $query, array $data): Builder {
                         return $query
-                            ->when($data['from_date'], fn (Builder $q, $date) => $q->whereDate('create_date', '>=', $date))
-                            ->when($data['to_date'], fn (Builder $q, $date) => $q->whereDate('create_date', '<=', $date));
+                            ->when($data['from_create_date'], fn (Builder $q, $date) => $q->whereDate('create_date', '>=', $date))
+                            ->when($data['to_create_date'], fn (Builder $q, $date) => $q->whereDate('create_date', '<=', $date));
+                    }),
+
+                Filter::make('value_date_range')
+                    ->label('Filter by Value Date')
+                    ->form([
+                        DatePicker::make('from_value_date')->label('From Value Date'),
+                        DatePicker::make('to_value_date')->label('To Value Date'),
+                    ])
+                    ->query(function (Builder $query, array $data): Builder {
+                        return $query
+                            ->when($data['from_value_date'], fn (Builder $q, $date) => $q->whereDate('value_date', '>=', $date))
+                            ->when($data['to_value_date'], fn (Builder $q, $date) => $q->whereDate('value_date', '<=', $date));
                     }),
             ]);
     }

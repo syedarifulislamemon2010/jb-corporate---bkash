@@ -173,6 +173,7 @@ class UploadBkashExcel extends Page implements HasForms
                 $totalAmount += $amount;
 
                 $parsedDate = $createDate ? Carbon::parse($createDate) : Carbon::now();
+                $valueDate  = \App\Helper\ValueDateHelper::resolve($parsedDate)->toDateString();
 
                 $txnData = [
                     'batch_id'             => $batch->id,
@@ -192,7 +193,7 @@ class UploadBkashExcel extends Page implements HasForms
                     'created_by'           => Str::limit(auth()->user()->name ?? 'SYSTEM', 255, ''),
                     'created_by_id'        => auth()->id(),
                     'create_date'          => $parsedDate,
-                    'value_date'           => $parsedDate->toDateString(),
+                    'value_date'           => $valueDate,
                     'file_name'            => $fileName,
                 ];
 

@@ -159,6 +159,7 @@ class ProcessBkashFileJob implements ShouldQueue
                 $totalAmount += $amount;
 
                 $parsedDate = $createDate ? Carbon::parse($createDate) : Carbon::now();
+                $valueDate  = \App\Helper\ValueDateHelper::resolve($parsedDate)->toDateString();
 
                 BkashTransaction::create([
                     'batch_id'             => $batch->id,
@@ -178,7 +179,7 @@ class ProcessBkashFileJob implements ShouldQueue
                     'status_id'            => BkashTransaction::STATUS_PENDING_CHECKER,
                     'created_by'           => $this->createdBy,
                     'create_date'          => $parsedDate,
-                    'value_date'           => $parsedDate->toDateString(),
+                    'value_date'           => $valueDate,
                 ]);
             } else {
                 BkashFailedTransaction::create([
