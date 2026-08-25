@@ -121,4 +121,38 @@ class CheckerExcelExportTest extends TestCase
 
         @unlink($tempFile);
     }
+
+    public function test_export_transactions_csv_produces_valid_xlsx(): void
+    {
+        $t1 = new BkashTransaction([
+            'transaction_type'    => 'A2A',
+            'reference_id'        => 'REF_TEST_01',
+            'txn_id'              => 'TXN_TEST_01',
+            'debit_account_title' => 'Test Account',
+            'debit_account_no'    => '0100111111111',
+            'amount'              => 1000.00,
+            'credit_account_no'   => '0100202707747',
+        ]);
+        $t1->create_date = now();
+
+        $collection = new Collection([$t1]);
+
+        $response = ExcelExportService::exportTransactionsCsv($collection, 'legacy_export.csv');
+
+        $this->assertEquals('application/vnd.openxmlformats-officedocument.spreadsheetml.sheet', $response->headers->get('Content-Type'));
+        $this->assertStringContainsString('legacy_export.xlsx', $response->headers->get('Content-Disposition'));
+
+        ob_start();
+        $response->sendContent();
+        $excelBinary = ob_get_clean();
+
+        $this->assertNotEmpty($excelBinary);
+
+        $tempFile = tempnam(sys_get_temp_dir(), 'xlsx_legacy_test_');
+        file_put_contents($tempFile, $excelBinary);
+
+        $spreadsheet = IOFactory::load($tempFile);
+        $this->assertContains('Account to Account', $spreadsheet->getSheetNames());
+        @unlink($tempFile);
+    }
 }

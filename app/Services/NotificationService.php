@@ -26,7 +26,9 @@ class NotificationService
             $recipients = User::all();
         } else {
             $query = User::query()->where('id', '!=', $sender->id);
-            if ($sender->organization_id) {
+            if (!empty($sender->organization)) {
+                $query->where('organization', $sender->organization);
+            } elseif (!empty($sender->organization_id)) {
                 $query->where('organization_id', $sender->organization_id);
             }
             $recipients = $query->get();
@@ -97,7 +99,7 @@ class NotificationService
     }
 
     /**
-     * Dispatch Stage 3: Authorized by 1st Authorizer -> Pending 2nd Authorization
+     * Dispatch Stage 3: Authorized by 1st Authorizer -> Pending 2nd Authorization (Scoped to Authorizer 1 Organization)
      */
     public static function dispatchStage3(string $fileName, int $totalTrn, float $totalAmount, string $authorizerName1, ?User $senderUser = null): NotificationOutbox
     {
@@ -164,14 +166,14 @@ class NotificationService
 
         Log::info("Notification Outbox Created [{$eventType}]: {$fileName}");
 
-        $excludeUserId  = $senderUser?->id;
-        $organizationId = $senderUser?->organization_id;
+        $excludeUserId = $senderUser?->id;
+        $organization  = $senderUser?->organization ?? $senderUser?->organization_id;
 
         // Send actual email notifications (scoped to org & excluding actor)
-        static::sendActualEmails($outbox, $recipientGroup, $messageText, $fileName, $eventType, $organizationId, $excludeUserId);
+        static::sendActualEmails($outbox, $recipientGroup, $messageText, $fileName, $eventType, $organization, $excludeUserId);
 
         // Send SMS notifications using exact registered bank template types (14 to 17)
-        static::sendActualSms($outbox, $recipientGroup, $eventType, $fileName, $totalTrn, BkashTransaction::formatBdtAmount($totalAmount), $actorName, $organizationId, $excludeUserId);
+        static::sendActualSms($outbox, $recipientGroup, $eventType, $fileName, $totalTrn, BkashTransaction::formatBdtAmount($totalAmount), $actorName, $organization, $excludeUserId);
 
         return $outbox;
     }
@@ -185,7 +187,7 @@ class NotificationService
         string $messageText,
         string $fileName,
         string $eventType,
-        ?int $organizationId = null,
+        mixed $organization = null,
         ?int $excludeUserId = null
     ): void {
         if (!config('bkash.email_enabled', true)) {
@@ -193,10 +195,10 @@ class NotificationService
         }
 
         try {
-            $recipients = static::getRecipientEmails($organizationId, $excludeUserId);
+            $recipients = static::getRecipientEmails($organization, $excludeUserId);
 
             if (empty($recipients)) {
-                Log::warning("No email recipients found for group: {$recipientGroup} (org: {$organizationId}, excluded: {$excludeUserId})");
+                Log::warning("No email recipients found for group: {$recipientGroup} (org: {$organization}, excluded: {$excludeUserId})");
                 return;
             }
 
@@ -238,7 +240,7 @@ class NotificationService
         int $totalTrn,
         string $formattedAmount,
         ?string $actorName = null,
-        ?int $organizationId = null,
+        mixed $organization = null,
         ?int $excludeUserId = null
     ): void {
         if (!config('bkash.sms_enabled', true)) {
@@ -247,7 +249,7 @@ class NotificationService
         }
 
         try {
-            $phones = static::getRecipientPhones($organizationId, $excludeUserId);
+            $phones = static::getRecipientPhones($organization, $excludeUserId);
 
             if (empty($phones)) {
                 Log::info("No recipient phone numbers found for group [{$recipientGroup}]. Skipping SMS.");
@@ -256,7 +258,7 @@ class NotificationService
 
             // Map event type to bank template type
             $templateType = match ($eventType) {
-                'STAGE_1_SFTP'  => 14,
+                'STAGE_1_SFTP'    => 14,
                 'STAGE_2_CHECKED' => 15,
                 'STAGE_3_AUTH1'   => 16,
                 'STAGE_4_AUTH2'   => 17,
@@ -289,14 +291,19 @@ class NotificationService
     /**
      * Get recipient email addresses with organization scoping and actor exclusion.
      */
-    public static function getRecipientEmails(?int $organizationId = null, ?int $excludeUserId = null): array
+    public static function getRecipientEmails(mixed $organization = null, ?int $excludeUserId = null): array
     {
         $query = User::query()->whereNotNull('email');
         if ($excludeUserId) {
             $query->where('id', '!=', $excludeUserId);
         }
-        if ($organizationId) {
-            $query->where('organization_id', $organizationId);
+        if (!empty($organization)) {
+            $query->where(function ($q) use ($organization) {
+                $q->where('organization', $organization);
+                if (is_numeric($organization)) {
+                    $q->orWhere('organization_id', $organization);
+                }
+            });
         }
         return $query->pluck('email')->filter()->unique()->toArray();
     }
@@ -304,14 +311,19 @@ class NotificationService
     /**
      * Get recipient phone numbers with organization scoping and actor exclusion.
      */
-    public static function getRecipientPhones(?int $organizationId = null, ?int $excludeUserId = null): array
+    public static function getRecipientPhones(mixed $organization = null, ?int $excludeUserId = null): array
     {
         $query = User::query();
         if ($excludeUserId) {
             $query->where('id', '!=', $excludeUserId);
         }
-        if ($organizationId) {
-            $query->where('organization_id', $organizationId);
+        if (!empty($organization)) {
+            $query->where(function ($q) use ($organization) {
+                $q->where('organization', $organization);
+                if (is_numeric($organization)) {
+                    $q->orWhere('organization_id', $organization);
+                }
+            });
         }
 
         $phones = $query->whereNotNull('mobile_no')->pluck('mobile_no')->toArray();

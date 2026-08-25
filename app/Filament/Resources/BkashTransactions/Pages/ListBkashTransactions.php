@@ -38,20 +38,6 @@ class ListBkashTransactions extends ListRecords
 
                     return ExcelExportService::exportCheckerReportXlsx($transactions, $fileName);
                 }),
-
-            Action::make('download_csv')
-                ->label('Export CSV')
-                ->icon('heroicon-o-document-text')
-                ->color('gray')
-                ->action(function () {
-                    $transactions = BkashTransaction::where('status_id', BkashTransaction::STATUS_PENDING_CHECKER)
-                        ->orderBy('create_date', 'desc')
-                        ->get();
-
-                    $fileName = 'bkash_pending_checker_' . now()->format('Ymd_His') . '.csv';
-
-                    return ExcelExportService::exportTransactionsCsv($transactions, $fileName);
-                }),
         ];
     }
 
