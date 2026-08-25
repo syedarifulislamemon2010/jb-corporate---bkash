@@ -36,8 +36,8 @@ class SMSGenerateHelper extends Controller
     {
         try {
             $client = new Client();
-            $authHeader = config('bkash.sms_auth_header', 'Basic YmFjaCZydGdzOjMhYiRjJWgmTSZSc0d0MlNxciop');
-            $apiUrl = config('bkash.sms_api_url', 'http://172.17.20.17/JBSmsApi/Send');
+            $authHeader = config('bkash.sms_auth_header') ?: 'Basic YmFjaCZydGdzOjMhYiRjJWgmTSZSc0d0MlNxciop';
+            $apiUrl = config('bkash.sms_api_url') ?: 'http://172.17.20.17/JBSmsApi/Send';
 
             $headers = [
                 'Authorization' => $authHeader,
@@ -110,8 +110,8 @@ class SMSGenerateHelper extends Controller
     {
         try {
             $client = new Client();
-            $authHeader = config('bkash.sms_auth_header', 'Basic YmFjaCZydGdzOjMhYiRjJWgmTSZSc0d0MlNxciop');
-            $apiUrl = config('bkash.sms_api_url', 'http://172.17.20.17/JBSmsApi/Send');
+            $authHeader = config('bkash.sms_auth_header') ?: 'Basic YmFjaCZydGdzOjMhYiRjJWgmTSZSc0d0MlNxciop';
+            $apiUrl = config('bkash.sms_api_url') ?: 'http://172.17.20.17/JBSmsApi/Send';
 
             $headers = [
                 'Authorization' => $authHeader,

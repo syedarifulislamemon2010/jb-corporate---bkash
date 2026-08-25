@@ -122,7 +122,7 @@ class BkashTransactionsTable
                 BulkAction::make('check_selected')
                     ->label('Check Selected Transactions')
                     ->icon('heroicon-o-check-circle')
-                    ->color('success')
+                    ->color('info')
                     ->requiresConfirmation()
                     ->action(function (Collection $records) {
                         $currentUser = Auth::user();

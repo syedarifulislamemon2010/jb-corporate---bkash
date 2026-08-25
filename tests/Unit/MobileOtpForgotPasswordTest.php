@@ -2,6 +2,7 @@
 
 namespace Tests\Unit;
 
+use App\Filament\Pages\Auth\EnterTempPassword;
 use App\Filament\Pages\Auth\ForgotPasswordMobile;
 use App\Filament\Pages\Auth\SetNewPassword;
 use App\Filament\Pages\Auth\VerifyOtp;
@@ -74,7 +75,7 @@ class MobileOtpForgotPasswordTest extends TestCase
             ->assertNotDispatched('redirect');
     }
 
-    public function test_verify_otp_page_verifies_and_issues_temp_password_and_token(): void
+    public function test_verify_otp_page_verifies_and_redirects_to_enter_temp_password(): void
     {
         $user = User::create([
             'name'         => 'Test User 3',
@@ -92,15 +93,19 @@ class MobileOtpForgotPasswordTest extends TestCase
             ->test(VerifyOtp::class)
             ->set('data.otp', '654321')
             ->call('verifyOtp')
-            ->assertRedirect('/admin/set-new-password');
+            ->assertRedirect('/admin/enter-temp-password');
 
         // Assert OTP removed from Cache after successful use
         $this->assertNull(Cache::get('otp_reset_01911223344'));
 
-        // Assert Reset Token generated in Cache
-        $resetToken = Cache::get('reset_token_01911223344');
-        $this->assertNotNull($resetToken);
-        $this->assertEquals(40, strlen($resetToken));
+        // Assert Temporary Password generated and saved in Cache
+        $tempPassword = Cache::get('temp_password_01911223344');
+        $this->assertNotNull($tempPassword);
+        $this->assertEquals(10, strlen($tempPassword));
+
+        // Assert password in DB is NOT changed yet
+        $user->refresh();
+        $this->assertTrue(Hash::check('OldPassword123!', $user->password));
     }
 
     public function test_verify_otp_page_rejects_invalid_otp(): void
@@ -124,6 +129,36 @@ class MobileOtpForgotPasswordTest extends TestCase
 
         // OTP should still remain until expired or verified
         $this->assertEquals('112233', Cache::get('otp_reset_01511223344'));
+    }
+
+    public function test_enter_temp_password_page_verifies_and_redirects_to_set_new_password(): void
+    {
+        $user = User::create([
+            'name'         => 'Test User Temp',
+            'organization' => 'Janata Bank',
+            'mobile_no'    => '01799887766',
+            'email'        => 'tempuser@janatabank.com',
+            'password'     => Hash::make('OldPassword123!'),
+        ]);
+
+        $tempPassword = 'Abc123XyZ!';
+        Cache::put('temp_password_01799887766', $tempPassword, now()->addMinutes(10));
+        session(['reset_verified_mobile' => '01799887766']);
+        RateLimiter::clear('verify_temp_pwd_lockout:01799887766');
+
+        Livewire::test(EnterTempPassword::class)
+            ->set('data.temp_password', $tempPassword)
+            ->call('verifyTempPassword')
+            ->assertRedirect('/admin/set-new-password');
+
+        // Temp password removed from cache
+        $this->assertNull(Cache::get('temp_password_01799887766'));
+
+        // Reset token generated in Cache and session
+        $resetToken = Cache::get('reset_token_01799887766');
+        $this->assertNotNull($resetToken);
+        $this->assertEquals(40, strlen($resetToken));
+        $this->assertEquals($resetToken, session('reset_token'));
     }
 
     public function test_set_new_password_updates_user_password_and_logs_in(): void

@@ -10,76 +10,15 @@ use Symfony\Component\HttpFoundation\StreamedResponse;
 class ExcelExportService
 {
     /**
-     * Export transactions as CSV (universally compatible with Excel).
-     * No external package dependency — production-safe.
+     * Export transactions as Excel XLSX format (matches sample format).
+     * Backwards-compatible method signature converted from CSV to PhpSpreadsheet XLSX.
      */
     public static function exportTransactionsCsv(
         Collection $transactions,
-        string $fileName = 'bkash_transactions.csv'
+        string $fileName = 'bkash_transactions.xlsx'
     ): StreamedResponse {
-        $headers = [
-            'Content-Type' => 'text/csv; charset=UTF-8',
-            'Content-Disposition' => "attachment; filename=\"{$fileName}\"",
-            'Pragma' => 'no-cache',
-            'Cache-Control' => 'must-revalidate, post-check=0, pre-check=0',
-            'Expires' => '0',
-        ];
-
-        return response()->stream(function () use ($transactions) {
-            $handle = fopen('php://output', 'w');
-
-            // BOM for Excel UTF-8 compatibility
-            fprintf($handle, chr(0xEF) . chr(0xBB) . chr(0xBF));
-
-            // Header row
-            fputcsv($handle, [
-                'Ref No',
-                'Txn ID',
-                'Channel',
-                'Bank Account Name',
-                'Bank Account No',
-                'Amount (BDT)',
-                'Routing Code',
-                'Bank Name',
-                'Branch Name',
-                'Debit Account',
-                'Status',
-                'File Name',
-                'Checked By',
-                'Checked At',
-                '1st Auth By',
-                '1st Auth At',
-                '2nd Auth By',
-                '2nd Auth At',
-                'Created At',
-            ]);
-
-            foreach ($transactions as $txn) {
-                fputcsv($handle, [
-                    $txn->reference_id,
-                    $txn->txn_id,
-                    $txn->transaction_type,
-                    $txn->debit_account_title,
-                    $txn->debit_account_no,
-                    number_format((float) $txn->amount, 2, '.', ''),
-                    $txn->debit_routing,
-                    $txn->credit_routing,
-                    $txn->credit_bank,
-                    $txn->credit_account_no,
-                    static::statusLabel((int) $txn->status_id),
-                    $txn->file_name,
-                    $txn->checked_by,
-                    $txn->checked_at?->format('d/m/Y H:i'),
-                    $txn->approved_by_1,
-                    $txn->approved_at_1?->format('d/m/Y H:i'),
-                    $txn->approved_by_2,
-                    $txn->approved_at_2?->format('d/m/Y H:i'),
-                    $txn->create_date?->format('d/m/Y H:i'),
-                ]);
-            }
-
-            fclose($handle);
-        }, 200, $headers);
+        $xlsxFileName = preg_replace('/\.csv$/i', '.xlsx', $fileName);
+        return static::exportCheckerReportXlsx($transactions, $xlsxFileName);
     }
 
     /**

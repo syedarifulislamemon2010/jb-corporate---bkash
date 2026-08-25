@@ -190,11 +190,9 @@ class VerifyOtp extends SimplePage
             return;
         }
 
-        // Generate temporary password
+        // Generate temporary password (DO NOT update user password in DB yet)
         $tempPassword = Str::random(10);
-        $user->update([
-            'password' => Hash::make($tempPassword),
-        ]);
+        Cache::put("temp_password_{$mobileNo}", $tempPassword, now()->addMinutes(10));
 
         // Send SMS with temporary password using exact bank template Type 2
         if (config('bkash.sms_enabled', true)) {
@@ -212,22 +210,17 @@ class VerifyOtp extends SimplePage
             Log::info("SMS dispatch attempted for temporary password (SMS disabled in config).");
         }
 
-        // Store secure token in session and cache for step 3 authentication
-        $resetToken = Str::random(40);
-        Cache::put("reset_token_{$mobileNo}", $resetToken, now()->addMinutes(10));
-
         session([
             'reset_verified_mobile' => $mobileNo,
-            'reset_token'           => $resetToken,
         ]);
 
         Notification::make()
             ->title('OTP Verified')
-            ->body('A temporary password has been sent to your mobile. Please set your new password.')
+            ->body('A temporary password has been sent to your mobile. Please enter it to continue.')
             ->success()
             ->send();
 
-        $this->redirect('/admin/set-new-password');
+        $this->redirect('/admin/enter-temp-password');
     }
 
     public function resendOtp(): void
