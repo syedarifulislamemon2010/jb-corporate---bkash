@@ -27,6 +27,7 @@ class BkashTransaction extends Model
     protected $fillable = [
         'batch_id',
         'file_name',
+        'row_sequence',
         'transaction_type',
         'reference_id',
         'bb_reference_number',
@@ -48,11 +49,15 @@ class BkashTransaction extends Model
         
         // Workflow Users & Timestamps
         'created_by',
+        'created_by_id',
         'checked_by',
+        'checked_by_id',
         'checked_at',
         'approved_by_1',
+        'approved_by_1_id',
         'approved_at_1',
         'approved_by_2',
+        'approved_by_2_id',
         'approved_at_2',
         'admin_approved_by',
         'admin_approved_at',
@@ -64,6 +69,10 @@ class BkashTransaction extends Model
         return [
             'amount'            => 'decimal:2',
             'status_id'         => 'integer',
+            'created_by_id'     => 'integer',
+            'checked_by_id'     => 'integer',
+            'approved_by_1_id'  => 'integer',
+            'approved_by_2_id'  => 'integer',
             'create_date'       => 'datetime',
             'return_date'       => 'datetime',
             'checked_at'        => 'datetime',
@@ -79,19 +88,24 @@ class BkashTransaction extends Model
         return $this->belongsTo(BkashTransactionBatch::class, 'batch_id', 'id');
     }
 
+    public function creatorUser(): \Illuminate\Database\Eloquent\Relations\BelongsTo
+    {
+        return $this->belongsTo(User::class, 'created_by_id', 'id');
+    }
+
     public function checkedByUser(): \Illuminate\Database\Eloquent\Relations\BelongsTo
     {
-        return $this->belongsTo(User::class, 'checked_by', 'name');
+        return $this->belongsTo(User::class, 'checked_by_id', 'id');
     }
 
     public function approvedBy1User(): \Illuminate\Database\Eloquent\Relations\BelongsTo
     {
-        return $this->belongsTo(User::class, 'approved_by_1', 'name');
+        return $this->belongsTo(User::class, 'approved_by_1_id', 'id');
     }
 
     public function approvedBy2User(): \Illuminate\Database\Eloquent\Relations\BelongsTo
     {
-        return $this->belongsTo(User::class, 'approved_by_2', 'name');
+        return $this->belongsTo(User::class, 'approved_by_2_id', 'id');
     }
 
     /**

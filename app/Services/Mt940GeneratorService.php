@@ -37,7 +37,7 @@ class Mt940GeneratorService
         $dateFull = $targetDate->format('Y-m-d');
         $refNumber = 'JB' . $targetDate->format('Ymd') . \Illuminate\Support\Str::random(8);
 
-        // Fetch settled transactions for this account on target date
+        // Fetch settled transactions for this account on target value date
         $transactions = BkashTransaction::where(function ($q) use ($accountNumber) {
             $q->where('credit_account_no', $accountNumber)
               ->orWhere('debit_account_no', $accountNumber);
@@ -46,8 +46,9 @@ class Mt940GeneratorService
             BkashTransaction::STATUS_FINAL_AUTHORIZED,
             BkashTransaction::STATUS_CBS_SUCCESS
         ])
-        ->whereDate('updated_at', $dateFull)
-        ->orderBy('updated_at', 'asc')
+        ->whereDate('value_date', $dateFull)
+        ->orderBy('row_sequence', 'asc')
+        ->orderBy('id', 'asc')
         ->get();
 
         $openingBalance = $accountNumber === '0100202707747' ? 542000000.50 : 18500000.00;

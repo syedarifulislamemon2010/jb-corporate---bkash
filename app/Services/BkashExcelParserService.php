@@ -111,8 +111,10 @@ class BkashExcelParserService
     /**
      * Map Excel row data using fuzzy header matching.
      * Returns normalized associative array.
+     *
+     * @param string $channelType  A2A, BEFTN, or RTGS — used for conditional field mapping.
      */
-    public static function mapRowData(array $headers, array $row): array
+    public static function mapRowData(array $headers, array $row, string $channelType = 'A2A'): array
     {
         $mapped = [];
 
@@ -126,7 +128,12 @@ class BkashExcelParserService
             }
 
             if (in_array($cleanHeader, ['ref', 'refno', 'reference', 'referenceid', 'refid'])) {
-                $mapped['reference_id'] = static::cleanString((string) $val, 255);
+                $cleanVal = static::cleanString((string) $val, 255);
+                $mapped['reference_id'] = $cleanVal;
+                // For RTGS/BEFTN, this Ref No. is the BB Reference Number shared with Bangladesh Bank
+                if (in_array($channelType, ['RTGS', 'BEFTN'])) {
+                    $mapped['bb_reference_number'] = $cleanVal;
+                }
             } elseif (in_array($cleanHeader, ['bbreferencenumber', 'bbreference', 'bbref', 'bbrefno', 'bbrefid', 'referencenumber'])) {
                 $mapped['bb_reference_number'] = static::cleanString((string) $val, 100);
             } elseif (in_array($cleanHeader, ['date', 'executiondate', 'createdate', 'transactiondate', 'txndate'])) {
@@ -141,13 +148,12 @@ class BkashExcelParserService
                 $cleanVal = preg_replace('/[^0-9.]/', '', str_replace(',', '', (string) $val));
                 $mapped['amount'] = (float) $cleanVal;
             } elseif (in_array($cleanHeader, ['routingcode', 'routingnumber', 'beneroutingno', 'routingno'])) {
-                $mapped['debit_routing'] = static::cleanString((string) $val, 20);
-            } elseif (in_array($cleanHeader, ['bankname', 'benebankname'])) {
-                $mapped['credit_routing'] = static::cleanString((string) $val, 100);
-            } elseif (in_array($cleanHeader, ['branchname', 'benebranchname'])) {
+                // Beneficiary Routing Number (Credit-side routing)
+                $routingVal = static::cleanString((string) $val, 20);
+                $mapped['credit_routing'] = $routingVal;
+                $mapped['debit_routing']  = $routingVal; // Backward compatibility
+            } elseif (in_array($cleanHeader, ['bankname', 'benebankname', 'branchname', 'benebranchname', 'bankbranchname'])) {
                 $mapped['credit_bank'] = static::cleanString((string) $val, 255);
-            } elseif (in_array($cleanHeader, ['bankbranchname'])) {
-                $mapped['credit_routing'] = static::cleanString((string) $val, 100);
             } elseif (in_array($cleanHeader, ['debitaccount', 'debitaccountno'])) {
                 $mapped['credit_account_no'] = static::cleanString((string) $val, 100);
             } elseif (in_array($cleanHeader, ['txnid', 'transactionid'])) {
@@ -209,6 +215,22 @@ class BkashExcelParserService
         if (empty($errors) && $txnId && in_array($txnId, static::$existingTxnIds)) {
             $errors[] = "Global Duplicate Transaction ID {$txnId} blocked.";
             $failureCode = 'DUPLICATE_TXN_ID';
+        }
+
+        // A2A-Specific Validation: Beneficiary account number required
+        $beneAccount = $mapped['debit_account_no'] ?? null;
+        if ($channelType === 'A2A' && empty($beneAccount)) {
+            $errors[] = 'Beneficiary Account Number is required for Account-to-Account transfer.';
+            $failureCode = 'INVALID_ACCOUNT_NO';
+        }
+
+        // RTGS & BEFTN Routing Code Validation (Conditional if required)
+        $routingNo = $mapped['debit_routing'] ?? null;
+        if (in_array($channelType, ['RTGS', 'BEFTN']) && config('bkash.validate_routing_numbers', false)) {
+            if (empty($routingNo) || strlen($routingNo) !== 9 || !is_numeric($routingNo)) {
+                $errors[] = "Valid 9-digit Routing Number required for {$channelType}.";
+                $failureCode = 'INVALID_ROUTING_NO';
+            }
         }
 
         // RTGS Minimum Limit

@@ -88,22 +88,68 @@ class BkashTransactionConfirmationsTable
                     ->color('primary')
                     ->requiresConfirmation()
                     ->action(function (Collection $records) {
-                        $authorizerName2 = Auth::user()->name ?? 'Authorizer 2';
+                        $currentUser = Auth::user();
+                        $currentUserId = $currentUser->id ?? null;
+                        $currentUserName = $currentUser->name ?? 'Authorizer 2';
+
+                        // 3-Person Segregation of Duties Checks
+                        $checkedBySameUser = $records->filter(function ($record) use ($currentUserId, $currentUserName) {
+                            return ($currentUserId && $record->checked_by_id === $currentUserId) ||
+                                   ($record->checked_by && $record->checked_by === $currentUserName);
+                        });
+
+                        $approved1BySameUser = $records->filter(function ($record) use ($currentUserId, $currentUserName) {
+                            return ($currentUserId && $record->approved_by_1_id === $currentUserId) ||
+                                   ($record->approved_by_1 && $record->approved_by_1 === $currentUserName);
+                        });
+
+                        if ($checkedBySameUser->isNotEmpty()) {
+                            \Filament\Notifications\Notification::make()
+                                ->title('Final Authorization Blocked (Segregation of Duties)')
+                                ->body('You checked this file; you cannot provide Final Authorization on it.')
+                                ->danger()
+                                ->persistent()
+                                ->send();
+                        }
+
+                        if ($approved1BySameUser->isNotEmpty()) {
+                            \Filament\Notifications\Notification::make()
+                                ->title('Final Authorization Blocked (Segregation of Duties)')
+                                ->body('You already provided 1st Authorization; final authorization must come from a different authorizer.')
+                                ->danger()
+                                ->persistent()
+                                ->send();
+                        }
+
+                        $unauthorizedRecords = $checkedBySameUser->merge($approved1BySameUser)->unique('id');
+                        $records = $records->diff($unauthorizedRecords);
+
+                        if ($records->isEmpty()) {
+                            return;
+                        }
+
                         $firstRecord = $records->first();
                         $fileName = $firstRecord->file_name ?? 'bKash_File.xlsx';
                         $totalTrn = $records->count();
                         $totalAmount = (float)$records->sum('amount');
                         $txnIds = $records->pluck('id')->toArray();
 
-                        $records->each(function ($record) use ($authorizerName2) {
+                        $records->each(function ($record) use ($currentUserName, $currentUserId) {
                             $record->update([
-                                'status_id'     => BkashTransaction::STATUS_FINAL_AUTHORIZED,
-                                'approved_by_2' => $authorizerName2,
-                                'approved_at_2' => Carbon::now(),
+                                'status_id'        => BkashTransaction::STATUS_FINAL_AUTHORIZED,
+                                'approved_by_2'    => $currentUserName,
+                                'approved_by_2_id' => $currentUserId,
+                                'approved_at_2'    => Carbon::now(),
                             ]);
                         });
 
-                        NotificationService::dispatchStage4($fileName, $totalTrn, $totalAmount, $authorizerName2);
+                        \Filament\Notifications\Notification::make()
+                            ->title('Final Authorized & Settling')
+                            ->body("Successfully authorized {$totalTrn} transactions. Executing automated CBS settlement.")
+                            ->success()
+                            ->send();
+
+                        NotificationService::dispatchStage4($fileName, $totalTrn, $totalAmount, $currentUserName, $currentUser);
 
                         ExecuteCbsSettlementJob::dispatchSync($txnIds);
                     }),

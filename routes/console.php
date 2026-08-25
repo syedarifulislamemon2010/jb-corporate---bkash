@@ -10,3 +10,4 @@ Artisan::command('inspire', function () {
 
 Schedule::command('sftp:fetch-bkash-files')->everyFifteenMinutes();
 Schedule::command('mt940:generate --push-sftp')->dailyAt('23:30');
+Schedule::command('eft-return:send-daily')->dailyAt('23:00');

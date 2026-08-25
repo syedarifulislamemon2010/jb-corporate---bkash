@@ -111,4 +111,51 @@ class SftpMultiFolderFetchTest extends TestCase
         $this->assertStringContainsString('0100202707747', $result['error_message']);
         $this->assertStringContainsString('0100224107522', $result['error_message']);
     }
+
+    public function test_bb_reference_number_mapping_for_rtgs_and_beftn(): void
+    {
+        $headers = ['Ref No', 'Debit Account', 'Amount', 'Bank Account Name', 'Bank Account No'];
+        $row = ['REF_BB_999', '0100202707747', '500000', 'Customer 1', '4512442413566'];
+
+        // For RTGS: ref should map to both reference_id and bb_reference_number
+        $mappedRtgs = BkashExcelParserService::mapRowData($headers, $row, 'RTGS');
+        $this->assertEquals('REF_BB_999', $mappedRtgs['reference_id']);
+        $this->assertEquals('REF_BB_999', $mappedRtgs['bb_reference_number']);
+
+        // For BEFTN: ref should map to both reference_id and bb_reference_number
+        $mappedBeftn = BkashExcelParserService::mapRowData($headers, $row, 'BEFTN');
+        $this->assertEquals('REF_BB_999', $mappedBeftn['reference_id']);
+        $this->assertEquals('REF_BB_999', $mappedBeftn['bb_reference_number']);
+
+        // For A2A: ref should map only to reference_id, bb_reference_number should remain null/unset
+        $mappedA2a = BkashExcelParserService::mapRowData($headers, $row, 'A2A');
+        $this->assertEquals('REF_BB_999', $mappedA2a['reference_id']);
+        $this->assertArrayNotHasKey('bb_reference_number', $mappedA2a);
+    }
+
+    public function test_a2a_type_specific_validation_requires_account_no(): void
+    {
+        $mapped = [
+            'reference_id'      => 'REF001',
+            'amount'            => 500,
+            'credit_account_no' => '0100202707747',
+            'debit_account_no'  => null, // Missing beneficiary account!
+        ];
+
+        $result = BkashExcelParserService::validateRow($mapped, 'A2A');
+        $this->assertFalse($result['is_valid']);
+        $this->assertEquals('INVALID_ACCOUNT_NO', $result['failure_code']);
+    }
+
+    public function test_routing_field_mapping_to_credit_routing(): void
+    {
+        $headers = ['Ref No', 'Debit Account', 'Amount', 'Bank Account Name', 'Bank Account No', 'Routing Code', 'Bank & Branch Name'];
+        $row = ['REF_RTGS_88', '0100202707747', '500000', 'Customer 1', '4512442413566', '225260856', 'City Bank Principal Branch'];
+
+        $mapped = BkashExcelParserService::mapRowData($headers, $row, 'RTGS');
+
+        // Assert Routing Code maps to credit_routing (beneficiary routing)
+        $this->assertEquals('225260856', $mapped['credit_routing']);
+        $this->assertEquals('City Bank Principal Branch', $mapped['credit_bank']);
+    }
 }

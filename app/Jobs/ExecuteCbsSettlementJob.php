@@ -27,6 +27,8 @@ class ExecuteCbsSettlementJob implements ShouldQueue
 
         $transactions = BkashTransaction::whereIn('id', $this->transactionIds)
             ->where('status_id', BkashTransaction::STATUS_FINAL_AUTHORIZED)
+            ->orderBy('row_sequence', 'asc')
+            ->orderBy('id', 'asc')
             ->get();
 
         foreach ($transactions as $txn) {
@@ -51,9 +53,7 @@ class ExecuteCbsSettlementJob implements ShouldQueue
 
                 if ($result['success']) {
                     $attempt->update([
-                        'outcome'       => 'SUCCESS',
-                        'response_code' => (string) $result['status_code'],
-                        'response_body' => is_array($result['response']) ? json_encode($result['response']) : (string)$result['response'],
+                        'outcome' => 'SUCCESS',
                     ]);
 
                     $txn->update([
@@ -63,14 +63,34 @@ class ExecuteCbsSettlementJob implements ShouldQueue
 
                     Log::info("Successfully settled transaction via CBS API: {$txn->reference_id} [{$txn->amount} BDT]");
                 } else {
+                    $failureCode  = $result['failure_code'] ?? 'CBS_REJECTED';
+                    $rejectReason = $result['reject_reason'] ?? $result['message'] ?? 'CBS rejected transaction.';
+
                     $attempt->update([
-                        'outcome'       => 'FAILED',
-                        'response_code' => (string) $result['status_code'],
-                        'response_body' => is_array($result['response']) ? json_encode($result['response']) : (string)$result['response'],
-                        'error_message' => $result['message'],
+                        'outcome' => 'FAILED',
                     ]);
 
-                    Log::error("CBS API posting failed for Txn {$txn->reference_id}: {$result['message']}");
+                    // 1. Mark transaction status as STATUS_REJECTED (9000)
+                    $txn->update([
+                        'status_id'     => BkashTransaction::STATUS_REJECTED,
+                        'reject_reason' => $rejectReason,
+                    ]);
+
+                    // 2. Record in BkashFailedTransaction table for reporting
+                    \App\Models\BkashFailedTransaction::create([
+                        'batch_id'          => $txn->batch_id,
+                        'file_name'         => $txn->file_name ?? 'bKash_File.xlsx',
+                        'row_number'        => ($txn->row_sequence !== null ? $txn->row_sequence + 1 : 1),
+                        'transaction_type'  => $txn->transaction_type,
+                        'reference_id'      => $txn->reference_id ?? 'N/A',
+                        'debit_account_no'  => $txn->credit_account_no, // Sender / Debit account
+                        'credit_account_no' => $txn->debit_account_no,  // Beneficiary / Credit account
+                        'amount'            => $txn->amount,
+                        'failure_code'      => $failureCode,
+                        'reject_reason'     => $rejectReason,
+                    ]);
+
+                    Log::warning("CBS API posting failed for Txn {$txn->reference_id} [Code: {$failureCode}]: {$rejectReason}");
                 }
 
             } catch (\Exception $e) {
