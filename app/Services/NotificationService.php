@@ -35,12 +35,19 @@ class NotificationService
         }
 
         if ($recipients->isNotEmpty()) {
-            Notification::make()
+            $notification = Notification::make()
                 ->title($title)
                 ->body($body)
                 ->icon('heroicon-o-bell')
-                ->info()
-                ->sendToDatabase($recipients);
+                ->info();
+
+            foreach ($recipients as $recipient) {
+                try {
+                    $recipient->notifyNow($notification->toDatabase());
+                } catch (\Throwable $e) {
+                    Log::error("Failed to write database notification for User #{$recipient->id}: " . $e->getMessage());
+                }
+            }
         }
     }
 
