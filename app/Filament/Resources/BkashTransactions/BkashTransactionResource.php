@@ -41,6 +41,8 @@ class BkashTransactionResource extends Resource
         ];
     }
 
+    protected static bool $shouldRegisterNavigation = false;
+
     protected static \UnitEnum|string|null $navigationGroup = 'Transaction Pipeline';
 
     protected static ?string $navigationLabel = 'Upload & Verify Files';

@@ -2,9 +2,9 @@
 
 namespace App\Filament\Resources\BkashTransactionConfirmations\Tables;
 
+use App\Jobs\ExecuteCbsSettlementJob;
 use App\Models\BkashTransaction;
 use App\Services\NotificationService;
-use App\Jobs\ExecuteCbsSettlementJob;
 use Filament\Tables\Table;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Actions\BulkAction;
@@ -26,15 +26,7 @@ class BkashTransactionConfirmationsTable
                     return false;
                 }
 
-                // Disable selection if current user checked this transaction
-                if ($currentUser->id && $record->checked_by_id && (int) $record->checked_by_id === (int) $currentUser->id) {
-                    return false;
-                }
-                if ($currentUser->name && $record->checked_by && $record->checked_by === $currentUser->name) {
-                    return false;
-                }
-
-                // Disable selection if current user provided 1st authorization
+                // 2-Person Segregation of Duties: Disable selection if current user authorized this transaction
                 if ($currentUser->id && $record->approved_by_1_id && (int) $record->approved_by_1_id === (int) $currentUser->id) {
                     return false;
                 }
@@ -97,56 +89,41 @@ class BkashTransactionConfirmationsTable
                     ->sortable(),
 
                 TextColumn::make('approved_by_1')
-                    ->label('1st Auth By')
+                    ->label('Authorized By')
                     ->searchable(),
 
                 TextColumn::make('approved_at_1')
-                    ->label('1st Auth At')
+                    ->label('Authorized At')
                     ->formatStateUsing(fn ($state) => $state ? Carbon::parse($state)->timezone('Asia/Dhaka')->format('d M Y, h:i A') : '-')
                     ->sortable(),
             ])
             ->bulkActions([
                 BulkAction::make('authorize_final_level')
-                    ->label('Final Authorize Selected (Instantly Settle)')
+                    ->label('Confirm Selected (Instantly Settle)')
                     ->icon('heroicon-o-check-badge')
                     ->color('success')
                     ->requiresConfirmation()
                     ->action(function (Collection $records) {
                         $currentUser = Auth::user();
                         $currentUserId = $currentUser->id ?? null;
-                        $currentUserName = $currentUser->name ?? 'Authorizer 2';
+                        $currentUserName = $currentUser->name ?? 'Confirmer';
 
-                        // 3-Person Segregation of Duties Checks
-                        $checkedBySameUser = $records->filter(function ($record) use ($currentUserId, $currentUserName) {
-                            return ($currentUserId && $record->checked_by_id === $currentUserId) ||
-                                   ($record->checked_by && $record->checked_by === $currentUserName);
-                        });
-
-                        $approved1BySameUser = $records->filter(function ($record) use ($currentUserId, $currentUserName) {
+                        // 2-Person Segregation of Duties Check: Confirmer != Authorizer
+                        $authorizedBySameUser = $records->filter(function ($record) use ($currentUserId, $currentUserName) {
                             return ($currentUserId && $record->approved_by_1_id === $currentUserId) ||
                                    ($record->approved_by_1 && $record->approved_by_1 === $currentUserName);
                         });
 
-                        if ($checkedBySameUser->isNotEmpty()) {
+                        if ($authorizedBySameUser->isNotEmpty()) {
                             \Filament\Notifications\Notification::make()
-                                ->title('Final Authorization Blocked (Segregation of Duties)')
-                                ->body('You checked this file; you cannot provide Final Authorization on it.')
+                                ->title('Confirmation Blocked (Segregation of Duties)')
+                                ->body('You authorized this file; final confirmation must come from a different user.')
                                 ->danger()
                                 ->persistent()
                                 ->send();
                         }
 
-                        if ($approved1BySameUser->isNotEmpty()) {
-                            \Filament\Notifications\Notification::make()
-                                ->title('Final Authorization Blocked (Segregation of Duties)')
-                                ->body('You already provided 1st Authorization; final authorization must come from a different authorizer.')
-                                ->danger()
-                                ->persistent()
-                                ->send();
-                        }
-
-                        $unauthorizedRecords = $checkedBySameUser->merge($approved1BySameUser)->unique('id');
-                        $records = $records->diff($unauthorizedRecords);
+                        $records = $records->diff($authorizedBySameUser);
 
                         if ($records->isEmpty()) {
                             return;
@@ -164,18 +141,20 @@ class BkashTransactionConfirmationsTable
                                 'approved_by_2'    => $currentUserName,
                                 'approved_by_2_id' => $currentUserId,
                                 'approved_at_2'    => Carbon::now(),
+                                'confirmed_by'     => $currentUserName,
+                                'confirmed_at'     => Carbon::now(),
                             ]);
                         });
 
                         \Filament\Notifications\Notification::make()
-                            ->title('Final Authorized & Settling')
-                            ->body("Successfully authorized {$totalTrn} transactions. Executing automated CBS settlement.")
+                            ->title('Final Confirmation Completed')
+                            ->body("Confirmed {$totalTrn} transactions. Dispatching CBS Settlement.")
                             ->success()
                             ->send();
 
-                        NotificationService::dispatchStage4($fileName, $totalTrn, $totalAmount, $currentUserName, $currentUser);
+                        ExecuteCbsSettlementJob::dispatch($txnIds, $fileName);
 
-                        ExecuteCbsSettlementJob::dispatchSync($txnIds);
+                        NotificationService::dispatchStage4($fileName, $totalTrn, $totalAmount, $currentUserName, $currentUser);
                     }),
             ]);
     }

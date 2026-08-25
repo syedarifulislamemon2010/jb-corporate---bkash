@@ -45,7 +45,7 @@ class NotificationService
     }
 
     /**
-     * Dispatch Stage 1: SFTP / Upload File Ingested -> Pending Checker
+     * Dispatch Stage 1: SFTP / Upload File Ingested -> Pending Authorization
      */
     public static function dispatchStage1(string $fileName, int $totalTrn, float $totalAmount, ?User $senderUser = null): NotificationOutbox
     {
@@ -62,84 +62,70 @@ class NotificationService
               . "Upload Time: {$uploadTimeStr}\n"
               . "Total Files Uploaded Today: {$todayFilesCount}\n"
               . "Total Trn: \"{$totalTrn}\", Total Amount: \"{$formattedAmount}\".\n\n"
-              . "File is pending for Checker. Please Check this file.\n\n"
+              . "File is pending for Authorization. Please Authorize this file.\n\n"
               . "Thank you\n\n"
               . "Best Regards,\n\n"
               . "JANATA BANK";
 
         static::sendOrganizationDatabaseNotification(
             "New bKash Settlement File: {$fileName}",
-            "Uploaded at {$uploadTimeStr} | Total Trn: {$totalTrn}, Amount: BDT {$formattedAmount} (File #{$todayFilesCount} today). Pending Checker verification.",
+            "Uploaded at {$uploadTimeStr} | Total Trn: {$totalTrn}, Amount: BDT {$formattedAmount} (File #{$todayFilesCount} today). Pending Authorization.",
             $senderUser
         );
 
-        return static::createOutbox('STAGE_1_SFTP', $fileName, $totalTrn, $totalAmount, null, 'ALL_CHECKERS', $body, $senderUser);
+        return static::createOutbox('STAGE_1_SFTP', $fileName, $totalTrn, $totalAmount, null, 'ALL_AUTHORIZERS', $body, $senderUser);
     }
 
     /**
-     * Dispatch Stage 2: Checked by Checker -> Pending Authorization
+     * Dispatch Stage 2: Authorized by Authorizer -> Pending Confirmation (Scoped to Authorizer Organization)
      */
-    public static function dispatchStage2(string $fileName, int $totalTrn, float $totalAmount, string $checkerName, ?User $senderUser = null): NotificationOutbox
+    public static function dispatchStage2(string $fileName, int $totalTrn, float $totalAmount, string $authorizerName, ?User $senderUser = null): NotificationOutbox
     {
         $formattedAmount = BkashTransaction::formatBdtAmount($totalAmount);
 
         $body = "Dear Sir/Madam,\n\n"
               . "File Name: \"{$fileName}\"\n\n"
-              . "Total Trn: \"{$totalTrn}\", Total Amount: \"{$formattedAmount}\" is checked by \"{$checkerName}\" & is pending for further Authorization/Approval.\n\n"
+              . "Total Trn: \"{$totalTrn}\", Total Amount: \"{$formattedAmount}\" is Authorized by \"{$authorizerName}\" & is pending for final Confirmation.\n\n"
               . "Thank you\n\n"
               . "JANATA BANK";
 
         static::sendOrganizationDatabaseNotification(
-            "Transactions Checked by {$checkerName}",
-            "File: {$fileName} | Total Trn: {$totalTrn}, Amount: BDT {$formattedAmount}. Pending Authorization.",
+            "Transactions Authorized by {$authorizerName}",
+            "File: {$fileName} | Total Trn: {$totalTrn}, Amount: BDT {$formattedAmount}. Pending Confirmation.",
             $senderUser
         );
 
-        return static::createOutbox('STAGE_2_CHECKED', $fileName, $totalTrn, $totalAmount, $checkerName, 'ALL_CHECKERS_AND_AUTHORIZERS', $body, $senderUser);
+        return static::createOutbox('STAGE_2_CHECKED', $fileName, $totalTrn, $totalAmount, $authorizerName, 'ALL_CONFIRMERS', $body, $senderUser);
     }
 
     /**
-     * Dispatch Stage 3: Authorized by 1st Authorizer -> Pending 2nd Authorization (Scoped to Authorizer 1 Organization)
+     * Dispatch Stage 3: Authorized by 1st Authorizer -> Pending 2nd Authorization (Backward-compatible alias)
      */
     public static function dispatchStage3(string $fileName, int $totalTrn, float $totalAmount, string $authorizerName1, ?User $senderUser = null): NotificationOutbox
     {
-        $formattedAmount = BkashTransaction::formatBdtAmount($totalAmount);
-
-        $body = "Dear Sir/Madam,\n\n"
-              . "File Name: \"{$fileName}\"\n\n"
-              . "Total Trn: \"{$totalTrn}\", Total Amount: \"{$formattedAmount}\" is Authorized by \"{$authorizerName1}\" & is pending for further Authorization/Approval or final authorization.\n\n"
-              . "Thank you\n\n"
-              . "JANATA BANK";
-
-        static::sendOrganizationDatabaseNotification(
-            "1st Authorization Completed by {$authorizerName1}",
-            "File: {$fileName} | Total Trn: {$totalTrn}, Amount: BDT {$formattedAmount}. Pending final approval.",
-            $senderUser
-        );
-
-        return static::createOutbox('STAGE_3_AUTH1', $fileName, $totalTrn, $totalAmount, $authorizerName1, 'ALL_CHECKERS_AND_AUTHORIZERS', $body, $senderUser);
+        return static::dispatchStage2($fileName, $totalTrn, $totalAmount, $authorizerName1, $senderUser);
     }
 
     /**
-     * Dispatch Stage 4: Authorized by 2nd Authorizer -> Finally Authorized
+     * Dispatch Stage 4: Confirmed by Confirmer -> Finally Settled
      */
-    public static function dispatchStage4(string $fileName, int $totalTrn, float $totalAmount, string $authorizerName2, ?User $senderUser = null): NotificationOutbox
+    public static function dispatchStage4(string $fileName, int $totalTrn, float $totalAmount, string $confirmerName, ?User $senderUser = null): NotificationOutbox
     {
         $formattedAmount = BkashTransaction::formatBdtAmount($totalAmount);
 
         $body = "Dear Sir/Madam,\n\n"
               . "File Name: \"{$fileName}\"\n\n"
-              . "Total Trn: \"{$totalTrn}\", Total Amount: \"{$formattedAmount}\" is Authorized by \"{$authorizerName2}\" & is finally authorized.\n\n"
+              . "Total Trn: \"{$totalTrn}\", Total Amount: \"{$formattedAmount}\" is Confirmed by \"{$confirmerName}\" & is finally settled.\n\n"
               . "Thank you\n\n"
               . "JANATA BANK";
 
         static::sendOrganizationDatabaseNotification(
-            "Final Authorization Completed by {$authorizerName2}",
+            "Final Confirmation Completed by {$confirmerName}",
             "File: {$fileName} | Total Trn: {$totalTrn}, Amount: BDT {$formattedAmount}. Settled.",
             $senderUser
         );
 
-        return static::createOutbox('STAGE_4_AUTH2', $fileName, $totalTrn, $totalAmount, $authorizerName2, 'ALL_CHECKERS_AND_AUTHORIZERS', $body, $senderUser);
+        return static::createOutbox('STAGE_4_AUTH2', $fileName, $totalTrn, $totalAmount, $confirmerName, 'ALL_USERS', $body, $senderUser);
     }
 
     private static function createOutbox(

@@ -25,7 +25,7 @@ class BkashTransactionConfirmationResource extends Resource
 
     protected static ?string $pluralModelLabel = 'Transaction Confirmation';
 
-    protected static ?int $navigationSort = 3;
+    protected static ?int $navigationSort = 2;
 
     protected static \BackedEnum|string|null $navigationIcon = 'heroicon-o-clipboard-document-check';
 
@@ -34,7 +34,7 @@ class BkashTransactionConfirmationResource extends Resource
     public static function getEloquentQuery(): Builder
     {
         return parent::getEloquentQuery()
-            ->where('status_id', 1002)
+            ->where('status_id', 1001)
             ->withoutGlobalScopes([
                 SoftDeletingScope::class,
             ]);

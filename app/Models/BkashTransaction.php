@@ -16,15 +16,32 @@ class BkashTransaction extends Model
     protected $table = 'bkash_transactions';
     protected $primaryKey = 'id';
 
-    // Status Constants
-    public const STATUS_PENDING_CHECKER = 1000;
-    public const STATUS_CHECKED = 1001;
-    public const STATUS_AUTH_1_APPROVED = 1002;
+    // Status Constants (2-Tier: Authorizer -> Confirmer)
+    public const STATUS_PENDING_AUTHORIZATION = 1000;
+    public const STATUS_PENDING_CHECKER = 1000; // alias
+    public const STATUS_AUTHORIZED = 1001;
+    public const STATUS_CHECKED = 1001; // alias
+    public const STATUS_AUTH_1_APPROVED = 1001; // alias
     public const STATUS_FINAL_AUTHORIZED = 1003;
+    public const STATUS_CONFIRMED = 1003; // alias
     public const STATUS_CBS_SUCCESS = 1004;
     public const STATUS_CBS_RESPONSE_SUCCESS = 1006;
     public const STATUS_CBS_RESPONSE_FAILED  = 1007;
     public const STATUS_REJECTED = 9000;
+
+    public static function statusLabel(int $statusId): string
+    {
+        return match ($statusId) {
+            1000 => 'Pending Authorization',
+            1001 => 'Authorized',
+            1003 => 'Confirmed',
+            1004 => 'CBS Settled',
+            1006 => 'CBS Confirmed (Async)',
+            1007 => 'CBS Failed (Async)',
+            9000 => 'Rejected',
+            default => 'Unknown',
+        };
+    }
 
     protected $fillable = [
         'batch_id',

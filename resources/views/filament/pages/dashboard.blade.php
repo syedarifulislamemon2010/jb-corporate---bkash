@@ -41,7 +41,7 @@
                 </div>
                 <div style="flex: 1; min-width: 0;">
                     <p style="font-size: 0.95rem; font-weight: 700; margin: 0;">
-                        <span class="db-tabular">{{ $urgency['total'] }}</span> {{ Str::plural('file', $urgency['total']) }} need your action today: <span class="db-tabular">{{ $urgency['pending_checker'] }}</span> checker {{ Str::plural('verification', $urgency['pending_checker']) }}, <span class="db-tabular">{{ $urgency['pending_auth'] }}</span> dual {{ Str::plural('approval', $urgency['pending_auth']) }}
+                        <span class="db-tabular">{{ $urgency['total'] }}</span> {{ Str::plural('file', $urgency['total']) }} need your action today: <span class="db-tabular">{{ $urgency['pending_auth'] }}</span> pending authorization, <span class="db-tabular">{{ $urgency['pending_confirm'] }}</span> pending confirmation
                     </p>
                     <p style="font-size: 0.75rem; opacity: 0.85; margin: 0.125rem 0 0 0;">
                         Please review and clear pending files to complete automated CBS settlement.
@@ -53,25 +53,7 @@
         <!-- 3. ACTION ROW CARDS (Tier 2 Action-Required & Tier 3/Zero-State) -->
         <div class="db-grid-3">
 
-            <!-- Card 1: Pending Checker (Tier 2 Action Required) -->
-            <a href="{{ $actionStats['pending_checker']['url'] }}" class="db-card-warning">
-                <div class="db-flex-between">
-                    <div class="db-flex-gap-2" style="color: #d97706;">
-                        <x-filament::icon icon="heroicon-o-shield-check" class="w-5 h-5 text-amber-500" />
-                        <span class="db-text-sub" style="font-size: 0.75rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em;">Pending checker</span>
-                    </div>
-                </div>
-                <div style="margin-top: 0.75rem;">
-                    <div class="db-text-val db-tabular">
-                        {{ $actionStats['pending_checker']['files'] }}
-                    </div>
-                    <div class="db-link-action" style="margin-top: 0.5rem;">
-                        Awaiting verification →
-                    </div>
-                </div>
-            </a>
-
-            <!-- Card 2: Pending Authorization (Tier 2 Action Required) -->
+            <!-- Card 1: Pending Authorization (Tier 2 Action Required) -->
             <a href="{{ $actionStats['pending_auth']['url'] }}" class="db-card-warning">
                 <div class="db-flex-between">
                     <div class="db-flex-gap-2" style="color: #d97706;">
@@ -84,7 +66,25 @@
                         {{ $actionStats['pending_auth']['files'] }}
                     </div>
                     <div class="db-link-action" style="margin-top: 0.5rem;">
-                        Dual approval (auth 1 and 2) →
+                        Authorize transactions →
+                    </div>
+                </div>
+            </a>
+
+            <!-- Card 2: Pending Confirmation (Tier 2 Action Required) -->
+            <a href="{{ $actionStats['pending_confirm']['url'] }}" class="db-card-warning">
+                <div class="db-flex-between">
+                    <div class="db-flex-gap-2" style="color: #d97706;">
+                        <x-filament::icon icon="heroicon-o-clipboard-document-check" class="w-5 h-5 text-amber-500" />
+                        <span class="db-text-sub" style="font-size: 0.75rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em;">Pending confirmation</span>
+                    </div>
+                </div>
+                <div style="margin-top: 0.75rem;">
+                    <div class="db-text-val db-tabular">
+                        {{ $actionStats['pending_confirm']['files'] }}
+                    </div>
+                    <div class="db-link-action" style="margin-top: 0.5rem;">
+                        Final confirmation & settle →
                     </div>
                 </div>
             </a>
@@ -126,12 +126,12 @@
                         </div>
                         <div class="db-card-inner" style="display: grid; grid-template-columns: repeat(3, 1fr); text-align: center; padding: 0.5rem 0; border-radius: 0.75rem;">
                             <div>
-                                <div class="db-text-sub" style="font-size: 0.75rem; font-weight: 500;">Checker</div>
-                                <div class="db-tabular" style="font-size: 1rem; font-weight: 700; color: #d97706; margin-top: 0.125rem;">{{ $info['pending_checker'] }}</div>
+                                <div class="db-text-sub" style="font-size: 0.75rem; font-weight: 500;">Auth</div>
+                                <div class="db-tabular" style="font-size: 1rem; font-weight: 700; color: #d97706; margin-top: 0.125rem;">{{ $info['pending_auth'] }}</div>
                             </div>
                             <div style="border-left: 1px solid rgba(148,163,184,0.2); border-right: 1px solid rgba(148,163,184,0.2);">
-                                <div class="db-text-sub" style="font-size: 0.75rem; font-weight: 500;">Auth</div>
-                                <div class="db-tabular" style="font-size: 1rem; font-weight: 700; color: var(--color-signature-accent); margin-top: 0.125rem;">{{ $info['pending_auth'] }}</div>
+                                <div class="db-text-sub" style="font-size: 0.75rem; font-weight: 500;">Confirm</div>
+                                <div class="db-tabular" style="font-size: 1rem; font-weight: 700; color: var(--color-signature-accent); margin-top: 0.125rem;">{{ $info['pending_confirm'] }}</div>
                             </div>
                             <div>
                                 <div class="db-text-sub" style="font-size: 0.75rem; font-weight: 500;">Settled</div>
@@ -156,7 +156,7 @@
         </div>
 
         <!-- 5. EXCEPTIONS ROW (Tier 3 Informational) -->
-        <a href="/admin/bkash-failed-transactions" class="{{ $exceptions['is_clean'] ? 'db-card' : 'db-card-danger' }}" style="text-decoration: none;">
+        <a href="/admin/bkash-reports" class="{{ $exceptions['is_clean'] ? 'db-card' : 'db-card-danger' }}" style="text-decoration: none;">
             <div class="db-flex-between">
                 <div class="db-flex-gap-3">
                     <div style="padding: 0.5rem; border-radius: 0.75rem; {{ $exceptions['is_clean'] ? 'background: rgba(16,185,129,0.15); color: #059669;' : 'background: rgba(244,63,94,0.15); color: #e11d48;' }}">
@@ -167,7 +167,7 @@
                             Failed / Partial Transactions Today
                         </div>
                         <div class="db-text-heading db-tabular" style="font-size: 0.875rem; font-weight: 600; margin-top: 0.125rem;">
-                            {{ $exceptions['description'] }}
+                            {{ $exceptions['headline'] }}
                         </div>
                     </div>
                 </div>
