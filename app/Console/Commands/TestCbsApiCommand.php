@@ -51,30 +51,27 @@ class TestCbsApiCommand extends Command
         // 2. Test BEFTN Transaction Posting
         $this->info("👉 Step 2: Testing BEFTN Transaction Endpoint (POST /api/bkash-transactions)...");
 
-        $dummyTxn = new BkashTransaction([
-            'id'                  => 'test-' . time(),
-            'reference_id'        => 'TEST_' . date('Ymd_His'),
-            'txn_id'              => 'BKS' . date('Ymd') . rand(1000, 9999),
-            'transaction_type'    => 'BEFTN',
-            'amount'              => 500.00,
-            'credit_account_no'   => '0100202707747',
-            'debit_account_no'    => '4512442413566',
-            'debit_account_title' => 'TEST BENEFICIARY',
-            'debit_routing'       => '315260856',
-        ]);
+        $txn = BkashTransaction::where('status_id', 1003)->get();
 
-        $result = $apiService->settleTransaction($dummyTxn);
+        if(count($txn) > 0) {
+            foreach ($txn as $transaction) {
+                $result = $apiService->settleTransaction($transaction);
 
-        if ($result['success']) {
-            $this->info("✅ Transaction Posting SUCCESSFUL!");
-            $this->line("   HTTP Status: <comment>{$result['status_code']}</comment>");
-            $this->line("   Server Response: " . json_encode($result['response'], JSON_PRETTY_PRINT));
-        } else {
-            $this->warn("⚠️ Transaction Posting Response:");
-            $this->line("   HTTP Status: <comment>{$result['status_code']}</comment>");
-            $this->line("   Message:     <comment>{$result['message']}</comment>");
-            if (!empty($result['response'])) {
-                $this->line("   Payload:     " . (is_array($result['response']) ? json_encode($result['response']) : $result['response']));
+                if ($result['success']) {
+                    if ($result['response']['responseCode'] === 200 || $result['response']['responseCode'] === 201) {
+                        BkashTransaction::where('id', $transaction->id)->where('status_id', 1003)->update(['status_id' => 1004, 'response_id' => $result['response']['responseId']]);
+                    }
+                    $this->info("✅ Transaction Posting SUCCESSFUL!");
+                    $this->line("   HTTP Status: <comment>{$result['status_code']}</comment>");
+                    $this->line("   Server Response: " . json_encode($result['response'], JSON_PRETTY_PRINT));
+                } else {
+                    $this->warn("⚠️ Transaction Posting Response:");
+                    $this->line("   HTTP Status: <comment>{$result['status_code']}</comment>");
+                    $this->line("   Message:     <comment>{$result['message']}</comment>");
+                    if (!empty($result['response'])) {
+                        $this->line("   Payload:     " . (is_array($result['response']) ? json_encode($result['response']) : $result['response']));
+                    }
+                }
             }
         }
 

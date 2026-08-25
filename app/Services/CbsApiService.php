@@ -88,7 +88,7 @@ class CbsApiService
      *
      * @return array ['success' => bool, 'status_code' => int, 'response' => array|string, 'message' => string]
      */
-    public function settleTransaction(BkashTransaction $txn): array
+    public function settleTransaction($txn): array
     {
         $token = $this->getAuthToken();
 
