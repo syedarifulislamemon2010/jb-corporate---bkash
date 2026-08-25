@@ -65,6 +65,25 @@ class BkashFailedTransactionResource extends Resource
                     ->alignRight()
                     ->sortable(),
 
+                // 4b. Error Code / Cause
+                TextColumn::make('failure_code')
+                    ->label('Error Code')
+                    ->badge()
+                    ->sortable()
+                    ->searchable()
+                    ->color(fn (?string $state): string => match ($state) {
+                        'DORMANT_ACCOUNT'        => 'danger',
+                        'CBS_REJECTED'           => 'danger',
+                        'DUPLICATE_TXN_ID'       => 'warning',
+                        'MULTI_DEBIT_ACC'        => 'danger',
+                        'INVALID_DEBIT_ACCOUNT'  => 'danger',
+                        'INVALID_ROUTING'        => 'warning',
+                        'INVALID_ACCOUNT_NO'     => 'warning',
+                        'INVALID_ROW'            => 'gray',
+                        'NETWORK_ERROR'          => 'danger',
+                        default                  => 'info',
+                    }),
+
                 // 5. Reason for Failure / Dormant — Native danger token
                 TextColumn::make('reject_reason')
                     ->label('Reason for Failure / Dormant')
@@ -108,6 +127,20 @@ class BkashFailedTransactionResource extends Resource
                     ->sortable(),
             ])
             ->filters([
+                SelectFilter::make('failure_code')
+                    ->label('Error Code / Type')
+                    ->options([
+                        'DORMANT_ACCOUNT'       => 'Dormant Account',
+                        'CBS_REJECTED'          => 'CBS / Bank Rejected',
+                        'DUPLICATE_TXN_ID'      => 'Duplicate Txn ID',
+                        'MULTI_DEBIT_ACC'       => 'Multi Debit Account',
+                        'INVALID_DEBIT_ACCOUNT' => 'Invalid Debit Account',
+                        'INVALID_ROUTING'       => 'Invalid Routing',
+                        'INVALID_ACCOUNT_NO'    => 'Invalid Account No',
+                        'INVALID_ROW'           => 'Invalid Row / Missing Data',
+                        'NETWORK_ERROR'         => 'Network Error',
+                    ]),
+
                 SelectFilter::make('transaction_type')
                     ->options([
                         'A2A'   => 'Account to Account',

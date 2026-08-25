@@ -45,7 +45,7 @@ class CbsApiService
             Log::info("CBS API: Requesting authentication token from {$loginEndpoint} [User: {$this->username}]");
 
             $response = Http::timeout($this->timeout)
-                ->retry($this->retryAttempts, 1000)
+                ->retry($this->retryAttempts, 1000, throw: false)
                 ->post($loginEndpoint, [
                     'username' => $this->username,
                     'password' => $this->password,
@@ -146,7 +146,7 @@ class CbsApiService
 
             $response = Http::withToken($token)
                 ->timeout($this->timeout)
-                ->retry($this->retryAttempts, 1000)
+                ->retry($this->retryAttempts, 1000, throw: false)
                 ->post($endpoint, $payload);
 
             $isSuccess = $response->successful();
@@ -154,24 +154,73 @@ class CbsApiService
 
             if ($isSuccess) {
                 Log::info("CBS API: Successfully settled Txn {$txn->reference_id} [Status {$response->status()}]");
+
+                return [
+                    'success'       => true,
+                    'status_code'   => $response->status(),
+                    'response'      => $data,
+                    'failure_code'  => null,
+                    'reject_reason' => null,
+                    'message'       => 'Transaction posted successfully to CBS.',
+                ];
+            }
+
+            // Extract error message and error code from CBS response
+            $responseArray = is_array($data) ? $data : [];
+            $rawMessage = $responseArray['message'] ?? $responseArray['error'] ?? $responseArray['error_message'] ?? (is_string($data) ? $data : 'CBS rejected transaction.');
+            $rawCode    = $responseArray['error_code'] ?? $responseArray['code'] ?? null;
+
+            // Normalize failure_code (Requirement: Detect dormant accounts and map appropriately)
+            $upperMessage = strtoupper((string) $rawMessage);
+            $upperCode    = strtoupper((string) $rawCode);
+
+            if (str_contains($upperMessage, 'DORMANT') || str_contains($upperCode, 'DORMANT') || str_contains($upperMessage, 'INACTIVE') || str_contains($upperMessage, 'BLOCKED')) {
+                $failureCode = 'DORMANT_ACCOUNT';
+            } elseif (str_contains($upperMessage, 'ROUTING') || str_contains($upperCode, 'ROUTING')) {
+                $failureCode = 'INVALID_ROUTING';
+            } elseif (str_contains($upperMessage, 'ACCOUNT') || str_contains($upperCode, 'ACCOUNT')) {
+                $failureCode = 'INVALID_ACCOUNT_NO';
             } else {
-                Log::warning("CBS API: Posting rejected for Txn {$txn->reference_id} [Status {$response->status()}]: " . $response->body());
+                $failureCode = $rawCode ? strtoupper(str_replace(' ', '_', (string) $rawCode)) : 'CBS_REJECTED';
+            }
+
+            Log::warning("CBS API: Posting rejected for Txn {$txn->reference_id} [Status {$response->status()}, Code {$failureCode}]: {$rawMessage}");
+
+            return [
+                'success'       => false,
+                'status_code'   => $response->status(),
+                'response'      => $data,
+                'failure_code'  => $failureCode,
+                'reject_reason' => (string) $rawMessage,
+                'message'       => (string) $rawMessage,
+            ];
+        } catch (\Throwable $e) {
+            Log::error("CBS API: Exception posting Txn {$txn->reference_id}: " . $e->getMessage());
+
+            if ($e instanceof \Illuminate\Http\Client\RequestException && $e->response) {
+                $data = $e->response->json() ?? $e->response->body();
+                $responseArray = is_array($data) ? $data : [];
+                $rawMessage = $responseArray['message'] ?? $responseArray['error'] ?? $e->getMessage();
+                $upperMessage = strtoupper((string) $rawMessage);
+                $failureCode = str_contains($upperMessage, 'DORMANT') ? 'DORMANT_ACCOUNT' : 'CBS_REJECTED';
+
+                return [
+                    'success'       => false,
+                    'status_code'   => $e->response->status(),
+                    'response'      => $data,
+                    'failure_code'  => $failureCode,
+                    'reject_reason' => (string) $rawMessage,
+                    'message'       => (string) $rawMessage,
+                ];
             }
 
             return [
-                'success'     => $isSuccess,
-                'status_code' => $response->status(),
-                'response'    => $data,
-                'message'     => $isSuccess ? 'Transaction posted successfully to CBS.' : ($response->json('message') ?? 'CBS rejected transaction.'),
-            ];
-        } catch (\Throwable $e) {
-            Log::error("CBS API: Network exception posting Txn {$txn->reference_id}: " . $e->getMessage());
-
-            return [
-                'success'     => false,
-                'status_code' => 500,
-                'response'    => null,
-                'message'     => 'API Network Error: ' . $e->getMessage(),
+                'success'       => false,
+                'status_code'   => 500,
+                'response'      => null,
+                'failure_code'  => 'NETWORK_ERROR',
+                'reject_reason' => 'API Network Error: ' . $e->getMessage(),
+                'message'       => 'API Network Error: ' . $e->getMessage(),
             ];
         }
     }
