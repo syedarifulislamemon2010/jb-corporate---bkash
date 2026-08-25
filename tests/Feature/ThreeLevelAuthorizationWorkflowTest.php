@@ -73,6 +73,16 @@ class ThreeLevelAuthorizationWorkflowTest extends TestCase
         // Verify Segregation of Duties: checker cannot approve 1st level
         $this->assertNotEquals($checker->id, $auth1->id);
 
+        // Verify Authorizations table selectability: checker cannot select, but auth1 can select
+        Auth::login($checker);
+        $authTable = \App\Filament\Resources\BkashTransactionAuthorizations\Tables\BkashTransactionAuthorizationsTable::configure(
+            new \Filament\Tables\Table(new \Filament\Resources\Pages\ListRecords())
+        );
+        $this->assertFalse($authTable->isRecordSelectable($txn));
+
+        Auth::login($auth1);
+        $this->assertTrue($authTable->isRecordSelectable($txn));
+
         $txn->update([
             'status_id'        => BkashTransaction::STATUS_AUTH_1_APPROVED,
             'approved_by_1'    => $auth1->name,
@@ -86,6 +96,19 @@ class ThreeLevelAuthorizationWorkflowTest extends TestCase
         // Verify Segregation of Duties: auth1 or checker cannot provide final approval
         $this->assertNotEquals($auth1->id, $auth2->id);
         $this->assertNotEquals($checker->id, $auth2->id);
+
+        // Verify Confirmations table selectability: checker and auth1 cannot select, but auth2 can select
+        $confirmTable = \App\Filament\Resources\BkashTransactionConfirmations\Tables\BkashTransactionConfirmationsTable::configure(
+            new \Filament\Tables\Table(new \Filament\Resources\Pages\ListRecords())
+        );
+        Auth::login($checker);
+        $this->assertFalse($confirmTable->isRecordSelectable($txn));
+
+        Auth::login($auth1);
+        $this->assertFalse($confirmTable->isRecordSelectable($txn));
+
+        Auth::login($auth2);
+        $this->assertTrue($confirmTable->isRecordSelectable($txn));
 
         $txn->update([
             'status_id'        => BkashTransaction::STATUS_FINAL_AUTHORIZED,

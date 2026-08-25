@@ -20,6 +20,30 @@ class BkashTransactionConfirmationsTable
         return $table
             ->defaultPaginationPageOption(50)
             ->paginated([10, 20, 50, 100, 200])
+            ->checkIfRecordIsSelectableUsing(function (BkashTransaction $record): bool {
+                $currentUser = Auth::user();
+                if (!$currentUser) {
+                    return false;
+                }
+
+                // Disable selection if current user checked this transaction
+                if ($currentUser->id && $record->checked_by_id && (int) $record->checked_by_id === (int) $currentUser->id) {
+                    return false;
+                }
+                if ($currentUser->name && $record->checked_by && $record->checked_by === $currentUser->name) {
+                    return false;
+                }
+
+                // Disable selection if current user provided 1st authorization
+                if ($currentUser->id && $record->approved_by_1_id && (int) $record->approved_by_1_id === (int) $currentUser->id) {
+                    return false;
+                }
+                if ($currentUser->name && $record->approved_by_1 && $record->approved_by_1 === $currentUser->name) {
+                    return false;
+                }
+
+                return true;
+            })
             ->columns([
                 TextColumn::make('index')
                     ->label('#')
