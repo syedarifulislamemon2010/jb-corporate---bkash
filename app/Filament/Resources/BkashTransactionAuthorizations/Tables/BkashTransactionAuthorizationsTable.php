@@ -84,7 +84,7 @@ class BkashTransactionAuthorizationsTable
                 BulkAction::make('authorize_first_level')
                     ->label('Authorize Selected (1st Approval)')
                     ->icon('heroicon-o-check-circle')
-                    ->color('success')
+                    ->color('warning')
                     ->requiresConfirmation()
                     ->action(function (Collection $records) {
                         $currentUser = Auth::user();

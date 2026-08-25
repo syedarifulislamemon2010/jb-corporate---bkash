@@ -239,9 +239,15 @@
                     <div class="db-flex-gap-2 db-tabular">
                         <span>{{ $stmt['account'] }}:</span>
                         <span class="db-text-heading" style="font-weight: 600;">{{ $stmt['timestamp'] }}</span>
-                        <span style="padding: 0.125rem 0.5rem; border-radius: 0.25rem; font-size: 0.625rem; font-weight: 700; background: rgba(16,185,129,0.15); color: #059669; border: 1px solid rgba(16,185,129,0.35);">
-                            {{ $stmt['status'] }}
-                        </span>
+                        @if ($stmt['is_ok'])
+                            <span style="padding: 0.125rem 0.5rem; border-radius: 0.25rem; font-size: 0.625rem; font-weight: 700; background: rgba(16,185,129,0.15); color: #059669; border: 1px solid rgba(16,185,129,0.35);">
+                                {{ $stmt['status'] }}
+                            </span>
+                        @else
+                            <span style="padding: 0.125rem 0.5rem; border-radius: 0.25rem; font-size: 0.625rem; font-weight: 700; background: rgba(245,158,11,0.15); color: #d97706; border: 1px solid rgba(245,158,11,0.35);">
+                                {{ $stmt['status'] }}
+                            </span>
+                        @endif
                     </div>
                 @endforeach
             </div>
@@ -253,21 +259,28 @@
                 Recent activity
             </h3>
 
-            <div style="display: flex; flex-direction: column;">
-                @foreach ($activities as $index => $act)
-                    <div class="db-flex-between" style="padding: 0.875rem 0; {{ $index > 0 ? 'border-top: 1px solid rgba(148,163,184,0.2);' : '' }}">
-                        <div class="db-flex-gap-3">
-                            <x-filament::icon :icon="$act['icon']" class="w-4 h-4 {{ $act['color'] }} flex-shrink-0" />
-                            <span class="db-text-heading" style="font-size: 0.8125rem; font-weight: 500;">
-                                {{ $act['title'] }}
+            @if (empty($activities))
+                <div class="db-flex-gap-2 db-text-sub" style="padding: 1.5rem 0; justify-content: center; font-size: 0.875rem;">
+                    <x-filament::icon icon="heroicon-o-information-circle" class="w-5 h-5 text-gray-400" />
+                    <span>No recent activity yet</span>
+                </div>
+            @else
+                <div style="display: flex; flex-direction: column;">
+                    @foreach ($activities as $index => $act)
+                        <div class="db-flex-between" style="padding: 0.875rem 0; {{ $index > 0 ? 'border-top: 1px solid rgba(148,163,184,0.2);' : '' }}">
+                            <div class="db-flex-gap-3">
+                                <x-filament::icon :icon="$act['icon']" class="w-4 h-4 {{ $act['color'] }} flex-shrink-0" />
+                                <span class="db-text-heading" style="font-size: 0.8125rem; font-weight: 500;">
+                                    {{ $act['title'] }}
+                                </span>
+                            </div>
+                            <span class="db-text-sub db-tabular" style="font-size: 0.75rem; font-weight: 600; white-space: nowrap;">
+                                {{ $act['time'] }}
                             </span>
                         </div>
-                        <span class="db-text-sub db-tabular" style="font-size: 0.75rem; font-weight: 600; white-space: nowrap;">
-                            {{ $act['time'] }}
-                        </span>
-                    </div>
-                @endforeach
-            </div>
+                    @endforeach
+                </div>
+            @endif
         </div>
 
     </div>

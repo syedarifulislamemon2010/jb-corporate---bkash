@@ -230,26 +230,40 @@ class Dashboard extends BaseDashboard
     }
 
     /**
-     * Get MT940 statement delivery status per account.
+     * Get MT940 statement delivery status per account from actual delivery logs.
      */
     public function getMt940Status(): array
     {
-        $nowFormatted = Carbon::now()->format('h:i A');
-
-        return [
-            [
-                'account'   => '0100202707747 (TCSA)',
-                'timestamp' => $nowFormatted,
-                'status'    => 'Delivered to SFTP',
-                'is_ok'     => true,
-            ],
-            [
-                'account'   => '0100224107522 (Ops)',
-                'timestamp' => $nowFormatted,
-                'status'    => 'Delivered to SFTP',
-                'is_ok'     => true,
-            ],
+        $accounts = [
+            '0100202707747' => '0100202707747 (TCSA)',
+            '0100224107522' => '0100224107522 (Ops)',
         ];
+
+        $statuses = [];
+
+        foreach ($accounts as $accNo => $label) {
+            $latestLog = \App\Models\Mt940DeliveryLog::where('account_no', $accNo)
+                ->latest('delivered_at')
+                ->first();
+
+            if ($latestLog) {
+                $statuses[] = [
+                    'account'   => $label,
+                    'timestamp' => $latestLog->delivered_at ? $latestLog->delivered_at->format('h:i A') : $latestLog->created_at->format('h:i A'),
+                    'status'    => $latestLog->status,
+                    'is_ok'     => (bool) $latestLog->is_ok,
+                ];
+            } else {
+                $statuses[] = [
+                    'account'   => $label,
+                    'timestamp' => 'Pending',
+                    'status'    => 'Pending first delivery',
+                    'is_ok'     => false,
+                ];
+            }
+        }
+
+        return $statuses;
     }
 
     /**
@@ -299,31 +313,6 @@ class Dashboard extends BaseDashboard
                 'time'  => $eft->created_at ? $eft->created_at->format('d M Y, h:i:s A') : Carbon::now()->format('d M Y, h:i:s A'),
                 'icon'  => 'heroicon-o-arrow-uturn-left',
                 'color' => 'text-amber-500 dark:text-amber-400',
-            ];
-        }
-
-        // Fallback default activities if empty
-        if (empty($activities)) {
-            $todayDate = Carbon::now()->format('d M Y');
-            $activities = [
-                [
-                    'title' => 'EFT return processed, ref TXN-88213',
-                    'time'  => "{$todayDate}, 10:42:15 AM",
-                    'icon'  => 'heroicon-o-arrow-uturn-left',
-                    'color' => 'text-amber-500 dark:text-amber-400',
-                ],
-                [
-                    'title' => 'Transaction TXN-88190 failed, insufficient balance',
-                    'time'  => "{$todayDate}, 09:58:20 AM",
-                    'icon'  => 'heroicon-o-x-circle',
-                    'color' => 'text-rose-500 dark:text-rose-400',
-                ],
-                [
-                    'title' => 'Batch file BATCH-0417 confirmed by checker',
-                    'time'  => "{$todayDate}, 09:20:05 AM",
-                    'icon'  => 'heroicon-o-check',
-                    'color' => 'text-emerald-500 dark:text-emerald-400',
-                ],
             ];
         }
 

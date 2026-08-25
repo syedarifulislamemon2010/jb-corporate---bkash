@@ -2,6 +2,7 @@
 
 namespace App\Console\Commands;
 
+use App\Models\Mt940DeliveryLog;
 use App\Services\Mt940GeneratorService;
 use Carbon\Carbon;
 use Illuminate\Console\Command;
@@ -36,10 +37,28 @@ class GenerateMt940Command extends Command
                 $statement = Mt940GeneratorService::generateStatement($accountNumber, $date);
 
                 $fileName = "MT940_{$accountNumber}_{$date->format('Ymd')}.sta";
-                $generatedFiles[] = $fileName;
+                $generatedFiles[$accountNumber] = $fileName;
+
+                Mt940DeliveryLog::create([
+                    'account_no'     => $accountNumber,
+                    'statement_date' => $date->format('Y-m-d'),
+                    'file_name'      => $fileName,
+                    'status'         => 'Generated Locally',
+                    'is_ok'          => true,
+                    'delivered_at'   => now(),
+                ]);
 
                 $this->info("✅ Generated: {$fileName}");
             } catch (\Throwable $e) {
+                Mt940DeliveryLog::create([
+                    'account_no'     => $accountNumber,
+                    'statement_date' => $date->format('Y-m-d'),
+                    'file_name'      => "MT940_{$accountNumber}_{$date->format('Ymd')}.sta",
+                    'status'         => 'Failed',
+                    'is_ok'          => false,
+                    'error_message'  => $e->getMessage(),
+                ]);
+
                 $this->error("Failed for {$accountNumber}: " . $e->getMessage());
                 Log::error("MT940 generation failed for {$accountNumber}: " . $e->getMessage());
             }
@@ -47,19 +66,19 @@ class GenerateMt940Command extends Command
 
         // Push to SFTP if requested
         if ($this->option('push-sftp') && !empty($generatedFiles)) {
-            $this->pushToSftp($generatedFiles);
+            $this->pushToSftp($generatedFiles, $date);
         }
 
         $this->info("MT940 generation complete.");
         return Command::SUCCESS;
     }
 
-    private function pushToSftp(array $fileNames): void
+    private function pushToSftp(array $generatedFiles, Carbon $date): void
     {
         $this->info("Pushing MT940 files to SFTP...");
 
-        try {
-            foreach ($fileNames as $fileName) {
+        foreach ($generatedFiles as $accountNumber => $fileName) {
+            try {
                 $localPath = "MT940_Statements/{$fileName}";
 
                 if (!Storage::disk('public')->exists($localPath)) {
@@ -71,12 +90,32 @@ class GenerateMt940Command extends Command
                 $remotePath = "/var/www/html/beftn-bach-rtgs/storage/app/public/mt940/{$fileName}";
 
                 Storage::disk('bkash_sftp')->put($remotePath, $content);
+
+                Mt940DeliveryLog::create([
+                    'account_no'     => (string) $accountNumber,
+                    'statement_date' => $date->format('Y-m-d'),
+                    'file_name'      => $fileName,
+                    'status'         => 'Delivered to SFTP',
+                    'is_ok'          => true,
+                    'delivered_at'   => now(),
+                ]);
+
                 $this->info("📤 Pushed to SFTP: {$fileName}");
                 Log::info("MT940 pushed to SFTP: {$fileName}");
+            } catch (\Throwable $e) {
+                Mt940DeliveryLog::create([
+                    'account_no'     => (string) $accountNumber,
+                    'statement_date' => $date->format('Y-m-d'),
+                    'file_name'      => $fileName,
+                    'status'         => 'SFTP Delivery Failed',
+                    'is_ok'          => false,
+                    'delivered_at'   => now(),
+                    'error_message'  => $e->getMessage(),
+                ]);
+
+                $this->error("SFTP push failed for {$accountNumber}: " . $e->getMessage());
+                Log::error("MT940 SFTP push failed: " . $e->getMessage());
             }
-        } catch (\Throwable $e) {
-            $this->error("SFTP push failed: " . $e->getMessage());
-            Log::error("MT940 SFTP push failed: " . $e->getMessage());
         }
     }
 }

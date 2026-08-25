@@ -85,7 +85,7 @@ class BkashTransactionConfirmationsTable
                 BulkAction::make('authorize_final_level')
                     ->label('Final Authorize Selected (Instantly Settle)')
                     ->icon('heroicon-o-check-badge')
-                    ->color('primary')
+                    ->color('success')
                     ->requiresConfirmation()
                     ->action(function (Collection $records) {
                         $currentUser = Auth::user();
