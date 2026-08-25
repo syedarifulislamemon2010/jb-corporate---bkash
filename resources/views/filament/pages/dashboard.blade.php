@@ -186,17 +186,17 @@
                     <div>
                         <h3 class="db-text-sub" style="font-size: 0.875rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; margin: 0; color: var(--color-signature-accent);">TCSA live balance</h3>
                         <p class="db-text-sub db-tabular" style="font-size: 0.75rem; font-weight: 500; margin: 0.125rem 0 0 0;">
-                            {{ $balances['tcsa']['account'] }} · {{ $balances['tcsa']['label'] }}
+                            {{ $balances['tcsa']['account'] ?? '0100202707747' }} · {{ $balances['tcsa']['label'] ?? 'Pool Account' }}
                         </p>
                     </div>
                     <span class="db-tabular" style="padding: 0.125rem 0.625rem; border-radius: 9999px; font-size: 0.625rem; font-weight: 700; background: rgba(74,111,165,0.15); color: var(--color-signature-accent); border: 1px solid rgba(74,111,165,0.3);">
-                        Value date: {{ $balances['tcsa']['value_date'] }}
+                        Value date: {{ $balances['tcsa']['value_date'] ?? now()->format('d M Y') }}
                     </span>
                 </div>
 
                 <div style="margin-top: 1rem; margin-bottom: 0.5rem;">
                     <div class="db-text-val db-tabular" style="font-size: 2.25rem; letter-spacing: -0.03em;">
-                        BDT {{ \App\Models\BkashTransaction::formatBdtAmount($balances['tcsa']['balance']) }}
+                        BDT {{ \App\Models\BkashTransaction::formatBdtAmount($balances['tcsa']['balance'] ?? 0) }}
                     </div>
                 </div>
 
@@ -213,16 +213,16 @@
                 <div>
                     <h3 class="db-text-sub" style="font-size: 0.875rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; margin: 0;">Operational balance</h3>
                     <p class="db-text-sub db-tabular" style="font-size: 0.75rem; font-weight: 500; margin: 0.125rem 0 0 0;">
-                        {{ $balances['ops']['account'] }}
+                        {{ $balances['ops']['account'] ?? '0100224107522' }}
                     </p>
                     <div class="db-text-val db-tabular" style="margin-top: 1.25rem; font-size: 1.75rem; letter-spacing: -0.025em;">
-                        BDT {{ \App\Models\BkashTransaction::formatBdtAmount($balances['ops']['balance']) }}
+                        BDT {{ \App\Models\BkashTransaction::formatBdtAmount($balances['ops']['balance'] ?? 0) }}
                     </div>
                 </div>
 
                 <div class="db-flex-gap-2 db-tabular" style="margin-top: 1.5rem; font-size: 0.75rem; font-weight: 700; color: #059669;">
                     <x-filament::icon icon="heroicon-m-arrow-trending-up" class="w-4 h-4 text-emerald-600" />
-                    <span>↗ {{ $balances['ops']['change_pct'] }}% vs yesterday</span>
+                    <span>↗ {{ $balances['ops']['change_pct'] ?? '0.0' }}% vs yesterday</span>
                 </div>
             </div>
 

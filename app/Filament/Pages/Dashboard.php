@@ -180,22 +180,29 @@ class Dashboard extends Page
      */
     public function getBalances(): array
     {
+        $todayValueDate = Carbon::now()->timezone('Asia/Dhaka')->format('d M Y');
+
         return [
             'tcsa' => [
                 'name'         => 'bKash Settlement Account (TCSA)',
+                'label'        => 'Pool Account',
                 'account'      => '0100202707747',
                 'balance'      => $this->calculateBalance('0100202707747'),
                 'is_low'       => false,
                 'badge'        => 'Main Pool',
                 'badge_color'  => 'info',
+                'value_date'   => $todayValueDate,
             ],
             'ops' => [
                 'name'         => 'Janata Operational Account',
+                'label'        => 'Operational Reserve',
                 'account'      => '0100224107522',
                 'balance'      => $this->calculateBalance('0100224107522'),
                 'is_low'       => false,
                 'badge'        => 'Ops Reserve',
                 'badge_color'  => 'success',
+                'value_date'   => $todayValueDate,
+                'change_pct'   => '0.0',
             ],
         ];
     }
