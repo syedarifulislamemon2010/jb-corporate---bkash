@@ -17,34 +17,64 @@ class ListBkashReports extends ListRecords
     protected function getHeaderActions(): array
     {
         return [
-            Action::make('export_csv')
-                ->label('Download Report (CSV)')
-                ->icon('heroicon-o-arrow-down-tray')
-                ->color('success')
-                ->action(function () {
-                    $transactions = BkashTransaction::query()
-                        ->orderBy('create_date', 'desc')
-                        ->limit(10000)
-                        ->get();
-
-                    $fileName = 'bkash_transaction_report_' . now()->format('Ymd_His') . '.csv';
-
-                    return ExcelExportService::exportTransactionsCsv($transactions, $fileName);
-                }),
-
-            Action::make('export_daily')
-                ->label('Today\'s Report')
+            Action::make('download_today')
+                ->label('Download Today')
                 ->icon('heroicon-o-calendar')
                 ->color('primary')
                 ->action(function () {
                     $transactions = BkashTransaction::query()
                         ->whereDate('create_date', today())
-                        ->orderBy('create_date', 'desc')
+                        ->orderBy('row_sequence', 'asc')
+                        ->orderBy('id', 'asc')
                         ->get();
 
-                    $fileName = 'bkash_daily_report_' . now()->format('Ymd') . '.csv';
+                    $fileName = 'Transaction_Report_Today_' . now()->format('Ymd') . '.xlsx';
+                    return ExcelExportService::exportCheckerReportXlsx($transactions, $fileName);
+                }),
 
-                    return ExcelExportService::exportTransactionsCsv($transactions, $fileName);
+            Action::make('download_this_week')
+                ->label('Download This Week')
+                ->icon('heroicon-o-calendar-days')
+                ->color('info')
+                ->action(function () {
+                    $transactions = BkashTransaction::query()
+                        ->whereBetween('create_date', [now()->startOfWeek(), now()->endOfWeek()])
+                        ->orderBy('row_sequence', 'asc')
+                        ->orderBy('id', 'asc')
+                        ->get();
+
+                    $fileName = 'Transaction_Report_Week_' . now()->format('Ymd') . '.xlsx';
+                    return ExcelExportService::exportCheckerReportXlsx($transactions, $fileName);
+                }),
+
+            Action::make('download_this_month')
+                ->label('Download This Month')
+                ->icon('heroicon-o-table-cells')
+                ->color('warning')
+                ->action(function () {
+                    $transactions = BkashTransaction::query()
+                        ->whereBetween('create_date', [now()->startOfMonth(), now()->endOfMonth()])
+                        ->orderBy('row_sequence', 'asc')
+                        ->orderBy('id', 'asc')
+                        ->get();
+
+                    $fileName = 'Transaction_Report_Month_' . now()->format('Ym') . '.xlsx';
+                    return ExcelExportService::exportCheckerReportXlsx($transactions, $fileName);
+                }),
+
+            Action::make('download_this_year')
+                ->label('Download This Year')
+                ->icon('heroicon-o-arrow-down-tray')
+                ->color('success')
+                ->action(function () {
+                    $transactions = BkashTransaction::query()
+                        ->whereBetween('create_date', [now()->startOfYear(), now()->endOfYear()])
+                        ->orderBy('row_sequence', 'asc')
+                        ->orderBy('id', 'asc')
+                        ->get();
+
+                    $fileName = 'Transaction_Report_Year_' . now()->format('Y') . '.xlsx';
+                    return ExcelExportService::exportCheckerReportXlsx($transactions, $fileName);
                 }),
         ];
     }

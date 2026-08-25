@@ -235,6 +235,67 @@ class ExcelExportService
         }, 200, $headers);
     }
 
+    /**
+     * Export EFT Returns matching standard 11-column format.
+     */
+    public static function exportEftReturnsReportXlsx(
+        Collection $eftReturns,
+        string $fileName = 'EFT_Return_Report.xlsx'
+    ): StreamedResponse {
+        $spreadsheet = new \PhpOffice\PhpSpreadsheet\Spreadsheet();
+        $sheet = $spreadsheet->getActiveSheet();
+        $sheet->setTitle('EFT Return');
+
+        $headers = [
+            'Execution Date',
+            'Return Date',
+            'Amount',
+            'Service Type',
+            'Bene. Bank Name',
+            'Bene. Branch Name',
+            'Bene. Routing No',
+            'Bene. Account',
+            'Bene. Name',
+            'Reject Reason',
+            'Particular',
+        ];
+
+        foreach ($headers as $colIdx => $h) {
+            $colLetter = \PhpOffice\PhpSpreadsheet\Cell\Coordinate::stringFromColumnIndex($colIdx + 1);
+            $sheet->setCellValue("{$colLetter}1", $h);
+            $sheet->getStyle("{$colLetter}1")->getFont()->setBold(true);
+        }
+
+        $row = 2;
+        foreach ($eftReturns as $eft) {
+            $sheet->setCellValue("A{$row}", $eft->execution_date?->format('d/m/Y') ?? ($eft->created_at?->format('d/m/Y') ?? ''));
+            $sheet->setCellValue("B{$row}", $eft->return_date?->format('d/m/Y') ?? '');
+            $sheet->setCellValue("C{$row}", (float) ($eft->amount ?? 0));
+            $sheet->setCellValue("D{$row}", (string) ($eft->service_type ?? 'BEFTN'));
+            $sheet->setCellValue("E{$row}", (string) ($eft->bene_bank_name ?? $eft->bank_name ?? ''));
+            $sheet->setCellValue("F{$row}", (string) ($eft->bene_branch_name ?? $eft->branch_name ?? ''));
+            $sheet->setCellValueExplicit("G{$row}", (string) ($eft->bene_routing_no ?? $eft->routing_no ?? ''), \PhpOffice\PhpSpreadsheet\Cell\DataType::TYPE_STRING);
+            $sheet->setCellValueExplicit("H{$row}", (string) ($eft->bene_account ?? $eft->account_no ?? ''), \PhpOffice\PhpSpreadsheet\Cell\DataType::TYPE_STRING);
+            $sheet->setCellValue("I{$row}", (string) ($eft->bene_name ?? $eft->account_name ?? ''));
+            $sheet->setCellValue("J{$row}", (string) ($eft->reject_reason ?? $eft->reason ?? ''));
+            $sheet->setCellValue("K{$row}", (string) ($eft->particular ?? ''));
+            $row++;
+        }
+
+        $headers = [
+            'Content-Type' => 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+            'Content-Disposition' => "attachment; filename=\"{$fileName}\"",
+            'Pragma' => 'no-cache',
+            'Cache-Control' => 'must-revalidate, post-check=0, pre-check=0',
+            'Expires' => '0',
+        ];
+
+        return response()->stream(function () use ($spreadsheet) {
+            $writer = new \PhpOffice\PhpSpreadsheet\Writer\Xlsx($spreadsheet);
+            $writer->save('php://output');
+        }, 200, $headers);
+    }
+
     private static function statusLabel(int $statusId): string
     {
         return match ($statusId) {
