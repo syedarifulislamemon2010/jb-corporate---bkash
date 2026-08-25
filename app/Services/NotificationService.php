@@ -314,10 +314,7 @@ class NotificationService
             $query->where('organization_id', $organizationId);
         }
 
-        $phones = (clone $query)->whereNotNull('mobile_no')->pluck('mobile_no')->toArray();
-        if (empty($phones)) {
-            $phones = $query->whereNotNull('phone')->pluck('phone')->toArray();
-        }
+        $phones = $query->whereNotNull('mobile_no')->pluck('mobile_no')->toArray();
         return array_values(array_unique(array_filter($phones)));
     }
 }

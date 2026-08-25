@@ -37,7 +37,7 @@ class MobileOtpForgotPasswordTest extends TestCase
         RateLimiter::clear('forgot_pwd_otp_send:01711223344');
 
         Livewire::test(ForgotPasswordMobile::class)
-            ->set('mobile_no', '01711223344')
+            ->set('data.mobile_no', '01711223344')
             ->call('sendOtp')
             ->assertRedirect('/admin/verify-otp');
 
@@ -62,14 +62,14 @@ class MobileOtpForgotPasswordTest extends TestCase
 
         // 1st attempt: success
         Livewire::test(ForgotPasswordMobile::class)
-            ->set('mobile_no', '01811223344')
+            ->set('data.mobile_no', '01811223344')
             ->call('sendOtp');
 
         $this->assertTrue(RateLimiter::tooManyAttempts('forgot_pwd_otp_send:01811223344', 1));
 
         // 2nd attempt within 60s: throttled
         Livewire::test(ForgotPasswordMobile::class)
-            ->set('mobile_no', '01811223344')
+            ->set('data.mobile_no', '01811223344')
             ->call('sendOtp')
             ->assertNotDispatched('redirect');
     }
@@ -90,7 +90,7 @@ class MobileOtpForgotPasswordTest extends TestCase
 
         Livewire::withQueryParams(['mobile' => '01911223344'])
             ->test(VerifyOtp::class)
-            ->set('otp', '654321')
+            ->set('data.otp', '654321')
             ->call('verifyOtp')
             ->assertRedirect('/admin/set-new-password');
 
@@ -118,7 +118,7 @@ class MobileOtpForgotPasswordTest extends TestCase
 
         Livewire::withQueryParams(['mobile' => '01511223344'])
             ->test(VerifyOtp::class)
-            ->set('otp', '999999')
+            ->set('data.otp', '999999')
             ->call('verifyOtp')
             ->assertNotDispatched('redirect');
 
@@ -144,8 +144,8 @@ class MobileOtpForgotPasswordTest extends TestCase
         ]);
 
         Livewire::test(SetNewPassword::class)
-            ->set('password', 'BrandNewSecurePass2026!')
-            ->set('password_confirmation', 'BrandNewSecurePass2026!')
+            ->set('data.password', 'BrandNewSecurePass2026!')
+            ->set('data.password_confirmation', 'BrandNewSecurePass2026!')
             ->call('setNewPassword')
             ->assertRedirect('/admin');
 

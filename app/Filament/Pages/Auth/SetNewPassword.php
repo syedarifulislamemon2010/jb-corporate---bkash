@@ -3,35 +3,39 @@
 namespace App\Filament\Pages\Auth;
 
 use App\Models\User;
-use Filament\Forms\Concerns\InteractsWithForms;
-use Filament\Forms\Contracts\HasForms;
+use Filament\Actions\Action;
+use Filament\Forms\Components\TextInput;
 use Filament\Notifications\Notification;
 use Filament\Pages\SimplePage;
+use Filament\Schemas\Components\Actions;
+use Filament\Schemas\Components\Component;
+use Filament\Schemas\Components\EmbeddedSchema;
+use Filament\Schemas\Components\Form;
+use Filament\Schemas\Concerns\RestrictsFileUploadsToSchemaComponents;
+use Filament\Schemas\Schema;
+use Filament\Support\Enums\Alignment;
+use Illuminate\Contracts\Support\Htmlable;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Hash;
+use Livewire\Attributes\Locked;
 
-class SetNewPassword extends SimplePage implements HasForms
+/**
+ * @property-read Schema $form
+ */
+class SetNewPassword extends SimplePage
 {
-    use InteractsWithForms;
+    use RestrictsFileUploadsToSchemaComponents;
 
     protected static ?string $slug = 'set-new-password';
 
-    protected string $view = 'filament.pages.auth.set-new-password';
+    /**
+     * @var array<string, mixed> | null
+     */
+    public ?array $data = [];
 
-    public ?string $mobile_no = '';
-    public ?string $password = '';
-    public ?string $password_confirmation = '';
-
-    public function getHeading(): string
-    {
-        return 'Set New Password';
-    }
-
-    public function getSubheading(): ?string
-    {
-        return 'Create a new secure password for your account (minimum 8 characters).';
-    }
+    #[Locked]
+    public ?string $mobile_no = null;
 
     public function mount(): void
     {
@@ -48,17 +52,96 @@ class SetNewPassword extends SimplePage implements HasForms
                 ->send();
 
             $this->redirect('/admin/forgot-password');
+
+            return;
         }
+
+        $this->form->fill();
+    }
+
+    public function defaultForm(Schema $schema): Schema
+    {
+        return $schema
+            ->statePath('data');
+    }
+
+    public function form(Schema $schema): Schema
+    {
+        return $schema
+            ->components([
+                $this->getPasswordFormComponent(),
+                $this->getPasswordConfirmationFormComponent(),
+            ]);
+    }
+
+    protected function getPasswordFormComponent(): Component
+    {
+        return TextInput::make('password')
+            ->label('New Password')
+            ->password()
+            ->revealable(filament()->arePasswordsRevealable())
+            ->required()
+            ->minLength(8)
+            ->same('password_confirmation')
+            ->autofocus();
+    }
+
+    protected function getPasswordConfirmationFormComponent(): Component
+    {
+        return TextInput::make('password_confirmation')
+            ->label('Confirm New Password')
+            ->password()
+            ->revealable(filament()->arePasswordsRevealable())
+            ->required()
+            ->dehydrated(false);
+    }
+
+    public function getTitle(): string | Htmlable
+    {
+        return 'Set New Password';
+    }
+
+    public function getHeading(): string | Htmlable | null
+    {
+        return 'Set New Password';
+    }
+
+    public function getSubheading(): string | Htmlable | null
+    {
+        return 'Create a new secure password for your account (minimum 8 characters).';
+    }
+
+    protected function getFormActions(): array
+    {
+        return [
+            Action::make('setNewPassword')
+                ->label('Reset Password')
+                ->submit('setNewPassword'),
+        ];
+    }
+
+    public function content(Schema $schema): Schema
+    {
+        return $schema
+            ->components([
+                Form::make([EmbeddedSchema::make('form')])
+                    ->id('form')
+                    ->livewireSubmitHandler('setNewPassword')
+                    ->footer([
+                        Actions::make($this->getFormActions())
+                            ->alignment(Alignment::Start)
+                            ->fullWidth(true)
+                            ->key('form-actions'),
+                    ]),
+            ]);
     }
 
     public function setNewPassword(): void
     {
-        $this->validate([
-            'password' => ['required', 'string', 'min:8', 'same:password_confirmation'],
-            'password_confirmation' => ['required', 'string'],
-        ]);
+        $data = $this->form->getState();
+        $password = $data['password'] ?? '';
 
-        $mobileNo = trim($this->mobile_no);
+        $mobileNo = trim($this->mobile_no ?? '');
         $user = User::where('mobile_no', $mobileNo)->first();
 
         if (!$user) {
@@ -67,12 +150,13 @@ class SetNewPassword extends SimplePage implements HasForms
                 ->body('Unable to locate user account.')
                 ->danger()
                 ->send();
+
             return;
         }
 
         // Update to new user-provided password
         $user->update([
-            'password' => Hash::make($this->password),
+            'password' => Hash::make($password),
         ]);
 
         // Invalidate token and session keys

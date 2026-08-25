@@ -4,36 +4,43 @@ namespace App\Filament\Pages\Auth;
 
 use App\Helper\SMSGenerateHelper;
 use App\Models\User;
-use Filament\Forms\Concerns\InteractsWithForms;
-use Filament\Forms\Contracts\HasForms;
+use DanHarrin\LivewireRateLimiting\WithRateLimiting;
+use Filament\Actions\Action;
+use Filament\Forms\Components\TextInput;
 use Filament\Notifications\Notification;
 use Filament\Pages\SimplePage;
+use Filament\Schemas\Components\Actions;
+use Filament\Schemas\Components\Component;
+use Filament\Schemas\Components\EmbeddedSchema;
+use Filament\Schemas\Components\Form;
+use Filament\Schemas\Concerns\RestrictsFileUploadsToSchemaComponents;
+use Filament\Schemas\Schema;
+use Filament\Support\Enums\Alignment;
+use Illuminate\Contracts\Support\Htmlable;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\Str;
+use Livewire\Attributes\Locked;
 
-class VerifyOtp extends SimplePage implements HasForms
+/**
+ * @property-read Schema $form
+ */
+class VerifyOtp extends SimplePage
 {
-    use InteractsWithForms;
+    use RestrictsFileUploadsToSchemaComponents;
+    use WithRateLimiting;
 
     protected static ?string $slug = 'verify-otp';
 
-    protected string $view = 'filament.pages.auth.verify-otp';
+    /**
+     * @var array<string, mixed> | null
+     */
+    public ?array $data = [];
 
-    public ?string $mobile_no = '';
-    public ?string $otp = '';
-
-    public function getHeading(): string
-    {
-        return 'Verify OTP';
-    }
-
-    public function getSubheading(): ?string
-    {
-        return 'Enter the 6-digit OTP sent to your mobile number.';
-    }
+    #[Locked]
+    public ?string $mobile_no = null;
 
     public function mount(): void
     {
@@ -41,16 +48,104 @@ class VerifyOtp extends SimplePage implements HasForms
 
         if (empty($this->mobile_no)) {
             $this->redirect('/admin/forgot-password');
+
+            return;
         }
+
+        $this->form->fill();
+    }
+
+    public function defaultForm(Schema $schema): Schema
+    {
+        return $schema
+            ->statePath('data');
+    }
+
+    public function form(Schema $schema): Schema
+    {
+        return $schema
+            ->components([
+                $this->getOtpFormComponent(),
+            ]);
+    }
+
+    protected function getOtpFormComponent(): Component
+    {
+        return TextInput::make('otp')
+            ->label('6-Digit Verification OTP')
+            ->placeholder('Enter 6-digit OTP')
+            ->numeric()
+            ->length(6)
+            ->required()
+            ->autofocus();
+    }
+
+    public function getTitle(): string | Htmlable
+    {
+        return 'Verify OTP';
+    }
+
+    public function getHeading(): string | Htmlable | null
+    {
+        return 'Verify OTP';
+    }
+
+    public function getSubheading(): string | Htmlable | null
+    {
+        return 'Enter the 6-digit OTP sent to your mobile number.';
+    }
+
+    protected function getFormActions(): array
+    {
+        return [
+            Action::make('verifyOtp')
+                ->label('Verify OTP')
+                ->submit('verifyOtp'),
+        ];
+    }
+
+    public function resendAction(): Action
+    {
+        return Action::make('resendOtp')
+            ->link()
+            ->label('Resend OTP')
+            ->action('resendOtp');
+    }
+
+    public function changeNumberAction(): Action
+    {
+        return Action::make('changeNumber')
+            ->link()
+            ->label('Change Number')
+            ->url('/admin/forgot-password');
+    }
+
+    public function content(Schema $schema): Schema
+    {
+        return $schema
+            ->components([
+                Form::make([EmbeddedSchema::make('form')])
+                    ->id('form')
+                    ->livewireSubmitHandler('verifyOtp')
+                    ->footer([
+                        Actions::make($this->getFormActions())
+                            ->alignment(Alignment::Start)
+                            ->fullWidth(true)
+                            ->key('form-actions'),
+                        Actions::make([$this->resendAction(), $this->changeNumberAction()])
+                            ->alignment(Alignment::Between)
+                            ->fullWidth(true)
+                            ->key('extra-actions'),
+                    ]),
+            ]);
     }
 
     public function verifyOtp(): void
     {
-        $this->validate([
-            'otp' => ['required', 'string', 'size:6'],
-        ]);
+        $data = $this->form->getState();
+        $otp  = trim($data['otp'] ?? '');
 
-        $mobileNo = trim($this->mobile_no);
+        $mobileNo = trim($this->mobile_no ?? '');
         $lockoutKey = 'verify_otp_lockout:' . $mobileNo;
 
         // Security: Lockout after 5 failed attempts for 15 minutes
@@ -61,12 +156,13 @@ class VerifyOtp extends SimplePage implements HasForms
                 ->body("Too many failed OTP attempts. Please try again in {$minutes} minutes.")
                 ->danger()
                 ->send();
+
             return;
         }
 
         $cachedOtp = Cache::get("otp_reset_{$mobileNo}");
 
-        if (empty($cachedOtp) || $cachedOtp !== trim($this->otp)) {
+        if (empty($cachedOtp) || $cachedOtp !== $otp) {
             RateLimiter::hit($lockoutKey, 900); // 15-minute window
 
             Notification::make()
@@ -74,6 +170,7 @@ class VerifyOtp extends SimplePage implements HasForms
                 ->body('Invalid or expired OTP. Please request a new one.')
                 ->danger()
                 ->send();
+
             return;
         }
 
@@ -89,6 +186,7 @@ class VerifyOtp extends SimplePage implements HasForms
                 ->body('No user account associated with this number.')
                 ->danger()
                 ->send();
+
             return;
         }
 
@@ -134,7 +232,7 @@ class VerifyOtp extends SimplePage implements HasForms
 
     public function resendOtp(): void
     {
-        $mobileNo = trim($this->mobile_no);
+        $mobileNo = trim($this->mobile_no ?? '');
         $rateLimitKey = 'forgot_pwd_otp_send:' . $mobileNo;
 
         if (RateLimiter::tooManyAttempts($rateLimitKey, 1)) {
@@ -144,6 +242,7 @@ class VerifyOtp extends SimplePage implements HasForms
                 ->body("Please wait {$seconds} seconds before requesting a new OTP.")
                 ->warning()
                 ->send();
+
             return;
         }
 
