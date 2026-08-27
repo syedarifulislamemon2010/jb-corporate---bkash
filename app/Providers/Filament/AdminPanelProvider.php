@@ -61,7 +61,7 @@ class AdminPanelProvider extends PanelProvider
             ])
             ->userMenuItems([
                 \Filament\Navigation\MenuItem::make()
-                    ->label(fn () => (auth()->user()?->organization ?? 'Janata Bank PLC.') . ' · ' . (auth()->user()?->roles?->first()?->name ?? 'User'))
+                    ->label(fn () => (auth()->user()?->getRawOriginal('organization') ?: 'Janata Bank PLC.') . ' · ' . (auth()->user()?->roles?->first()?->name ?? 'User'))
                     ->icon('heroicon-o-building-office-2')
                     ->url('#'),
             ])
@@ -90,6 +90,8 @@ class AdminPanelProvider extends PanelProvider
             ])
             ->plugins([
                 FilamentShieldPlugin::make()
+                    ->navigationGroup('Roles & Permissions')
+                    ->navigationLabel('Roles & Permissions')
                     ->navigationIcon('heroicon-o-identification')
                     ->gridColumns([
                         'default' => 1,

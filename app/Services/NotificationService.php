@@ -26,8 +26,9 @@ class NotificationService
             $recipients = User::all();
         } else {
             $query = User::query()->where('id', '!=', $sender->id);
-            if (!empty($sender->organization)) {
-                $query->where('organization', $sender->organization);
+            $org = $sender->getRawOriginal('organization');
+            if (!empty($org)) {
+                $query->where('organization', $org);
             } elseif (!empty($sender->organization_id)) {
                 $query->where('organization_id', $sender->organization_id);
             }
@@ -176,7 +177,7 @@ class NotificationService
         Log::info("Notification Outbox Created [{$eventType}]: {$fileName}");
 
         $excludeUserId = $senderUser?->id;
-        $organization  = $senderUser?->organization ?? $senderUser?->organization_id;
+        $organization  = $senderUser?->getRawOriginal('organization') ?? $senderUser?->organization_id;
 
         // Send actual email notifications (scoped to org & excluding actor)
         static::sendActualEmails($outbox, $recipientGroup, $messageText, $fileName, $eventType, $organization, $excludeUserId);
