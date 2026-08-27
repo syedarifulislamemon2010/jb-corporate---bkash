@@ -28,15 +28,8 @@ class BkashTransactionAuthorizationsTable
                     return false;
                 }
 
-                // Segregation of Duties: Disable selection if current user checked this transaction
-                if ($currentUser->id && $record->checked_by_id && (int) $record->checked_by_id === (int) $currentUser->id) {
-                    return false;
-                }
-                if ($currentUser->name && $record->checked_by && $record->checked_by === $currentUser->name) {
-                    return false;
-                }
-
-                return true;
+                // Segregation of Duties / Self-Approval Prevention via Policy
+                return \Illuminate\Support\Facades\Gate::forUser($currentUser)->allows('authorize', $record);
             })
             ->columns([
                 TextColumn::make('index')

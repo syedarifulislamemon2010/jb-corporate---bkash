@@ -29,22 +29,8 @@ class BkashTransactionConfirmationsTable
                     return false;
                 }
 
-                // 3-Person Segregation of Duties: 2nd Authorizer cannot be the Checker or 1st Authorizer
-                if ($currentUser->id && $record->checked_by_id && (int) $record->checked_by_id === (int) $currentUser->id) {
-                    return false;
-                }
-                if ($currentUser->name && $record->checked_by && $record->checked_by === $currentUser->name) {
-                    return false;
-                }
-
-                if ($currentUser->id && $record->approved_by_1_id && (int) $record->approved_by_1_id === (int) $currentUser->id) {
-                    return false;
-                }
-                if ($currentUser->name && $record->approved_by_1 && $record->approved_by_1 === $currentUser->name) {
-                    return false;
-                }
-
-                return true;
+                // 3-Person Segregation of Duties / Self-Approval Prevention via Policy
+                return \Illuminate\Support\Facades\Gate::forUser($currentUser)->allows('confirm', $record);
             })
             ->columns([
                 TextColumn::make('index')
