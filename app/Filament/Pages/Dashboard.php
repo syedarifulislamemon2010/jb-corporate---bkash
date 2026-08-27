@@ -136,23 +136,29 @@ class Dashboard extends Page
 
         return [
             'pending_checker' => [
-                'files'       => $pendingCheckerFiles,
-                'trns'        => $pendingCheckerTrns,
-                'url'         => '/admin/bkash-transactions',
+                'files'        => $pendingCheckerFiles,
+                'trns'         => $pendingCheckerTrns,
+                'url'          => '/admin/bkash-transactions',
+                'empty_label'  => 'All clear — no files awaiting check',
+                'action_label' => 'Verify & check files →',
             ],
             'pending_auth1' => [
-                'files'       => $pendingAuth1Files,
-                'trns'        => $pendingAuth1Trns,
-                'url'         => '/admin/bkash-transaction-authorizations',
+                'files'        => $pendingAuth1Files,
+                'trns'         => $pendingAuth1Trns,
+                'url'          => '/admin/bkash-transaction-authorizations',
+                'empty_label'  => 'All clear — no files awaiting 1st auth',
+                'action_label' => '1st Authorizer approval →',
             ],
             'pending_auth2' => [
-                'files'       => $pendingAuth2Files,
-                'trns'        => $pendingAuth2Trns,
-                'url'         => '/admin/bkash-transaction-confirmations',
+                'files'        => $pendingAuth2Files,
+                'trns'         => $pendingAuth2Trns,
+                'url'          => '/admin/bkash-transaction-confirmations',
+                'empty_label'  => 'All clear — no files awaiting final auth',
+                'action_label' => 'Final confirmation & settle →',
             ],
             'settled_today' => [
-                'amount'      => $settledTodayAmount,
-                'count'       => $settledTodayCount,
+                'amount'       => $settledTodayAmount,
+                'count'        => $settledTodayCount,
             ],
         ];
     }

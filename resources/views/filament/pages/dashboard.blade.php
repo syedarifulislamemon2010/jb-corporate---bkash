@@ -67,7 +67,7 @@
                         </div>
                         <div class="db-text-sub db-tabular" style="font-size: 0.75rem; margin-top: 0.25rem;">{{ $actionStats['pending_checker']['trns'] }} {{ Str::plural('transaction', $actionStats['pending_checker']['trns']) }}</div>
                         <div class="db-link-action" style="margin-top: 0.5rem;">
-                            Verify & check files →
+                            {{ $actionStats['pending_checker']['action_label'] }}
                         </div>
                     </div>
                 </a>
@@ -81,7 +81,7 @@
                     </div>
                     <div style="margin-top: 0.75rem;">
                         <div class="db-text-val db-tabular" style="color: #94a3b8 !important;">0</div>
-                        <div style="font-size: 0.75rem; color: #94a3b8; margin-top: 0.5rem;">All clear — no files awaiting check</div>
+                        <div style="font-size: 0.75rem; color: #94a3b8; margin-top: 0.5rem;">{{ $actionStats['pending_checker']['empty_label'] }}</div>
                     </div>
                 </div>
             @endif
@@ -101,7 +101,7 @@
                         </div>
                         <div class="db-text-sub db-tabular" style="font-size: 0.75rem; margin-top: 0.25rem;">{{ $actionStats['pending_auth1']['trns'] }} {{ Str::plural('transaction', $actionStats['pending_auth1']['trns']) }}</div>
                         <div class="db-link-action" style="margin-top: 0.5rem;">
-                            1st Authorizer approval →
+                            {{ $actionStats['pending_auth1']['action_label'] }}
                         </div>
                     </div>
                 </a>
@@ -115,7 +115,7 @@
                     </div>
                     <div style="margin-top: 0.75rem;">
                         <div class="db-text-val db-tabular" style="color: #94a3b8 !important;">0</div>
-                        <div style="font-size: 0.75rem; color: #94a3b8; margin-top: 0.5rem;">All clear — no files awaiting 1st auth</div>
+                        <div style="font-size: 0.75rem; color: #94a3b8; margin-top: 0.5rem;">{{ $actionStats['pending_auth1']['empty_label'] }}</div>
                     </div>
                 </div>
             @endif
@@ -135,7 +135,7 @@
                         </div>
                         <div class="db-text-sub db-tabular" style="font-size: 0.75rem; margin-top: 0.25rem;">{{ $actionStats['pending_auth2']['trns'] }} {{ Str::plural('transaction', $actionStats['pending_auth2']['trns']) }}</div>
                         <div class="db-link-action" style="margin-top: 0.5rem;">
-                            Final confirmation & settle →
+                            {{ $actionStats['pending_auth2']['action_label'] }}
                         </div>
                     </div>
                 </a>
@@ -149,7 +149,7 @@
                     </div>
                     <div style="margin-top: 0.75rem;">
                         <div class="db-text-val db-tabular" style="color: #94a3b8 !important;">0</div>
-                        <div style="font-size: 0.75rem; color: #94a3b8; margin-top: 0.5rem;">All clear — no files awaiting final auth</div>
+                        <div style="font-size: 0.75rem; color: #94a3b8; margin-top: 0.5rem;">{{ $actionStats['pending_auth2']['empty_label'] }}</div>
                     </div>
                 </div>
             @endif
