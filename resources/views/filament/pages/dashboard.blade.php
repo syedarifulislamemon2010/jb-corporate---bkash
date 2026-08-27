@@ -10,7 +10,7 @@
         $activities   = $this->getRecentActivities();
     @endphp
 
-    <div style="display: flex; flex-direction: column; gap: 1.5rem;">
+    <div class="db-container">
 
         <!-- 1. HEADER ROW: Title + Sync Status + Refresh (Single Instance) -->
         <div class="db-flex-between" style="flex-wrap: wrap; gap: 1rem; padding-bottom: 0.5rem;">
@@ -18,7 +18,7 @@
                 <h1 class="db-text-heading" style="font-size: 1.75rem; font-weight: 800; letter-spacing: -0.025em; margin: 0;">
                     bKash settlement dashboard
                 </h1>
-                <div class="db-flex-gap-2" style="padding: 0.25rem 0.75rem; border-radius: 9999px; font-size: 0.75rem; font-weight: 800; {{ $lastSynced['is_delayed'] ? 'background: rgba(239,68,68,0.15); color: #dc2626; border: 1px solid rgba(239,68,68,0.4);' : 'background: rgba(16,185,129,0.15); color: #059669; border: 1px solid rgba(16,185,129,0.4);' }}">
+                <div class="db-badge-pill {{ $lastSynced['is_delayed'] ? 'db-badge-danger' : 'db-badge-success' }} db-flex-gap-2">
                     <span style="width: 8px; height: 8px; border-radius: 50%; display: inline-block; {{ $lastSynced['is_delayed'] ? 'background-color: #dc2626;' : 'background-color: #10b981;' }}"></span>
                     <span class="db-tabular">Last synced: {{ $lastSynced['formatted'] }}</span>
                 </div>
@@ -120,16 +120,16 @@
                     <div class="db-card">
                         <div class="db-flex-between" style="margin-bottom: 0.75rem;">
                             <span class="db-text-heading" style="font-size: 1rem; font-weight: 800;">{{ $channel }} Payment Mode</span>
-                            <span style="padding: 0.125rem 0.625rem; border-radius: 9999px; font-size: 0.625rem; font-weight: 700; text-transform: uppercase; background: rgba(16,185,129,0.15); color: #059669; border: 1px solid rgba(16,185,129,0.35);">
+                            <span class="db-badge-sm db-badge-success">
                                 {{ $info['label'] }}
                             </span>
                         </div>
-                        <div class="db-card-inner" style="display: grid; grid-template-columns: repeat(3, 1fr); text-align: center; padding: 0.5rem 0; border-radius: 0.75rem;">
+                        <div class="db-card-inner db-channel-cols">
                             <div>
                                 <div class="db-text-sub" style="font-size: 0.75rem; font-weight: 500;">Auth</div>
                                 <div class="db-tabular" style="font-size: 1rem; font-weight: 700; color: #d97706; margin-top: 0.125rem;">{{ $info['pending_auth'] }}</div>
                             </div>
-                            <div style="border-left: 1px solid rgba(148,163,184,0.2); border-right: 1px solid rgba(148,163,184,0.2);">
+                            <div class="db-channel-col-border">
                                 <div class="db-text-sub" style="font-size: 0.75rem; font-weight: 500;">Confirm</div>
                                 <div class="db-tabular" style="font-size: 1rem; font-weight: 700; color: var(--color-signature-accent); margin-top: 0.125rem;">{{ $info['pending_confirm'] }}</div>
                             </div>
@@ -143,7 +143,7 @@
                     <div class="db-card" style="opacity: 0.6;">
                         <div class="db-flex-between" style="margin-bottom: 0.75rem;">
                             <span class="db-text-sub" style="font-size: 1rem; font-weight: 800;">{{ $channel }} Payment Mode</span>
-                            <span class="db-text-sub" style="padding: 0.125rem 0.625rem; border-radius: 9999px; font-size: 0.625rem; font-weight: 700; text-transform: uppercase; background: rgba(148,163,184,0.15); border: 1px solid rgba(148,163,184,0.3);">
+                            <span class="db-badge-sm" style="background: rgba(148,163,184,0.15); border: 1px solid rgba(148,163,184,0.3); color: #64748b;">
                                 {{ $info['label'] }}
                             </span>
                         </div>
@@ -189,7 +189,7 @@
                             {{ $balances['tcsa']['account'] ?? '0100202707747' }} · {{ $balances['tcsa']['label'] ?? 'Pool Account' }}
                         </p>
                     </div>
-                    <span class="db-tabular" style="padding: 0.125rem 0.625rem; border-radius: 9999px; font-size: 0.625rem; font-weight: 700; background: rgba(74,111,165,0.15); color: var(--color-signature-accent); border: 1px solid rgba(74,111,165,0.3);">
+                    <span class="db-tabular db-badge-sm db-badge-info">
                         Value date: {{ $balances['tcsa']['value_date'] ?? now()->format('d M Y') }}
                     </span>
                 </div>
@@ -240,11 +240,11 @@
                         <span>{{ $stmt['account'] }}:</span>
                         <span class="db-text-heading" style="font-weight: 600;">{{ $stmt['timestamp'] }}</span>
                         @if ($stmt['is_ok'])
-                            <span style="padding: 0.125rem 0.5rem; border-radius: 0.25rem; font-size: 0.625rem; font-weight: 700; background: rgba(16,185,129,0.15); color: #059669; border: 1px solid rgba(16,185,129,0.35);">
+                            <span class="db-badge-square-sm db-badge-success">
                                 {{ $stmt['status'] }}
                             </span>
                         @else
-                            <span style="padding: 0.125rem 0.5rem; border-radius: 0.25rem; font-size: 0.625rem; font-weight: 700; background: rgba(245,158,11,0.15); color: #d97706; border: 1px solid rgba(245,158,11,0.35);">
+                            <span class="db-badge-square-sm db-badge-warning">
                                 {{ $stmt['status'] }}
                             </span>
                         @endif
@@ -265,9 +265,9 @@
                     <span>No recent activity yet</span>
                 </div>
             @else
-                <div style="display: flex; flex-direction: column;">
-                    @foreach ($activities as $index => $act)
-                        <div class="db-flex-between" style="padding: 0.875rem 0; {{ $index > 0 ? 'border-top: 1px solid rgba(148,163,184,0.2);' : '' }}">
+                <div class="db-activity-list">
+                    @foreach ($activities as $act)
+                        <div class="db-activity-item">
                             <div class="db-flex-gap-3">
                                 <x-filament::icon :icon="$act['icon']" class="w-4 h-4 {{ $act['color'] }} flex-shrink-0" />
                                 <span class="db-text-heading" style="font-size: 0.8125rem; font-weight: 500;">

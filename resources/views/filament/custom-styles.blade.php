@@ -322,6 +322,89 @@
         gap: 0.75rem;
     }
 
+    .db-container {
+        display: flex;
+        flex-direction: column;
+        gap: 1.5rem;
+    }
+
+    .db-badge-pill {
+        display: inline-flex;
+        align-items: center;
+        padding: 0.25rem 0.75rem;
+        border-radius: 9999px;
+        font-size: 0.75rem;
+        font-weight: 800;
+    }
+
+    .db-badge-success {
+        background: rgba(16, 185, 129, 0.15);
+        color: #059669;
+        border: 1px solid rgba(16, 185, 129, 0.4);
+    }
+
+    .db-badge-danger {
+        background: rgba(239, 68, 68, 0.15);
+        color: #dc2626;
+        border: 1px solid rgba(239, 68, 68, 0.4);
+    }
+
+    .db-badge-warning {
+        background: rgba(245, 158, 11, 0.15);
+        color: #d97706;
+        border: 1px solid rgba(245, 158, 11, 0.4);
+    }
+
+    .db-badge-info {
+        background: rgba(74, 111, 165, 0.15);
+        color: var(--color-signature-accent);
+        border: 1px solid rgba(74, 111, 165, 0.3);
+    }
+
+    .db-badge-sm {
+        padding: 0.125rem 0.625rem;
+        border-radius: 9999px;
+        font-size: 0.625rem;
+        font-weight: 700;
+        text-transform: uppercase;
+    }
+
+    .db-badge-square-sm {
+        padding: 0.125rem 0.5rem;
+        border-radius: 0.25rem;
+        font-size: 0.625rem;
+        font-weight: 700;
+    }
+
+    .db-channel-cols {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        text-align: center;
+        padding: 0.5rem 0;
+        border-radius: 0.75rem;
+    }
+
+    .db-channel-col-border {
+        border-left: 1px solid rgba(148, 163, 184, 0.2);
+        border-right: 1px solid rgba(148, 163, 184, 0.2);
+    }
+
+    .db-activity-list {
+        display: flex;
+        flex-direction: column;
+    }
+
+    .db-activity-item {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 0.875rem 0;
+    }
+
+    .db-activity-item + .db-activity-item {
+        border-top: 1px solid rgba(148, 163, 184, 0.2);
+    }
+
     /* ─── Hide Default Filament Widgets ─── */
     .fi-wi-account,
     .fi-wi-filament-info,
