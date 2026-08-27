@@ -23,6 +23,8 @@ class OrganizationResource extends Resource implements HasShieldPermissions
 
     protected static string|BackedEnum|null $navigationIcon = 'heroicon-o-building-library';
     protected static \UnitEnum|string|null $navigationGroup = 'Administration';
+    protected static ?string $navigationLabel = 'Organizations';
+    protected static ?int $navigationSort = 1;
     protected static ?string $recordTitleAttribute = 'name';
 
     public static function form(Schema $schema): Schema

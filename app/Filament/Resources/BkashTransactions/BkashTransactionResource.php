@@ -53,6 +53,8 @@ class BkashTransactionResource extends Resource
 
     protected static \BackedEnum|string|null $navigationIcon = 'heroicon-o-shield-check';
 
+    protected static ?string $navigationIconColor = 'info';
+
     public static function getEloquentQuery(): Builder
     {
         return parent::getEloquentQuery()

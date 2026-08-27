@@ -32,6 +32,9 @@ class BkashFailedTransactionResource extends Resource
             ->defaultSort('created_at', 'desc')
             ->defaultPaginationPageOption(50)
             ->paginated([10, 20, 50, 100, 200])
+            ->emptyStateHeading('No Failed Transactions')
+            ->emptyStateDescription('All transactions have been processed successfully — nothing to review here.')
+            ->emptyStateIcon('heroicon-o-face-smile')
             ->columns([
                 // 1. Continuous Serial Number
                 TextColumn::make('index')

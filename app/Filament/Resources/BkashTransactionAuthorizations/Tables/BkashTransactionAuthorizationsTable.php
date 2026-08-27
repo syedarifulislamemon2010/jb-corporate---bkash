@@ -19,6 +19,9 @@ class BkashTransactionAuthorizationsTable
         return $table
             ->defaultPaginationPageOption(50)
             ->paginated([10, 20, 50, 100, 200])
+            ->emptyStateHeading('Nothing to Authorize')
+            ->emptyStateDescription('No transactions are currently pending 1st-level authorization.')
+            ->emptyStateIcon('heroicon-o-key')
             ->checkIfRecordIsSelectableUsing(function (BkashTransaction $record): bool {
                 $currentUser = Auth::user();
                 if (!$currentUser) {
@@ -69,15 +72,15 @@ class BkashTransactionAuthorizationsTable
                         default => 'gray',
                     }),
 
-                TextColumn::make('debit_account_no')
+                TextColumn::make('credit_account_no')
                     ->label('Debit Account')
                     ->searchable(),
 
-                TextColumn::make('credit_account_title')
+                TextColumn::make('debit_account_title')
                     ->label('Beneficiary Name')
                     ->searchable(),
 
-                TextColumn::make('credit_account_no')
+                TextColumn::make('debit_account_no')
                     ->label('Beneficiary Acc')
                     ->searchable(),
 

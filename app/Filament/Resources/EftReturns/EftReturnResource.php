@@ -21,7 +21,7 @@ class EftReturnResource extends Resource
 
     protected static ?string $pluralModelLabel = 'EFT Return Reports';
 
-    protected static ?int $navigationSort = 5;
+    protected static ?int $navigationSort = 6;
 
     protected static \BackedEnum|string|null $navigationIcon = 'heroicon-o-receipt-refund';
 

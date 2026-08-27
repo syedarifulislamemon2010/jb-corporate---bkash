@@ -46,6 +46,14 @@ class RoleResource extends Resource
 
     protected static ?string $recordTitleAttribute = 'name';
 
+    protected static \UnitEnum|string|null $navigationGroup = 'Roles & Permissions';
+
+    protected static ?string $navigationLabel = 'Roles & Permissions';
+
+    protected static \BackedEnum|string|null $navigationIcon = 'heroicon-o-shield-check';
+
+    protected static ?int $navigationSort = 1;
+
     #[Override]
     public static function form(Schema $schema): Schema
     {

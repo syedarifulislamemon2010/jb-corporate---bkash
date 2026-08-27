@@ -46,7 +46,7 @@ class AdminPanelProvider extends PanelProvider
             ])
             ->navigationGroups([
                 NavigationGroup::make()
-                    ->label('Filament Shield')
+                    ->label('Roles & Permissions')
                     ->collapsible(true),
                 NavigationGroup::make()
                     ->label('Transaction Pipeline')
@@ -58,6 +58,12 @@ class AdminPanelProvider extends PanelProvider
                     ->label('Administration')
                     ->collapsible(true)
                     ->collapsed(true),
+            ])
+            ->userMenuItems([
+                \Filament\Navigation\MenuItem::make()
+                    ->label(fn () => (auth()->user()?->organization ?? 'Janata Bank PLC.') . ' · ' . (auth()->user()?->roles?->first()?->name ?? 'User'))
+                    ->icon('heroicon-o-building-office-2')
+                    ->url('#'),
             ])
             ->navigationItems([
                 NavigationItem::make('Log Viewer')
@@ -71,7 +77,10 @@ class AdminPanelProvider extends PanelProvider
             ->pages([
                 CustomDashboard::class,
             ])
-
+            ->renderHook(
+                \Filament\View\PanelsRenderHook::FOOTER,
+                fn () => view('filament.custom-footer')
+            )
             ->renderHook(
                 \Filament\View\PanelsRenderHook::BODY_END,
                 fn () => view('filament.custom-styles')

@@ -21,6 +21,9 @@ class BkashTransactionsTable
             ->recordUrl(null)
             ->defaultPaginationPageOption(50)
             ->paginated([10, 20, 50, 100, 200])
+            ->emptyStateHeading('All Caught Up!')
+            ->emptyStateDescription('No files are currently pending Checker verification.')
+            ->emptyStateIcon('heroicon-o-check-circle')
             ->modifyQueryUsing(function (Builder $query) {
                 $query->where('status_id', BkashTransaction::STATUS_PENDING_CHECKER);
             })
@@ -54,12 +57,12 @@ class BkashTransactionsTable
                     }),
 
                 TextColumn::make('debit_account_title')
-                    ->label('Bank Account Name')
+                    ->label('Beneficiary Name')
                     ->searchable()
                     ->toggleable(),
 
                 TextColumn::make('debit_account_no')
-                    ->label('Bank Account No')
+                    ->label('Beneficiary Acc')
                     ->searchable()
                     ->toggleable(),
 
