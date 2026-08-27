@@ -116,6 +116,7 @@ class BkashTransactionsTable
                 BulkAction::make('export_selected_excel')
                     ->label('Export Selected (Excel)')
                     ->icon('heroicon-o-arrow-down-tray')
+                    ->tooltip('Export selected transactions to Excel')
                     ->color('info')
                     ->action(function (Collection $records) {
                         $fileName = 'Transaction_Process_Report_' . now()->format('Ymd_His') . '.xlsx';
@@ -125,6 +126,7 @@ class BkashTransactionsTable
                 BulkAction::make('check_selected')
                     ->label('Check Selected Transactions')
                     ->icon('heroicon-o-check-circle')
+                    ->tooltip('Verify and forward selected transactions to 1st Authorizer')
                     ->color('info')
                     ->requiresConfirmation()
                     ->action(function (Collection $records) {

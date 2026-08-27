@@ -102,6 +102,7 @@ class BkashTransactionConfirmationsTable
                 BulkAction::make('authorize_final_level')
                     ->label('Final Authorize (Instantly Settle)')
                     ->icon('heroicon-o-check-badge')
+                    ->tooltip('Perform final confirmation and trigger automated CBS settlement')
                     ->color('success')
                     ->requiresConfirmation()
                     ->action(function (Collection $records) {

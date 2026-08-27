@@ -22,12 +22,14 @@ class ListBkashTransactions extends ListRecords
             Action::make('upload_excel')
                 ->label('Upload bKash Excel File')
                 ->icon('heroicon-o-document-arrow-up')
+                ->tooltip('Upload and ingest a new bKash settlement Excel file')
                 ->color('primary')
                 ->url(BkashTransactionResource::getUrl('upload')),
 
             Action::make('export_excel')
                 ->label('Export Report (Excel)')
                 ->icon('heroicon-o-arrow-down-tray')
+                ->tooltip('Export all pending checker transactions to an Excel file')
                 ->color('success')
                 ->action(function () {
                     $transactions = BkashTransaction::where('status_id', BkashTransaction::STATUS_PENDING_CHECKER)

@@ -102,6 +102,7 @@ class BkashTransactionAuthorizationsTable
                 BulkAction::make('authorize_selected')
                     ->label('Authorize Selected (1st Level)')
                     ->icon('heroicon-o-check-circle')
+                    ->tooltip('Approve selected transactions for 2nd / Final Authorization')
                     ->color('warning')
                     ->requiresConfirmation()
                     ->action(function (Collection $records) {

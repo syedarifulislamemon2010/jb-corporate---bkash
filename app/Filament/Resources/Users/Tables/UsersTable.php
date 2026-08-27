@@ -80,11 +80,11 @@ class UsersTable
             ], layout: FiltersLayout::AboveContentCollapsible)
             ->filtersFormColumns(2)
             ->recordActions([
-                EditAction::make(),
+                EditAction::make()->tooltip('Edit user details'),
             ])
             ->toolbarActions([
                 BulkActionGroup::make([
-                    DeleteBulkAction::make(),
+                    DeleteBulkAction::make()->tooltip('Delete selected users'),
                 ]),
             ]);
     }

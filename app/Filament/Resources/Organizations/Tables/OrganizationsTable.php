@@ -70,13 +70,13 @@ class OrganizationsTable
                     ])
             ])
             ->recordActions([
-                EditAction::make(),
+                EditAction::make()->tooltip('Edit organization details'),
             ])
             ->toolbarActions([
                 BulkActionGroup::make([
 //                    DeleteBulkAction::make(),
-                    ForceDeleteBulkAction::make(),
-                    RestoreBulkAction::make(),
+                    ForceDeleteBulkAction::make()->tooltip('Force delete selected organizations'),
+                    RestoreBulkAction::make()->tooltip('Restore selected organizations'),
                 ]),
             ]);
     }

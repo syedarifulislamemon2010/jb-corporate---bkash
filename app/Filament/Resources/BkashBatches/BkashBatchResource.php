@@ -63,6 +63,9 @@ class BkashBatchResource extends Resource
             ->defaultSort('created_at', 'desc')
             ->defaultPaginationPageOption(50)
             ->paginated([10, 20, 50, 100, 200])
+            ->emptyStateHeading('No Batch Files Found')
+            ->emptyStateDescription('No settlement batch files have been ingested yet.')
+            ->emptyStateIcon('heroicon-o-archive-box')
             ->columns([
                 TextColumn::make('index')
                     ->label('#')

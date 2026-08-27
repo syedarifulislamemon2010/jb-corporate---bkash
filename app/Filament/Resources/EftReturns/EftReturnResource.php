@@ -30,6 +30,9 @@ class EftReturnResource extends Resource
         return $table
             ->defaultPaginationPageOption(50)
             ->paginated([10, 20, 50, 100, 200])
+            ->emptyStateHeading('No EFT Returns Found')
+            ->emptyStateDescription('No return records exist for the selected criteria.')
+            ->emptyStateIcon('heroicon-o-receipt-refund')
             ->columns([
                 TextColumn::make('index')
                     ->label('#')

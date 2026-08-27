@@ -21,6 +21,7 @@ class ListBkashReports extends ListRecords
                 Action::make('download_today')
                     ->label('Today')
                     ->icon('heroicon-o-calendar')
+                    ->tooltip('Download Excel report for today')
                     ->action(function () {
                         $transactions = BkashTransaction::query()
                             ->whereDate('create_date', today())
@@ -35,6 +36,7 @@ class ListBkashReports extends ListRecords
                 Action::make('download_this_week')
                     ->label('This Week')
                     ->icon('heroicon-o-calendar-days')
+                    ->tooltip('Download Excel report for this week')
                     ->action(function () {
                         $transactions = BkashTransaction::query()
                             ->whereBetween('create_date', [now()->startOfWeek(), now()->endOfWeek()])
@@ -49,6 +51,7 @@ class ListBkashReports extends ListRecords
                 Action::make('download_this_month')
                     ->label('This Month')
                     ->icon('heroicon-o-table-cells')
+                    ->tooltip('Download Excel report for this month')
                     ->action(function () {
                         $transactions = BkashTransaction::query()
                             ->whereBetween('create_date', [now()->startOfMonth(), now()->endOfMonth()])
@@ -63,6 +66,7 @@ class ListBkashReports extends ListRecords
                 Action::make('download_this_year')
                     ->label('This Year')
                     ->icon('heroicon-o-arrow-down-tray')
+                    ->tooltip('Download Excel report for this year')
                     ->action(function () {
                         $transactions = BkashTransaction::query()
                             ->whereBetween('create_date', [now()->startOfYear(), now()->endOfYear()])
@@ -76,6 +80,7 @@ class ListBkashReports extends ListRecords
             ])
             ->label('Download Report')
             ->icon('heroicon-o-arrow-down-tray')
+            ->tooltip('Download transaction reports by time period')
             ->color('primary')
             ->button(),
         ];
