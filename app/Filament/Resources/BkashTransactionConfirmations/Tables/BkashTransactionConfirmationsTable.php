@@ -26,7 +26,14 @@ class BkashTransactionConfirmationsTable
                     return false;
                 }
 
-                // 2-Person Segregation of Duties: Disable selection if current user authorized this transaction
+                // 3-Person Segregation of Duties: 2nd Authorizer cannot be the Checker or 1st Authorizer
+                if ($currentUser->id && $record->checked_by_id && (int) $record->checked_by_id === (int) $currentUser->id) {
+                    return false;
+                }
+                if ($currentUser->name && $record->checked_by && $record->checked_by === $currentUser->name) {
+                    return false;
+                }
+
                 if ($currentUser->id && $record->approved_by_1_id && (int) $record->approved_by_1_id === (int) $currentUser->id) {
                     return false;
                 }
@@ -88,42 +95,50 @@ class BkashTransactionConfirmationsTable
                     ->alignRight()
                     ->sortable(),
 
+                TextColumn::make('checked_by')
+                    ->label('Checked By')
+                    ->default('System/Legacy')
+                    ->searchable(),
+
                 TextColumn::make('approved_by_1')
-                    ->label('Authorized By')
+                    ->label('1st Auth By')
                     ->searchable(),
 
                 TextColumn::make('approved_at_1')
-                    ->label('Authorized At')
+                    ->label('1st Auth At')
                     ->formatStateUsing(fn ($state) => $state ? Carbon::parse($state)->timezone('Asia/Dhaka')->format('d M Y, h:i A') : '-')
                     ->sortable(),
             ])
             ->bulkActions([
                 BulkAction::make('authorize_final_level')
-                    ->label('Confirm Selected (Instantly Settle)')
+                    ->label('Final Authorize (Instantly Settle)')
                     ->icon('heroicon-o-check-badge')
                     ->color('success')
                     ->requiresConfirmation()
                     ->action(function (Collection $records) {
                         $currentUser = Auth::user();
                         $currentUserId = $currentUser->id ?? null;
-                        $currentUserName = $currentUser->name ?? 'Confirmer';
+                        $currentUserName = $currentUser->name ?? '2nd Authorizer';
 
-                        // 2-Person Segregation of Duties Check: Confirmer != Authorizer
-                        $authorizedBySameUser = $records->filter(function ($record) use ($currentUserId, $currentUserName) {
-                            return ($currentUserId && $record->approved_by_1_id === $currentUserId) ||
-                                   ($record->approved_by_1 && $record->approved_by_1 === $currentUserName);
+                        // 3-Person Segregation of Duties Check: 2nd Authorizer != Checker AND 2nd Authorizer != 1st Authorizer
+                        $ineligibleRecords = $records->filter(function ($record) use ($currentUserId, $currentUserName) {
+                            $isChecker = ($currentUserId && $record->checked_by_id === $currentUserId) ||
+                                         ($record->checked_by && $record->checked_by === $currentUserName);
+                            $isAuth1   = ($currentUserId && $record->approved_by_1_id === $currentUserId) ||
+                                         ($record->approved_by_1 && $record->approved_by_1 === $currentUserName);
+                            return $isChecker || $isAuth1;
                         });
 
-                        if ($authorizedBySameUser->isNotEmpty()) {
+                        if ($ineligibleRecords->isNotEmpty()) {
                             \Filament\Notifications\Notification::make()
                                 ->title('Confirmation Blocked (Segregation of Duties)')
-                                ->body('You authorized this file; final confirmation must come from a different user.')
+                                ->body('You checked or 1st-authorized this file; final confirmation must come from a third distinct user.')
                                 ->danger()
                                 ->persistent()
                                 ->send();
                         }
 
-                        $records = $records->diff($authorizedBySameUser);
+                        $records = $records->diff($ineligibleRecords);
 
                         if ($records->isEmpty()) {
                             return;
@@ -148,13 +163,15 @@ class BkashTransactionConfirmationsTable
 
                         \Filament\Notifications\Notification::make()
                             ->title('Final Confirmation Completed')
-                            ->body("Confirmed {$totalTrn} transactions. Dispatching CBS Settlement.")
+                            ->body("Successfully authorized {$totalTrn} transactions. Dispatched for CBS settlement.")
                             ->success()
                             ->send();
 
-                        ExecuteCbsSettlementJob::dispatch($txnIds, $fileName);
-
+                        // 1. Dispatch Stage 4 Notification (2nd Authorizer name)
                         NotificationService::dispatchStage4($fileName, $totalTrn, $totalAmount, $currentUserName, $currentUser);
+
+                        // 2. Dispatch Automated Host-to-Host CBS Settlement Job
+                        ExecuteCbsSettlementJob::dispatch($txnIds, $currentUserName);
                     }),
             ]);
     }

@@ -16,25 +16,23 @@ class BkashTransaction extends Model
     protected $table = 'bkash_transactions';
     protected $primaryKey = 'id';
 
-    // Status Constants (2-Tier: Authorizer -> Confirmer)
-    public const STATUS_PENDING_AUTHORIZATION = 1000;
-    public const STATUS_PENDING_CHECKER = 1000; // alias
-    public const STATUS_AUTHORIZED = 1001;
-    public const STATUS_CHECKED = 1001; // alias
-    public const STATUS_AUTH_1_APPROVED = 1001; // alias
-    public const STATUS_FINAL_AUTHORIZED = 1003;
-    public const STATUS_CONFIRMED = 1003; // alias
-    public const STATUS_CBS_SUCCESS = 1004;
+    // Status Constants (3-Tier: Checker -> 1st Authorizer -> 2nd Authorizer)
+    public const STATUS_PENDING_CHECKER      = 1000; // File uploaded, awaiting Checker
+    public const STATUS_CHECKED              = 1001; // Checker approved, awaiting 1st Authorizer
+    public const STATUS_AUTH_1_APPROVED      = 1002; // 1st Authorizer approved, awaiting 2nd Authorizer
+    public const STATUS_FINAL_AUTHORIZED     = 1003; // 2nd Authorizer approved, awaiting/triggering settlement
+    public const STATUS_CBS_SUCCESS          = 1004;
     public const STATUS_CBS_RESPONSE_SUCCESS = 1006;
     public const STATUS_CBS_RESPONSE_FAILED  = 1007;
-    public const STATUS_REJECTED = 9000;
+    public const STATUS_REJECTED             = 9000;
 
     public static function statusLabel(int $statusId): string
     {
         return match ($statusId) {
-            1000 => 'Pending Authorization',
-            1001 => 'Authorized',
-            1003 => 'Confirmed',
+            1000 => 'Pending Checker',
+            1001 => 'Checked',
+            1002 => '1st Authorized',
+            1003 => 'Final Authorized',
             1004 => 'CBS Settled',
             1006 => 'CBS Confirmed (Async)',
             1007 => 'CBS Failed (Async)',

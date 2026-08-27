@@ -23,7 +23,7 @@ class BkashTransactionAuthorizationResource extends Resource
 
     protected static ?string $navigationLabel = 'Transaction Authorization';
 
-    protected static ?int $navigationSort = 1;
+    protected static ?int $navigationSort = 2;
 
     protected static \BackedEnum|string|null $navigationIcon = 'heroicon-o-key';
 
@@ -32,7 +32,7 @@ class BkashTransactionAuthorizationResource extends Resource
     public static function getEloquentQuery(): Builder
     {
         return parent::getEloquentQuery()
-            ->where('status_id', 1000)
+            ->where('status_id', BkashTransaction::STATUS_CHECKED)
             ->withoutGlobalScopes([
                 SoftDeletingScope::class,
             ]);

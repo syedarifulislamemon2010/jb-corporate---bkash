@@ -25,10 +25,8 @@ class StatsOverview extends BaseWidget
         ])->whereDate('updated_at', today())->sum('amount');
 
         $pendingChecker = BkashTransaction::where('status_id', BkashTransaction::STATUS_PENDING_CHECKER)->count();
-        $pendingAuth = BkashTransaction::whereIn('status_id', [
-            BkashTransaction::STATUS_CHECKED,
-            BkashTransaction::STATUS_AUTH_1_APPROVED
-        ])->count();
+        $pendingAuth1   = BkashTransaction::where('status_id', BkashTransaction::STATUS_CHECKED)->count();
+        $pendingAuth2   = BkashTransaction::where('status_id', BkashTransaction::STATUS_AUTH_1_APPROVED)->count();
 
         return [
             Stat::make('TCSA Live Balance (0100202707747)', 'BDT ' . BkashTransaction::formatBdtAmount($tcsaBalance))
@@ -36,22 +34,23 @@ class StatsOverview extends BaseWidget
                 ->descriptionIcon('heroicon-m-banknotes')
                 ->color('success'),
 
-            Stat::make('Operational Acc Balance (0100224107522)', 'BDT ' . BkashTransaction::formatBdtAmount($opsBalance))
-                ->description('Operational Account')
-                ->descriptionIcon('heroicon-m-building-library')
-                ->color('primary'),
-
             Stat::make('Pending Checker', $pendingChecker)
                 ->description('Awaiting Checker verification')
-                ->descriptionIcon('heroicon-m-clock')
+                ->descriptionIcon('heroicon-m-shield-check')
                 ->url('/admin/bkash-transactions')
                 ->color('warning'),
 
-            Stat::make('Pending Authorization', $pendingAuth)
-                ->description('Awaiting Dual Approval (Auth 1 & 2)')
-                ->descriptionIcon('heroicon-m-arrow-trending-up')
+            Stat::make('Pending 1st Auth', $pendingAuth1)
+                ->description('Awaiting 1st Authorizer approval')
+                ->descriptionIcon('heroicon-m-key')
                 ->url('/admin/bkash-transaction-authorizations')
                 ->color('info'),
+
+            Stat::make('Pending 2nd Auth', $pendingAuth2)
+                ->description('Awaiting 2nd Authorizer final approval')
+                ->descriptionIcon('heroicon-m-clipboard-document-check')
+                ->url('/admin/bkash-transaction-confirmations')
+                ->color('warning'),
 
             Stat::make('Today Settled Volume', 'BDT ' . BkashTransaction::formatBdtAmount($todaySettledVolume))
                 ->description('Processed today')

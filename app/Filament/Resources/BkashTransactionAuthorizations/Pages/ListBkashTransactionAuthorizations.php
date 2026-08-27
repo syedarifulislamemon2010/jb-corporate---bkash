@@ -29,7 +29,7 @@ class ListBkashTransactionAuthorizations extends ListRecords
                 ->icon('heroicon-o-arrow-down-tray')
                 ->color('success')
                 ->action(function () {
-                    $transactions = BkashTransaction::where('status_id', BkashTransaction::STATUS_PENDING_AUTHORIZATION)
+                    $transactions = BkashTransaction::where('status_id', BkashTransaction::STATUS_CHECKED)
                         ->orderBy('create_date', 'desc')
                         ->get();
 

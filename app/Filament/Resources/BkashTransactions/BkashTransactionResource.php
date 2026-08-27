@@ -41,22 +41,22 @@ class BkashTransactionResource extends Resource
         ];
     }
 
-    protected static bool $shouldRegisterNavigation = false;
+    protected static bool $shouldRegisterNavigation = true;
 
     protected static \UnitEnum|string|null $navigationGroup = 'Transaction Pipeline';
 
-    protected static ?string $navigationLabel = 'Upload & Verify Files';
+    protected static ?string $navigationLabel = 'Checker - Verify Files';
 
-    protected static ?string $pluralModelLabel = 'Upload & Verify Files';
+    protected static ?string $pluralModelLabel = 'Checker - Verify Files';
 
     protected static ?int $navigationSort = 1;
 
-    protected static \BackedEnum|string|null $navigationIcon = 'heroicon-o-document-arrow-up';
+    protected static \BackedEnum|string|null $navigationIcon = 'heroicon-o-shield-check';
 
     public static function getEloquentQuery(): Builder
     {
         return parent::getEloquentQuery()
-            ->where('status_id', 1000)
+            ->where('status_id', BkashTransaction::STATUS_PENDING_CHECKER)
             ->withoutGlobalScopes([
                 SoftDeletingScope::class,
             ]);

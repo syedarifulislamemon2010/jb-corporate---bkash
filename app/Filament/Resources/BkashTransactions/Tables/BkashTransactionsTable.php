@@ -142,6 +142,12 @@ class BkashTransactionsTable
                             ]);
                         });
 
+                        \Filament\Notifications\Notification::make()
+                            ->title('Transactions Checked')
+                            ->body("Successfully checked {$totalTrn} transactions. Forwarded for 1st Authorization.")
+                            ->success()
+                            ->send();
+
                         NotificationService::dispatchStage2($fileName, $totalTrn, $totalAmount, $checkerName, $currentUser);
                     }),
             ]);

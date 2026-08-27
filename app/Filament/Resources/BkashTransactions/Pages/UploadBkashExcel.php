@@ -229,11 +229,11 @@ class UploadBkashExcel extends Page implements HasForms
 
         Notification::make()
             ->title('File Ingested Successfully!')
-            ->body("{$validCount} transactions imported for Authorization.")
+            ->body("{$validCount} transactions imported for Checker verification.")
             ->success()
             ->send();
 
-        $this->redirect(\App\Filament\Resources\BkashTransactionAuthorizations\BkashTransactionAuthorizationResource::getUrl('index'));
+        $this->redirect(BkashTransactionResource::getUrl('index'));
     }
 }
 

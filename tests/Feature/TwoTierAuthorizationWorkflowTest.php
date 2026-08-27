@@ -21,26 +21,34 @@ class TwoTierAuthorizationWorkflowTest extends TestCase
         Queue::fake();
     }
 
-    public function test_two_tier_workflow_transitions_correctly_with_segregation_of_duties(): void
+    public function test_three_tier_workflow_transitions_correctly_with_segregation_of_duties(): void
     {
-        // 1. Create 2 distinct users from Janata Bank (Authorizer & Confirmer)
-        $authorizer = User::create([
-            'name'         => 'Authorizer Person',
-            'email'        => 'authorizer@janatabank.com',
+        // 1. Create 3 distinct users from Janata Bank (Checker, 1st Authorizer, 2nd Authorizer)
+        $checker = User::create([
+            'name'         => 'Checker Person',
+            'email'        => 'checker@janatabank.com',
+            'mobile_no'    => '01700000000',
+            'organization' => 'Janata Bank',
+            'password'     => bcrypt('Secret123!'),
+        ]);
+
+        $authorizer1 = User::create([
+            'name'         => 'Authorizer Person 1',
+            'email'        => 'authorizer1@janatabank.com',
             'mobile_no'    => '01711111111',
             'organization' => 'Janata Bank',
             'password'     => bcrypt('Secret123!'),
         ]);
 
-        $confirmer = User::create([
-            'name'         => 'Confirmer Person',
-            'email'        => 'confirmer@janatabank.com',
+        $authorizer2 = User::create([
+            'name'         => 'Confirmer Person 2',
+            'email'        => 'confirmer2@janatabank.com',
             'mobile_no'    => '01722222222',
             'organization' => 'Janata Bank',
             'password'     => bcrypt('Secret123!'),
         ]);
 
-        // Create transaction at Stage 1 (Pending Authorization)
+        // Create transaction at Stage 1 (Pending Checker)
         $txn = BkashTransaction::create([
             'transaction_type'    => 'A2A',
             'reference_id'        => 'REF_STAGE_01',
@@ -48,43 +56,68 @@ class TwoTierAuthorizationWorkflowTest extends TestCase
             'amount'              => 50000.00,
             'debit_account_no'    => '0100111111111',
             'credit_account_no'   => '0100202707747',
-            'status_id'           => BkashTransaction::STATUS_PENDING_AUTHORIZATION,
+            'status_id'           => BkashTransaction::STATUS_PENDING_CHECKER,
         ]);
 
-        // Step 1: Authorizer authorizes transaction -> Status 1001 (STATUS_AUTHORIZED)
+        // Step 1: Checker checks transaction -> Status 1001 (STATUS_CHECKED)
         $txn->update([
-            'status_id'        => BkashTransaction::STATUS_AUTHORIZED,
-            'approved_by_1'    => $authorizer->name,
-            'approved_by_1_id' => $authorizer->id,
+            'status_id'     => BkashTransaction::STATUS_CHECKED,
+            'checked_by'    => $checker->name,
+            'checked_by_id' => $checker->id,
+            'checked_at'    => now(),
+        ]);
+        $this->assertEquals(BkashTransaction::STATUS_CHECKED, $txn->status_id);
+        $this->assertEquals($checker->id, $txn->checked_by_id);
+
+        // Step 2: Segregation of Duties on 1st Authorization Table
+        // Checker cannot select their own checked transaction for 1st authorization
+        $auth1Table = \App\Filament\Resources\BkashTransactionAuthorizations\Tables\BkashTransactionAuthorizationsTable::configure(
+            new \Filament\Tables\Table(new \Filament\Resources\Pages\ListRecords())
+        );
+
+        Auth::login($checker);
+        $this->assertFalse($auth1Table->isRecordSelectable($txn));
+
+        // 1st Authorizer (different user) can select
+        Auth::login($authorizer1);
+        $this->assertTrue($auth1Table->isRecordSelectable($txn));
+
+        // Authorizer 1 authorizes -> Status 1002 (STATUS_AUTH_1_APPROVED)
+        $txn->update([
+            'status_id'        => BkashTransaction::STATUS_AUTH_1_APPROVED,
+            'approved_by_1'    => $authorizer1->name,
+            'approved_by_1_id' => $authorizer1->id,
             'approved_at_1'    => now(),
         ]);
-        $this->assertEquals(BkashTransaction::STATUS_AUTHORIZED, $txn->status_id);
-        $this->assertEquals($authorizer->id, $txn->approved_by_1_id);
+        $this->assertEquals(BkashTransaction::STATUS_AUTH_1_APPROVED, $txn->status_id);
 
-        // Step 2: 2-Person Segregation of Duties on Confirmation Table
-        // Authorizer cannot select their own transaction for final confirmation
+        // Step 3: Segregation of Duties on 2nd Authorization / Confirmation Table
         $confirmTable = \App\Filament\Resources\BkashTransactionConfirmations\Tables\BkashTransactionConfirmationsTable::configure(
             new \Filament\Tables\Table(new \Filament\Resources\Pages\ListRecords())
         );
 
-        Auth::login($authorizer);
+        // Neither Checker nor 1st Authorizer can select for final confirmation
+        Auth::login($checker);
         $this->assertFalse($confirmTable->isRecordSelectable($txn));
 
-        // Confirmer (different user) can select the transaction
-        Auth::login($confirmer);
+        Auth::login($authorizer1);
+        $this->assertFalse($confirmTable->isRecordSelectable($txn));
+
+        // 2nd Authorizer (third distinct user) can select
+        Auth::login($authorizer2);
         $this->assertTrue($confirmTable->isRecordSelectable($txn));
 
-        // Step 3: Confirmer confirms transaction -> Status 1003 (STATUS_FINAL_AUTHORIZED / STATUS_CONFIRMED)
+        // 2nd Authorizer confirms -> Status 1003 (STATUS_FINAL_AUTHORIZED)
         $txn->update([
             'status_id'        => BkashTransaction::STATUS_FINAL_AUTHORIZED,
-            'approved_by_2'    => $confirmer->name,
-            'approved_by_2_id' => $confirmer->id,
+            'approved_by_2'    => $authorizer2->name,
+            'approved_by_2_id' => $authorizer2->id,
             'approved_at_2'    => now(),
-            'confirmed_by'     => $confirmer->name,
+            'confirmed_by'     => $authorizer2->name,
             'confirmed_at'     => now(),
         ]);
         $this->assertEquals(BkashTransaction::STATUS_FINAL_AUTHORIZED, $txn->status_id);
-        $this->assertEquals($confirmer->id, $txn->approved_by_2_id);
+        $this->assertEquals($authorizer2->id, $txn->approved_by_2_id);
     }
 
     public function test_stage_2_notification_is_scoped_to_authorizer_organization_excluding_actor(): void

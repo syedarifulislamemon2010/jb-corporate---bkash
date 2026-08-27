@@ -55,22 +55,24 @@ class Dashboard extends Page
     }
 
     /**
-     * Get Urgency Banner counts.
+     * Get Urgency Banner counts (3-tier pipeline).
      */
     public function getUrgencyBanner(): ?array
     {
-        $pendingAuthFiles    = BkashTransactionBatch::where('status_id', BkashTransaction::STATUS_PENDING_AUTHORIZATION)->count();
-        $pendingConfirmFiles = BkashTransactionBatch::where('status_id', BkashTransaction::STATUS_AUTHORIZED)->count();
+        $pendingCheckerFiles = BkashTransactionBatch::where('status_id', BkashTransaction::STATUS_PENDING_CHECKER)->count();
+        $pendingAuth1Files   = BkashTransactionBatch::where('status_id', BkashTransaction::STATUS_CHECKED)->count();
+        $pendingAuth2Files   = BkashTransactionBatch::where('status_id', BkashTransaction::STATUS_AUTH_1_APPROVED)->count();
 
-        $totalUrgent = $pendingAuthFiles + $pendingConfirmFiles;
+        $totalUrgent = $pendingCheckerFiles + $pendingAuth1Files + $pendingAuth2Files;
         if ($totalUrgent <= 0) {
             return null;
         }
 
         return [
             'total'           => $totalUrgent,
-            'pending_auth'    => $pendingAuthFiles,
-            'pending_confirm' => $pendingConfirmFiles,
+            'pending_checker' => $pendingCheckerFiles,
+            'pending_auth1'   => $pendingAuth1Files,
+            'pending_auth2'   => $pendingAuth2Files,
         ];
     }
 
@@ -84,18 +86,18 @@ class Dashboard extends Page
         $stats = [];
 
         foreach ($channels as $channel) {
+            $pendingChecker = BkashTransactionBatch::where('transaction_type', $channel)
+                ->where('status_id', BkashTransaction::STATUS_PENDING_CHECKER)->count();
             $pendingAuth = BkashTransactionBatch::where('transaction_type', $channel)
-                ->where('status_id', BkashTransaction::STATUS_PENDING_AUTHORIZATION)->count();
-            $pendingConfirm = BkashTransactionBatch::where('transaction_type', $channel)
-                ->where('status_id', BkashTransaction::STATUS_AUTHORIZED)->count();
+                ->whereIn('status_id', [BkashTransaction::STATUS_CHECKED, BkashTransaction::STATUS_AUTH_1_APPROVED])->count();
             $settledToday = BkashTransactionBatch::where('transaction_type', $channel)
                 ->whereIn('status_id', [BkashTransaction::STATUS_FINAL_AUTHORIZED, BkashTransaction::STATUS_CBS_SUCCESS])
                 ->whereDate('updated_at', today())->count();
 
             $stats[$channel] = [
                 'is_live'         => in_array($channel, $enabled),
+                'pending_checker' => $pendingChecker,
                 'pending_auth'    => $pendingAuth,
-                'pending_confirm' => $pendingConfirm,
                 'settled_today'   => $settledToday,
                 'label'           => match($channel) {
                     'A2A'   => 'Live',
@@ -109,15 +111,18 @@ class Dashboard extends Page
     }
 
     /**
-     * Get Action Row stats (file-level counts).
+     * Get Action Row stats (file-level counts for 3-tier pipeline).
      */
     public function getActionStats(): array
     {
-        $pendingAuthFiles = BkashTransactionBatch::where('status_id', BkashTransaction::STATUS_PENDING_AUTHORIZATION)->count();
-        $pendingAuthTrns  = BkashTransaction::where('status_id', BkashTransaction::STATUS_PENDING_AUTHORIZATION)->count();
+        $pendingCheckerFiles = BkashTransactionBatch::where('status_id', BkashTransaction::STATUS_PENDING_CHECKER)->count();
+        $pendingCheckerTrns  = BkashTransaction::where('status_id', BkashTransaction::STATUS_PENDING_CHECKER)->count();
 
-        $pendingConfirmFiles = BkashTransactionBatch::where('status_id', BkashTransaction::STATUS_AUTHORIZED)->count();
-        $pendingConfirmTrns  = BkashTransaction::where('status_id', BkashTransaction::STATUS_AUTHORIZED)->count();
+        $pendingAuth1Files = BkashTransactionBatch::where('status_id', BkashTransaction::STATUS_CHECKED)->count();
+        $pendingAuth1Trns  = BkashTransaction::where('status_id', BkashTransaction::STATUS_CHECKED)->count();
+
+        $pendingAuth2Files = BkashTransactionBatch::where('status_id', BkashTransaction::STATUS_AUTH_1_APPROVED)->count();
+        $pendingAuth2Trns  = BkashTransaction::where('status_id', BkashTransaction::STATUS_AUTH_1_APPROVED)->count();
 
         $settledTodayAmount = (float) BkashTransaction::whereIn('status_id', [
             BkashTransaction::STATUS_FINAL_AUTHORIZED,
@@ -130,14 +135,19 @@ class Dashboard extends Page
         ])->whereDate('updated_at', today())->count();
 
         return [
-            'pending_auth' => [
-                'files'       => $pendingAuthFiles,
-                'trns'        => $pendingAuthTrns,
+            'pending_checker' => [
+                'files'       => $pendingCheckerFiles,
+                'trns'        => $pendingCheckerTrns,
+                'url'         => '/admin/bkash-transactions',
+            ],
+            'pending_auth1' => [
+                'files'       => $pendingAuth1Files,
+                'trns'        => $pendingAuth1Trns,
                 'url'         => '/admin/bkash-transaction-authorizations',
             ],
-            'pending_confirm' => [
-                'files'       => $pendingConfirmFiles,
-                'trns'        => $pendingConfirmTrns,
+            'pending_auth2' => [
+                'files'       => $pendingAuth2Files,
+                'trns'        => $pendingAuth2Trns,
                 'url'         => '/admin/bkash-transaction-confirmations',
             ],
             'settled_today' => [
@@ -252,7 +262,7 @@ class Dashboard extends Page
     }
 
     /**
-     * Get Recent Activities matching 2-stage notification vocabulary.
+     * Get Recent Activities matching 4-stage notification vocabulary.
      */
     public function getRecentActivities(): array
     {
@@ -262,16 +272,16 @@ class Dashboard extends Page
         $notifications = NotificationOutbox::latest()->take(6)->get();
         foreach ($notifications as $n) {
             $stageLabel = match ($n->event_type) {
-                'STAGE_1_SFTP'    => "File received — pending authorization ({$n->file_name})",
-                'STAGE_2_CHECKED' => "Authorized by {$n->actor_name} — pending confirmation ({$n->file_name})",
-                'STAGE_3_AUTH1'   => "Authorized by {$n->actor_name} — pending confirmation ({$n->file_name})",
-                'STAGE_4_AUTH2'   => "Confirmed by {$n->actor_name} — settled ({$n->file_name})",
+                'STAGE_1_SFTP'    => "File received — pending checker ({$n->file_name})",
+                'STAGE_2_CHECKED' => "Checked by {$n->actor_name} — pending 1st authorization ({$n->file_name})",
+                'STAGE_3_AUTH1'   => "Authorized by {$n->actor_name} (1st Auth) — pending final authorization ({$n->file_name})",
+                'STAGE_4_AUTH2'   => "Authorized by {$n->actor_name} (2nd Auth) — finally authorized ({$n->file_name})",
                 default           => "Notification sent for {$n->file_name}",
             };
 
             $icon = match ($n->event_type) {
                 'STAGE_1_SFTP'    => 'heroicon-o-inbox-arrow-down',
-                'STAGE_2_CHECKED' => 'heroicon-o-key',
+                'STAGE_2_CHECKED' => 'heroicon-o-shield-check',
                 'STAGE_3_AUTH1'   => 'heroicon-o-key',
                 'STAGE_4_AUTH2'   => 'heroicon-o-check-badge',
                 default           => 'heroicon-o-bell',

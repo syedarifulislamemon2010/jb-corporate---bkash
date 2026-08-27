@@ -41,75 +41,71 @@
                 </div>
                 <div style="flex: 1; min-width: 0;">
                     <p style="font-size: 0.95rem; font-weight: 700; margin: 0;">
-                        <span class="db-tabular">{{ $urgency['total'] }}</span> {{ Str::plural('file', $urgency['total']) }} need your action today: <span class="db-tabular">{{ $urgency['pending_auth'] }}</span> pending authorization, <span class="db-tabular">{{ $urgency['pending_confirm'] }}</span> pending confirmation
+                        <span class="db-tabular">{{ $urgency['total'] }}</span> {{ Str::plural('file', $urgency['total']) }} need your action today: <span class="db-tabular">{{ $urgency['pending_checker'] }}</span> pending checker, <span class="db-tabular">{{ $urgency['pending_auth1'] }}</span> 1st auth, <span class="db-tabular">{{ $urgency['pending_auth2'] }}</span> 2nd auth
                     </p>
                     <p style="font-size: 0.75rem; opacity: 0.85; margin: 0.125rem 0 0 0;">
-                        Please review and clear pending files to complete automated CBS settlement.
+                        Please review and clear pending files across all 3 tiers to complete automated CBS settlement.
                     </p>
                 </div>
             </div>
         @endif
 
-        <!-- 3. ACTION ROW CARDS (Tier 2 Action-Required & Tier 3/Zero-State) -->
+        <!-- 3. ACTION ROW CARDS (3-Tier Action-Required Pipeline) -->
         <div class="db-grid-3">
 
-            <!-- Card 1: Pending Authorization (Tier 2 Action Required) -->
-            <a href="{{ $actionStats['pending_auth']['url'] }}" class="db-card-warning">
+            <!-- Card 1: Pending Checker (Tier 1 Action Required) -->
+            <a href="{{ $actionStats['pending_checker']['url'] }}" class="db-card-warning">
                 <div class="db-flex-between">
                     <div class="db-flex-gap-2" style="color: #d97706;">
-                        <x-filament::icon icon="heroicon-o-key" class="w-5 h-5 text-amber-500" />
-                        <span class="db-text-sub" style="font-size: 0.75rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em;">Pending authorization</span>
+                        <x-filament::icon icon="heroicon-o-shield-check" class="w-5 h-5 text-amber-500" />
+                        <span class="db-text-sub" style="font-size: 0.75rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em;">Pending checker</span>
                     </div>
                 </div>
                 <div style="margin-top: 0.75rem;">
                     <div class="db-text-val db-tabular">
-                        {{ $actionStats['pending_auth']['files'] }}
+                        {{ $actionStats['pending_checker']['files'] }}
                     </div>
                     <div class="db-link-action" style="margin-top: 0.5rem;">
-                        Authorize transactions →
+                        Verify & check files →
                     </div>
                 </div>
             </a>
 
-            <!-- Card 2: Pending Confirmation (Tier 2 Action Required) -->
-            <a href="{{ $actionStats['pending_confirm']['url'] }}" class="db-card-warning">
+            <!-- Card 2: Pending 1st Authorization (Tier 2 Action Required) -->
+            <a href="{{ $actionStats['pending_auth1']['url'] }}" class="db-card-warning">
                 <div class="db-flex-between">
                     <div class="db-flex-gap-2" style="color: #d97706;">
-                        <x-filament::icon icon="heroicon-o-clipboard-document-check" class="w-5 h-5 text-amber-500" />
-                        <span class="db-text-sub" style="font-size: 0.75rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em;">Pending confirmation</span>
+                        <x-filament::icon icon="heroicon-o-key" class="w-5 h-5 text-amber-500" />
+                        <span class="db-text-sub" style="font-size: 0.75rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em;">Pending 1st auth</span>
                     </div>
                 </div>
                 <div style="margin-top: 0.75rem;">
                     <div class="db-text-val db-tabular">
-                        {{ $actionStats['pending_confirm']['files'] }}
+                        {{ $actionStats['pending_auth1']['files'] }}
+                    </div>
+                    <div class="db-link-action" style="margin-top: 0.5rem;">
+                        1st Authorizer approval →
+                    </div>
+                </div>
+            </a>
+
+            <!-- Card 3: Pending Final Confirmation (Tier 3 Action Required) -->
+            <a href="{{ $actionStats['pending_auth2']['url'] }}" class="db-card-warning">
+                <div class="db-flex-between">
+                    <div class="db-flex-gap-2" style="color: #d97706;">
+                        <x-filament::icon icon="heroicon-o-clipboard-document-check" class="w-5 h-5 text-amber-500" />
+                        <span class="db-text-sub" style="font-size: 0.75rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em;">Pending 2nd auth</span>
+                    </div>
+                </div>
+                <div style="margin-top: 0.75rem;">
+                    <div class="db-text-val db-tabular">
+                        {{ $actionStats['pending_auth2']['files'] }}
                     </div>
                     <div class="db-link-action" style="margin-top: 0.5rem;">
                         Final confirmation & settle →
                     </div>
                 </div>
             </a>
-
-            <!-- Card 3: Settled Today (Tier 3 with Zero-State treatment if 0) -->
-            <div class="{{ $actionStats['settled_today']['amount'] > 0 ? 'db-card' : 'db-card-zero' }}">
-                <div class="db-flex-between">
-                    <div class="db-flex-gap-2" style="color: #059669;">
-                        <x-filament::icon icon="heroicon-o-check-circle" class="w-5 h-5 text-emerald-500" />
-                        <span class="db-text-sub" style="font-size: 0.75rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em;">Settled today</span>
-                    </div>
-                </div>
-                <div style="margin-top: 0.75rem;">
-                    <div class="db-text-val db-tabular">
-                        BDT {{ \App\Models\BkashTransaction::formatBdtAmount($actionStats['settled_today']['amount']) }}
-                    </div>
-                    <div class="db-text-sub" style="margin-top: 0.375rem; font-size: 0.75rem; font-weight: 500;">
-                        @if ($actionStats['settled_today']['count'] > 0)
-                            <span class="db-tabular">{{ $actionStats['settled_today']['count'] }}</span> {{ Str::plural('transaction', $actionStats['settled_today']['count']) }} settled today
-                        @else
-                            No transactions processed yet
-                        @endif
-                    </div>
-                </div>
-            </div>
 
         </div>
 
@@ -126,12 +122,12 @@
                         </div>
                         <div class="db-card-inner db-channel-cols">
                             <div>
-                                <div class="db-text-sub" style="font-size: 0.75rem; font-weight: 500;">Auth</div>
-                                <div class="db-tabular" style="font-size: 1rem; font-weight: 700; color: #d97706; margin-top: 0.125rem;">{{ $info['pending_auth'] }}</div>
+                                <div class="db-text-sub" style="font-size: 0.75rem; font-weight: 500;">Checker</div>
+                                <div class="db-tabular" style="font-size: 1rem; font-weight: 700; color: #d97706; margin-top: 0.125rem;">{{ $info['pending_checker'] }}</div>
                             </div>
                             <div class="db-channel-col-border">
-                                <div class="db-text-sub" style="font-size: 0.75rem; font-weight: 500;">Confirm</div>
-                                <div class="db-tabular" style="font-size: 1rem; font-weight: 700; color: var(--color-signature-accent); margin-top: 0.125rem;">{{ $info['pending_confirm'] }}</div>
+                                <div class="db-text-sub" style="font-size: 0.75rem; font-weight: 500;">Auth</div>
+                                <div class="db-tabular" style="font-size: 1rem; font-weight: 700; color: var(--color-signature-accent); margin-top: 0.125rem;">{{ $info['pending_auth'] }}</div>
                             </div>
                             <div>
                                 <div class="db-text-sub" style="font-size: 0.75rem; font-weight: 500;">Settled</div>
