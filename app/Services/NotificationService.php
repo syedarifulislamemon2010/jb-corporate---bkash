@@ -16,14 +16,14 @@ use Illuminate\Support\Facades\Mail;
 class NotificationService
 {
     /**
-     * Send Database Notifications to users in the same organization excluding the sender.
+     * Send Database Notifications to users in the same organization excluding the sender, optionally filtered by role.
      */
-    public static function sendOrganizationDatabaseNotification(string $title, string $body, ?User $senderUser = null): void
+    public static function sendOrganizationDatabaseNotification(string $title, string $body, ?User $senderUser = null, array $roleNames = []): void
     {
         $sender = $senderUser ?? Auth::user();
         if (!$sender) {
             // For system-triggered notifications (SFTP cron), notify all users
-            $recipients = User::all();
+            $query = User::query();
         } else {
             $query = User::query()->where('id', '!=', $sender->id);
             $org = $sender->getRawOriginal('organization');
@@ -32,8 +32,13 @@ class NotificationService
             } elseif (!empty($sender->organization_id)) {
                 $query->where('organization_id', $sender->organization_id);
             }
-            $recipients = $query->get();
         }
+
+        if (!empty($roleNames)) {
+            $query->whereHas('roles', fn ($q) => $q->whereIn('name', $roleNames));
+        }
+
+        $recipients = $query->get();
 
         if ($recipients->isNotEmpty()) {
             $notification = Notification::make()
@@ -53,7 +58,8 @@ class NotificationService
     }
 
     /**
-     * Dispatch Stage 1: SFTP / Upload File Ingested -> Pending Authorization
+     * Dispatch Stage 1: SFTP / Upload File Ingested -> Pending Checker
+     * Recipient Roles: ['bkash_checker']
      */
     public static function dispatchStage1(string $fileName, int $totalTrn, float $totalAmount, ?User $senderUser = null): NotificationOutbox
     {
@@ -74,17 +80,21 @@ class NotificationService
               . "Upload Time: {$uploadTimeStr}\n"
               . "Total Files Uploaded Today: {$todayFilesCount}";
 
+        $recipientRoles = ['bkash_checker'];
+
         static::sendOrganizationDatabaseNotification(
             "New bKash Settlement File: {$fileName}",
             "Uploaded at {$uploadTimeStr} | Total Trn: {$totalTrn}, Amount: BDT {$formattedAmount} (File #{$todayFilesCount} today). Pending Authorization.",
-            $senderUser
+            $senderUser,
+            $recipientRoles
         );
 
-        return static::createOutbox('STAGE_1_SFTP', $fileName, $totalTrn, $totalAmount, null, 'ALL_AUTHORIZERS', $body, $senderUser);
+        return static::createOutbox('STAGE_1_SFTP', $fileName, $totalTrn, $totalAmount, null, 'ALL_AUTHORIZERS', $body, $senderUser, $recipientRoles);
     }
 
     /**
      * Dispatch Stage 2: Checked by Checker -> Pending Authorization
+     * Recipient Roles: ['bkash_checker', 'bkash_authorizer_1']
      */
     public static function dispatchStage2(string $fileName, int $totalTrn, float $totalAmount, string $authorizerName, ?User $senderUser = null): NotificationOutbox
     {
@@ -97,17 +107,21 @@ class NotificationService
               . "Thank you\n"
               . "JANATA BANK";
 
+        $recipientRoles = ['bkash_checker', 'bkash_authorizer_1'];
+
         static::sendOrganizationDatabaseNotification(
             "Transactions Authorized by {$authorizerName}",
             "File: {$fileName} | Total Trn: {$totalTrn}, Amount: BDT {$formattedAmount}. Pending Confirmation.",
-            $senderUser
+            $senderUser,
+            $recipientRoles
         );
 
-        return static::createOutbox('STAGE_2_CHECKED', $fileName, $totalTrn, $totalAmount, $authorizerName, 'ALL_CONFIRMERS', $body, $senderUser);
+        return static::createOutbox('STAGE_2_CHECKED', $fileName, $totalTrn, $totalAmount, $authorizerName, 'ALL_CONFIRMERS', $body, $senderUser, $recipientRoles);
     }
 
     /**
      * Dispatch Stage 3: Authorized by 1st Authorizer -> Pending Further Authorization/Approval
+     * Recipient Roles: ['bkash_checker', 'bkash_authorizer_1', 'bkash_authorizer_2']
      */
     public static function dispatchStage3(string $fileName, int $totalTrn, float $totalAmount, string $authorizerName1, ?User $senderUser = null): NotificationOutbox
     {
@@ -120,17 +134,21 @@ class NotificationService
               . "Thank you\n"
               . "JANATA BANK";
 
+        $recipientRoles = ['bkash_checker', 'bkash_authorizer_1', 'bkash_authorizer_2'];
+
         static::sendOrganizationDatabaseNotification(
             "Transactions 1st Authorized by {$authorizerName1}",
             "File: {$fileName} | Total Trn: {$totalTrn}, Amount: BDT {$formattedAmount}. Pending Final Authorization.",
-            $senderUser
+            $senderUser,
+            $recipientRoles
         );
 
-        return static::createOutbox('STAGE_3_AUTH1', $fileName, $totalTrn, $totalAmount, $authorizerName1, 'ALL_AUTHORIZERS_2', $body, $senderUser);
+        return static::createOutbox('STAGE_3_AUTH1', $fileName, $totalTrn, $totalAmount, $authorizerName1, 'ALL_AUTHORIZERS_2', $body, $senderUser, $recipientRoles);
     }
 
     /**
      * Dispatch Stage 4: Authorized by 2nd Authorizer -> Finally Authorized
+     * Recipient Roles: ['bkash_checker', 'bkash_authorizer_1', 'bkash_authorizer_2']
      */
     public static function dispatchStage4(string $fileName, int $totalTrn, float $totalAmount, string $confirmerName, ?User $senderUser = null): NotificationOutbox
     {
@@ -143,13 +161,16 @@ class NotificationService
               . "Thank you\n"
               . "JANATA BANK";
 
+        $recipientRoles = ['bkash_checker', 'bkash_authorizer_1', 'bkash_authorizer_2'];
+
         static::sendOrganizationDatabaseNotification(
             "Final Confirmation Completed by {$confirmerName}",
             "File: {$fileName} | Total Trn: {$totalTrn}, Amount: BDT {$formattedAmount}. Settled.",
-            $senderUser
+            $senderUser,
+            $recipientRoles
         );
 
-        return static::createOutbox('STAGE_4_AUTH2', $fileName, $totalTrn, $totalAmount, $confirmerName, 'ALL_USERS', $body, $senderUser);
+        return static::createOutbox('STAGE_4_AUTH2', $fileName, $totalTrn, $totalAmount, $confirmerName, 'ALL_USERS', $body, $senderUser, $recipientRoles);
     }
 
     private static function createOutbox(
@@ -160,7 +181,8 @@ class NotificationService
         ?string $actorName,
         string $recipientGroup,
         string $messageText,
-        ?User $senderUser = null
+        ?User $senderUser = null,
+        array $roleNames = []
     ): NotificationOutbox {
         $outbox = NotificationOutbox::create([
             'event_type'      => $eventType,
@@ -179,11 +201,11 @@ class NotificationService
         $excludeUserId = $senderUser?->id;
         $organization  = $senderUser?->getRawOriginal('organization') ?? $senderUser?->organization_id;
 
-        // Send actual email notifications (scoped to org & excluding actor)
-        static::sendActualEmails($outbox, $recipientGroup, $messageText, $fileName, $eventType, $organization, $excludeUserId);
+        // Send actual email notifications (scoped to org & roles, excluding actor)
+        static::sendActualEmails($outbox, $recipientGroup, $messageText, $fileName, $eventType, $organization, $excludeUserId, $roleNames);
 
         // Send SMS notifications using exact registered bank template types (14 to 17)
-        static::sendActualSms($outbox, $recipientGroup, $eventType, $fileName, $totalTrn, BkashTransaction::formatBdtAmount($totalAmount), $actorName, $organization, $excludeUserId);
+        static::sendActualSms($outbox, $recipientGroup, $eventType, $fileName, $totalTrn, BkashTransaction::formatBdtAmount($totalAmount), $actorName, $organization, $excludeUserId, $roleNames);
 
         return $outbox;
     }
@@ -198,14 +220,15 @@ class NotificationService
         string $fileName,
         string $eventType,
         mixed $organization = null,
-        ?int $excludeUserId = null
+        ?int $excludeUserId = null,
+        array $roleNames = []
     ): void {
         if (!config('bkash.email_enabled', true)) {
             return;
         }
 
         try {
-            $recipients = static::getRecipientEmails($organization, $excludeUserId);
+            $recipients = static::getRecipientEmails($organization, $excludeUserId, $roleNames);
 
             if (empty($recipients)) {
                 Log::warning("No email recipients found for group: {$recipientGroup} (org: {$organization}, excluded: {$excludeUserId})");
@@ -251,7 +274,8 @@ class NotificationService
         string $formattedAmount,
         ?string $actorName = null,
         mixed $organization = null,
-        ?int $excludeUserId = null
+        ?int $excludeUserId = null,
+        array $roleNames = []
     ): void {
         if (!config('bkash.sms_enabled', true)) {
             Log::info('SMS sending is disabled. Skipping SMS dispatch.');
@@ -259,7 +283,7 @@ class NotificationService
         }
 
         try {
-            $phones = static::getRecipientPhones($organization, $excludeUserId);
+            $phones = static::getRecipientPhones($organization, $excludeUserId, $roleNames);
 
             if (empty($phones)) {
                 Log::info("No recipient phone numbers found for group [{$recipientGroup}]. Skipping SMS.");
@@ -299,9 +323,9 @@ class NotificationService
     }
 
     /**
-     * Get recipient email addresses with organization scoping and actor exclusion.
+     * Get recipient email addresses with organization scoping, actor exclusion, and role filtering.
      */
-    public static function getRecipientEmails(mixed $organization = null, ?int $excludeUserId = null): array
+    public static function getRecipientEmails(mixed $organization = null, ?int $excludeUserId = null, array $roleNames = []): array
     {
         $query = User::query()->whereNotNull('email');
         if ($excludeUserId) {
@@ -315,13 +339,16 @@ class NotificationService
                 }
             });
         }
+        if (!empty($roleNames)) {
+            $query->whereHas('roles', fn ($q) => $q->whereIn('name', $roleNames));
+        }
         return $query->pluck('email')->filter()->unique()->toArray();
     }
 
     /**
-     * Get recipient phone numbers with organization scoping and actor exclusion.
+     * Get recipient phone numbers with organization scoping, actor exclusion, and role filtering.
      */
-    public static function getRecipientPhones(mixed $organization = null, ?int $excludeUserId = null): array
+    public static function getRecipientPhones(mixed $organization = null, ?int $excludeUserId = null, array $roleNames = []): array
     {
         $query = User::query();
         if ($excludeUserId) {
@@ -334,6 +361,9 @@ class NotificationService
                     $q->orWhere('organization_id', $organization);
                 }
             });
+        }
+        if (!empty($roleNames)) {
+            $query->whereHas('roles', fn ($q) => $q->whereIn('name', $roleNames));
         }
 
         $phones = $query->whereNotNull('mobile_no')->pluck('mobile_no')->toArray();

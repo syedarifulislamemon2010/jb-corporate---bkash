@@ -1,0 +1,242 @@
+{
+  "info": {
+    "_postman_id": "9a1e4b3c-5d6e-4f7a-8b9c-0d1e2f3a4b5c",
+    "name": "Janata Bank — CBS Response Callback API",
+    "description": "Postman Collection for manual testing of Janata Bank CBS Asynchronous Response Callback endpoint (/api/cbs/response-callback).",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:8000",
+      "type": "string"
+    },
+    {
+      "key": "cbsApiKey",
+      "value": "cbs-secret-callback-key-2026",
+      "type": "string"
+    },
+    {
+      "key": "testTxnId",
+      "value": "TEST_TXN_CBS_001",
+      "type": "string"
+    },
+    {
+      "key": "testRefId",
+      "value": "TEST_REF_CBS_001",
+      "type": "string"
+    }
+  ],
+  "item": [
+    {
+      "name": "1. CBS Callback — SUCCESS (Status 1006)",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json",
+            "type": "text"
+          },
+          {
+            "key": "X-CBS-API-Key",
+            "value": "{{cbsApiKey}}",
+            "type": "text"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"response_id\": \"CBS_RESP_SUCCESS_001\",\n  \"status_id\": 1006,\n  \"txn_id\": \"{{testTxnId}}\",\n  \"confirmed_by\": \"JANATA_CBS_CORE\"\n}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/api/cbs/response-callback",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "api",
+            "cbs",
+            "response-callback"
+          ]
+        },
+        "description": "Simulates successful settlement confirmation by CBS core system. Updates transaction status to 1006 (STATUS_CBS_RESPONSE_SUCCESS) and sets cbs_success_at timestamp."
+      },
+      "response": []
+    },
+    {
+      "name": "2. CBS Callback — FAILED (Status 1007)",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json",
+            "type": "text"
+          },
+          {
+            "key": "X-CBS-API-Key",
+            "value": "{{cbsApiKey}}",
+            "type": "text"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"response_id\": \"CBS_RESP_FAIL_001\",\n  \"status_id\": 1007,\n  \"txn_id\": \"{{testTxnId}}\",\n  \"reason\": \"Beneficiary account dormant or closed in core banking system\",\n  \"confirmed_by\": \"JANATA_CBS_CORE\"\n}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/api/cbs/response-callback",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "api",
+            "cbs",
+            "response-callback"
+          ]
+        },
+        "description": "Simulates rejected/failed settlement callback by CBS. Updates transaction status to 1007 (STATUS_CBS_RESPONSE_FAILED) and creates a record in the bkash_failed_transactions table."
+      },
+      "response": []
+    },
+    {
+      "name": "3. CBS Callback — By Reference ID (Status 1006)",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json",
+            "type": "text"
+          },
+          {
+            "key": "X-CBS-API-Key",
+            "value": "{{cbsApiKey}}",
+            "type": "text"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"response_id\": \"CBS_RESP_REF_001\",\n  \"status_id\": 1006,\n  \"reference_id\": \"{{testRefId}}\",\n  \"confirmed_by\": \"JANATA_CBS_CORE\"\n}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/api/cbs/response-callback",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "api",
+            "cbs",
+            "response-callback"
+          ]
+        },
+        "description": "Demonstrates lookup using reference_id instead of txn_id."
+      },
+      "response": []
+    },
+    {
+      "name": "4. CBS Callback — UNAUTHORIZED (Invalid API Key -> 401)",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json",
+            "type": "text"
+          },
+          {
+            "key": "X-CBS-API-Key",
+            "value": "invalid-secret-key",
+            "type": "text"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"response_id\": \"CBS_RESP_UNAUTH_001\",\n  \"status_id\": 1006,\n  \"txn_id\": \"{{testTxnId}}\"\n}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/api/cbs/response-callback",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "api",
+            "cbs",
+            "response-callback"
+          ]
+        },
+        "description": "Expected 401 Unauthorized response due to invalid X-CBS-API-Key."
+      },
+      "response": []
+    },
+    {
+      "name": "5. CBS Callback — NOT FOUND (Non-existent Txn -> 404)",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json",
+            "type": "text"
+          },
+          {
+            "key": "X-CBS-API-Key",
+            "value": "{{cbsApiKey}}",
+            "type": "text"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"response_id\": \"CBS_RESP_NOT_FOUND\",\n  \"status_id\": 1006,\n  \"txn_id\": \"NON_EXISTENT_TXN_99999\"\n}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/api/cbs/response-callback",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "api",
+            "cbs",
+            "response-callback"
+          ]
+        },
+        "description": "Expected 404 Not Found response when transaction ID does not match any record."
+      },
+      "response": []
+    },
+    {
+      "name": "6. CBS Callback — VALIDATION ERROR (Invalid Status -> 422)",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json",
+            "type": "text"
+          },
+          {
+            "key": "X-CBS-API-Key",
+            "value": "{{cbsApiKey}}",
+            "type": "text"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"response_id\": \"CBS_RESP_INVALID\",\n  \"status_id\": 9999,\n  \"txn_id\": \"{{testTxnId}}\"\n}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/api/cbs/response-callback",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "api",
+            "cbs",
+            "response-callback"
+          ]
+        },
+        "description": "Expected 422 Unprocessable Content response due to invalid status_id (only 1006 and 1007 are allowed)."
+      },
+      "response": []
+    }
+  ]
+}
