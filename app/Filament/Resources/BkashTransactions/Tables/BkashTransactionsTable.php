@@ -147,6 +147,10 @@ class BkashTransactionsTable
                             ]);
                         });
 
+                        // Refresh parent batch status
+                        $batchIds = $records->pluck('batch_id')->filter()->unique();
+                        \App\Models\BkashTransactionBatch::whereIn('id', $batchIds)->each(fn ($batch) => $batch->refreshStatusFromTransactions());
+
                         \Filament\Notifications\Notification::make()
                             ->title('Transactions Checked')
                             ->body("Successfully checked {$totalTrn} transactions. Forwarded for 1st Authorization.")

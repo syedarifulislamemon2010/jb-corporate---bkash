@@ -151,6 +151,10 @@ class BkashTransactionConfirmationsTable
                             ]);
                         });
 
+                        // Refresh parent batch status
+                        $batchIds = $records->pluck('batch_id')->filter()->unique();
+                        \App\Models\BkashTransactionBatch::whereIn('id', $batchIds)->each(fn ($batch) => $batch->refreshStatusFromTransactions());
+
                         \Filament\Notifications\Notification::make()
                             ->title('Final Confirmation Completed')
                             ->body("Successfully authorized {$totalTrn} transactions. Dispatched for CBS settlement.")

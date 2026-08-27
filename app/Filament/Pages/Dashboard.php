@@ -59,9 +59,15 @@ class Dashboard extends Page
      */
     public function getUrgencyBanner(): ?array
     {
-        $pendingCheckerFiles = BkashTransactionBatch::where('status_id', BkashTransaction::STATUS_PENDING_CHECKER)->count();
-        $pendingAuth1Files   = BkashTransactionBatch::where('status_id', BkashTransaction::STATUS_CHECKED)->count();
-        $pendingAuth2Files   = BkashTransactionBatch::where('status_id', BkashTransaction::STATUS_AUTH_1_APPROVED)->count();
+        $pendingCheckerFiles = BkashTransaction::where('status_id', BkashTransaction::STATUS_PENDING_CHECKER)
+            ->distinct('batch_id')
+            ->count('batch_id');
+        $pendingAuth1Files   = BkashTransaction::where('status_id', BkashTransaction::STATUS_CHECKED)
+            ->distinct('batch_id')
+            ->count('batch_id');
+        $pendingAuth2Files   = BkashTransaction::where('status_id', BkashTransaction::STATUS_AUTH_1_APPROVED)
+            ->distinct('batch_id')
+            ->count('batch_id');
 
         $totalUrgent = $pendingCheckerFiles + $pendingAuth1Files + $pendingAuth2Files;
         if ($totalUrgent <= 0) {
@@ -86,11 +92,11 @@ class Dashboard extends Page
         $stats = [];
 
         foreach ($channels as $channel) {
-            $pendingChecker = BkashTransactionBatch::where('transaction_type', $channel)
+            $pendingChecker = BkashTransaction::where('transaction_type', $channel)
                 ->where('status_id', BkashTransaction::STATUS_PENDING_CHECKER)->count();
-            $pendingAuth = BkashTransactionBatch::where('transaction_type', $channel)
+            $pendingAuth = BkashTransaction::where('transaction_type', $channel)
                 ->whereIn('status_id', [BkashTransaction::STATUS_CHECKED, BkashTransaction::STATUS_AUTH_1_APPROVED])->count();
-            $settledToday = BkashTransactionBatch::where('transaction_type', $channel)
+            $settledToday = BkashTransaction::where('transaction_type', $channel)
                 ->whereIn('status_id', [BkashTransaction::STATUS_FINAL_AUTHORIZED, BkashTransaction::STATUS_CBS_SUCCESS])
                 ->whereDate('updated_at', today())->count();
 
@@ -111,17 +117,23 @@ class Dashboard extends Page
     }
 
     /**
-     * Get Action Row stats (file-level counts for 3-tier pipeline).
+     * Get Action Row stats (file-level counts for 3-tier pipeline derived from live transactions).
      */
     public function getActionStats(): array
     {
-        $pendingCheckerFiles = BkashTransactionBatch::where('status_id', BkashTransaction::STATUS_PENDING_CHECKER)->count();
+        $pendingCheckerFiles = BkashTransaction::where('status_id', BkashTransaction::STATUS_PENDING_CHECKER)
+            ->distinct('batch_id')
+            ->count('batch_id');
         $pendingCheckerTrns  = BkashTransaction::where('status_id', BkashTransaction::STATUS_PENDING_CHECKER)->count();
 
-        $pendingAuth1Files = BkashTransactionBatch::where('status_id', BkashTransaction::STATUS_CHECKED)->count();
+        $pendingAuth1Files = BkashTransaction::where('status_id', BkashTransaction::STATUS_CHECKED)
+            ->distinct('batch_id')
+            ->count('batch_id');
         $pendingAuth1Trns  = BkashTransaction::where('status_id', BkashTransaction::STATUS_CHECKED)->count();
 
-        $pendingAuth2Files = BkashTransactionBatch::where('status_id', BkashTransaction::STATUS_AUTH_1_APPROVED)->count();
+        $pendingAuth2Files = BkashTransaction::where('status_id', BkashTransaction::STATUS_AUTH_1_APPROVED)
+            ->distinct('batch_id')
+            ->count('batch_id');
         $pendingAuth2Trns  = BkashTransaction::where('status_id', BkashTransaction::STATUS_AUTH_1_APPROVED)->count();
 
         $settledTodayAmount = (float) BkashTransaction::whereIn('status_id', [

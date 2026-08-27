@@ -149,6 +149,10 @@ class BkashTransactionAuthorizationsTable
                             ]);
                         });
 
+                        // Refresh parent batch status
+                        $batchIds = $records->pluck('batch_id')->filter()->unique();
+                        \App\Models\BkashTransactionBatch::whereIn('id', $batchIds)->each(fn ($batch) => $batch->refreshStatusFromTransactions());
+
                         \Filament\Notifications\Notification::make()
                             ->title('Transactions 1st Authorized')
                             ->body("Successfully authorized {$totalTrn} transactions. Forwarded for 2nd / Final Authorization.")
