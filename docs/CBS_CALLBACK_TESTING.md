@@ -1,67 +1,40 @@
-# Janata Bank — CBS Asynchronous Response Callback API Manual Testing Guide
+# Janata Bank — CBS Settlement Response Callback Testing Guide
 
-This guide details how to manually test the Janata Bank Core Banking System (CBS) / BACH settlement callback endpoint (`POST /api/cbs/response-callback`) using **cURL**, **Postman**, or **Artisan**.
+This guide details how to test the Janata Bank Core Banking System (CBS) / BACH asynchronous settlement callback system.
 
 ---
 
-## 1. Architecture & Mechanism
+> [!IMPORTANT]
+> **Production vs. Dev/Staging Authentication Mechanism**
+>
+> ⚠️ **এই token-based টেস্ট এন্ডপয়েন্ট শুধুমাত্র dev/staging পরিবেশের জন্য এবং প্রোডাকশনে ডিজেবল থাকে। JANATA BANK production এ ঠিক আগের মতোই `/api/cbs/response-callback` এন্ডপয়েন্টে `X-CBS-API-Key` header দিয়ে callback পাঠাবে — production authentication mechanism সম্পূর্ণ অপরিবর্তিত ও সুরক্ষিত।**
 
-- **Endpoint**: `POST /api/cbs/response-callback`
-- **Authentication**: `X-CBS-API-Key` HTTP Header (System-to-System Shared Secret)
+---
+
+## 🏛️ Part 1: Production CBS Callback (`X-CBS-API-Key` Header)
+
+### 1.1 Architecture & Security Mechanism
+- **Route**: `POST /api/cbs/response-callback`
+- **Authentication**: `X-CBS-API-Key` HTTP Header (Machine-to-Machine Shared Secret)
 - **Middleware**: `App\Http\Middleware\AuthenticateCbsCallback`
 - **Controller**: `App\Http\Controllers\Api\CbsResponseCallbackController`
 
-> [!NOTE]
-> Bank host-to-host callbacks are machine-to-machine integrations. Basic user authentication (username/password) is not applicable because the caller is an automated CBS backend engine. The `X-CBS-API-Key` header with constant-time string comparison (`hash_equals`) is the standard secure mechanism.
+Bank host-to-host callbacks are machine-to-machine integrations. Basic user authentication (username/password) is not applicable because the caller is an automated CBS backend engine. The `X-CBS-API-Key` header with constant-time string comparison (`hash_equals`) is the standard secure banking mechanism.
 
----
-
-## 2. Prerequisites & Environment Setup
-
-Check or set the callback API key in your `.env` file:
-
+### 1.2 Environment Configuration
+Check or configure `CBS_CALLBACK_API_KEY` in `.env`:
 ```dotenv
 CBS_CALLBACK_API_KEY=cbs-secret-callback-key-2026
 ```
 
-If not explicitly defined in `.env`, the system defaults to:
-`cbs-secret-callback-key-2026` (as defined in `config/bkash.php`).
-
----
-
-## 3. Step 1: Seed Test Users & Transaction Data
-
-Run the dedicated seeding command:
-
+### 1.3 Seed Test Data
 ```bash
 php artisan test:seed-cbs-callback-data
 ```
 
-This command will:
-1. Ensure the 3 required workflow roles exist (`bkash_checker`, `bkash_authorizer_1`, `bkash_authorizer_2`).
-2. Create/update 3 predictable test users:
-   - **Checker**: `test.checker@jbcorporate.test` (`01711000001`)
-   - **1st Authorizer**: `test.authorizer1@jbcorporate.test` (`01711000002`)
-   - **2nd Authorizer**: `test.authorizer2@jbcorporate.test` (`01711000003`)
-3. Create/reset a test transaction with `status_id = 1003` (`STATUS_FINAL_AUTHORIZED`):
-   - **Txn ID**: `TEST_TXN_CBS_001`
-   - **Reference ID**: `TEST_REF_CBS_001`
-   - **Amount**: BDT `50,000.00`
-   - **Status**: `1003` (Ready to receive CBS Callback)
+### 1.4 Production Callback cURL Examples
 
----
-
-## 4. Step 2: Manual API Testing Scenarios (cURL)
-
-Make sure your local Laravel application server is running:
-```bash
-php artisan serve
-```
-
-### Scenario A: Settlement SUCCESS Callback (Status `1006`)
-
-Simulates CBS successfully debiting the pool account and crediting the beneficiary:
-
+#### A. Settlement SUCCESS Callback (Status `1006`):
 ```bash
 curl -X POST http://localhost:8000/api/cbs/response-callback \
   -H "Content-Type: application/json" \
@@ -74,22 +47,7 @@ curl -X POST http://localhost:8000/api/cbs/response-callback \
   }'
 ```
 
-**Expected HTTP Response (200 OK):**
-```json
-{
-  "success": true,
-  "message": "Transaction status updated",
-  "id": 1,
-  "status_id": 1006
-}
-```
-
----
-
-### Scenario B: Settlement REJECTION / FAILURE Callback (Status `1007`)
-
-Simulates CBS rejecting the transaction (e.g., beneficiary account closed or dormant):
-
+#### B. Settlement REJECTION / FAILURE Callback (Status `1007`):
 ```bash
 curl -X POST http://localhost:8000/api/cbs/response-callback \
   -H "Content-Type: application/json" \
@@ -103,67 +61,83 @@ curl -X POST http://localhost:8000/api/cbs/response-callback \
   }'
 ```
 
-**Expected HTTP Response (200 OK):**
-```json
-{
-  "success": true,
-  "message": "Transaction status updated",
-  "id": 1,
-  "status_id": 1007
-}
-```
-
----
-
-### Scenario C: Unauthorized Request (Invalid / Missing API Key)
-
+#### C. Unauthorized Request (401 Response):
 ```bash
 curl -X POST http://localhost:8000/api/cbs/response-callback \
   -H "Content-Type: application/json" \
   -H "X-CBS-API-Key: wrong-invalid-key" \
-  -d '{
-    "response_id": "CBS_RESP_UNAUTH_001",
-    "status_id": 1006,
-    "txn_id": "TEST_TXN_CBS_001"
-  }'
-```
-
-**Expected HTTP Response (401 Unauthorized):**
-```json
-{
-  "success": false,
-  "message": "Unauthorized: Invalid or missing CBS API Key"
-}
+  -d '{"response_id": "CBS_123", "status_id": 1006, "txn_id": "TEST_TXN_CBS_001"}'
 ```
 
 ---
 
-### Scenario D: Non-existent Transaction ID (404 Not Found)
+## 🧪 Part 2: Dev/Staging Token-Based Testing (Laravel Sanctum)
 
+For internal team development and QA testing without needing the production `X-CBS-API-Key`, a token-issuing test flow is available strictly in non-production environments.
+
+### 2.1 Test Endpoints Overview
+| Endpoint | Method | Auth Guard | Description |
+| :--- | :--- | :--- | :--- |
+| `/api/test-auth/token` | `POST` | Public (Dev/Staging only) | Issues a Bearer token for test users |
+| `/api/test-auth/cbs/response-callback` | `POST` | `auth:sanctum` | Reuses core CBS callback logic via Bearer token |
+
+### 2.2 Step-by-Step Manual Token Testing
+
+#### Step 1: Seed Test Users & Transaction
+Run the following artisan command:
 ```bash
-curl -X POST http://localhost:8000/api/cbs/response-callback \
+php artisan test:seed-users --with-transaction
+```
+This creates:
+- **Checker User**: `checker@test.jbcorporate.com` / `Test@Pass123`
+- **1st Authorizer**: `authorizer1@test.jbcorporate.com` / `Test@Pass123`
+- **2nd Authorizer**: `authorizer2@test.jbcorporate.com` / `Test@Pass123`
+- **Test Transaction**: `TEST_TXN_CBS_001` (Status `1003` - `STATUS_FINAL_AUTHORIZED`)
+
+#### Step 2: Request Bearer Token
+```bash
+curl -X POST http://localhost:8000/api/test-auth/token \
   -H "Content-Type: application/json" \
-  -H "X-CBS-API-Key: cbs-secret-callback-key-2026" \
+  -H "Accept: application/json" \
   -d '{
-    "response_id": "CBS_RESP_NOT_FOUND",
-    "status_id": 1006,
-    "txn_id": "NON_EXISTENT_TXN_99999"
+    "email": "checker@test.jbcorporate.com",
+    "password": "Test@Pass123"
   }'
 ```
-
-**Expected HTTP Response (404 Not Found):**
+**Response:**
 ```json
 {
-  "success": false,
-  "message": "Transaction not found"
+  "success": true,
+  "token": "1|abcdef123456...",
+  "user": {
+    "id": 1,
+    "name": "bKash Checker Test User",
+    "email": "checker@test.jbcorporate.com",
+    "organization": "Janata Bank PLC.",
+    "role": "bkash_checker"
+  }
 }
+```
+
+#### Step 3: Send CBS Callback using Token
+```bash
+curl -X POST http://localhost:8000/api/test-auth/cbs/response-callback \
+  -H "Content-Type: application/json" \
+  -H "Accept: application/json" \
+  -H "Authorization: Bearer 1|abcdef123456..." \
+  -d '{
+    "response_id": "TEST_CBS_RESP_001",
+    "status_id": 1006,
+    "txn_id": "TEST_TXN_CBS_001",
+    "confirmed_by": "TEST_VIA_POSTMAN"
+  }'
 ```
 
 ---
 
-## 5. Step 3: Database Verification via Tinker
+## 🔍 Part 3: Database Verification via Tinker
 
-After sending callback requests, verify the changes in database:
+After sending callback requests (via API Key or Sanctum Token), verify the database updates:
 
 ```bash
 php artisan tinker
@@ -172,11 +146,11 @@ php artisan tinker
 ```php
 // Check Transaction status and timestamps
 $txn = \App\Models\BkashTransaction::where('txn_id', 'TEST_TXN_CBS_001')->first();
-$txn->status_id;        // 1006 (SUCCESS) or 1007 (FAILED)
-$txn->response_id;      // "CBS_RESP_SUCCESS_001" or "CBS_RESP_FAIL_001"
+$txn->status_id;        // 1006 (STATUS_CBS_RESPONSE_SUCCESS) or 1007 (STATUS_CBS_RESPONSE_FAILED)
+$txn->response_id;      // "TEST_CBS_RESP_001"
 $txn->confirmed_at;     // Carbon timestamp
 $txn->cbs_success_at;   // Carbon timestamp (for 1006)
-$txn->reject_reason;    // Reason text (for 1007)
+$txn->reject_reason;    // Reason message (for 1007)
 
 // Check Failed Transactions audit record (when testing 1007)
 $failed = \App\Models\BkashFailedTransaction::where('reference_id', 'TEST_REF_CBS_001')->first();
@@ -186,20 +160,13 @@ $failed->reject_reason;  // Reason message
 
 ---
 
-## 6. Step 4: Testing with Postman
+## 📦 Part 4: Postman Collections
 
-A ready-to-import Postman Collection is included at:
-`docs/postman/CBS_Callback_Collection.json`
+Two ready-to-import Postman collections (v2.1.0) are available in `docs/postman/`:
 
-### How to import into Postman:
-1. Open **Postman**.
-2. Click **Import** (top left).
-3. Select the file: `docs/postman/CBS_Callback_Collection.json`.
-4. The collection **Janata Bank — CBS Response Callback API** will appear with 6 pre-configured requests:
-   - `1. CBS Callback — SUCCESS (Status 1006)`
-   - `2. CBS Callback — FAILED (Status 1007)`
-   - `3. CBS Callback — By Reference ID (Status 1006)`
-   - `4. CBS Callback — UNAUTHORIZED (Invalid API Key -> 401)`
-   - `5. CBS Callback — NOT FOUND (Non-existent Txn -> 404)`
-   - `6. CBS Callback — VALIDATION ERROR (Invalid Status -> 422)`
-5. Adjust the collection variable `baseUrl` if your application is running on a different port/host.
+1. **`docs/postman/CBS_Callback_Collection.json`**
+   - Direct production-mirror testing using `X-CBS-API-Key` header.
+   - Includes 6 pre-configured requests (Success 1006, Fail 1007, Ref ID lookup, 401 Unauthorized, 404 Not Found, 422 Validation error).
+
+2. **`docs/postman/CBS_Callback_Token_Test_Collection.json`**
+   - Dev/Staging token-based testing with automated script that extracts the token from `1. Get Token` and populates `{{auth_token}}` variable for subsequent requests.

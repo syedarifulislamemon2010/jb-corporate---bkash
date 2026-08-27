@@ -1,0 +1,175 @@
+{
+  "info": {
+    "_postman_id": "8f3b2c1a-4d5e-6f7a-8b9c-1e2f3a4b5c6d",
+    "name": "Janata Bank — CBS Callback Token-Based Testing (Dev/Staging)",
+    "description": "Dev/Staging-only token-based Postman collection using Laravel Sanctum for team testing of CBS callback logic without needing production API keys.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:8000",
+      "type": "string"
+    },
+    {
+      "key": "auth_token",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "testEmail",
+      "value": "checker@test.jbcorporate.com",
+      "type": "string"
+    },
+    {
+      "key": "testPassword",
+      "value": "Test@Pass123",
+      "type": "string"
+    },
+    {
+      "key": "testTxnId",
+      "value": "TEST_TXN_CBS_001",
+      "type": "string"
+    }
+  ],
+  "item": [
+    {
+      "name": "1. Get Token",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "var jsonData = pm.response.json();",
+              "if (jsonData.success && jsonData.token) {",
+              "    pm.collectionVariables.set(\"auth_token\", jsonData.token);",
+              "    pm.test(\"Token received and stored in {{auth_token}}\", function () {",
+              "        pm.expect(jsonData.token).to.be.a('string');",
+              "    });",
+              "} else {",
+              "    pm.test(\"Failed to retrieve token\", function () {",
+              "        pm.expect.fail(jsonData.message || 'Authentication failed');",
+              "    });",
+              "}"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json",
+            "type": "text"
+          },
+          {
+            "key": "Accept",
+            "value": "application/json",
+            "type": "text"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"email\": \"{{testEmail}}\",\n  \"password\": \"{{testPassword}}\"\n}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/api/test-auth/token",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "api",
+            "test-auth",
+            "token"
+          ]
+        },
+        "description": "Authenticates test user and returns a Laravel Sanctum personal access token. The test script automatically captures the token into the collection variable {{auth_token}} for subsequent requests."
+      },
+      "response": []
+    },
+    {
+      "name": "2. CBS Callback Success (via Token)",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json",
+            "type": "text"
+          },
+          {
+            "key": "Accept",
+            "value": "application/json",
+            "type": "text"
+          },
+          {
+            "key": "Authorization",
+            "value": "Bearer {{auth_token}}",
+            "type": "text"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"response_id\": \"TEST_CBS_RESP_001\",\n  \"status_id\": 1006,\n  \"txn_id\": \"{{testTxnId}}\",\n  \"confirmed_by\": \"TEST_VIA_POSTMAN\"\n}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/api/test-auth/cbs/response-callback",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "api",
+            "test-auth",
+            "cbs",
+            "response-callback"
+          ]
+        },
+        "description": "Submits a successful CBS settlement callback (status 1006) authenticated via Sanctum Bearer token. Reuses CbsResponseCallbackController logic."
+      },
+      "response": []
+    },
+    {
+      "name": "3. CBS Callback Failed (via Token)",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json",
+            "type": "text"
+          },
+          {
+            "key": "Accept",
+            "value": "application/json",
+            "type": "text"
+          },
+          {
+            "key": "Authorization",
+            "value": "Bearer {{auth_token}}",
+            "type": "text"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"response_id\": \"TEST_CBS_RESP_002\",\n  \"status_id\": 1007,\n  \"txn_id\": \"{{testTxnId}}\",\n  \"reason\": \"Beneficiary account dormant or closed in core banking system\",\n  \"confirmed_by\": \"TEST_VIA_POSTMAN\"\n}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/api/test-auth/cbs/response-callback",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "api",
+            "test-auth",
+            "cbs",
+            "response-callback"
+          ]
+        },
+        "description": "Submits a failed CBS settlement callback (status 1007) with rejection reason authenticated via Sanctum Bearer token."
+      },
+      "response": []
+    }
+  ]
+}
