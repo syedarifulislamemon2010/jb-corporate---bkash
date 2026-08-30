@@ -34,6 +34,8 @@ class AdminPanelProvider extends PanelProvider
             ->favicon(asset('favicon.svg'))
             ->sidebarCollapsibleOnDesktop()
             ->sidebarWidth('17rem')
+            ->spa()
+            ->font('Plus Jakarta Sans')
             ->databaseNotifications()
             ->databaseNotificationsPolling('15s')
             ->globalSearchKeybindings(['command+k', 'ctrl+k'])
@@ -88,9 +90,7 @@ class AdminPanelProvider extends PanelProvider
                 \Filament\View\PanelsRenderHook::BODY_END,
                 fn () => view('filament.custom-styles')
             )
-            ->widgets([
-                \App\Filament\Widgets\StatsOverview::class,
-            ])
+            ->widgets([])
             ->plugins([
                 FilamentShieldPlugin::make()
                     ->navigationGroup('Roles & Permissions')
