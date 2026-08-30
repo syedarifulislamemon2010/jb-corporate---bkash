@@ -1251,7 +1251,7 @@
             const dropdown = groupEl.querySelector('.fi-dropdown');
             if (!dropdown) return;
 
-            const triggerBtn = dropdown.querySelector('.fi-sidebar-group-dropdown-trigger-btn') || dropdown.querySelector('.fi-dropdown-trigger button');
+            const trigger = dropdown.querySelector('.fi-dropdown-trigger') || dropdown.querySelector('.fi-sidebar-group-dropdown-trigger-btn');
             const panel = dropdown.querySelector('.fi-dropdown-panel');
 
             clearTimeout(activeHoverTimeout);
@@ -1259,18 +1259,18 @@
             // Close any previously opened other dropdown
             if (currentlyOpenDropdown && currentlyOpenDropdown !== dropdown) {
                 const prevPanel = currentlyOpenDropdown.querySelector('.fi-dropdown-panel');
-                const prevBtn = currentlyOpenDropdown.querySelector('.fi-sidebar-group-dropdown-trigger-btn') || currentlyOpenDropdown.querySelector('.fi-dropdown-trigger button');
-                if (prevPanel && prevBtn && (prevPanel.style.display === 'block' || getComputedStyle(prevPanel).display === 'block')) {
-                    prevBtn.click();
+                const prevTrigger = currentlyOpenDropdown.querySelector('.fi-dropdown-trigger') || currentlyOpenDropdown.querySelector('.fi-sidebar-group-dropdown-trigger-btn');
+                if (prevPanel && prevTrigger && (prevPanel.style.display === 'block' || getComputedStyle(prevPanel).display === 'block')) {
+                    prevTrigger.dispatchEvent(new MouseEvent('mousedown', { bubbles: true, cancelable: true, button: 0 }));
                 }
             }
 
             // Open this dropdown
-            if (triggerBtn && panel) {
+            if (trigger && panel) {
                 const isClosed = !panel.style.display || panel.style.display === 'none' || getComputedStyle(panel).display === 'none';
                 if (isClosed) {
                     currentlyOpenDropdown = dropdown;
-                    triggerBtn.click();
+                    trigger.dispatchEvent(new MouseEvent('mousedown', { bubbles: true, cancelable: true, button: 0 }));
                 }
             }
         };
@@ -1282,23 +1282,23 @@
             const dropdown = groupEl.querySelector('.fi-dropdown');
             if (!dropdown) return;
 
-            const triggerBtn = dropdown.querySelector('.fi-sidebar-group-dropdown-trigger-btn') || dropdown.querySelector('.fi-dropdown-trigger button');
+            const trigger = dropdown.querySelector('.fi-dropdown-trigger') || dropdown.querySelector('.fi-sidebar-group-dropdown-trigger-btn');
             const panel = dropdown.querySelector('.fi-dropdown-panel');
 
             clearTimeout(activeHoverTimeout);
             activeHoverTimeout = setTimeout(() => {
-                // Verify mouse is not hovering over the panel or group
-                const isHovering = groupEl.matches(':hover') || (panel && panel.matches(':hover'));
-                if (!isHovering && triggerBtn && panel) {
+                // Verify mouse is not hovering over the panel, dropdown, or group
+                const isHovering = groupEl.matches(':hover') || (panel && panel.matches(':hover')) || dropdown.matches(':hover');
+                if (!isHovering && trigger && panel) {
                     const isOpen = panel.style.display === 'block' || (getComputedStyle(panel).display !== 'none' && panel.style.display !== 'none');
                     if (isOpen) {
-                        triggerBtn.click();
+                        trigger.dispatchEvent(new MouseEvent('mousedown', { bubbles: true, cancelable: true, button: 0 }));
                         if (currentlyOpenDropdown === dropdown) {
                             currentlyOpenDropdown = null;
                         }
                     }
                 }
-            }, 250);
+            }, 300);
         };
 
         document.addEventListener('mouseover', function (e) {
@@ -1306,13 +1306,13 @@
             if (group) {
                 openGroupFlyout(group);
             }
-        });
+        }, { passive: true });
 
         document.addEventListener('mouseout', function (e) {
             const group = e.target.closest('.fi-sidebar-group');
             if (group && (!e.relatedTarget || !group.contains(e.relatedTarget))) {
                 closeGroupFlyout(group);
             }
-        });
+        }, { passive: true });
     });
 </script>
