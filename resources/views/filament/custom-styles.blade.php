@@ -13,6 +13,22 @@
         --color-primary-ink: #0F172A;
         --color-secondary-ink: #64748B;
         --color-signature-accent: #1E3A5F;
+
+        /* ─── 3-COLOR STAGE PALETTE (Workflow Hierarchy) ─── */
+        --color-stage-checker: #D97706; /* Amber / Orange for Tier 1 Verification */
+        --color-stage-checker-bg: rgba(217, 119, 6, 0.05);
+        --color-stage-auth1: #6366F1;   /* Indigo / Blue for Tier 2 1st Authorization */
+        --color-stage-auth1-bg: rgba(99, 102, 241, 0.05);
+        --color-stage-auth2: #0D9488;   /* Teal / Emerald for Tier 3 Final Authorization */
+        --color-stage-auth2-bg: rgba(13, 148, 136, 0.05);
+
+        /* ─── CHANNEL COLOR PALETTE (Payment Modes) ─── */
+        --color-channel-a2a: #0284C7;   /* Sky Blue for Account-to-Account */
+        --color-channel-a2a-bg: rgba(2, 132, 199, 0.04);
+        --color-channel-beftn: #8B5CF6; /* Violet for BEFTN Clearing Batch */
+        --color-channel-beftn-bg: rgba(139, 92, 246, 0.04);
+        --color-channel-rtgs: #EA580C;  /* Deep Orange for High-Value RTGS */
+        --color-channel-rtgs-bg: rgba(234, 88, 12, 0.04);
     }
 
     html.dark, .dark {
@@ -21,6 +37,22 @@
         --color-primary-ink: #F8FAFC;
         --color-secondary-ink: #94A3B8;
         --color-signature-accent: #4A6FA5;
+
+        /* Dark Mode Stage Palette */
+        --color-stage-checker: #F59E0B;
+        --color-stage-checker-bg: rgba(245, 158, 11, 0.08);
+        --color-stage-auth1: #818CF8;
+        --color-stage-auth1-bg: rgba(129, 140, 248, 0.08);
+        --color-stage-auth2: #14B8A6;
+        --color-stage-auth2-bg: rgba(20, 184, 166, 0.08);
+
+        /* Dark Mode Channel Palette */
+        --color-channel-a2a: #38BDF8;
+        --color-channel-a2a-bg: rgba(56, 189, 248, 0.08);
+        --color-channel-beftn: #A78BFA;
+        --color-channel-beftn-bg: rgba(167, 139, 250, 0.08);
+        --color-channel-rtgs: #FB923C;
+        --color-channel-rtgs-bg: rgba(251, 146, 60, 0.08);
     }
 
     body, button, input, select, textarea, .fi-body {
@@ -83,7 +115,93 @@
         overflow: hidden;
     }
 
-    /* TIER 2: ACTION REQUIRED (Pending Checker / Auth) */
+    /* TIER 2: ACTION REQUIRED (Stage Specific Cards) */
+    .db-card-stage-checker {
+        background-color: #ffffff;
+        border: 1px solid rgba(217, 119, 6, 0.35);
+        border-left: 4px solid var(--color-stage-checker) !important;
+        background-image: linear-gradient(to bottom, var(--color-stage-checker-bg), transparent);
+        border-radius: 1rem;
+        padding: 1.25rem;
+        box-shadow: 0 1px 3px 0 rgba(15, 23, 42, 0.03);
+        transition: box-shadow 0.15s ease, border-color 0.15s ease, transform 0.15s ease;
+        display: block;
+        text-decoration: none;
+    }
+    .db-card-stage-checker:hover {
+        border-color: rgba(217, 119, 6, 0.8);
+        box-shadow: 0 4px 14px rgba(217, 119, 6, 0.12);
+        transform: translateY(-1px);
+    }
+
+    .db-card-stage-auth1 {
+        background-color: #ffffff;
+        border: 1px solid rgba(99, 102, 241, 0.35);
+        border-left: 4px solid var(--color-stage-auth1) !important;
+        background-image: linear-gradient(to bottom, var(--color-stage-auth1-bg), transparent);
+        border-radius: 1rem;
+        padding: 1.25rem;
+        box-shadow: 0 1px 3px 0 rgba(15, 23, 42, 0.03);
+        transition: box-shadow 0.15s ease, border-color 0.15s ease, transform 0.15s ease;
+        display: block;
+        text-decoration: none;
+    }
+    .db-card-stage-auth1:hover {
+        border-color: rgba(99, 102, 241, 0.8);
+        box-shadow: 0 4px 14px rgba(99, 102, 241, 0.12);
+        transform: translateY(-1px);
+    }
+
+    .db-card-stage-auth2 {
+        background-color: #ffffff;
+        border: 1px solid rgba(13, 148, 136, 0.35);
+        border-left: 4px solid var(--color-stage-auth2) !important;
+        background-image: linear-gradient(to bottom, var(--color-stage-auth2-bg), transparent);
+        border-radius: 1rem;
+        padding: 1.25rem;
+        box-shadow: 0 1px 3px 0 rgba(15, 23, 42, 0.03);
+        transition: box-shadow 0.15s ease, border-color 0.15s ease, transform 0.15s ease;
+        display: block;
+        text-decoration: none;
+    }
+    .db-card-stage-auth2:hover {
+        border-color: rgba(13, 148, 136, 0.8);
+        box-shadow: 0 4px 14px rgba(13, 148, 136, 0.12);
+        transform: translateY(-1px);
+    }
+
+    /* Channel Payment Mode Specific Cards */
+    .db-card-channel-a2a {
+        background-color: #ffffff;
+        border: 1px solid #e2e8f0;
+        border-left: 4px solid var(--color-channel-a2a) !important;
+        background-image: linear-gradient(to bottom, var(--color-channel-a2a-bg), transparent);
+        border-radius: 1rem;
+        padding: 1.25rem;
+        box-shadow: 0 1px 2px 0 rgba(15, 23, 42, 0.03);
+        transition: all 0.15s ease;
+    }
+    .db-card-channel-beftn {
+        background-color: #ffffff;
+        border: 1px solid #e2e8f0;
+        border-left: 4px solid var(--color-channel-beftn) !important;
+        background-image: linear-gradient(to bottom, var(--color-channel-beftn-bg), transparent);
+        border-radius: 1rem;
+        padding: 1.25rem;
+        box-shadow: 0 1px 2px 0 rgba(15, 23, 42, 0.03);
+        transition: all 0.15s ease;
+    }
+    .db-card-channel-rtgs {
+        background-color: #ffffff;
+        border: 1px solid #e2e8f0;
+        border-left: 4px solid var(--color-channel-rtgs) !important;
+        background-image: linear-gradient(to bottom, var(--color-channel-rtgs-bg), transparent);
+        border-radius: 1rem;
+        padding: 1.25rem;
+        box-shadow: 0 1px 2px 0 rgba(15, 23, 42, 0.03);
+        transition: all 0.15s ease;
+    }
+
     .db-card-warning {
         background-color: #ffffff;
         border: 1px solid rgba(217, 119, 6, 0.45);
@@ -223,6 +341,42 @@
     html.dark .db-card-inner {
         background-color: rgba(2, 6, 23, 0.5) !important;
         border-color: #1e293b !important;
+    }
+
+    html.dark .db-card-stage-checker {
+        background-color: #0f172a !important;
+        border-color: rgba(245, 158, 11, 0.3) !important;
+        border-left: 4px solid var(--color-stage-checker) !important;
+    }
+
+    html.dark .db-card-stage-auth1 {
+        background-color: #0f172a !important;
+        border-color: rgba(129, 140, 248, 0.3) !important;
+        border-left: 4px solid var(--color-stage-auth1) !important;
+    }
+
+    html.dark .db-card-stage-auth2 {
+        background-color: #0f172a !important;
+        border-color: rgba(20, 184, 166, 0.3) !important;
+        border-left: 4px solid var(--color-stage-auth2) !important;
+    }
+
+    html.dark .db-card-channel-a2a {
+        background-color: #0f172a !important;
+        border-color: #1e293b !important;
+        border-left: 4px solid var(--color-channel-a2a) !important;
+    }
+
+    html.dark .db-card-channel-beftn {
+        background-color: #0f172a !important;
+        border-color: #1e293b !important;
+        border-left: 4px solid var(--color-channel-beftn) !important;
+    }
+
+    html.dark .db-card-channel-rtgs {
+        background-color: #0f172a !important;
+        border-color: #1e293b !important;
+        border-left: 4px solid var(--color-channel-rtgs) !important;
     }
 
     html.dark .db-card-warning {

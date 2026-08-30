@@ -80,11 +80,11 @@
 
             <!-- Card 1: Pending Checker (Tier 1 Action Required) -->
             @if ($actionStats['pending_checker']['files'] > 0)
-                <a href="{{ $actionStats['pending_checker']['url'] }}" class="db-card-warning" aria-label="View and verify pending checker files">
+                <a href="{{ $actionStats['pending_checker']['url'] }}" class="db-card-stage-checker" aria-label="View and verify pending checker files">
                     <div class="db-flex-between">
-                        <div class="db-flex-gap-2" style="color: #d97706;">
-                            <x-filament::icon icon="heroicon-o-shield-check" class="w-5 h-5 text-amber-500" aria-hidden="true" />
-                            <span class="db-text-sub" style="font-size: 0.75rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em;">Pending checker</span>
+                        <div class="db-flex-gap-2" style="color: var(--color-stage-checker);">
+                            <x-filament::icon icon="heroicon-o-shield-check" class="w-5 h-5" style="color: var(--color-stage-checker);" aria-hidden="true" />
+                            <span class="db-text-sub" style="font-size: 0.75rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; color: var(--color-stage-checker);">Pending checker</span>
                         </div>
                     </div>
                     <div style="margin-top: 0.75rem;">
@@ -92,7 +92,7 @@
                             {{ $actionStats['pending_checker']['files'] }}
                         </div>
                         <div class="db-text-sub db-tabular" style="font-size: 0.75rem; margin-top: 0.25rem;">{{ $actionStats['pending_checker']['trns'] }} {{ Str::plural('transaction', $actionStats['pending_checker']['trns']) }}</div>
-                        <div class="db-link-action" style="margin-top: 0.5rem;">
+                        <div class="db-link-action" style="margin-top: 0.5rem; color: var(--color-stage-checker);">
                             {{ $actionStats['pending_checker']['action_label'] }}
                         </div>
                     </div>
@@ -114,11 +114,11 @@
 
             <!-- Card 2: Pending 1st Authorization (Tier 2 Action Required) -->
             @if ($actionStats['pending_auth1']['files'] > 0)
-                <a href="{{ $actionStats['pending_auth1']['url'] }}" class="db-card-warning" aria-label="View and approve pending 1st authorization transactions">
+                <a href="{{ $actionStats['pending_auth1']['url'] }}" class="db-card-stage-auth1" aria-label="View and approve pending 1st authorization transactions">
                     <div class="db-flex-between">
-                        <div class="db-flex-gap-2" style="color: #d97706;">
-                            <x-filament::icon icon="heroicon-o-key" class="w-5 h-5 text-amber-500" aria-hidden="true" />
-                            <span class="db-text-sub" style="font-size: 0.75rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em;">Pending 1st auth</span>
+                        <div class="db-flex-gap-2" style="color: var(--color-stage-auth1);">
+                            <x-filament::icon icon="heroicon-o-key" class="w-5 h-5" style="color: var(--color-stage-auth1);" aria-hidden="true" />
+                            <span class="db-text-sub" style="font-size: 0.75rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; color: var(--color-stage-auth1);">Pending 1st auth</span>
                         </div>
                     </div>
                     <div style="margin-top: 0.75rem;">
@@ -126,7 +126,7 @@
                             {{ $actionStats['pending_auth1']['files'] }}
                         </div>
                         <div class="db-text-sub db-tabular" style="font-size: 0.75rem; margin-top: 0.25rem;">{{ $actionStats['pending_auth1']['trns'] }} {{ Str::plural('transaction', $actionStats['pending_auth1']['trns']) }}</div>
-                        <div class="db-link-action" style="margin-top: 0.5rem;">
+                        <div class="db-link-action" style="margin-top: 0.5rem; color: var(--color-stage-auth1);">
                             {{ $actionStats['pending_auth1']['action_label'] }}
                         </div>
                     </div>
@@ -148,11 +148,11 @@
 
             <!-- Card 3: Pending Final Confirmation (Tier 3 Action Required) -->
             @if ($actionStats['pending_auth2']['files'] > 0)
-                <a href="{{ $actionStats['pending_auth2']['url'] }}" class="db-card-warning" aria-label="View and confirm pending 2nd authorization transactions">
+                <a href="{{ $actionStats['pending_auth2']['url'] }}" class="db-card-stage-auth2" aria-label="View and confirm pending 2nd authorization transactions">
                     <div class="db-flex-between">
-                        <div class="db-flex-gap-2" style="color: #d97706;">
-                            <x-filament::icon icon="heroicon-o-clipboard-document-check" class="w-5 h-5 text-amber-500" aria-hidden="true" />
-                            <span class="db-text-sub" style="font-size: 0.75rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em;">Pending 2nd auth</span>
+                        <div class="db-flex-gap-2" style="color: var(--color-stage-auth2);">
+                            <x-filament::icon icon="heroicon-o-clipboard-document-check" class="w-5 h-5" style="color: var(--color-stage-auth2);" aria-hidden="true" />
+                            <span class="db-text-sub" style="font-size: 0.75rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; color: var(--color-stage-auth2);">Pending 2nd auth</span>
                         </div>
                     </div>
                     <div style="margin-top: 0.75rem;">
@@ -160,7 +160,7 @@
                             {{ $actionStats['pending_auth2']['files'] }}
                         </div>
                         <div class="db-text-sub db-tabular" style="font-size: 0.75rem; margin-top: 0.25rem;">{{ $actionStats['pending_auth2']['trns'] }} {{ Str::plural('transaction', $actionStats['pending_auth2']['trns']) }}</div>
-                        <div class="db-link-action" style="margin-top: 0.5rem;">
+                        <div class="db-link-action" style="margin-top: 0.5rem; color: var(--color-stage-auth2);">
                             {{ $actionStats['pending_auth2']['action_label'] }}
                         </div>
                     </div>
@@ -182,13 +182,36 @@
 
         </div>
 
-        <!-- 4. PHASED ROLLOUT CHANNEL ROW (Tier 3 Informational) -->
+        <!-- 4. PHASED ROLLOUT CHANNEL ROW (Tier 3 Informational with Channel Identity Palette) -->
         <div class="db-grid-3" role="region" aria-label="Payment channels status">
             @foreach ($channelStats as $channel => $info)
+                @php
+                    $channelCardClass = match($channel) {
+                        'A2A'   => 'db-card-channel-a2a',
+                        'BEFTN' => 'db-card-channel-beftn',
+                        'RTGS'  => 'db-card-channel-rtgs',
+                        default => 'db-card',
+                    };
+                    $channelIcon = match($channel) {
+                        'A2A'   => 'heroicon-o-arrows-right-left',
+                        'BEFTN' => 'heroicon-o-building-library',
+                        'RTGS'  => 'heroicon-o-bolt',
+                        default => 'heroicon-o-credit-card',
+                    };
+                    $channelColor = match($channel) {
+                        'A2A'   => 'var(--color-channel-a2a)',
+                        'BEFTN' => 'var(--color-channel-beftn)',
+                        'RTGS'  => 'var(--color-channel-rtgs)',
+                        default => 'var(--color-secondary-ink)',
+                    };
+                @endphp
                 @if ($info['is_live'])
-                    <div class="db-card" role="article" aria-label="{{ $channel }} payment mode status">
+                    <div class="{{ $channelCardClass }}" role="article" aria-label="{{ $channel }} payment mode status">
                         <div class="db-flex-between" style="margin-bottom: 0.75rem;">
-                            <span class="db-text-heading" style="font-size: 1rem; font-weight: 800;">{{ $channel }} Payment Mode</span>
+                            <div class="db-flex-gap-2">
+                                <x-filament::icon :icon="$channelIcon" class="w-5 h-5" style="color: {{ $channelColor }};" aria-hidden="true" />
+                                <span class="db-text-heading" style="font-size: 1rem; font-weight: 800;">{{ $channel }} Payment Mode</span>
+                            </div>
                             <span class="db-badge-sm db-badge-success">
                                 {{ $info['label'] }}
                             </span>
@@ -209,9 +232,12 @@
                         </div>
                     </div>
                 @else
-                    <div class="db-card" style="opacity: 0.6;" role="article" aria-label="{{ $channel }} payment mode coming soon">
+                    <div class="{{ $channelCardClass }}" style="opacity: 0.6;" role="article" aria-label="{{ $channel }} payment mode coming soon">
                         <div class="db-flex-between" style="margin-bottom: 0.75rem;">
-                            <span class="db-text-sub" style="font-size: 1rem; font-weight: 800;">{{ $channel }} Payment Mode</span>
+                            <div class="db-flex-gap-2">
+                                <x-filament::icon :icon="$channelIcon" class="w-5 h-5" style="color: {{ $channelColor }};" aria-hidden="true" />
+                                <span class="db-text-sub" style="font-size: 1rem; font-weight: 800;">{{ $channel }} Payment Mode</span>
+                            </div>
                             <span class="db-badge-sm" style="background: rgba(148,163,184,0.15); border: 1px solid rgba(148,163,184,0.3); color: #64748b;">
                                 {{ $info['label'] }}
                             </span>
