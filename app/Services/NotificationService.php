@@ -7,6 +7,7 @@ use App\Models\BkashTransactionBatch;
 use App\Models\NotificationOutbox;
 use App\Models\User;
 use Carbon\Carbon;
+use Filament\Actions\Action;
 use Filament\Notifications\Notification;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Http;
@@ -18,8 +19,16 @@ class NotificationService
     /**
      * Send Database Notifications to users in the same organization excluding the sender, optionally filtered by role.
      */
-    public static function sendOrganizationDatabaseNotification(string $title, string $body, ?User $senderUser = null, array $roleNames = []): void
-    {
+    public static function sendOrganizationDatabaseNotification(
+        string $title,
+        string $body,
+        ?User $senderUser = null,
+        array $roleNames = [],
+        string $icon = 'heroicon-o-bell',
+        string $color = 'info',
+        ?string $actionUrl = null,
+        ?string $actionLabel = null
+    ): void {
         $sender = $senderUser ?? Auth::user();
         if (!$sender) {
             // For system-triggered notifications (SFTP cron), notify all users
@@ -44,8 +53,19 @@ class NotificationService
             $notification = Notification::make()
                 ->title($title)
                 ->body($body)
-                ->icon('heroicon-o-bell')
-                ->info();
+                ->icon($icon)
+                ->color($color);
+
+            if ($actionUrl && $actionLabel) {
+                $notification->actions([
+                    Action::make('view')
+                        ->label($actionLabel)
+                        ->url($actionUrl)
+                        ->button()
+                        ->size('xs')
+                        ->color($color),
+                ]);
+            }
 
             foreach ($recipients as $recipient) {
                 try {
@@ -86,7 +106,11 @@ class NotificationService
             "New bKash Settlement File: {$fileName}",
             "Uploaded at {$uploadTimeStr} | Total Trn: {$totalTrn}, Amount: BDT {$formattedAmount} (File #{$todayFilesCount} today). Pending Authorization.",
             $senderUser,
-            $recipientRoles
+            $recipientRoles,
+            'heroicon-o-arrow-down-tray',
+            'warning',
+            '/admin/bkash-transactions',
+            'Check File →'
         );
 
         return static::createOutbox('STAGE_1_SFTP', $fileName, $totalTrn, $totalAmount, null, 'ALL_AUTHORIZERS', $body, $senderUser, $recipientRoles);
@@ -110,10 +134,14 @@ class NotificationService
         $recipientRoles = ['bkash_checker', 'bkash_authorizer_1'];
 
         static::sendOrganizationDatabaseNotification(
-            "Transactions Authorized by {$authorizerName}",
+            "Transactions Checked by {$authorizerName}",
             "File: {$fileName} | Total Trn: {$totalTrn}, Amount: BDT {$formattedAmount}. Pending Confirmation.",
             $senderUser,
-            $recipientRoles
+            $recipientRoles,
+            'heroicon-o-shield-check',
+            'info',
+            '/admin/bkash-transaction-authorizations',
+            '1st Authorizer Approval →'
         );
 
         return static::createOutbox('STAGE_2_CHECKED', $fileName, $totalTrn, $totalAmount, $authorizerName, 'ALL_CONFIRMERS', $body, $senderUser, $recipientRoles);
@@ -140,7 +168,11 @@ class NotificationService
             "Transactions 1st Authorized by {$authorizerName1}",
             "File: {$fileName} | Total Trn: {$totalTrn}, Amount: BDT {$formattedAmount}. Pending Final Authorization.",
             $senderUser,
-            $recipientRoles
+            $recipientRoles,
+            'heroicon-o-key',
+            'primary',
+            '/admin/bkash-transaction-confirmations',
+            'Final Confirmation →'
         );
 
         return static::createOutbox('STAGE_3_AUTH1', $fileName, $totalTrn, $totalAmount, $authorizerName1, 'ALL_AUTHORIZERS_2', $body, $senderUser, $recipientRoles);
@@ -167,7 +199,11 @@ class NotificationService
             "Final Confirmation Completed by {$confirmerName}",
             "File: {$fileName} | Total Trn: {$totalTrn}, Amount: BDT {$formattedAmount}. Settled.",
             $senderUser,
-            $recipientRoles
+            $recipientRoles,
+            'heroicon-o-check-badge',
+            'success',
+            '/admin/bkash-transactions',
+            'View Transactions →'
         );
 
         return static::createOutbox('STAGE_4_AUTH2', $fileName, $totalTrn, $totalAmount, $confirmerName, 'ALL_USERS', $body, $senderUser, $recipientRoles);

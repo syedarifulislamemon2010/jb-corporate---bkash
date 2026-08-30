@@ -559,6 +559,48 @@
         border-top: 1px solid rgba(148, 163, 184, 0.2);
     }
 
+    /* ─── Slide-over Notifications Drawer Polish ─── */
+    .fi-no-database,
+    .fi-no-notifications {
+        overflow-x: hidden !important;
+    }
+
+    .fi-no-notification-unread-ctn,
+    .fi-no-notification-read-ctn {
+        padding: 0.875rem 1rem !important;
+        margin-bottom: 0.625rem !important;
+        border-radius: 0.875rem !important;
+        transition: all 0.15s ease !important;
+    }
+
+    .fi-no-notification-unread-ctn {
+        background-color: rgba(2, 132, 199, 0.05) !important;
+        border: 1px solid rgba(2, 132, 199, 0.25) !important;
+        border-left: 4px solid #0284c7 !important;
+    }
+
+    html.dark .fi-no-notification-unread-ctn {
+        background-color: rgba(56, 189, 248, 0.06) !important;
+        border: 1px solid rgba(56, 189, 248, 0.2) !important;
+        border-left: 4px solid #38bdf8 !important;
+    }
+
+    .fi-no-notification-read-ctn {
+        background-color: rgba(248, 250, 252, 0.8) !important;
+        border: 1px solid #e2e8f0 !important;
+    }
+
+    html.dark .fi-no-notification-read-ctn {
+        background-color: rgba(15, 23, 42, 0.5) !important;
+        border: 1px solid #1e293b !important;
+    }
+
+    .fi-no-notifications .fi-btn {
+        margin-top: 0.5rem !important;
+        border-radius: 0.5rem !important;
+        font-weight: 700 !important;
+    }
+
     /* ─── Hide Default Filament Widgets ─── */
     .fi-wi-account,
     .fi-wi-filament-info,
