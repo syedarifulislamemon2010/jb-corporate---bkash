@@ -595,10 +595,125 @@
         border: 1px solid #1e293b !important;
     }
 
-    .fi-no-notifications .fi-btn {
-        margin-top: 0.5rem !important;
-        border-radius: 0.5rem !important;
-        font-weight: 700 !important;
+    /* ─── Enterprise Corporate Footer ─── */
+    .jb-portal-footer {
+        width: 100%;
+        margin-top: 2rem;
+        padding: 1rem 1.5rem;
+        border-top: 1px solid #e2e8f0;
+        background-color: rgba(255, 255, 255, 0.75);
+        backdrop-filter: blur(8px);
+        font-size: 0.75rem;
+        color: #64748b;
+    }
+
+    html.dark .jb-portal-footer {
+        border-top-color: #1e293b;
+        background-color: rgba(15, 23, 42, 0.75);
+        color: #94a3b8;
+    }
+
+    .jb-portal-footer-inner {
+        max-width: 100%;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: space-between;
+        gap: 0.75rem;
+    }
+
+    @media (min-width: 768px) {
+        .jb-portal-footer-inner {
+            flex-direction: row;
+        }
+    }
+
+    .jb-footer-left {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        flex-wrap: wrap;
+    }
+
+    .jb-footer-dot {
+        width: 6px;
+        height: 6px;
+        border-radius: 50%;
+        background-color: #10b981;
+        display: inline-block;
+    }
+
+    .jb-footer-org {
+        font-weight: 700;
+        color: #0f172a;
+    }
+
+    html.dark .jb-footer-org {
+        color: #f8fafc;
+    }
+
+    .jb-footer-sep {
+        color: #cbd5e1;
+    }
+
+    html.dark .jb-footer-sep {
+        color: #475569;
+    }
+
+    .jb-footer-desc {
+        font-weight: 500;
+    }
+
+    .jb-footer-right {
+        display: flex;
+        align-items: center;
+        gap: 0.875rem;
+        flex-wrap: wrap;
+    }
+
+    .jb-footer-security {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.35rem;
+        font-weight: 600;
+        font-size: 0.7rem;
+        color: #059669;
+        background: rgba(16, 185, 129, 0.1);
+        padding: 0.15rem 0.5rem;
+        border-radius: 9999px;
+        border: 1px solid rgba(16, 185, 129, 0.25);
+    }
+
+    html.dark .jb-footer-security {
+        color: #34d399;
+        background: rgba(16, 185, 129, 0.15);
+        border-color: rgba(16, 185, 129, 0.35);
+    }
+
+    .jb-footer-lock-icon {
+        width: 0.75rem;
+        height: 0.75rem;
+    }
+
+    .jb-footer-badge {
+        font-family: ui-monospace, monospace;
+        font-size: 0.7rem;
+        font-weight: 700;
+        padding: 0.15rem 0.5rem;
+        background: #f1f5f9;
+        border: 1px solid #e2e8f0;
+        border-radius: 0.375rem;
+        color: #475569;
+    }
+
+    html.dark .jb-footer-badge {
+        background: #1e293b;
+        border-color: #334155;
+        color: #cbd5e1;
+    }
+
+    .jb-footer-copy {
+        font-weight: 600;
     }
 
     /* ─── Hide Default Filament Widgets ─── */
