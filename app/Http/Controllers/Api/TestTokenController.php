@@ -22,7 +22,12 @@ class TestTokenController extends Controller
         }
 
         // 2. Validate input
-        $validator = Validator::make($request->all(), [
+        $data = $request->isJson() ? $request->json()->all() : $request->all();
+        if (empty($data)) {
+            $data = json_decode($request->getContent(), true) ?? [];
+        }
+
+        $validator = Validator::make($data, [
             'email'    => ['required', 'string', 'email'],
             'password' => ['required', 'string'],
         ]);
@@ -35,8 +40,8 @@ class TestTokenController extends Controller
             ], 422);
         }
 
-        $email    = $request->input('email');
-        $password = $request->input('password');
+        $email    = $data['email'] ?? $request->input('email');
+        $password = $data['password'] ?? $request->input('password');
 
         // 3. Verify user and password
         $user = User::where('email', $email)->first();

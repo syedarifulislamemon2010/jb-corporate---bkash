@@ -83,15 +83,27 @@ class SeedTestUsersCommand extends Command
 
         $seededUsersTable = [];
         foreach ($usersData as $data) {
-            $user = User::updateOrCreate(
-                ['email' => $data['email']],
-                [
+            $user = User::where('email', $data['email'])
+                ->orWhere('mobile_no', $data['mobile_no'])
+                ->first();
+
+            if ($user) {
+                $user->update([
                     'name'         => $data['name'],
+                    'email'        => $data['email'],
                     'mobile_no'    => $data['mobile_no'],
                     'organization' => $data['organization'],
                     'password'     => Hash::make($data['password']),
-                ]
-            );
+                ]);
+            } else {
+                $user = User::create([
+                    'name'         => $data['name'],
+                    'email'        => $data['email'],
+                    'mobile_no'    => $data['mobile_no'],
+                    'organization' => $data['organization'],
+                    'password'     => Hash::make($data['password']),
+                ]);
+            }
 
             if (!$user->hasRole($data['role'])) {
                 $user->assignRole($data['role']);
