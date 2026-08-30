@@ -43,6 +43,7 @@ class SidebarAccordionNavigationTest extends TestCase
             $this->assertInstanceOf(NavigationGroup::class, $group);
             $this->assertTrue($group->isCollapsible(), "Navigation group [{$group->getLabel()}] should be collapsible.");
             $this->assertTrue($group->isCollapsed(), "Navigation group [{$group->getLabel()}] should be collapsed by default.");
+            $this->assertNotEmpty($group->getIcon(), "Navigation group [{$group->getLabel()}] should have an icon for collapsed dropdown mode.");
         }
     }
 
