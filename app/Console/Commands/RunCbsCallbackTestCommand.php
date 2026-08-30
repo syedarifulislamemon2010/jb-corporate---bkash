@@ -51,18 +51,20 @@ class RunCbsCallbackTestCommand extends Command
         $this->line('<comment>Payload:</comment>  {"response_id":"CBS_RESP_LIVE_001","status_id":1006,"txn_id":"TXN_CBS_DEMO_01","confirmed_by":"JANATA_CBS_CORE"}');
         $this->newLine();
 
-        $req1 = Request::create('/api/cbs/response-callback', 'POST', [], [], [], [
+        $payload1 = [
+            'response_id'  => 'CBS_RESP_LIVE_001',
+            'status_id'    => 1006,
+            'txn_id'       => 'TEST_TXN_CBS_001',
+            'confirmed_by' => 'JANATA_CBS_CORE',
+        ];
+
+        $req1 = Request::create('/api/cbs/response-callback', 'POST', $payload1, [], [], [
             'HTTP_X_CBS_API_KEY' => $apiKey,
             'HTTP_ACCEPT'        => 'application/json',
             'CONTENT_TYPE'       => 'application/json',
-        ], json_encode([
-            'response_id'  => 'CBS_RESP_LIVE_001',
-            'status_id'    => 1006,
-            'txn_id'       => 'TXN_CBS_DEMO_01',
-            'confirmed_by' => 'JANATA_CBS_CORE',
-        ]));
+        ], json_encode($payload1));
 
-        $res1 = Route::dispatch($req1);
+        $res1 = app()->handle($req1);
         $status1 = $res1->getStatusCode();
         $body1 = json_decode($res1->getContent(), true);
 
@@ -79,15 +81,17 @@ class RunCbsCallbackTestCommand extends Command
         $this->line('<comment>Payload:</comment>  {"email":"checker@test.jbcorporate.com","password":"Test@Pass123"}');
         $this->newLine();
 
-        $reqToken = Request::create('/api/test-auth/token', 'POST', [], [], [], [
-            'HTTP_ACCEPT'  => 'application/json',
-            'CONTENT_TYPE' => 'application/json',
-        ], json_encode([
+        $tokenPayload = [
             'email'    => 'checker@test.jbcorporate.com',
             'password' => 'Test@Pass123',
-        ]));
+        ];
 
-        $resToken = Route::dispatch($reqToken);
+        $reqToken = Request::create('/api/test-auth/token', 'POST', $tokenPayload, [], [], [
+            'HTTP_ACCEPT'  => 'application/json',
+            'CONTENT_TYPE' => 'application/json',
+        ], json_encode($tokenPayload));
+
+        $resToken = app()->handle($reqToken);
         $statusToken = $resToken->getStatusCode();
         $bodyToken = json_decode($resToken->getContent(), true);
 
@@ -100,21 +104,23 @@ class RunCbsCallbackTestCommand extends Command
         $this->line('<comment>Step 2.2:</comment> Send CBS Callback using Sanctum Bearer Token');
         $this->line('<comment>Endpoint:</comment> POST /api/test-auth/cbs/response-callback');
         $this->line("<comment>Header:</comment>   Authorization: Bearer {$bearerToken}");
-        $this->line('<comment>Payload:</comment>  {"response_id":"CBS_RESP_TOKEN_002","status_id":1006,"txn_id":"TXN_CBS_DEMO_02","confirmed_by":"TEST_VIA_POSTMAN"}');
+        $this->line('<comment>Payload:</comment>  {"response_id":"CBS_RESP_TOKEN_002","status_id":1006,"txn_id":"TEST_TXN_CBS_001","confirmed_by":"TEST_VIA_POSTMAN"}');
         $this->newLine();
 
-        $req2 = Request::create('/api/test-auth/cbs/response-callback', 'POST', [], [], [], [
+        $callbackPayload = [
+            'response_id'  => 'CBS_RESP_TOKEN_002',
+            'status_id'    => 1006,
+            'txn_id'       => 'TEST_TXN_CBS_001',
+            'confirmed_by' => 'TEST_VIA_POSTMAN',
+        ];
+
+        $req2 = Request::create('/api/test-auth/cbs/response-callback', 'POST', $callbackPayload, [], [], [
             'HTTP_AUTHORIZATION' => "Bearer {$bearerToken}",
             'HTTP_ACCEPT'        => 'application/json',
             'CONTENT_TYPE'       => 'application/json',
-        ], json_encode([
-            'response_id'  => 'CBS_RESP_TOKEN_002',
-            'status_id'    => 1006,
-            'txn_id'       => 'TXN_CBS_DEMO_02',
-            'confirmed_by' => 'TEST_VIA_POSTMAN',
-        ]));
+        ], json_encode($callbackPayload));
 
-        $res2 = Route::dispatch($req2);
+        $res2 = app()->handle($req2);
         $status2 = $res2->getStatusCode();
         $body2 = json_decode($res2->getContent(), true);
 
