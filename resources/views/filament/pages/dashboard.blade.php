@@ -10,9 +10,9 @@
         $activities   = $this->getRecentActivities();
     @endphp
 
-    <div class="db-container">
+    <div class="db-container" @if ($autoRefresh) wire:poll.15s="refreshData" @endif>
 
-        <!-- 1. HEADER ROW: Sync Status + Refresh -->
+        <!-- 1. HEADER ROW: Sync Status + Auto-refresh Toggle + Refresh Button -->
         <div class="db-flex-between" style="flex-wrap: wrap; gap: 1rem; padding-bottom: 0.5rem;">
             <div class="db-flex-gap-3" style="flex-wrap: wrap;">
                 <div class="db-badge-pill {{ $lastSynced['is_delayed'] ? 'db-badge-danger' : 'db-badge-success' }} db-flex-gap-2" role="status" aria-label="Last synchronization status">
@@ -21,15 +21,41 @@
                 </div>
             </div>
 
-            <button 
-                onclick="window.location.reload()"
-                class="db-btn-refresh"
-                aria-label="Refresh dashboard data"
-                title="Refresh dashboard data"
-            >
-                <x-filament::icon icon="heroicon-o-arrow-path" class="w-4 h-4 text-slate-400" aria-hidden="true" />
-                <span>Refresh</span>
-            </button>
+            <div class="db-flex-gap-3" style="align-items: center; flex-wrap: wrap;">
+                <!-- Auto-refresh Toggle Switch / Checkbox (Default: ON) -->
+                <label class="db-flex-gap-2" style="cursor: pointer; font-size: 0.8125rem; font-weight: 600; color: #64748b; user-select: none; align-items: center;" aria-label="Toggle auto-refresh">
+                    <input 
+                        type="checkbox" 
+                        wire:model.live="autoRefresh" 
+                        style="cursor: pointer; width: 1rem; height: 1rem; border-radius: 0.25rem; accent-color: #0284c7;"
+                    />
+                    <span style="display: inline-flex; align-items: center; gap: 0.375rem;">
+                        <span>Auto-refresh (15s)</span>
+                        @if ($autoRefresh)
+                            <span style="width: 6px; height: 6px; border-radius: 50%; background-color: #10b981; display: inline-block;" title="Auto-refresh active"></span>
+                        @endif
+                    </span>
+                </label>
+
+                <!-- Manual Force-Refresh Button -->
+                <button 
+                    wire:click="refreshData"
+                    wire:loading.attr="disabled"
+                    type="button"
+                    class="db-btn-refresh"
+                    aria-label="Refresh dashboard data"
+                    title="Refresh dashboard data now"
+                >
+                    <x-filament::icon 
+                        icon="heroicon-o-arrow-path" 
+                        class="w-4 h-4 text-slate-400" 
+                        wire:loading.class="animate-spin"
+                        aria-hidden="true" 
+                    />
+                    <span wire:loading.remove>Refresh</span>
+                    <span wire:loading>Refreshing...</span>
+                </button>
+            </div>
         </div>
 
         <!-- 2. URGENCY ACTION BANNER (Conditional) -->

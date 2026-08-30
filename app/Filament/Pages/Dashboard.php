@@ -24,6 +24,20 @@ class Dashboard extends Page
     protected static ?int $navigationSort = 0;
 
     /**
+     * Whether auto-refresh polling (15s interval) is enabled (default: true).
+     */
+    public bool $autoRefresh = true;
+
+    /**
+     * Refresh dashboard data (called by wire:poll.15s or manual Refresh button).
+     * Livewire triggers a full re-render of computed properties on invocation.
+     */
+    public function refreshData(): void
+    {
+        // Livewire re-renders the component and updates all statistics dynamically.
+    }
+
+    /**
      * Compute "Last synced" time dynamically from the latest activity across key tables.
      */
     public function getLastSynced(): array
