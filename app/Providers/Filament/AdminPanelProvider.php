@@ -47,13 +47,16 @@ class AdminPanelProvider extends PanelProvider
             ->navigationGroups([
                 NavigationGroup::make()
                     ->label('Roles & Permissions')
-                    ->collapsible(true),
+                    ->collapsible(true)
+                    ->collapsed(true),
                 NavigationGroup::make()
                     ->label('Transaction Pipeline')
-                    ->collapsible(true),
+                    ->collapsible(true)
+                    ->collapsed(true),
                 NavigationGroup::make()
                     ->label('Audits & Reports')
-                    ->collapsible(true),
+                    ->collapsible(true)
+                    ->collapsed(true),
                 NavigationGroup::make()
                     ->label('Administration')
                     ->collapsible(true)

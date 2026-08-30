@@ -984,5 +984,51 @@
             
             keyTimeout = setTimeout(() => { keySequence = ''; }, 600);
         });
+
+        // 6. Sidebar Navigation Accordion Mode (Single Expanded Group at a Time)
+        const setupSidebarAccordion = () => {
+            if (!window.Alpine || !window.Alpine.store || !window.Alpine.store('sidebar')) {
+                setTimeout(setupSidebarAccordion, 50);
+                return;
+            }
+
+            const sidebarStore = window.Alpine.store('sidebar');
+            if (sidebarStore._accordionConfigured) return;
+            sidebarStore._accordionConfigured = true;
+
+            const originalToggle = sidebarStore.toggleCollapsedGroup.bind(sidebarStore);
+
+            sidebarStore.toggleCollapsedGroup = function (targetLabel) {
+                // Determine if target group is currently collapsed (being opened)
+                const isCurrentlyCollapsed = (!this.collapsedGroups || !Array.isArray(this.collapsedGroups)) 
+                    ? true 
+                    : this.collapsedGroups.includes(targetLabel);
+
+                if (isCurrentlyCollapsed) {
+                    // Collect all available navigation group labels from sidebar DOM
+                    const groupElements = document.querySelectorAll('.fi-sidebar-group[data-group-label], li[data-group-label]');
+                    const allLabels = new Set();
+                    groupElements.forEach(el => {
+                        const label = el.getAttribute('data-group-label');
+                        if (label) allLabels.add(label);
+                    });
+
+                    // Ensure targetLabel is in the label set
+                    allLabels.add(targetLabel);
+
+                    // Accordion behavior: Collapse every group except targetLabel
+                    this.collapsedGroups = Array.from(allLabels).filter(label => label !== targetLabel);
+                } else {
+                    // User is closing the currently open group -> normal collapse
+                    if (!this.collapsedGroups || !Array.isArray(this.collapsedGroups)) {
+                        this.collapsedGroups = [targetLabel];
+                    } else if (!this.collapsedGroups.includes(targetLabel)) {
+                        this.collapsedGroups = this.collapsedGroups.concat(targetLabel);
+                    }
+                }
+            };
+        };
+        setupSidebarAccordion();
+        document.addEventListener('livewire:navigated', setupSidebarAccordion);
     });
 </script>
