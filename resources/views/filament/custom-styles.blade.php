@@ -592,27 +592,49 @@
 
     /* ─── Collapsed Sidebar Group Hover Flyout & Sub-item Labels ─── */
     .fi-sidebar-group .fi-dropdown-panel {
-        min-width: 15rem !important;
-        border-radius: 0.875rem !important;
-        padding: 0.5rem !important;
+        min-width: 16rem !important;
+        border-radius: 1rem !important;
+        padding: 0.75rem !important;
         background-color: #ffffff !important;
         border: 1px solid #e2e8f0 !important;
-        box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.12), 0 8px 10px -6px rgba(0, 0, 0, 0.1) !important;
-        z-index: 999 !important;
+        box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04) !important;
+        z-index: 9999 !important;
     }
 
     html.dark .fi-sidebar-group .fi-dropdown-panel {
         background-color: #0f172a !important;
         border-color: #1e293b !important;
-        box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.6), 0 8px 10px -6px rgba(0, 0, 0, 0.5) !important;
+        box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.7) !important;
+    }
+
+    .fi-sidebar-group .fi-dropdown-header {
+        padding: 0.25rem 0.5rem 0.5rem 0.5rem !important;
+        font-size: 0.875rem !important;
+        font-weight: 700 !important;
+        color: #0f172a !important;
+        border-bottom: 1px solid #f1f5f9 !important;
+        margin-bottom: 0.35rem !important;
+    }
+
+    html.dark .fi-sidebar-group .fi-dropdown-header {
+        color: #f8fafc !important;
+        border-bottom-color: #1e293b !important;
     }
 
     .fi-sidebar-group .fi-dropdown-panel .fi-dropdown-list-item {
         border-radius: 0.5rem !important;
-        padding: 0.5rem 0.75rem !important;
-        font-size: 0.8125rem !important;
+        padding: 0.625rem 0.75rem !important;
+        font-size: 0.875rem !important;
         font-weight: 600 !important;
+        color: #334155 !important;
         transition: all 0.15s ease !important;
+        display: flex !important;
+        align-items: center !important;
+        gap: 0.625rem !important;
+    }
+
+    html.dark .fi-sidebar-group .fi-dropdown-panel .fi-dropdown-list-item {
+        color: #cbd5e1 !important;
     }
 
     .fi-sidebar-group .fi-dropdown-panel .fi-dropdown-list-item:hover {
@@ -1220,40 +1242,77 @@
 
         // 7. Collapsed Sidebar Group Hover Flyout with Full Names
         let activeHoverTimeout;
-        document.addEventListener('mouseenter', function (e) {
-            const group = e.target.closest('.fi-sidebar-group');
-            if (!group) return;
-            
-            const sidebarStore = window.Alpine && window.Alpine.store && window.Alpine.store('sidebar');
-            if (!sidebarStore || sidebarStore.isOpen) return; // Only trigger in collapsed icon mode
+        let currentlyOpenDropdown = null;
 
-            const dropdown = group.querySelector('.fi-dropdown');
+        const openGroupFlyout = (groupEl) => {
+            const sidebarStore = window.Alpine && window.Alpine.store && window.Alpine.store('sidebar');
+            if (!sidebarStore || sidebarStore.isOpen) return; // Only when sidebar is collapsed
+
+            const dropdown = groupEl.querySelector('.fi-dropdown');
             if (!dropdown) return;
 
+            const triggerBtn = dropdown.querySelector('.fi-sidebar-group-dropdown-trigger-btn') || dropdown.querySelector('.fi-dropdown-trigger button');
+            const panel = dropdown.querySelector('.fi-dropdown-panel');
+
             clearTimeout(activeHoverTimeout);
-            const alpineData = window.Alpine.$data(dropdown);
-            if (alpineData && typeof alpineData.open === 'function') {
-                alpineData.open();
+
+            // Close any previously opened other dropdown
+            if (currentlyOpenDropdown && currentlyOpenDropdown !== dropdown) {
+                const prevPanel = currentlyOpenDropdown.querySelector('.fi-dropdown-panel');
+                const prevBtn = currentlyOpenDropdown.querySelector('.fi-sidebar-group-dropdown-trigger-btn') || currentlyOpenDropdown.querySelector('.fi-dropdown-trigger button');
+                if (prevPanel && prevBtn && (prevPanel.style.display === 'block' || getComputedStyle(prevPanel).display === 'block')) {
+                    prevBtn.click();
+                }
             }
-        }, true);
 
-        document.addEventListener('mouseleave', function (e) {
-            const group = e.target.closest('.fi-sidebar-group');
-            if (!group) return;
+            // Open this dropdown
+            if (triggerBtn && panel) {
+                const isClosed = !panel.style.display || panel.style.display === 'none' || getComputedStyle(panel).display === 'none';
+                if (isClosed) {
+                    currentlyOpenDropdown = dropdown;
+                    triggerBtn.click();
+                }
+            }
+        };
 
+        const closeGroupFlyout = (groupEl) => {
             const sidebarStore = window.Alpine && window.Alpine.store && window.Alpine.store('sidebar');
             if (!sidebarStore || sidebarStore.isOpen) return;
 
-            const dropdown = group.querySelector('.fi-dropdown');
+            const dropdown = groupEl.querySelector('.fi-dropdown');
             if (!dropdown) return;
+
+            const triggerBtn = dropdown.querySelector('.fi-sidebar-group-dropdown-trigger-btn') || dropdown.querySelector('.fi-dropdown-trigger button');
+            const panel = dropdown.querySelector('.fi-dropdown-panel');
 
             clearTimeout(activeHoverTimeout);
             activeHoverTimeout = setTimeout(() => {
-                const alpineData = window.Alpine.$data(dropdown);
-                if (alpineData && typeof alpineData.close === 'function') {
-                    alpineData.close();
+                // Verify mouse is not hovering over the panel or group
+                const isHovering = groupEl.matches(':hover') || (panel && panel.matches(':hover'));
+                if (!isHovering && triggerBtn && panel) {
+                    const isOpen = panel.style.display === 'block' || (getComputedStyle(panel).display !== 'none' && panel.style.display !== 'none');
+                    if (isOpen) {
+                        triggerBtn.click();
+                        if (currentlyOpenDropdown === dropdown) {
+                            currentlyOpenDropdown = null;
+                        }
+                    }
                 }
-            }, 200);
-        }, true);
+            }, 250);
+        };
+
+        document.addEventListener('mouseover', function (e) {
+            const group = e.target.closest('.fi-sidebar-group');
+            if (group) {
+                openGroupFlyout(group);
+            }
+        });
+
+        document.addEventListener('mouseout', function (e) {
+            const group = e.target.closest('.fi-sidebar-group');
+            if (group && (!e.relatedTarget || !group.contains(e.relatedTarget))) {
+                closeGroupFlyout(group);
+            }
+        });
     });
 </script>
