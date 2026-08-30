@@ -590,6 +590,41 @@
         border: 1px solid #1e293b !important;
     }
 
+    /* ─── Collapsed Sidebar Group Hover Flyout & Sub-item Labels ─── */
+    .fi-sidebar-group .fi-dropdown-panel {
+        min-width: 15rem !important;
+        border-radius: 0.875rem !important;
+        padding: 0.5rem !important;
+        background-color: #ffffff !important;
+        border: 1px solid #e2e8f0 !important;
+        box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.12), 0 8px 10px -6px rgba(0, 0, 0, 0.1) !important;
+        z-index: 999 !important;
+    }
+
+    html.dark .fi-sidebar-group .fi-dropdown-panel {
+        background-color: #0f172a !important;
+        border-color: #1e293b !important;
+        box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.6), 0 8px 10px -6px rgba(0, 0, 0, 0.5) !important;
+    }
+
+    .fi-sidebar-group .fi-dropdown-panel .fi-dropdown-list-item {
+        border-radius: 0.5rem !important;
+        padding: 0.5rem 0.75rem !important;
+        font-size: 0.8125rem !important;
+        font-weight: 600 !important;
+        transition: all 0.15s ease !important;
+    }
+
+    .fi-sidebar-group .fi-dropdown-panel .fi-dropdown-list-item:hover {
+        background-color: rgba(2, 132, 199, 0.08) !important;
+        color: #0284c7 !important;
+    }
+
+    html.dark .fi-sidebar-group .fi-dropdown-panel .fi-dropdown-list-item:hover {
+        background-color: rgba(56, 189, 248, 0.12) !important;
+        color: #38bdf8 !important;
+    }
+
     /* ─── Enterprise Corporate Footer ─── */
     .jb-portal-footer {
         width: 100%;
@@ -1182,5 +1217,43 @@
         };
         setupSidebarAccordion();
         document.addEventListener('livewire:navigated', setupSidebarAccordion);
+
+        // 7. Collapsed Sidebar Group Hover Flyout with Full Names
+        let activeHoverTimeout;
+        document.addEventListener('mouseenter', function (e) {
+            const group = e.target.closest('.fi-sidebar-group');
+            if (!group) return;
+            
+            const sidebarStore = window.Alpine && window.Alpine.store && window.Alpine.store('sidebar');
+            if (!sidebarStore || sidebarStore.isOpen) return; // Only trigger in collapsed icon mode
+
+            const dropdown = group.querySelector('.fi-dropdown');
+            if (!dropdown) return;
+
+            clearTimeout(activeHoverTimeout);
+            const alpineData = window.Alpine.$data(dropdown);
+            if (alpineData && typeof alpineData.open === 'function') {
+                alpineData.open();
+            }
+        }, true);
+
+        document.addEventListener('mouseleave', function (e) {
+            const group = e.target.closest('.fi-sidebar-group');
+            if (!group) return;
+
+            const sidebarStore = window.Alpine && window.Alpine.store && window.Alpine.store('sidebar');
+            if (!sidebarStore || sidebarStore.isOpen) return;
+
+            const dropdown = group.querySelector('.fi-dropdown');
+            if (!dropdown) return;
+
+            clearTimeout(activeHoverTimeout);
+            activeHoverTimeout = setTimeout(() => {
+                const alpineData = window.Alpine.$data(dropdown);
+                if (alpineData && typeof alpineData.close === 'function') {
+                    alpineData.close();
+                }
+            }, 200);
+        }, true);
     });
 </script>
