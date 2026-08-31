@@ -53,7 +53,17 @@ class SidebarAccordionNavigationTest extends TestCase
 
         $this->assertStringContainsString('setupSidebarAccordion', $viewContent);
         $this->assertStringContainsString('toggleCollapsedGroup', $viewContent);
+        $this->assertStringContainsString('collapseAllGroupsOnTopLevelClick', $viewContent);
         $this->assertStringContainsString('livewire:navigated', $viewContent);
+    }
+
+    public function test_dashboard_navigation_collapses_all_open_groups_script_is_registered(): void
+    {
+        $viewContent = view('filament.custom-styles')->render();
+
+        $this->assertStringContainsString('collapseAllGroupsOnTopLevelClick', $viewContent);
+        $this->assertStringContainsString("link.closest('.fi-sidebar-group')", $viewContent);
+        $this->assertStringContainsString('sidebarStore.collapsedGroups = Array.from(allLabels)', $viewContent);
     }
 
     public function test_dashboard_renders_successfully_for_authenticated_admin(): void
