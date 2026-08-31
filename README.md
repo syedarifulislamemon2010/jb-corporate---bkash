@@ -48,20 +48,25 @@ Throughout the lifecycle, every state transition is accompanied by automated, ro
 ### Dashboard
 ![Dashboard Overview](docs/screenshots/dashboard.png)
 *Live TCSA and Operational balance tracking, 3-tier pending action cards, urgency monitors, and real-time 3-channel payment breakdown with automatic 15-second toggleable live polling.*
+*(Screenshot placeholder — replace with actual application screenshot. See `docs/screenshots/README.md` for instructions.)*
 
 ### 3-Tier Approval Workflow
 ![Checker Verification Queue](docs/screenshots/checker-queue.png)
 *Stage 1: Checker reviews and verifies uploaded Excel transaction batches, inspecting row-level details, debit account authenticity, and totals before moving forward.*
+*(Screenshot placeholder — replace with actual application screenshot. See `docs/screenshots/README.md` for instructions.)*
 
 ![1st Authorizer Approval](docs/screenshots/authorizer-1.png)
 *Stage 2: First-level authorization queue where Senior Officers inspect verified batches, perform audit checks, and grant primary management approval.*
+*(Screenshot placeholder — replace with actual application screenshot. See `docs/screenshots/README.md` for instructions.)*
 
 ![2nd Authorizer Final Confirmation](docs/screenshots/authorizer-2.png)
 *Stage 3: Final executive authorization queue. Executing final confirmation immediately dispatches synchronous Host-to-Host settlement calls to the Janata Bank Core Banking System.*
+*(Screenshot placeholder — replace with actual application screenshot. See `docs/screenshots/README.md` for instructions.)*
 
 ### Mobile OTP Password Reset
 ![Forgot Password - Mobile OTP](docs/screenshots/otp-flow.png)
 *4-step secure password recovery flow featuring SMS OTP verification, rate limiting, temporary credential generation, and banking-grade password policy enforcement.*
+*(Screenshot placeholder — replace with actual application screenshot. See `docs/screenshots/README.md` for instructions.)*
 
 ---
 
