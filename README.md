@@ -158,14 +158,14 @@ flowchart TD
     B --> B3
 
     subgraph Cron ["Janata Bank Portal Background Engine"]
-        C["Cron Job (Every 15 Min): sftp:fetch-bkash-files"] -->|Connects via Flysystem v3| D["Scan Channel Folders"]
+        C["Cron Job Every 15 Min: sftp:fetch-bkash-files"] -->|Connects via Flysystem v3| D["Scan Channel Folders"]
         D --> E{"File Exists & Not Ingested?"}
         E -->|No| F["Log: No New Files / Skip"]
         E -->|Yes| G["Download File to Local Secure Storage"]
         G --> H["Compute SHA256 Hash & Validate Name Pattern"]
         H --> I["Parse Excel Rows via PhpSpreadsheet"]
         I --> J{"Pre-Validation Checks"}
-        J -->|Failed / Corrupt| K["Record Ingestion Failure Alert"]
+        J -->|Failed or Corrupt| K["Record Ingestion Failure Alert"]
         J -->|Passed| L["Insert Records into bkash_transactions (Status 1000)"]
         L --> M["Trigger NotificationService: Broadcast Stage 1 Alert"]
         M --> N["Available in Checker Verification Queue"]
@@ -186,32 +186,32 @@ The portal features an automated **`CbsApiService`** client that interfaces with
 ```mermaid
 flowchart TD
     subgraph UI ["1. Portal Frontend (Filament Admin)"]
-        A["2nd Authorizer Reviews Batch in Confirmation Queue"] --> B["Click 'Final Authorize Selected (Instantly Settle)'"]
+        A["2nd Authorizer Reviews Batch in Confirmation Queue"] --> B["Click Final Authorize Selected"]
     end
 
     subgraph Controller ["2. Controller & Table Action"]
         B --> C["BkashTransactionConfirmationsTable.php"]
         C --> D["Update Status: 1003 (Final Authorized)"]
         C --> E["NotificationService: Broadcast Stage 4 Final Alert"]
-        C --> F["ExecuteCbsSettlementJob::dispatchSync()"]
+        C --> F["ExecuteCbsSettlementJob: dispatchSync"]
     end
 
     subgraph Service ["3. CBS Service Layer (CbsApiService.php)"]
-        F --> G["Check / Refresh JWT Bearer Token in Cache"]
-        G -->|Token Expired / Missing| H["POST /api/login"]
+        F --> G["Check or Refresh JWT Bearer Token in Cache"]
+        G -->|Token Expired or Missing| H["POST /api/login"]
         H -->|Bearer Token Received| I["Cache Token for 50 Minutes"]
         G -->|Valid Token Found| I
-        I --> J["Map Unified Payload for /api/bkash-transactions (Type: 1=A2A, 2=BEFTN, 3=RTGS)"]
+        I --> J["Map Unified Payload for /api/bkash-transactions"]
     end
 
     subgraph BankServer ["4. Janata Bank CBS Clearing Server"]
-        J -->|HTTP POST + Bearer Token| K["CBS Host-to-Host Clearing Gateway"]
-        K -->|HTTP 200 OK + responseId| L["Transaction Generated Successfully"]
+        J -->|HTTP POST with Bearer Token| K["CBS Host-to-Host Clearing Gateway"]
+        K -->|HTTP 200 OK with responseId| L["Transaction Generated Successfully"]
     end
 
     subgraph Database ["5. Ledger & Audit Persistence"]
-        L --> M["Update bkash_transactions -> Status 1004 (CBS Settled)"]
-        L --> N["Record responseId & payload in posting_attempts table"]
+        L --> M["Update bkash_transactions to Status 1004 CBS Settled"]
+        L --> N["Record responseId in posting_attempts table"]
         M --> O["Real-time Reflection on Dashboard & Reports Table"]
     end
 ```
@@ -292,20 +292,20 @@ sequenceDiagram
     participant Ledger as Database (bkash_transactions)
     participant FailedLog as Error Log (bkash_failed_transactions)
 
-    CBS->>Webhook: POST /api/cbs/response-callback (Payload + X-CBS-API-Key)
+    CBS->>Webhook: POST /api/cbs/response-callback
     Webhook->>Auth: Validate X-CBS-API-Key header
     alt API Key Invalid
-        Auth-->>CBS: 401 Unauthorized ("Invalid CBS Callback API Key")
+        Auth-->>CBS: 401 Unauthorized - Invalid CBS Callback API Key
     else API Key Valid
         Auth->>Webhook: Authorized
         Webhook->>Ledger: Find transaction by txn_id
-        alt Status ID = 1006 (STATUS_CBS_RESPONSE_SUCCESS)
-            Webhook->>Ledger: Update status_id = 1006, confirmed_at = NOW(), response_id
-            Webhook-->>CBS: 200 OK ("CBS Settlement Confirmation Recorded")
-        else Status ID = 1007 (STATUS_CBS_RESPONSE_FAILED)
-            Webhook->>Ledger: Update status_id = 1007, reject_reason = payload.reason
-            Webhook->>FailedLog: Record into bkash_failed_transactions with reason
-            Webhook-->>CBS: 200 OK ("CBS Failure Recorded & Isolated")
+        alt Status ID is 1006 (STATUS_CBS_RESPONSE_SUCCESS)
+            Webhook->>Ledger: Update status_id = 1006, confirmed_at = NOW
+            Webhook-->>CBS: 200 OK - CBS Settlement Confirmation Recorded
+        else Status ID is 1007 (STATUS_CBS_RESPONSE_FAILED)
+            Webhook->>Ledger: Update status_id = 1007, isolate failed row
+            Webhook->>FailedLog: Record into bkash_failed_transactions
+            Webhook-->>CBS: 200 OK - CBS Failure Recorded and Isolated
         end
     end
 ```
@@ -347,20 +347,20 @@ flowchart TD
     CheckUser -->|Yes| GenOTP["Generate 6-Digit OTP (5-min TTL) & Send SMS"]
     
     GenOTP --> Step2["Step 2: Enter OTP at /admin/verify-otp"]
-    Step2 --> VerifyOTP{"OTP Valid & Not Expired?"}
-    VerifyOTP -->|No (Failed Attempt)| RateLimit{"Failed Attempts >= 5?"}
+    Step2 --> VerifyOTP{"OTP Valid and Not Expired?"}
+    VerifyOTP -->|Invalid or Expired OTP| RateLimit{"5 or More Failed Attempts?"}
     RateLimit -->|Yes| Lockout["15-Minute Account Lockout"]
-    RateLimit -->|No| Err2["Increment Attempt Counter & Show Error"]
+    RateLimit -->|No| Err2["Increment Attempt Counter and Show Error"]
     
-    VerifyOTP -->|Yes| GenTemp["Generate Temporary Password (Temp@XXXX) & Send SMS"]
+    VerifyOTP -->|Valid OTP| GenTemp["Generate Temporary Password (Temp@XXXX) and Send SMS"]
     GenTemp --> Step3["Step 3: Enter Temporary Password at /admin/enter-temp-password"]
     Step3 --> VerifyTemp{"Temporary Password Matches?"}
     VerifyTemp -->|No| Err3["Invalid Temporary Password"]
     
     VerifyTemp -->|Yes| Step4["Step 4: Set New Password at /admin/set-new-password"]
-    Step4 --> CheckPolicy{"Meets Complexity Policy? (8+ chars, upper, lower, num, symbol)"}
+    Step4 --> CheckPolicy{"Meets Banking Complexity Policy?"}
     CheckPolicy -->|No| Err4["Password Policy Requirements Not Met"]
-    CheckPolicy -->|Yes| Success["Update Password Hash, Log In User & Redirect to /admin"]
+    CheckPolicy -->|Yes| Success["Update Password Hash, Log In User and Redirect to Dashboard"]
 ```
 
 ---
@@ -372,35 +372,35 @@ flowchart TD
 ```mermaid
 flowchart TD
     subgraph S1 ["Stage 1: File Ingestion"]
-        A["SFTP / Manual File Ingestion"] -->|Status 1000: PENDING_CHECKER| B["Checker Verification Queue"]
+        A["SFTP or Manual File Ingestion"] -->|Status 1000: PENDING_CHECKER| B["Checker Verification Queue"]
         A -.->|Broadcast Stage 1 Alert| N1["Notify: Checkers"]
     end
 
     subgraph S2 ["Stage 2: Checker Verification"]
         B -->|Checker Verifies File| C{"Distinct Officer Check"}
         C -->|Valid| D["Status 1001: CHECKED"]
-        D -.->|Broadcast Stage 2 Alert| N2["Notify: Checkers + 1st Authorizers (Exclude Actor)"]
+        D -.->|Broadcast Stage 2 Alert| N2["Notify: Checkers and 1st Authorizers"]
     end
 
     subgraph S3 ["Stage 3: 1st Level Authorization"]
-        D -->|1st Authorizer Approves| E{"Distinct Officer Check (Actor != Checker)"}
+        D -->|1st Authorizer Approves| E{"Distinct Officer Check"}
         E -->|Self-Approval Attempt| Reject1["Blocked: Maker Cannot Authorize"]
-        E -->|Valid| F["Status 1002: AUTH_1_APPROVED"]
-        F -.->|Broadcast Stage 3 Alert| N3["Notify: Checkers + Auth1 + Auth2 (Exclude Actor)"]
+        E -->|Valid Distinct Officer| F["Status 1002: AUTH_1_APPROVED"]
+        F -.->|Broadcast Stage 3 Alert| N3["Notify: Checkers, Auth1, and Auth2"]
     end
 
     subgraph S4 ["Stage 4: 2nd Final Authorization"]
-        F -->|2nd Authorizer Confirms| G{"Distinct Officer Check (Actor != Checker & Actor != Auth1)"}
-        G -->|Self-Approval Attempt| Reject2["Blocked: Same Officer Cannot Double-Authorize"]
-        G -->|Valid| H["Status 1003: FINAL_AUTHORIZED"]
-        H -.->|Broadcast Stage 4 Alert| N4["Notify: All Stakeholders (Exclude Actor)"]
+        F -->|2nd Authorizer Confirms| G{"Distinct Officer Check"}
+        G -->|Self-Approval Attempt| Reject2["Blocked: Double-Authorization Prevented"]
+        G -->|Valid Distinct Officer| H["Status 1003: FINAL_AUTHORIZED"]
+        H -.->|Broadcast Stage 4 Alert| N4["Notify: All Stakeholders"]
         H -->|Dispatch Sync Job| I["ExecuteCbsSettlementJob"]
     end
 
     subgraph S5 ["Stage 5: CBS Core Settlement"]
-        I -->|POST /api/bkash-transactions| J{"CBS Host-to-Host Response"}
-        J -->|HTTP 200 OK| K["Status 1004: CBS_SUCCESS (Settled)"]
-        J -->|HTTP Error / Callback 1007| L["Status 1007: CBS_RESPONSE_FAILED -> Isolated in Error Queue"]
+        I -->|POST to CBS REST API| J{"CBS Host-to-Host Response"}
+        J -->|HTTP 200 OK| K["Status 1004: CBS_SUCCESS Settled"]
+        J -->|HTTP Error or Callback 1007| L["Status 1007: CBS_RESPONSE_FAILED in Error Queue"]
     end
 ```
 
