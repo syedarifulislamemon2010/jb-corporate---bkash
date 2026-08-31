@@ -902,19 +902,283 @@
         font-size: 0.75rem;
     }
 
-    .db-activity-header {
-        margin-bottom: 1rem;
+    /* ─── Modern Timeline & Pipeline Audit Feed ─── */
+    .db-live-feed-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.35rem;
+        font-size: 0.7rem;
+        font-weight: 600;
+        padding: 0.15rem 0.5rem;
+        border-radius: 9999px;
+        background-color: rgba(16, 185, 129, 0.12);
+        color: #34d399;
+        border: 1px solid rgba(16, 185, 129, 0.25);
     }
 
-    .db-activity-title-text {
-        font-size: 0.8125rem;
+    html:not(.dark) .db-live-feed-badge {
+        background-color: #ecfdf5;
+        color: #059669;
+        border-color: #a7f3d0;
+    }
+
+    .db-timeline-feed {
+        display: flex;
+        flex-direction: column;
+        gap: 0.25rem;
+        padding-top: 0.25rem;
+    }
+
+    .db-timeline-item {
+        display: flex;
+        position: relative;
+        gap: 1rem;
+        padding: 0.75rem 0.65rem;
+        border-radius: 8px;
+        transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .db-timeline-item:hover {
+        background-color: rgba(241, 245, 249, 0.65);
+    }
+
+    .dark .db-timeline-item:hover {
+        background-color: rgba(30, 41, 59, 0.45);
+    }
+
+    .db-timeline-node-wrapper {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        position: relative;
+        width: 28px;
+        flex-shrink: 0;
+    }
+
+    .db-timeline-connector {
+        position: absolute;
+        top: 28px;
+        bottom: -16px;
+        width: 2px;
+        background: linear-gradient(180deg, rgba(148, 163, 184, 0.3) 0%, rgba(148, 163, 184, 0.1) 100%);
+    }
+
+    .dark .db-timeline-connector {
+        background: linear-gradient(180deg, rgba(51, 65, 85, 0.8) 0%, rgba(51, 65, 85, 0.2) 100%);
+    }
+
+    .db-timeline-node {
+        width: 28px;
+        height: 28px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        z-index: 10;
+        border: 1.5px solid;
+    }
+
+    .db-node-sky {
+        background-color: rgba(14, 165, 233, 0.12);
+        border-color: rgba(14, 165, 233, 0.4);
+        color: #0284c7;
+    }
+    .dark .db-node-sky {
+        color: #38bdf8;
+        border-color: rgba(56, 189, 248, 0.4);
+    }
+
+    .db-node-indigo {
+        background-color: rgba(99, 102, 241, 0.12);
+        border-color: rgba(99, 102, 241, 0.4);
+        color: #4f46e5;
+    }
+    .dark .db-node-indigo {
+        color: #818cf8;
+        border-color: rgba(129, 140, 248, 0.4);
+    }
+
+    .db-node-amber {
+        background-color: rgba(245, 158, 11, 0.12);
+        border-color: rgba(245, 158, 11, 0.4);
+        color: #d97706;
+    }
+    .dark .db-node-amber {
+        color: #fbbf24;
+        border-color: rgba(251, 191, 36, 0.4);
+    }
+
+    .db-node-emerald {
+        background-color: rgba(16, 185, 129, 0.12);
+        border-color: rgba(16, 185, 129, 0.4);
+        color: #059669;
+    }
+    .dark .db-node-emerald {
+        color: #34d399;
+        border-color: rgba(52, 211, 153, 0.4);
+    }
+
+    .db-node-slate {
+        background-color: rgba(148, 163, 184, 0.12);
+        border-color: rgba(148, 163, 184, 0.4);
+        color: #64748b;
+    }
+    .dark .db-node-slate {
+        color: #94a3b8;
+    }
+
+    .db-timeline-content {
+        flex: 1 1 0%;
+        min-width: 0;
+        display: flex;
+        flex-direction: column;
+        gap: 0.35rem;
+    }
+
+    .db-timeline-top-row {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        flex-wrap: wrap;
+        gap: 0.5rem;
+    }
+
+    .db-stage-badge {
+        display: inline-flex;
+        align-items: center;
+        padding: 0.125rem 0.45rem;
+        border-radius: 4px;
+        font-size: 0.675rem;
+        font-weight: 700;
+        letter-spacing: 0.05em;
+        text-transform: uppercase;
+        border: 1px solid;
+    }
+
+    .db-stage-sky {
+        background-color: #e0f2fe;
+        color: #0369a1;
+        border-color: #bae6fd;
+    }
+    .dark .db-stage-sky {
+        background-color: rgba(14, 165, 233, 0.1);
+        border-color: rgba(14, 165, 233, 0.25);
+        color: #38bdf8;
+    }
+
+    .db-stage-indigo {
+        background-color: #e0e7ff;
+        color: #4338ca;
+        border-color: #c7d2fe;
+    }
+    .dark .db-stage-indigo {
+        background-color: rgba(99, 102, 241, 0.1);
+        border-color: rgba(99, 102, 241, 0.25);
+        color: #818cf8;
+    }
+
+    .db-stage-amber {
+        background-color: #fef3c7;
+        color: #b45309;
+        border-color: #fde68a;
+    }
+    .dark .db-stage-amber {
+        background-color: rgba(245, 158, 11, 0.1);
+        border-color: rgba(245, 158, 11, 0.25);
+        color: #fbbf24;
+    }
+
+    .db-stage-emerald {
+        background-color: #d1fae5;
+        color: #047857;
+        border-color: #a7f3d0;
+    }
+    .dark .db-stage-emerald {
+        background-color: rgba(16, 185, 129, 0.1);
+        border-color: rgba(16, 185, 129, 0.25);
+        color: #34d399;
+    }
+
+    .db-stage-slate {
+        background-color: #f1f5f9;
+        color: #475569;
+        border-color: #e2e8f0;
+    }
+    .dark .db-stage-slate {
+        background-color: rgba(148, 163, 184, 0.1);
+        border-color: rgba(148, 163, 184, 0.25);
+        color: #94a3b8;
+    }
+
+    .db-timeline-action-title {
+        font-size: 0.825rem;
+        font-weight: 600;
+        color: #0f172a;
+    }
+    .dark .db-timeline-action-title {
+        color: #f8fafc;
+    }
+
+    .db-timeline-file-tag {
+        font-family: var(--font-mono, monospace);
+        font-size: 0.725rem;
+        font-weight: 500;
+        padding: 0.1rem 0.4rem;
+        border-radius: 4px;
+        background-color: #f1f5f9;
+        color: #475569;
+        border: 1px solid #e2e8f0;
+    }
+    .dark .db-timeline-file-tag {
+        background-color: #0f172a;
+        color: #94a3b8;
+        border-color: #334155;
+    }
+
+    .db-timeline-human-time {
+        font-size: 0.725rem;
+        font-weight: 600;
+        color: #0284c7;
+        white-space: nowrap;
+    }
+    .dark .db-timeline-human-time {
+        color: #38bdf8;
+    }
+
+    .db-timeline-meta-row {
+        display: flex;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 0.5rem;
+        font-size: 0.725rem;
+        color: #64748b;
+    }
+    .dark .db-timeline-meta-row {
+        color: #94a3b8;
+    }
+
+    .db-timeline-actor {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.25rem;
         font-weight: 500;
     }
 
-    .db-activity-time {
-        font-size: 0.75rem;
-        font-weight: 600;
-        white-space: nowrap;
+    .db-timeline-dot-sep {
+        color: #94a3b8;
+        opacity: 0.6;
+    }
+
+    .db-timeline-full-time {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.25rem;
+        font-weight: 400;
+        opacity: 0.85;
+    }
+
+    .db-activity-header {
+        margin-bottom: 0.75rem;
     }
 
     .db-activity-empty {

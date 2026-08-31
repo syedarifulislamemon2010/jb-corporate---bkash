@@ -303,12 +303,28 @@ class Dashboard extends Page
         // 1. Fetch outbox notifications
         $notifications = NotificationOutbox::latest()->take(6)->get();
         foreach ($notifications as $n) {
+            $stageBadge = match ($n->event_type) {
+                'STAGE_1_SFTP'    => 'STAGE 1: SFTP INGEST',
+                'STAGE_2_CHECKED' => 'STAGE 2: CHECKER VERIFIED',
+                'STAGE_3_AUTH1'   => 'STAGE 3: 1ST AUTHORIZED',
+                'STAGE_4_AUTH2'   => 'STAGE 4: FINALLY AUTHORIZED',
+                default           => 'NOTIFICATION',
+            };
+
             $stageLabel = match ($n->event_type) {
                 'STAGE_1_SFTP'    => "File received — pending checker ({$n->file_name})",
                 'STAGE_2_CHECKED' => "Checked by {$n->actor_name} — pending 1st authorization ({$n->file_name})",
                 'STAGE_3_AUTH1'   => "Authorized by {$n->actor_name} (1st Auth) — pending final authorization ({$n->file_name})",
                 'STAGE_4_AUTH2'   => "Authorized by {$n->actor_name} (2nd Auth) — finally authorized ({$n->file_name})",
                 default           => "Notification sent for {$n->file_name}",
+            };
+
+            $actionTitle = match ($n->event_type) {
+                'STAGE_1_SFTP'    => 'SFTP Ingestion Received',
+                'STAGE_2_CHECKED' => 'Checker Verification Passed',
+                'STAGE_3_AUTH1'   => '1st Authorization Approved',
+                'STAGE_4_AUTH2'   => 'Final 2nd Authorization Approved',
+                default           => 'Pipeline Event Notification',
             };
 
             $icon = match ($n->event_type) {
@@ -319,27 +335,56 @@ class Dashboard extends Page
                 default           => 'heroicon-o-bell',
             };
 
-            $color = match ($n->event_type) {
-                'STAGE_4_AUTH2' => 'text-emerald-500 dark:text-emerald-400',
-                default         => 'text-sky-500 dark:text-sky-400',
+            $nodeClass = match ($n->event_type) {
+                'STAGE_1_SFTP'    => 'db-node-sky',
+                'STAGE_2_CHECKED' => 'db-node-indigo',
+                'STAGE_3_AUTH1'   => 'db-node-amber',
+                'STAGE_4_AUTH2'   => 'db-node-emerald',
+                default           => 'db-node-slate',
+            };
+
+            $badgeClass = match ($n->event_type) {
+                'STAGE_1_SFTP'    => 'db-stage-sky',
+                'STAGE_2_CHECKED' => 'db-stage-indigo',
+                'STAGE_3_AUTH1'   => 'db-stage-amber',
+                'STAGE_4_AUTH2'   => 'db-stage-emerald',
+                default           => 'db-stage-slate',
             };
 
             $activities[] = [
-                'title'     => $stageLabel,
-                'time'      => $n->created_at->format('d M Y, h:i:s A'),
-                'icon'      => $icon,
-                'color'     => $color,
+                'title'        => $stageLabel,
+                'action_title' => $actionTitle,
+                'stage_badge'  => $stageBadge,
+                'badge_class'  => $badgeClass,
+                'node_class'   => $nodeClass,
+                'file_name'    => $n->file_name,
+                'actor_name'   => $n->actor_name ?: 'System Daemon',
+                'time'         => $n->created_at->format('d M Y, h:i:s A'),
+                'time_human'   => $n->created_at->diffForHumans(),
+                'icon'         => $icon,
+                'color'        => match ($n->event_type) {
+                    'STAGE_4_AUTH2' => 'text-emerald-500 dark:text-emerald-400',
+                    default         => 'text-sky-500 dark:text-sky-400',
+                },
             ];
         }
 
         // 2. Fetch EFT Returns
         $eftReturns = EftReturn::latest()->take(2)->get();
         foreach ($eftReturns as $eft) {
+            $created = $eft->created_at ?: Carbon::now();
             $activities[] = [
-                'title' => "EFT return processed, ref {$eft->reference_id}",
-                'time'  => $eft->created_at ? $eft->created_at->format('d M Y, h:i:s A') : Carbon::now()->format('d M Y, h:i:s A'),
-                'icon'  => 'heroicon-o-arrow-uturn-left',
-                'color' => 'text-amber-500 dark:text-amber-400',
+                'title'        => "EFT return processed, ref {$eft->reference_id}",
+                'action_title' => 'EFT Return Processed',
+                'stage_badge'  => 'EFT RETURN',
+                'badge_class'  => 'db-stage-amber',
+                'node_class'   => 'db-node-amber',
+                'file_name'    => "Ref #{$eft->reference_id}",
+                'actor_name'   => 'Settlement Daemon',
+                'time'         => $created->format('d M Y, h:i:s A'),
+                'time_human'   => $created->diffForHumans(),
+                'icon'         => 'heroicon-o-arrow-uturn-left',
+                'color'        => 'text-amber-500 dark:text-amber-400',
             ];
         }
 

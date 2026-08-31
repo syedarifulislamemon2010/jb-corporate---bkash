@@ -363,12 +363,18 @@
             </div>
         </div>
 
-        <!-- 8. RECENT ACTIVITY FEED (Tier 3 Informational with Tabular Timestamps) -->
+        <!-- 8. RECENT PIPELINE ACTIVITY TIMELINE (Tier 3 Informational Live Audit Feed) -->
         <div class="db-card" role="region" aria-label="Recent transaction pipeline activity feed">
             <div class="db-flex-between db-activity-header">
-                <h3 class="db-text-sub db-ops-title">
-                    Recent activity
-                </h3>
+                <div class="flex items-center gap-2.5">
+                    <h3 class="db-text-sub db-ops-title">
+                        Recent Activity & Pipeline Audit Feed
+                    </h3>
+                    <span class="db-live-feed-badge">
+                        <span class="db-pulse-dot" aria-hidden="true"></span>
+                        <span>Live Stream</span>
+                    </span>
+                </div>
                 @if (!empty($activities))
                     <a href="/admin/bkash-transactions" class="db-link-action db-exception-link db-link-xs" aria-label="View all transactions activity">View all activity →</a>
                 @endif
@@ -380,25 +386,58 @@
                     <span>No recent activity yet — activity will appear here as files are processed through the pipeline.</span>
                 </div>
             @else
-                <div class="db-activity-list" role="feed" aria-label="Recent activity items">
+                <div class="db-timeline-feed" role="feed" aria-label="Recent pipeline activity timeline">
                     @foreach (array_slice($activities, 0, 5) as $act)
-                        <div class="db-activity-item" role="article" aria-label="Activity item: {{ $act['title'] }} at {{ $act['time'] }}">
-                            <div class="db-flex-gap-3">
-                                <x-filament::icon :icon="$act['icon']" class="w-4 h-4 {{ $act['color'] }} flex-shrink-0" aria-hidden="true" />
-                                <span class="db-text-heading db-activity-title-text">
-                                    {{ $act['title'] }}
-                                </span>
+                        <div class="db-timeline-item" role="article" aria-label="Activity item: {{ $act['title'] }} at {{ $act['time'] }}">
+                            <!-- Timeline node line and icon badge -->
+                            <div class="db-timeline-node-wrapper">
+                                @if (!$loop->last)
+                                    <div class="db-timeline-connector" aria-hidden="true"></div>
+                                @endif
+                                <div class="db-timeline-node {{ $act['node_class'] ?? 'db-node-slate' }}">
+                                    <x-filament::icon :icon="$act['icon']" class="w-3.5 h-3.5" aria-hidden="true" />
+                                </div>
                             </div>
-                            <span class="db-text-sub db-tabular db-activity-time">
-                                {{ $act['time'] }}
-                            </span>
+
+                            <!-- Timeline item content -->
+                            <div class="db-timeline-content">
+                                <div class="db-timeline-top-row">
+                                    <div class="flex items-center flex-wrap gap-2">
+                                        <span class="db-stage-badge {{ $act['badge_class'] ?? 'db-stage-slate' }}">
+                                            {{ $act['stage_badge'] ?? 'EVENT' }}
+                                        </span>
+                                        <span class="db-timeline-action-title">
+                                            {{ $act['action_title'] ?? $act['title'] }}
+                                        </span>
+                                        @if (!empty($act['file_name']))
+                                            <span class="db-timeline-file-tag">
+                                                {{ $act['file_name'] }}
+                                            </span>
+                                        @endif
+                                    </div>
+                                    <span class="db-timeline-human-time" title="{{ $act['time'] }}">
+                                        {{ $act['time_human'] ?? $act['time'] }}
+                                    </span>
+                                </div>
+                                <div class="db-timeline-meta-row">
+                                    <span class="db-timeline-actor">
+                                        <x-filament::icon icon="heroicon-o-user" class="w-3 h-3 text-gray-400" aria-hidden="true" />
+                                        <span>{{ $act['actor_name'] ?? 'System Daemon' }}</span>
+                                    </span>
+                                    <span class="db-timeline-dot-sep" aria-hidden="true">•</span>
+                                    <span class="db-timeline-full-time db-tabular">
+                                        <x-filament::icon icon="heroicon-o-clock" class="w-3 h-3 text-gray-400" aria-hidden="true" />
+                                        <span>{{ $act['time'] }}</span>
+                                    </span>
+                                </div>
+                            </div>
                         </div>
                     @endforeach
                 </div>
                 @if (count($activities) > 5)
                     <div class="db-activity-more">
                         <a href="/admin/bkash-transactions" class="db-link-action db-exception-link db-link-xs" aria-label="View {{ count($activities) - 5 }} more activity records">
-                            +{{ count($activities) - 5 }} more — view full history →
+                            +{{ count($activities) - 5 }} more — view full transaction history →
                         </a>
                     </div>
                 @endif
