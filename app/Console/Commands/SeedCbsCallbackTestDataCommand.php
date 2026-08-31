@@ -31,6 +31,11 @@ class SeedCbsCallbackTestDataCommand extends Command
      */
     public function handle(): int
     {
+        if (app()->environment('production')) {
+            $this->error('⚠️ This command is disabled in production for safety.');
+            return self::FAILURE;
+        }
+
         $this->info('===============================================================');
         $this->info('    JANATA BANK — SEED CBS CALLBACK MANUAL TEST DATA           ');
         $this->info('===============================================================');

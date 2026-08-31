@@ -34,6 +34,11 @@ class RunCbsCallbackTestCommand extends Command
      */
     public function handle(): int
     {
+        if (app()->environment('production')) {
+            $this->error('⚠️ This command is disabled in production for safety.');
+            return self::FAILURE;
+        }
+
         $this->newLine();
         $this->info('================================================================================');
         $this->info('           JANATA BANK — LIVE CBS CALLBACK EXECUTION DEMO                       ');

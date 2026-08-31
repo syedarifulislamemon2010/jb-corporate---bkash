@@ -13,26 +13,27 @@
     <div class="db-container" @if ($autoRefresh) wire:poll.15s="refreshData" @endif>
 
         <!-- 1. HEADER ROW: Sync Status + Auto-refresh Toggle + Refresh Button -->
-        <div class="db-flex-between" style="flex-wrap: wrap; gap: 1rem; padding-bottom: 0.5rem;">
-            <div class="db-flex-gap-3" style="flex-wrap: wrap;">
+        <div class="db-header-row">
+            <div class="db-flex-gap-3">
                 <div class="db-badge-pill {{ $lastSynced['is_delayed'] ? 'db-badge-danger' : 'db-badge-success' }} db-flex-gap-2" role="status" aria-label="Last synchronization status">
-                    <span style="width: 8px; height: 8px; border-radius: 50%; display: inline-block; {{ $lastSynced['is_delayed'] ? 'background-color: #dc2626;' : 'background-color: #10b981;' }}" aria-hidden="true"></span>
+                    <span class="db-sync-dot {{ $lastSynced['is_delayed'] ? 'db-sync-dot-delayed' : 'db-sync-dot-ok' }}" aria-hidden="true"></span>
                     <span class="db-tabular">Last synced: {{ $lastSynced['formatted'] }}</span>
                 </div>
             </div>
 
-            <div class="db-flex-gap-3" style="align-items: center; flex-wrap: wrap;">
+            <div class="db-flex-gap-3 db-flex-center-wrap">
                 <!-- Auto-refresh Toggle Switch / Checkbox (Default: ON) -->
-                <label class="db-flex-gap-2" style="cursor: pointer; font-size: 0.8125rem; font-weight: 600; color: #64748b; user-select: none; align-items: center;" aria-label="Toggle auto-refresh">
+                <label class="db-autorefresh-label" aria-label="Toggle auto-refresh">
                     <input 
                         type="checkbox" 
                         wire:model.live="autoRefresh" 
-                        style="cursor: pointer; width: 1rem; height: 1rem; border-radius: 0.25rem; accent-color: #0284c7;"
+                        class="db-autorefresh-checkbox"
+                        aria-label="Enable or disable 15-second dashboard auto-refresh"
                     />
-                    <span style="display: inline-flex; align-items: center; gap: 0.375rem;">
+                    <span class="db-autorefresh-badge">
                         <span>Auto-refresh (15s)</span>
                         @if ($autoRefresh)
-                            <span style="width: 6px; height: 6px; border-radius: 50%; background-color: #10b981; display: inline-block;" title="Auto-refresh active"></span>
+                            <span class="db-pulse-dot-sm" title="Auto-refresh active" aria-hidden="true"></span>
                         @endif
                     </span>
                 </label>
@@ -61,14 +62,14 @@
         <!-- 2. URGENCY ACTION BANNER (Conditional) -->
         @if ($urgency)
             <div class="db-banner-warning" role="alert" aria-label="Pending files requiring action">
-                <div style="padding: 0.625rem; border-radius: 0.75rem; background: rgba(245,158,11,0.2); color: #d97706; flex-shrink: 0;" aria-hidden="true">
+                <div class="db-urgency-icon-box" aria-hidden="true">
                     <x-filament::icon icon="heroicon-o-exclamation-triangle" class="w-6 h-6 text-amber-500" />
                 </div>
-                <div style="flex: 1; min-width: 0;">
-                    <p style="font-size: 0.95rem; font-weight: 700; margin: 0;">
+                <div class="db-urgency-content">
+                    <p class="db-urgency-title">
                         <span class="db-tabular">{{ $urgency['total'] }}</span> {{ Str::plural('file', $urgency['total']) }} need your action today: <span class="db-tabular">{{ $urgency['pending_checker'] }}</span> pending checker, <span class="db-tabular">{{ $urgency['pending_auth1'] }}</span> 1st auth, <span class="db-tabular">{{ $urgency['pending_auth2'] }}</span> 2nd auth
                     </p>
-                    <p style="font-size: 0.75rem; opacity: 0.85; margin: 0.125rem 0 0 0;">
+                    <p class="db-urgency-desc">
                         Please review and clear pending files across all 3 tiers to complete automated CBS settlement.
                     </p>
                 </div>
@@ -80,102 +81,102 @@
 
             <!-- Card 1: Pending Checker (Tier 1 Action Required) -->
             @if ($actionStats['pending_checker']['files'] > 0)
-                <a href="{{ $actionStats['pending_checker']['url'] }}" class="db-card-stage-checker" aria-label="View and verify pending checker files">
+                <a href="{{ $actionStats['pending_checker']['url'] }}" class="db-card-stage-checker" aria-label="View and verify pending checker files ({{ $actionStats['pending_checker']['files'] }} files, {{ $actionStats['pending_checker']['trns'] }} transactions)">
                     <div class="db-flex-between">
-                        <div class="db-flex-gap-2" style="color: var(--color-stage-checker);">
-                            <x-filament::icon icon="heroicon-o-shield-check" class="w-5 h-5" style="color: var(--color-stage-checker);" aria-hidden="true" />
-                            <span class="db-text-sub" style="font-size: 0.75rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; color: var(--color-stage-checker);">Pending checker</span>
+                        <div class="db-flex-gap-2 db-stage-checker-theme">
+                            <x-filament::icon icon="heroicon-o-shield-check" class="w-5 h-5 db-stage-checker-theme" aria-hidden="true" />
+                            <span class="db-text-sub db-stage-header db-stage-checker-theme">Pending checker</span>
                         </div>
                     </div>
-                    <div style="margin-top: 0.75rem;">
+                    <div class="db-stage-body">
                         <div class="db-text-val db-tabular">
                             {{ $actionStats['pending_checker']['files'] }}
                         </div>
-                        <div class="db-text-sub db-tabular" style="font-size: 0.75rem; margin-top: 0.25rem;">{{ $actionStats['pending_checker']['trns'] }} {{ Str::plural('transaction', $actionStats['pending_checker']['trns']) }}</div>
-                        <div class="db-link-action" style="margin-top: 0.5rem; color: var(--color-stage-checker);">
+                        <div class="db-text-sub db-tabular db-stage-sub">{{ $actionStats['pending_checker']['trns'] }} {{ Str::plural('transaction', $actionStats['pending_checker']['trns']) }}</div>
+                        <div class="db-link-action db-stage-action db-stage-checker-theme">
                             {{ $actionStats['pending_checker']['action_label'] }}
                         </div>
                     </div>
                 </a>
             @else
-                <div class="db-card-zero" style="opacity: 0.55;">
+                <div class="db-card-zero db-card-zero-dimmed" role="region" aria-label="Pending checker: queue is empty">
                     <div class="db-flex-between">
-                        <div class="db-flex-gap-2" style="color: #94a3b8;">
+                        <div class="db-flex-gap-2 db-stage-empty-muted">
                             <x-filament::icon icon="heroicon-o-shield-check" class="w-5 h-5 text-slate-400" aria-hidden="true" />
-                            <span style="font-size: 0.75rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; color: #94a3b8;">Pending checker</span>
+                            <span class="db-stage-header db-stage-empty-muted">Pending checker</span>
                         </div>
                     </div>
-                    <div style="margin-top: 0.75rem;">
-                        <div class="db-text-val db-tabular" style="color: #94a3b8 !important;">0</div>
-                        <div style="font-size: 0.75rem; color: #94a3b8; margin-top: 0.5rem;">{{ $actionStats['pending_checker']['empty_label'] }}</div>
+                    <div class="db-stage-body">
+                        <div class="db-text-val db-tabular db-stage-empty-muted">0</div>
+                        <div class="db-stage-empty-muted db-stage-sub">{{ $actionStats['pending_checker']['empty_label'] }}</div>
                     </div>
                 </div>
             @endif
 
             <!-- Card 2: Pending 1st Authorization (Tier 2 Action Required) -->
             @if ($actionStats['pending_auth1']['files'] > 0)
-                <a href="{{ $actionStats['pending_auth1']['url'] }}" class="db-card-stage-auth1" aria-label="View and approve pending 1st authorization transactions">
+                <a href="{{ $actionStats['pending_auth1']['url'] }}" class="db-card-stage-auth1" aria-label="View and approve pending 1st authorization transactions ({{ $actionStats['pending_auth1']['files'] }} files, {{ $actionStats['pending_auth1']['trns'] }} transactions)">
                     <div class="db-flex-between">
-                        <div class="db-flex-gap-2" style="color: var(--color-stage-auth1);">
-                            <x-filament::icon icon="heroicon-o-key" class="w-5 h-5" style="color: var(--color-stage-auth1);" aria-hidden="true" />
-                            <span class="db-text-sub" style="font-size: 0.75rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; color: var(--color-stage-auth1);">Pending 1st auth</span>
+                        <div class="db-flex-gap-2 db-stage-auth1-theme">
+                            <x-filament::icon icon="heroicon-o-key" class="w-5 h-5 db-stage-auth1-theme" aria-hidden="true" />
+                            <span class="db-text-sub db-stage-header db-stage-auth1-theme">Pending 1st auth</span>
                         </div>
                     </div>
-                    <div style="margin-top: 0.75rem;">
+                    <div class="db-stage-body">
                         <div class="db-text-val db-tabular">
                             {{ $actionStats['pending_auth1']['files'] }}
                         </div>
-                        <div class="db-text-sub db-tabular" style="font-size: 0.75rem; margin-top: 0.25rem;">{{ $actionStats['pending_auth1']['trns'] }} {{ Str::plural('transaction', $actionStats['pending_auth1']['trns']) }}</div>
-                        <div class="db-link-action" style="margin-top: 0.5rem; color: var(--color-stage-auth1);">
+                        <div class="db-text-sub db-tabular db-stage-sub">{{ $actionStats['pending_auth1']['trns'] }} {{ Str::plural('transaction', $actionStats['pending_auth1']['trns']) }}</div>
+                        <div class="db-link-action db-stage-action db-stage-auth1-theme">
                             {{ $actionStats['pending_auth1']['action_label'] }}
                         </div>
                     </div>
                 </a>
             @else
-                <div class="db-card-zero" style="opacity: 0.55;">
+                <div class="db-card-zero db-card-zero-dimmed" role="region" aria-label="Pending 1st authorization: queue is empty">
                     <div class="db-flex-between">
-                        <div class="db-flex-gap-2" style="color: #94a3b8;">
+                        <div class="db-flex-gap-2 db-stage-empty-muted">
                             <x-filament::icon icon="heroicon-o-key" class="w-5 h-5 text-slate-400" aria-hidden="true" />
-                            <span style="font-size: 0.75rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; color: #94a3b8;">Pending 1st auth</span>
+                            <span class="db-stage-header db-stage-empty-muted">Pending 1st auth</span>
                         </div>
                     </div>
-                    <div style="margin-top: 0.75rem;">
-                        <div class="db-text-val db-tabular" style="color: #94a3b8 !important;">0</div>
-                        <div style="font-size: 0.75rem; color: #94a3b8; margin-top: 0.5rem;">{{ $actionStats['pending_auth1']['empty_label'] }}</div>
+                    <div class="db-stage-body">
+                        <div class="db-text-val db-tabular db-stage-empty-muted">0</div>
+                        <div class="db-stage-empty-muted db-stage-sub">{{ $actionStats['pending_auth1']['empty_label'] }}</div>
                     </div>
                 </div>
             @endif
 
             <!-- Card 3: Pending Final Confirmation (Tier 3 Action Required) -->
             @if ($actionStats['pending_auth2']['files'] > 0)
-                <a href="{{ $actionStats['pending_auth2']['url'] }}" class="db-card-stage-auth2" aria-label="View and confirm pending 2nd authorization transactions">
+                <a href="{{ $actionStats['pending_auth2']['url'] }}" class="db-card-stage-auth2" aria-label="View and confirm pending 2nd authorization transactions ({{ $actionStats['pending_auth2']['files'] }} files, {{ $actionStats['pending_auth2']['trns'] }} transactions)">
                     <div class="db-flex-between">
-                        <div class="db-flex-gap-2" style="color: var(--color-stage-auth2);">
-                            <x-filament::icon icon="heroicon-o-clipboard-document-check" class="w-5 h-5" style="color: var(--color-stage-auth2);" aria-hidden="true" />
-                            <span class="db-text-sub" style="font-size: 0.75rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; color: var(--color-stage-auth2);">Pending 2nd auth</span>
+                        <div class="db-flex-gap-2 db-stage-auth2-theme">
+                            <x-filament::icon icon="heroicon-o-clipboard-document-check" class="w-5 h-5 db-stage-auth2-theme" aria-hidden="true" />
+                            <span class="db-text-sub db-stage-header db-stage-auth2-theme">Pending 2nd auth</span>
                         </div>
                     </div>
-                    <div style="margin-top: 0.75rem;">
+                    <div class="db-stage-body">
                         <div class="db-text-val db-tabular">
                             {{ $actionStats['pending_auth2']['files'] }}
                         </div>
-                        <div class="db-text-sub db-tabular" style="font-size: 0.75rem; margin-top: 0.25rem;">{{ $actionStats['pending_auth2']['trns'] }} {{ Str::plural('transaction', $actionStats['pending_auth2']['trns']) }}</div>
-                        <div class="db-link-action" style="margin-top: 0.5rem; color: var(--color-stage-auth2);">
+                        <div class="db-text-sub db-tabular db-stage-sub">{{ $actionStats['pending_auth2']['trns'] }} {{ Str::plural('transaction', $actionStats['pending_auth2']['trns']) }}</div>
+                        <div class="db-link-action db-stage-action db-stage-auth2-theme">
                             {{ $actionStats['pending_auth2']['action_label'] }}
                         </div>
                     </div>
                 </a>
             @else
-                <div class="db-card-zero" style="opacity: 0.55;">
+                <div class="db-card-zero db-card-zero-dimmed" role="region" aria-label="Pending 2nd authorization: queue is empty">
                     <div class="db-flex-between">
-                        <div class="db-flex-gap-2" style="color: #94a3b8;">
+                        <div class="db-flex-gap-2 db-stage-empty-muted">
                             <x-filament::icon icon="heroicon-o-clipboard-document-check" class="w-5 h-5 text-slate-400" aria-hidden="true" />
-                            <span style="font-size: 0.75rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; color: #94a3b8;">Pending 2nd auth</span>
+                            <span class="db-stage-header db-stage-empty-muted">Pending 2nd auth</span>
                         </div>
                     </div>
-                    <div style="margin-top: 0.75rem;">
-                        <div class="db-text-val db-tabular" style="color: #94a3b8 !important;">0</div>
-                        <div style="font-size: 0.75rem; color: #94a3b8; margin-top: 0.5rem;">{{ $actionStats['pending_auth2']['empty_label'] }}</div>
+                    <div class="db-stage-body">
+                        <div class="db-text-val db-tabular db-stage-empty-muted">0</div>
+                        <div class="db-stage-empty-muted db-stage-sub">{{ $actionStats['pending_auth2']['empty_label'] }}</div>
                     </div>
                 </div>
             @endif
@@ -206,11 +207,11 @@
                     };
                 @endphp
                 @if ($info['is_live'])
-                    <div class="{{ $channelCardClass }}" role="article" aria-label="{{ $channel }} payment mode status">
-                        <div class="db-flex-between" style="margin-bottom: 0.75rem;">
+                    <div class="{{ $channelCardClass }}" role="article" aria-label="{{ $channel }} payment mode status: Active">
+                        <div class="db-channel-header">
                             <div class="db-flex-gap-2">
                                 <x-filament::icon :icon="$channelIcon" class="w-5 h-5" style="color: {{ $channelColor }};" aria-hidden="true" />
-                                <span class="db-text-heading" style="font-size: 1rem; font-weight: 800;">{{ $channel }} Payment Mode</span>
+                                <span class="db-text-heading db-channel-title">{{ $channel }} Payment Mode</span>
                             </div>
                             <span class="db-badge-sm db-badge-success">
                                 {{ $info['label'] }}
@@ -218,31 +219,31 @@
                         </div>
                         <div class="db-card-inner db-channel-cols">
                             <div>
-                                <div class="db-text-sub" style="font-size: 0.75rem; font-weight: 500;">Checker</div>
-                                <div class="db-tabular" style="font-size: 1rem; font-weight: 700; margin-top: 0.125rem; {{ $info['pending_checker'] > 0 ? 'color: #d97706;' : 'color: #cbd5e1;' }}">{{ $info['pending_checker'] }}</div>
+                                <div class="db-text-sub db-channel-col-label">Checker</div>
+                                <div class="db-tabular db-channel-col-val {{ $info['pending_checker'] > 0 ? 'db-channel-val-active' : 'db-channel-val-zero' }}">{{ $info['pending_checker'] }}</div>
                             </div>
                             <div class="db-channel-col-border">
-                                <div class="db-text-sub" style="font-size: 0.75rem; font-weight: 500;">Auth</div>
-                                <div class="db-tabular" style="font-size: 1rem; font-weight: 700; margin-top: 0.125rem; {{ $info['pending_auth'] > 0 ? 'color: var(--color-signature-accent);' : 'color: #cbd5e1;' }}">{{ $info['pending_auth'] }}</div>
+                                <div class="db-text-sub db-channel-col-label">Auth</div>
+                                <div class="db-tabular db-channel-col-val {{ $info['pending_auth'] > 0 ? 'db-channel-val-auth' : 'db-channel-val-zero' }}">{{ $info['pending_auth'] }}</div>
                             </div>
                             <div>
-                                <div class="db-text-sub" style="font-size: 0.75rem; font-weight: 500;">Settled</div>
-                                <div class="db-tabular" style="font-size: 1rem; font-weight: 700; margin-top: 0.125rem; {{ $info['settled_today'] > 0 ? 'color: #059669;' : 'color: #cbd5e1;' }}">{{ $info['settled_today'] }}</div>
+                                <div class="db-text-sub db-channel-col-label">Settled</div>
+                                <div class="db-tabular db-channel-col-val {{ $info['settled_today'] > 0 ? 'db-channel-val-settled' : 'db-channel-val-zero' }}">{{ $info['settled_today'] }}</div>
                             </div>
                         </div>
                     </div>
                 @else
-                    <div class="{{ $channelCardClass }}" style="opacity: 0.6;" role="article" aria-label="{{ $channel }} payment mode coming soon">
-                        <div class="db-flex-between" style="margin-bottom: 0.75rem;">
+                    <div class="{{ $channelCardClass }} db-card-zero-dimmed" role="article" aria-label="{{ $channel }} payment mode status: {{ $info['label'] }}">
+                        <div class="db-channel-header">
                             <div class="db-flex-gap-2">
                                 <x-filament::icon :icon="$channelIcon" class="w-5 h-5" style="color: {{ $channelColor }};" aria-hidden="true" />
-                                <span class="db-text-sub" style="font-size: 1rem; font-weight: 800;">{{ $channel }} Payment Mode</span>
+                                <span class="db-text-sub db-channel-title">{{ $channel }} Payment Mode</span>
                             </div>
-                            <span class="db-badge-sm" style="background: rgba(148,163,184,0.15); border: 1px solid rgba(148,163,184,0.3); color: #64748b;">
+                            <span class="db-badge-sm db-channel-inactive-badge">
                                 {{ $info['label'] }}
                             </span>
                         </div>
-                        <p class="db-text-sub" style="font-size: 0.75rem; font-style: italic; margin-top: 0.5rem;">
+                        <p class="db-text-sub db-channel-inactive-desc">
                             Channel integration pre-configured for rollout phase.
                         </p>
                     </div>
@@ -251,22 +252,22 @@
         </div>
 
         <!-- 5. EXCEPTIONS ROW (Tier 3 Informational) -->
-        <a href="/admin/bkash-reports" class="{{ $exceptions['is_clean'] ? 'db-card' : 'db-card-danger' }}" style="text-decoration: none;" aria-label="View failed transactions report">
+        <a href="/admin/bkash-reports" class="{{ $exceptions['is_clean'] ? 'db-card' : 'db-card-danger' }} db-exception-link" aria-label="View failed and partial transactions exception report">
             <div class="db-flex-between">
                 <div class="db-flex-gap-3">
-                    <div style="padding: 0.5rem; border-radius: 0.75rem; {{ $exceptions['is_clean'] ? 'background: rgba(16,185,129,0.15); color: #059669;' : 'background: rgba(244,63,94,0.15); color: #e11d48;' }}" aria-hidden="true">
+                    <div class="{{ $exceptions['is_clean'] ? 'db-exception-icon-ok' : 'db-exception-icon-err' }}" aria-hidden="true">
                         <x-filament::icon icon="heroicon-o-exclamation-triangle" class="w-5 h-5" />
                     </div>
                     <div>
-                        <div class="db-text-sub" style="font-size: 0.75rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em;">
+                        <div class="db-text-sub db-exception-label">
                             Failed / Partial Transactions Today
                         </div>
-                        <div class="db-text-heading db-tabular" style="font-size: 0.875rem; font-weight: 600; margin-top: 0.125rem;">
+                        <div class="db-text-heading db-tabular db-exception-headline">
                             {{ $exceptions['headline'] }}
                         </div>
                     </div>
                 </div>
-                <div class="db-link-action" style="font-weight: 700;">
+                <div class="db-link-action db-exception-action">
                     View Report →
                 </div>
             </div>
@@ -276,11 +277,11 @@
         <div class="db-grid-2-1">
 
             <!-- TCSA Live Balance Card (TIER 1: SIGNATURE HERO CARD) -->
-            <div class="db-card-hero" role="region" aria-label="TCSA Live Balance">
-                <div class="db-flex-between" style="margin-bottom: 0.75rem; flex-wrap: wrap; gap: 0.5rem;">
+            <div class="db-card-hero" role="region" aria-label="TCSA Live Settlement Pool Account Balance">
+                <div class="db-balance-header">
                     <div>
-                        <h3 class="db-text-sub" style="font-size: 0.875rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; margin: 0; color: var(--color-signature-accent);">TCSA live balance</h3>
-                        <p class="db-text-sub db-tabular" style="font-size: 0.75rem; font-weight: 500; margin: 0.125rem 0 0 0;">
+                        <h3 class="db-text-sub db-tcsa-title">TCSA live balance</h3>
+                        <p class="db-text-sub db-tabular db-tcsa-sub">
                             {{ $balances['tcsa']['account'] ?? '0100202707747' }} · {{ $balances['tcsa']['label'] ?? 'Pool Account' }}
                         </p>
                     </div>
@@ -289,25 +290,25 @@
                     </span>
                 </div>
 
-                <div style="margin-top: 1rem; margin-bottom: 0.5rem;">
-                    <div class="db-text-val db-tabular" style="font-size: 2.25rem; letter-spacing: -0.03em;">
+                <div class="db-tcsa-amount">
+                    <div class="db-text-val db-tabular">
                         BDT {{ \App\Models\BkashTransaction::formatBdtAmount($balances['tcsa']['balance'] ?? 0) }}
                     </div>
                 </div>
 
                 <!-- Settled Today Summary -->
-                <div style="margin-top: 1.25rem; padding-top: 0.75rem; border-top: 1px solid rgba(148,163,184,0.15);">
+                <div class="db-settled-summary">
                     <div class="db-flex-between">
                         <div class="db-flex-gap-2">
                             <x-filament::icon icon="heroicon-o-check-circle" class="w-4 h-4 text-emerald-500" aria-hidden="true" />
-                            <span class="db-text-sub" style="font-size: 0.75rem; font-weight: 600;">Settled today</span>
+                            <span class="db-text-sub db-settled-label">Settled today</span>
                         </div>
                         <div class="db-flex-gap-3">
-                            <span class="db-tabular db-text-heading" style="font-size: 0.875rem; font-weight: 700;">
+                            <span class="db-tabular db-text-heading db-settled-count">
                                 {{ $actionStats['settled_today']['count'] }} {{ Str::plural('txn', $actionStats['settled_today']['count']) }}
                             </span>
                             @if ($actionStats['settled_today']['amount'] > 0)
-                                <span class="db-tabular" style="font-size: 0.875rem; font-weight: 700; color: #059669;">
+                                <span class="db-tabular db-settled-amount">
                                     BDT {{ \App\Models\BkashTransaction::formatBdtAmount($actionStats['settled_today']['amount']) }}
                                 </span>
                             @endif
@@ -317,18 +318,18 @@
             </div>
 
             <!-- Operational Balance Card (Tier 3 Informational) -->
-            <div class="db-card" style="display: flex; flex-direction: column; justify-content: space-between;" role="region" aria-label="Operational Balance">
+            <div class="db-card db-ops-card" role="region" aria-label="Operational Account Balance">
                 <div>
-                    <h3 class="db-text-sub" style="font-size: 0.875rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; margin: 0;">Operational balance</h3>
-                    <p class="db-text-sub db-tabular" style="font-size: 0.75rem; font-weight: 500; margin: 0.125rem 0 0 0;">
+                    <h3 class="db-text-sub db-ops-title">Operational balance</h3>
+                    <p class="db-text-sub db-tabular db-tcsa-sub">
                         {{ $balances['ops']['account'] ?? '0100224107522' }}
                     </p>
-                    <div class="db-text-val db-tabular" style="margin-top: 1.25rem; font-size: 1.75rem; letter-spacing: -0.025em;">
+                    <div class="db-text-val db-tabular db-ops-amount">
                         BDT {{ \App\Models\BkashTransaction::formatBdtAmount($balances['ops']['balance'] ?? 0) }}
                     </div>
                 </div>
 
-                <div style="margin-top: 1.5rem;">
+                <div class="db-ops-footer">
                     <span class="db-tabular db-badge-sm db-badge-success">
                         Value date: {{ $balances['ops']['value_date'] ?? now()->timezone('Asia/Dhaka')->format('d M Y') }}
                     </span>
@@ -338,16 +339,16 @@
         </div>
 
         <!-- 7. MT940 STATEMENT STATUS STRIP (Tier 3 Informational) -->
-        <div class="db-strip" role="region" aria-label="MT940 SFTP delivery status">
-            <div class="db-flex-gap-2" style="font-weight: 700;">
+        <div class="db-strip" role="region" aria-label="MT940 SFTP statement delivery status">
+            <div class="db-flex-gap-2 db-mt940-title">
                 <x-filament::icon icon="heroicon-o-document-text" class="w-4 h-4 text-sky-600" aria-hidden="true" />
                 <span>MT940 SFTP Delivery Status:</span>
             </div>
-            <div style="display: flex; flex-wrap: wrap; align-items: center; gap: 1rem; font-size: 0.75rem;">
+            <div class="db-mt940-list">
                 @foreach ($mt940 as $stmt)
                     <div class="db-flex-gap-2 db-tabular">
                         <span>{{ $stmt['account'] }}:</span>
-                        <span class="db-text-heading" style="font-weight: 600;">{{ $stmt['timestamp'] }}</span>
+                        <span class="db-text-heading db-font-semibold">{{ $stmt['timestamp'] }}</span>
                         @if ($stmt['is_ok'])
                             <span class="db-badge-square-sm db-badge-success">
                                 {{ $stmt['status'] }}
@@ -363,40 +364,40 @@
         </div>
 
         <!-- 8. RECENT ACTIVITY FEED (Tier 3 Informational with Tabular Timestamps) -->
-        <div class="db-card" role="region" aria-label="Recent activity log">
-            <div class="db-flex-between" style="margin-bottom: 1rem;">
-                <h3 class="db-text-sub" style="font-size: 0.875rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; margin: 0;">
+        <div class="db-card" role="region" aria-label="Recent transaction pipeline activity feed">
+            <div class="db-flex-between db-activity-header">
+                <h3 class="db-text-sub db-ops-title">
                     Recent activity
                 </h3>
                 @if (!empty($activities))
-                    <a href="/admin/bkash-transactions" class="db-link-action" style="font-size: 0.75rem; text-decoration: none;">View all activity →</a>
+                    <a href="/admin/bkash-transactions" class="db-link-action db-exception-link db-link-xs" aria-label="View all transactions activity">View all activity →</a>
                 @endif
             </div>
 
             @if (empty($activities))
-                <div class="db-flex-gap-2 db-text-sub" style="padding: 1.5rem 0; justify-content: center; font-size: 0.875rem;">
+                <div class="db-flex-gap-2 db-text-sub db-activity-empty">
                     <x-filament::icon icon="heroicon-o-clock" class="w-5 h-5 text-gray-400" aria-hidden="true" />
                     <span>No recent activity yet — activity will appear here as files are processed through the pipeline.</span>
                 </div>
             @else
-                <div class="db-activity-list" role="feed" aria-label="Activity items">
+                <div class="db-activity-list" role="feed" aria-label="Recent activity items">
                     @foreach (array_slice($activities, 0, 5) as $act)
-                        <div class="db-activity-item" role="article">
+                        <div class="db-activity-item" role="article" aria-label="Activity item: {{ $act['title'] }} at {{ $act['time'] }}">
                             <div class="db-flex-gap-3">
                                 <x-filament::icon :icon="$act['icon']" class="w-4 h-4 {{ $act['color'] }} flex-shrink-0" aria-hidden="true" />
-                                <span class="db-text-heading" style="font-size: 0.8125rem; font-weight: 500;">
+                                <span class="db-text-heading db-activity-title-text">
                                     {{ $act['title'] }}
                                 </span>
                             </div>
-                            <span class="db-text-sub db-tabular" style="font-size: 0.75rem; font-weight: 600; white-space: nowrap;">
+                            <span class="db-text-sub db-tabular db-activity-time">
                                 {{ $act['time'] }}
                             </span>
                         </div>
                     @endforeach
                 </div>
                 @if (count($activities) > 5)
-                    <div style="text-align: center; padding-top: 0.75rem; border-top: 1px solid rgba(148,163,184,0.15);">
-                        <a href="/admin/bkash-transactions" class="db-link-action" style="font-size: 0.75rem; text-decoration: none;">
+                    <div class="db-activity-more">
+                        <a href="/admin/bkash-transactions" class="db-link-action db-exception-link db-link-xs" aria-label="View {{ count($activities) - 5 }} more activity records">
                             +{{ count($activities) - 5 }} more — view full history →
                         </a>
                     </div>

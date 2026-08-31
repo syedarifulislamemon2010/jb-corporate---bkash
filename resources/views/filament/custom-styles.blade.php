@@ -554,6 +554,381 @@
         border-top: 1px solid rgba(148, 163, 184, 0.2);
     }
 
+    /* ─── Dashboard Header & Controls ─── */
+    .db-header-row {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 1rem;
+        padding-bottom: 0.5rem;
+    }
+
+    .db-sync-dot {
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+        display: inline-block;
+    }
+
+    .db-sync-dot-delayed {
+        background-color: #dc2626;
+    }
+
+    .db-sync-dot-ok {
+        background-color: #10b981;
+    }
+
+    .db-autorefresh-label {
+        cursor: pointer;
+        font-size: 0.8125rem;
+        font-weight: 600;
+        color: #64748b;
+        user-select: none;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    html.dark .db-autorefresh-label {
+        color: #94a3b8;
+    }
+
+    .db-autorefresh-checkbox {
+        cursor: pointer;
+        width: 1rem;
+        height: 1rem;
+        border-radius: 0.25rem;
+        accent-color: #0284c7;
+    }
+
+    .db-autorefresh-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.375rem;
+    }
+
+    .db-pulse-dot-sm {
+        width: 6px;
+        height: 6px;
+        border-radius: 50%;
+        background-color: #10b981;
+        display: inline-block;
+    }
+
+    /* ─── Dashboard Urgency Banner ─── */
+    .db-urgency-icon-box {
+        padding: 0.625rem;
+        border-radius: 0.75rem;
+        background: rgba(245, 158, 11, 0.2);
+        color: #d97706;
+        flex-shrink: 0;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .db-urgency-content {
+        flex: 1;
+        min-width: 0;
+    }
+
+    .db-urgency-title {
+        font-size: 0.95rem;
+        font-weight: 700;
+        margin: 0;
+    }
+
+    .db-urgency-desc {
+        font-size: 0.75rem;
+        opacity: 0.85;
+        margin: 0.125rem 0 0 0;
+    }
+
+    /* ─── Stage Action Cards ─── */
+    .db-stage-header {
+        font-size: 0.75rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+    }
+
+    .db-stage-body {
+        margin-top: 0.75rem;
+    }
+
+    .db-stage-sub {
+        font-size: 0.75rem;
+        margin-top: 0.25rem;
+    }
+
+    .db-stage-action {
+        margin-top: 0.5rem;
+    }
+
+    .db-stage-checker-theme {
+        color: var(--color-stage-checker);
+    }
+
+    .db-stage-auth1-theme {
+        color: var(--color-stage-auth1);
+    }
+
+    .db-stage-auth2-theme {
+        color: var(--color-stage-auth2);
+    }
+
+    .db-stage-empty-muted {
+        color: #64748b;
+    }
+
+    html.dark .db-stage-empty-muted {
+        color: #94a3b8;
+    }
+
+    .db-card-zero-dimmed {
+        opacity: 0.65;
+    }
+
+    .db-flex-center-wrap {
+        display: flex;
+        align-items: center;
+        flex-wrap: wrap;
+    }
+
+    .db-link-xs {
+        font-size: 0.75rem;
+    }
+
+    .db-font-semibold {
+        font-weight: 600;
+    }
+
+    /* ─── Channel Row Elements ─── */
+    .db-channel-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 0.75rem;
+    }
+
+    .db-channel-title {
+        font-size: 1rem;
+        font-weight: 800;
+    }
+
+    .db-channel-col-label {
+        font-size: 0.75rem;
+        font-weight: 500;
+    }
+
+    .db-channel-col-val {
+        font-size: 1rem;
+        font-weight: 700;
+        margin-top: 0.125rem;
+    }
+
+    .db-channel-val-active {
+        color: #d97706;
+    }
+
+    .db-channel-val-settled {
+        color: #059669;
+    }
+
+    .db-channel-val-auth {
+        color: var(--color-signature-accent);
+    }
+
+    .db-channel-val-zero {
+        color: #64748b;
+    }
+
+    html.dark .db-channel-val-zero {
+        color: #94a3b8;
+    }
+
+    .db-channel-inactive-badge {
+        background: rgba(148, 163, 184, 0.15);
+        border: 1px solid rgba(148, 163, 184, 0.3);
+        color: #64748b;
+    }
+
+    html.dark .db-channel-inactive-badge {
+        color: #94a3b8;
+    }
+
+    .db-channel-inactive-desc {
+        font-size: 0.75rem;
+        font-style: italic;
+        margin-top: 0.5rem;
+    }
+
+    /* ─── Exception Row ─── */
+    .db-exception-link {
+        text-decoration: none;
+        display: block;
+    }
+
+    .db-exception-icon-ok {
+        padding: 0.5rem;
+        border-radius: 0.75rem;
+        background: rgba(16, 185, 129, 0.15);
+        color: #059669;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .db-exception-icon-err {
+        padding: 0.5rem;
+        border-radius: 0.75rem;
+        background: rgba(244, 63, 94, 0.15);
+        color: #e11d48;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .db-exception-label {
+        font-size: 0.75rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+    }
+
+    .db-exception-headline {
+        font-size: 0.875rem;
+        font-weight: 600;
+        margin-top: 0.125rem;
+    }
+
+    .db-exception-action {
+        font-weight: 700;
+    }
+
+    /* ─── Balances Row ─── */
+    .db-balance-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 0.75rem;
+        flex-wrap: wrap;
+        gap: 0.5rem;
+    }
+
+    .db-tcsa-title {
+        font-size: 0.875rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        margin: 0;
+        color: var(--color-signature-accent);
+    }
+
+    .db-tcsa-sub {
+        font-size: 0.75rem;
+        font-weight: 500;
+        margin: 0.125rem 0 0 0;
+    }
+
+    .db-tcsa-amount {
+        margin-top: 1rem;
+        margin-bottom: 0.5rem;
+        font-size: 2.25rem;
+        letter-spacing: -0.03em;
+    }
+
+    .db-settled-summary {
+        margin-top: 1.25rem;
+        padding-top: 0.75rem;
+        border-top: 1px solid rgba(148, 163, 184, 0.15);
+    }
+
+    .db-settled-label {
+        font-size: 0.75rem;
+        font-weight: 600;
+    }
+
+    .db-settled-count {
+        font-size: 0.875rem;
+        font-weight: 700;
+    }
+
+    .db-settled-amount {
+        font-size: 0.875rem;
+        font-weight: 700;
+        color: #059669;
+    }
+
+    html.dark .db-settled-amount {
+        color: #10b981;
+    }
+
+    .db-ops-card {
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+    }
+
+    .db-ops-title {
+        font-size: 0.875rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        margin: 0;
+    }
+
+    .db-ops-amount {
+        margin-top: 1.25rem;
+        font-size: 1.75rem;
+        letter-spacing: -0.025em;
+    }
+
+    .db-ops-footer {
+        margin-top: 1.5rem;
+    }
+
+    /* ─── MT940 & Activity ─── */
+    .db-mt940-title {
+        font-weight: 700;
+    }
+
+    .db-mt940-list {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        gap: 1rem;
+        font-size: 0.75rem;
+    }
+
+    .db-activity-header {
+        margin-bottom: 1rem;
+    }
+
+    .db-activity-title-text {
+        font-size: 0.8125rem;
+        font-weight: 500;
+    }
+
+    .db-activity-time {
+        font-size: 0.75rem;
+        font-weight: 600;
+        white-space: nowrap;
+    }
+
+    .db-activity-empty {
+        padding: 1.5rem 0;
+        justify-content: center;
+        font-size: 0.875rem;
+    }
+
+    .db-activity-more {
+        text-align: center;
+        padding-top: 0.75rem;
+        border-top: 1px solid rgba(148, 163, 184, 0.15);
+    }
+
     /* ─── Slide-over Notifications Drawer Polish ─── */
     .fi-no-database,
     .fi-no-notifications {

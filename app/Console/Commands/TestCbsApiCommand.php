@@ -15,6 +15,11 @@ class TestCbsApiCommand extends Command
 
     public function handle(CbsApiService $apiService): int
     {
+        if (app()->environment('production')) {
+            $this->error('⚠️ This command is disabled in production for safety.');
+            return self::FAILURE;
+        }
+
         $this->info("=================================================");
         $this->info("   JANATA BANK - CBS HOST-TO-HOST API TESTER     ");
         $this->info("=================================================");
