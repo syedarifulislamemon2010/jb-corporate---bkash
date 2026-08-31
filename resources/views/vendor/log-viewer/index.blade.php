@@ -64,16 +64,24 @@
             display: none !important;
         }
 
-        /* Hide the bottom performance stats / version text line */
-        .text-xs.text-gray-500.dark\:text-gray-400,
-        .text-xs.text-gray-500,
-        .text-xs.text-gray-400 {
+        /* Hide the bottom performance stats / version text line.
+           The stats <p> lives inside a unique absolute-positioned
+           container: <div class="absolute bottom-4 right-4 flex items-center">.
+           Scoping to that parent avoids hiding unrelated .text-xs
+           elements (timestamps, badge subtitles, etc.). */
+        .absolute.bottom-4.right-4 .text-xs {
+            display: none !important;
+        }
+
+        /* Also hide the "Buy me a coffee" badge sitting next to the stats */
+        .absolute.bottom-4.right-4 a[href*="buymeacoffee"] {
             display: none !important;
         }
 
         /* ─── 2. POLISHED "BACK TO DASHBOARD" BUTTON (Top of Sidebar) ─── */
-        a[href="/admin"],
-        a[href*="/admin"] {
+        /* Exact-match only — no substring wildcard, so log entries
+           containing "/admin" in their text are never affected. */
+        a[href="/admin"] {
             font-weight: 600 !important;
             border-radius: 8px !important;
             transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1) !important;
