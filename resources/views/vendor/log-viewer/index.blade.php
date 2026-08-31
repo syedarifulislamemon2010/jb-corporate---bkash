@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="{{ str_replace('_', '-', app()->getLocale()) }}" class="h-full">
 <head>
     <meta charset="UTF-8">
@@ -196,11 +196,17 @@
             max-height: 100% !important;
         }
 
-        /* ─── 3. SIDEBAR MATCHING DASHBOARD DESIGN ─── */
+        /* ─── 3. SIDEBAR MATCHING DASHBOARD DESIGN (Zero Clipping) ─── */
         #log-viewer nav {
             background-color: #0f172a !important;
             border-right: 1px solid #1e293b !important;
             box-shadow: 2px 0 12px rgba(0, 0, 0, 0.2) !important;
+            padding: 1.25rem 1rem !important;
+            display: flex !important;
+            flex-direction: column !important;
+            height: 100% !important;
+            overflow-y: auto !important;
+            box-sizing: border-box !important;
         }
 
         html:not(.dark) #log-viewer nav {
@@ -214,19 +220,45 @@
             display: none !important;
         }
 
-        /* Sidebar Section Header (e.g. "Log files on Local") */
-        #log-viewer nav .text-xs.font-semibold,
-        #log-viewer nav [class*="text-xs font-semibold"] {
+        /* Sidebar Section Header (e.g. "Log files on Local" & "Sort direction") */
+        #log-viewer nav .text-sm,
+        #log-viewer nav .text-xs,
+        #log-viewer nav [class*="text-sm"],
+        #log-viewer nav [class*="text-xs"] {
             color: #94a3b8 !important;
-            font-size: 0.725rem !important;
-            font-weight: 700 !important;
-            text-transform: uppercase !important;
-            letter-spacing: 0.06em !important;
+            font-size: 0.8rem !important;
+            font-weight: 600 !important;
+            line-height: 1.6 !important;
+            overflow: visible !important;
+            text-overflow: unset !important;
+            white-space: normal !important;
         }
 
-        html:not(.dark) #log-viewer nav .text-xs.font-semibold,
-        html:not(.dark) #log-viewer nav [class*="text-xs font-semibold"] {
+        html:not(.dark) #log-viewer nav .text-sm,
+        html:not(.dark) #log-viewer nav .text-xs,
+        html:not(.dark) #log-viewer nav [class*="text-sm"],
+        html:not(.dark) #log-viewer nav [class*="text-xs"] {
             color: #64748b !important;
+        }
+
+        /* Top row of file list (contains "Log files on Local" and sort dropdown) */
+        #log-viewer nav select,
+        #log-viewer nav .select {
+            font-size: 0.775rem !important;
+            padding: 0.25rem 0.5rem !important;
+            border-radius: 6px !important;
+            line-height: 1.2 !important;
+        }
+
+        /* ─── 4. MAIN CONTENT AREA PADDING & VERTICAL ALIGNMENT ─── */
+        #log-viewer > div > div:last-child {
+            padding: 1.25rem 1.25rem 0.5rem 1.25rem !important;
+            display: flex !important;
+            flex-direction: column !important;
+            height: 100% !important;
+            max-height: 100% !important;
+            overflow: hidden !important;
+            box-sizing: border-box !important;
         }
 
         /* Sidebar Log File Items */
