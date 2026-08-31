@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="{{ str_replace('_', '-', app()->getLocale()) }}" class="h-full">
 <head>
     <meta charset="UTF-8">
@@ -257,6 +257,70 @@
             background-color: rgba(14, 165, 233, 0.08) !important;
         }
 
+        .jb-badge-env {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.35rem;
+            padding: 0.25rem 0.65rem;
+            border-radius: 9999px;
+            font-size: 0.725rem;
+            font-weight: 700;
+            letter-spacing: 0.03em;
+            text-transform: uppercase;
+        }
+        .jb-badge-prod {
+            background-color: rgba(16, 185, 129, 0.12);
+            color: #34d399;
+            border: 1px solid rgba(16, 185, 129, 0.3);
+        }
+        .jb-badge-dev {
+            background-color: rgba(245, 158, 11, 0.12);
+            color: #fbbf24;
+            border: 1px solid rgba(245, 158, 11, 0.3);
+        }
+        html:not(.dark) .jb-badge-prod {
+            background-color: #ecfdf5;
+            color: #059669;
+            border-color: #a7f3d0;
+        }
+        html:not(.dark) .jb-badge-dev {
+            background-color: #fffbeb;
+            color: #d97706;
+            border-color: #fde68a;
+        }
+
+        .jb-live-stream-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.4rem;
+            padding: 0.25rem 0.65rem;
+            border-radius: 6px;
+            font-size: 0.725rem;
+            font-weight: 600;
+            color: #94a3b8;
+            background-color: rgba(255, 255, 255, 0.04);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+        }
+        html:not(.dark) .jb-live-stream-badge {
+            color: #64748b;
+            background-color: #f1f5f9;
+            border-color: #e2e8f0;
+        }
+
+        .jb-pulse-dot {
+            width: 7px;
+            height: 7px;
+            border-radius: 50%;
+            background-color: #10b981;
+            box-shadow: 0 0 8px #10b981;
+            animation: pulse-dot 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+        }
+
+        @keyframes pulse-dot {
+            0%, 100% { opacity: 1; transform: scale(1); }
+            50% { opacity: 0.4; transform: scale(0.85); }
+        }
+
         /* ─── 6. CUSTOM SCROLLBARS ─── */
         ::-webkit-scrollbar {
             width: 6px;
@@ -284,7 +348,7 @@
 <body class="h-full bg-slate-950 text-slate-100 antialiased flex flex-col overflow-hidden">
     <!-- 1. Top JB Corporate Brand Navigation Bar -->
     <header class="jb-log-topbar">
-        <div class="flex items-center">
+        <div class="flex items-center gap-4">
             <a href="/admin" class="jb-brand-logo" title="Janata Bank Corporate Payment Portal">
                 <div class="jb-logo-badge">JB</div>
                 <div class="flex items-center">
@@ -292,6 +356,23 @@
                     <span class="jb-brand-subtitle">System Logs & Diagnostics</span>
                 </div>
             </a>
+            <div class="hidden md:flex items-center gap-2">
+                @if (app()->environment('production'))
+                    <span class="jb-badge-env jb-badge-prod">
+                        <span class="w-1.5 h-1.5 rounded-full bg-emerald-400"></span>
+                        Production
+                    </span>
+                @else
+                    <span class="jb-badge-env jb-badge-dev">
+                        <span class="w-1.5 h-1.5 rounded-full bg-amber-400"></span>
+                        {{ ucfirst(app()->environment()) }}
+                    </span>
+                @endif
+                <span class="jb-live-stream-badge">
+                    <span class="jb-pulse-dot" aria-hidden="true"></span>
+                    <span>Live Stream Active</span>
+                </span>
+            </div>
         </div>
         <div class="flex items-center gap-3">
             <a href="/admin" class="jb-back-btn" title="Return to Admin Dashboard">
