@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="{{ str_replace('_', '-', app()->getLocale()) }}" class="h-full">
 <head>
     <meta charset="UTF-8">
@@ -91,6 +91,118 @@
 
         .dark tbody tr:hover {
             background-color: rgba(14, 165, 233, 0.08) !important;
+        }
+
+        /* ─── 4. BEAUTIFUL HORIZONTAL PAGINATION (Previous / Next Buttons) ─── */
+        nav.pagination,
+        .pagination {
+            display: flex !important;
+            align-items: center !important;
+            justify-content: space-between !important;
+            flex-wrap: nowrap !important;
+            gap: 0.75rem !important;
+            padding: 0.75rem 0.5rem !important;
+            border-top: 1px solid #1e293b !important;
+            margin-top: auto !important;
+        }
+
+        html:not(.dark) nav.pagination,
+        html:not(.dark) .pagination {
+            border-top-color: #e2e8f0 !important;
+        }
+
+        /* Previous & Next Buttons */
+        .pagination .previous,
+        .pagination .next {
+            display: flex !important;
+            align-items: center !important;
+            flex-shrink: 0 !important;
+        }
+
+        .pagination .previous button,
+        .pagination .next button {
+            display: inline-flex !important;
+            align-items: center !important;
+            gap: 0.4rem !important;
+            padding: 0.4rem 0.85rem !important;
+            font-size: 0.825rem !important;
+            font-weight: 600 !important;
+            border-radius: 8px !important;
+            background-color: #1e293b !important;
+            color: #38bdf8 !important;
+            border: 1px solid #334155 !important;
+            cursor: pointer !important;
+            transition: all 0.15s ease !important;
+        }
+
+        html:not(.dark) .pagination .previous button,
+        html:not(.dark) .pagination .next button {
+            background-color: #f8fafc !important;
+            color: #0369a1 !important;
+            border-color: #cbd5e1 !important;
+        }
+
+        .pagination .previous button:hover,
+        .pagination .next button:hover {
+            background-color: #0284c7 !important;
+            color: #ffffff !important;
+            border-color: #0284c7 !important;
+        }
+
+        /* Ensure Previous and Next text labels are visible */
+        .pagination .previous button span,
+        .pagination .next button span {
+            display: inline !important;
+        }
+
+        /* Page Numbers Container */
+        .pagination .pages {
+            display: flex !important;
+            align-items: center !important;
+            justify-content: center !important;
+            flex-wrap: wrap !important;
+            gap: 0.25rem !important;
+        }
+
+        .pagination .pages button,
+        .pagination .pages span {
+            display: inline-flex !important;
+            align-items: center !important;
+            justify-content: center !important;
+            min-width: 30px !important;
+            height: 30px !important;
+            padding: 0 0.35rem !important;
+            border-radius: 6px !important;
+            font-size: 0.8rem !important;
+            font-weight: 600 !important;
+            border: none !important;
+        }
+
+        .pagination .pages button[aria-current="page"],
+        .pagination .pages button.border-brand-500 {
+            background-color: #0284c7 !important;
+            color: #ffffff !important;
+            font-weight: 700 !important;
+            box-shadow: 0 2px 6px rgba(2, 132, 199, 0.4) !important;
+        }
+
+        .pagination .pages button:not([aria-current="page"]) {
+            color: #94a3b8 !important;
+            background-color: transparent !important;
+        }
+
+        .pagination .pages button:not([aria-current="page"]):hover {
+            color: #38bdf8 !important;
+            background-color: rgba(14, 165, 233, 0.12) !important;
+        }
+
+        html:not(.dark) .pagination .pages button:not([aria-current="page"]) {
+            color: #64748b !important;
+        }
+
+        html:not(.dark) .pagination .pages button:not([aria-current="page"]):hover {
+            color: #0284c7 !important;
+            background-color: #e0f2fe !important;
         }
 
         /* Clean scrollbars */
