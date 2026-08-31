@@ -1747,6 +1747,27 @@
     html.dark .shield-select-all-separator {
         border-color: #1e293b;
     }
+    /* ─── MOBILE RESPONSIVENESS: Payment-Channel Breakdown ─── */
+    @media (max-width: 480px) {
+        .db-channel-cols {
+            grid-template-columns: repeat(3, 1fr);
+            gap: 0.25rem;
+            padding: 0.35rem 0;
+        }
+
+        .db-channel-col-label {
+            font-size: 0.65rem !important;
+        }
+
+        .db-channel-col-val {
+            font-size: 0.8rem !important;
+        }
+
+        .db-channel-col-border {
+            border-left-width: 1px;
+            border-right-width: 1px;
+        }
+    }
 </style>
 
 <script>

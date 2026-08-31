@@ -209,7 +209,7 @@
         }
 
         html:not(.dark) .pagination .pages button:not([aria-current="page"]):hover {
-            color: #0284c7 !important;
+            color: #0ea5e9 !important;
             background-color: #e0f2fe !important;
         }
 
