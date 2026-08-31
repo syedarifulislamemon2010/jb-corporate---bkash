@@ -70,9 +70,9 @@ return [
     |
     */
 
-    'back_to_system_url' => null,
+    'back_to_system_url' => env('LOG_VIEWER_BACK_TO_SYSTEM_URL', '/admin'),
 
-    'back_to_system_label' => null,
+    'back_to_system_label' => 'Back to Dashboard',
 
     /*
     |--------------------------------------------------------------------------
