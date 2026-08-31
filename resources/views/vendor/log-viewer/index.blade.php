@@ -197,19 +197,28 @@
         }
 
         /* ─── 3. SIDEBAR MATCHING DASHBOARD DESIGN (Zero Clipping) ─── */
-        #log-viewer nav {
+        #log-viewer nav,
+        #log-viewer .md\:fixed,
+        #log-viewer nav[class*="fixed"],
+        #log-viewer nav[class*="absolute"] {
+            top: 52px !important;
+            height: calc(100vh - 52px) !important;
+            bottom: 0 !important;
             background-color: #0f172a !important;
             border-right: 1px solid #1e293b !important;
             box-shadow: 2px 0 12px rgba(0, 0, 0, 0.2) !important;
             padding: 1.25rem 1rem !important;
             display: flex !important;
             flex-direction: column !important;
-            height: 100% !important;
             overflow-y: auto !important;
             box-sizing: border-box !important;
+            z-index: 40 !important;
         }
 
-        html:not(.dark) #log-viewer nav {
+        html:not(.dark) #log-viewer nav,
+        html:not(.dark) #log-viewer .md\:fixed,
+        html:not(.dark) #log-viewer nav[class*="fixed"],
+        html:not(.dark) #log-viewer nav[class*="absolute"] {
             background-color: #ffffff !important;
             border-right: 1px solid #e2e8f0 !important;
             box-shadow: 2px 0 12px rgba(15, 23, 42, 0.02) !important;
