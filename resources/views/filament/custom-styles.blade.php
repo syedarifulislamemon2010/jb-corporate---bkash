@@ -1569,9 +1569,28 @@
             keyTimeout = setTimeout(() => { keySequence = ''; }, 600);
         });
 
-        // 6. Sidebar Navigation Accordion Mode (Single Expanded Group at a Time)
+        // 6. Sidebar Navigation Accordion Mode (Single Expanded Group at a Time + Dashboard Auto-Collapse)
+        const getAllGroupLabels = () => {
+            const groupElements = document.querySelectorAll('.fi-sidebar-group[data-group-label], li[data-group-label]');
+            const allLabels = new Set();
+            groupElements.forEach(el => {
+                const label = el.getAttribute('data-group-label');
+                if (label) allLabels.add(label);
+            });
+            return Array.from(allLabels);
+        };
+
+        const collapseAllGroups = () => {
+            const sidebarStore = window.Alpine && window.Alpine.store && window.Alpine.store('sidebar');
+            if (!sidebarStore) return;
+            const allLabels = getAllGroupLabels();
+            if (allLabels.length > 0) {
+                sidebarStore.collapsedGroups = allLabels;
+            }
+        };
+
         const collapseAllGroupsOnTopLevelClick = () => {
-            const allSidebarLinks = document.querySelectorAll('.fi-sidebar-item a, .fi-sidebar-item button');
+            const allSidebarLinks = document.querySelectorAll('.fi-sidebar-item a, .fi-sidebar-item button, .fi-sidebar-header a, .fi-logo a');
 
             allSidebarLinks.forEach((link) => {
                 // Only target top-level standalone items (outside of any .fi-sidebar-group)
@@ -1581,20 +1600,34 @@
                 link.dataset.accordionBound = 'true';
 
                 link.addEventListener('click', () => {
-                    const sidebarStore = window.Alpine && window.Alpine.store && window.Alpine.store('sidebar');
-                    if (!sidebarStore) return;
-
-                    const groupElements = document.querySelectorAll('.fi-sidebar-group[data-group-label], li[data-group-label]');
-                    const allLabels = new Set();
-                    groupElements.forEach(el => {
-                        const label = el.getAttribute('data-group-label');
-                        if (label) allLabels.add(label);
-                    });
-
-                    // Collapse every group — Dashboard/non-group navigation means no group context is active
-                    sidebarStore.collapsedGroups = Array.from(allLabels);
+                    collapseAllGroups();
                 });
             });
+        };
+
+        const checkCurrentRouteAndSyncAccordion = () => {
+            const path = window.location.pathname.replace(/\/$/, '');
+            // If on Dashboard (/admin or /admin/dashboard), collapse all groups
+            if (path === '/admin' || path === '/admin/dashboard') {
+                collapseAllGroups();
+                return;
+            }
+
+            // If on a page inside a group, keep only that active group open and collapse all other groups
+            const activeItem = document.querySelector('.fi-sidebar-group .fi-sidebar-item.fi-active, .fi-sidebar-group .fi-sidebar-item-active');
+            if (activeItem) {
+                const parentGroup = activeItem.closest('.fi-sidebar-group');
+                if (parentGroup) {
+                    const activeLabel = parentGroup.getAttribute('data-group-label');
+                    if (activeLabel) {
+                        const sidebarStore = window.Alpine && window.Alpine.store && window.Alpine.store('sidebar');
+                        if (sidebarStore) {
+                            const allLabels = getAllGroupLabels();
+                            sidebarStore.collapsedGroups = allLabels.filter(label => label !== activeLabel);
+                        }
+                    }
+                }
+            }
         };
 
         const setupSidebarAccordion = () => {
@@ -1616,19 +1649,12 @@
                         : this.collapsedGroups.includes(targetLabel);
 
                     if (isCurrentlyCollapsed) {
-                        // Collect all available navigation group labels from sidebar DOM
-                        const groupElements = document.querySelectorAll('.fi-sidebar-group[data-group-label], li[data-group-label]');
-                        const allLabels = new Set();
-                        groupElements.forEach(el => {
-                            const label = el.getAttribute('data-group-label');
-                            if (label) allLabels.add(label);
-                        });
-
+                        const allLabels = getAllGroupLabels();
                         // Ensure targetLabel is in the label set
-                        allLabels.add(targetLabel);
+                        if (!allLabels.includes(targetLabel)) allLabels.push(targetLabel);
 
                         // Accordion behavior: Collapse every group except targetLabel
-                        this.collapsedGroups = Array.from(allLabels).filter(label => label !== targetLabel);
+                        this.collapsedGroups = allLabels.filter(label => label !== targetLabel);
                     } else {
                         // User is closing the currently open group -> normal collapse
                         if (!this.collapsedGroups || !Array.isArray(this.collapsedGroups)) {
@@ -1642,6 +1668,9 @@
 
             // Bind collapse on top-level navigation links (e.g. Dashboard)
             collapseAllGroupsOnTopLevelClick();
+
+            // Sync current route accordion state
+            checkCurrentRouteAndSyncAccordion();
         };
         setupSidebarAccordion();
         document.addEventListener('livewire:navigated', setupSidebarAccordion);

@@ -63,7 +63,8 @@ class SidebarAccordionNavigationTest extends TestCase
 
         $this->assertStringContainsString('collapseAllGroupsOnTopLevelClick', $viewContent);
         $this->assertStringContainsString("link.closest('.fi-sidebar-group')", $viewContent);
-        $this->assertStringContainsString('sidebarStore.collapsedGroups = Array.from(allLabels)', $viewContent);
+        $this->assertStringContainsString('collapseAllGroups()', $viewContent);
+        $this->assertStringContainsString('checkCurrentRouteAndSyncAccordion', $viewContent);
     }
 
     public function test_dashboard_renders_successfully_for_authenticated_admin(): void
