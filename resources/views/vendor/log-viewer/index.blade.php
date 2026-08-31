@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="{{ str_replace('_', '-', app()->getLocale()) }}" class="h-full">
 <head>
     <meta charset="UTF-8">
@@ -28,7 +28,7 @@
 
     <style>
         /* ═══════════════════════════════════════════════════════════════════
-           JANATA BANK CORPORATE — LOG VIEWER 10/10 MASTER THEME
+           JANATA BANK CORPORATE — LOG VIEWER 10/10 ENTERPRISE THEME
            ═══════════════════════════════════════════════════════════════════ */
 
         :root {
@@ -59,13 +59,13 @@
             background-color: #f8fafc !important;
         }
 
-        /* Monospace font for logs, timestamps, line numbers */
+        /* Monospace font for logs, timestamps, line numbers, file sizes */
         code, pre, .font-mono, [class*="font-mono"] {
             font-family: var(--font-mono) !important;
             font-feature-settings: "liga" 0, "tnum" 1;
         }
 
-        /* ─── 1. TOP BRAND NAVIGATION BAR (Seamless JB Corporate) ─── */
+        /* ─── 1. TOP BRAND HEADER (Single, Clean, Non-Duplicated Link) ─── */
         .jb-log-topbar {
             height: 52px !important;
             min-height: 52px !important;
@@ -87,12 +87,13 @@
             box-shadow: 0 1px 3px rgba(15, 23, 42, 0.04) !important;
         }
 
+        /* Static Brand Header Badge (Non-clickable to eliminate redundant duplicate link) */
         .jb-brand-logo {
             display: flex;
             align-items: center;
             gap: 0.75rem;
-            text-decoration: none;
             user-select: none;
+            cursor: default;
         }
 
         .jb-logo-badge {
@@ -135,6 +136,7 @@
             border-left-color: #e2e8f0;
         }
 
+        /* Dedicated "Back to Dashboard" Single Link */
         .jb-back-btn {
             display: inline-flex;
             align-items: center;
@@ -194,7 +196,76 @@
             max-height: 100% !important;
         }
 
-        /* ─── 3. REMOVE UNNECESSARY LINKS, SPONSORS & REDUNDANCIES ─── */
+        /* ─── 3. SIDEBAR MATCHING DASHBOARD DESIGN ─── */
+        #log-viewer nav {
+            background-color: #0f172a !important;
+            border-right: 1px solid #1e293b !important;
+            box-shadow: 2px 0 12px rgba(0, 0, 0, 0.2) !important;
+        }
+
+        html:not(.dark) #log-viewer nav {
+            background-color: #ffffff !important;
+            border-right: 1px solid #e2e8f0 !important;
+            box-shadow: 2px 0 12px rgba(15, 23, 42, 0.02) !important;
+        }
+
+        /* Hide the redundant "Log Viewer" title line inside the sidebar */
+        #log-viewer nav h1 {
+            display: none !important;
+        }
+
+        /* Sidebar Section Header (e.g. "Log files on Local") */
+        #log-viewer nav .text-xs.font-semibold,
+        #log-viewer nav [class*="text-xs font-semibold"] {
+            color: #94a3b8 !important;
+            font-size: 0.725rem !important;
+            font-weight: 700 !important;
+            text-transform: uppercase !important;
+            letter-spacing: 0.06em !important;
+        }
+
+        html:not(.dark) #log-viewer nav .text-xs.font-semibold,
+        html:not(.dark) #log-viewer nav [class*="text-xs font-semibold"] {
+            color: #64748b !important;
+        }
+
+        /* Sidebar Log File Items */
+        #log-viewer nav button,
+        #log-viewer nav a {
+            border-radius: 8px !important;
+            font-weight: 500 !important;
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1) !important;
+        }
+
+        /* Active selected log file */
+        #log-viewer nav .bg-brand-50,
+        #log-viewer nav .bg-brand-100,
+        #log-viewer nav .bg-brand-500\/10,
+        #log-viewer nav [class*="bg-brand-"] {
+            background-color: rgba(14, 165, 233, 0.15) !important;
+            color: #38bdf8 !important;
+            border-left: 3px solid #0284c7 !important;
+            font-weight: 700 !important;
+            box-shadow: inset 0 0 0 1px rgba(14, 165, 233, 0.25) !important;
+        }
+
+        html:not(.dark) #log-viewer nav .bg-brand-50,
+        html:not(.dark) #log-viewer nav .bg-brand-100,
+        html:not(.dark) #log-viewer nav .bg-brand-500\/10,
+        html:not(.dark) #log-viewer nav [class*="bg-brand-"] {
+            background-color: #e0f2fe !important;
+            color: #0369a1 !important;
+            border-left: 3px solid #0284c7 !important;
+            box-shadow: none !important;
+        }
+
+        /* Hover on sidebar log files */
+        #log-viewer nav button:hover,
+        #log-viewer nav a:hover {
+            transform: translateX(2px);
+        }
+
+        /* ─── 4. REMOVE ALL UNWANTED EXTERNAL & SPONSOR LINKS ─── */
         /* Hide GitHub link */
         a[href*="github.com"] {
             display: none !important;
@@ -218,17 +289,25 @@
             display: none !important;
         }
 
-        /* ─── 4. FIX PAGINATION CUT-OFF & FOOTER BAR ─── */
-        /* Pagination container breathing room */
+        /* ─── 5. REMOVE FOOTER STATS & VERSION COMPLETELY ─── */
+        /* Completely hide the Memory / Duration / Version footer text */
+        .text-xs.text-gray-500,
+        .text-xs.text-gray-400,
+        [class*="text-xs text-gray-500"],
+        div:has(> a[href*="buymeacoffee"]) {
+            display: none !important;
+        }
+
+        /* ─── 6. CLEAN, PROMINENT PAGINATION ─── */
         #log-viewer nav[aria-label="Pagination"],
         #log-viewer .pagination,
         #log-viewer [class*="pagination"] {
-            padding-top: 0.5rem !important;
-            padding-bottom: 0.65rem !important;
+            padding-top: 0.6rem !important;
+            padding-bottom: 0.75rem !important;
             margin-bottom: 0 !important;
         }
 
-        /* Footer bar wrapper */
+        /* Footer bar wrapper border */
         #log-viewer .border-t {
             border-top-color: #1e293b !important;
         }
@@ -237,14 +316,7 @@
             border-top-color: #e2e8f0 !important;
         }
 
-        /* Performance stats in bottom footer */
-        .text-xs.text-gray-500.dark\:text-gray-400 {
-            font-size: 0.75rem !important;
-            opacity: 0.75 !important;
-            font-family: var(--font-mono) !important;
-        }
-
-        /* ─── 5. LOG TABLE & SEVERITY BADGES POLISH ─── */
+        /* ─── 7. TABLE & BADGES POLISH ─── */
         tbody tr {
             transition: background-color 0.15s ease !important;
         }
@@ -257,71 +329,7 @@
             background-color: rgba(14, 165, 233, 0.08) !important;
         }
 
-        .jb-badge-env {
-            display: inline-flex;
-            align-items: center;
-            gap: 0.35rem;
-            padding: 0.25rem 0.65rem;
-            border-radius: 9999px;
-            font-size: 0.725rem;
-            font-weight: 700;
-            letter-spacing: 0.03em;
-            text-transform: uppercase;
-        }
-        .jb-badge-prod {
-            background-color: rgba(16, 185, 129, 0.12);
-            color: #34d399;
-            border: 1px solid rgba(16, 185, 129, 0.3);
-        }
-        .jb-badge-dev {
-            background-color: rgba(245, 158, 11, 0.12);
-            color: #fbbf24;
-            border: 1px solid rgba(245, 158, 11, 0.3);
-        }
-        html:not(.dark) .jb-badge-prod {
-            background-color: #ecfdf5;
-            color: #059669;
-            border-color: #a7f3d0;
-        }
-        html:not(.dark) .jb-badge-dev {
-            background-color: #fffbeb;
-            color: #d97706;
-            border-color: #fde68a;
-        }
-
-        .jb-live-stream-badge {
-            display: inline-flex;
-            align-items: center;
-            gap: 0.4rem;
-            padding: 0.25rem 0.65rem;
-            border-radius: 6px;
-            font-size: 0.725rem;
-            font-weight: 600;
-            color: #94a3b8;
-            background-color: rgba(255, 255, 255, 0.04);
-            border: 1px solid rgba(255, 255, 255, 0.08);
-        }
-        html:not(.dark) .jb-live-stream-badge {
-            color: #64748b;
-            background-color: #f1f5f9;
-            border-color: #e2e8f0;
-        }
-
-        .jb-pulse-dot {
-            width: 7px;
-            height: 7px;
-            border-radius: 50%;
-            background-color: #10b981;
-            box-shadow: 0 0 8px #10b981;
-            animation: pulse-dot 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
-        }
-
-        @keyframes pulse-dot {
-            0%, 100% { opacity: 1; transform: scale(1); }
-            50% { opacity: 0.4; transform: scale(0.85); }
-        }
-
-        /* ─── 6. CUSTOM SCROLLBARS ─── */
+        /* ─── 8. CUSTOM SCROLLBARS ─── */
         ::-webkit-scrollbar {
             width: 6px;
             height: 6px;
@@ -346,36 +354,21 @@
 </head>
 
 <body class="h-full bg-slate-950 text-slate-100 antialiased flex flex-col overflow-hidden">
-    <!-- 1. Top JB Corporate Brand Navigation Bar -->
+    <!-- 1. Top JB Corporate Brand Header (Single dedicated link to Dashboard) -->
     <header class="jb-log-topbar">
         <div class="flex items-center gap-4">
-            <a href="/admin" class="jb-brand-logo" title="Janata Bank Corporate Payment Portal">
+            <!-- Non-clickable Brand Identifier (Eliminates redundant link) -->
+            <div class="jb-brand-logo" aria-label="Janata Bank Corporate System Logs">
                 <div class="jb-logo-badge">JB</div>
                 <div class="flex items-center">
                     <span class="jb-brand-title">JB Corporate</span>
                     <span class="jb-brand-subtitle">System Logs & Diagnostics</span>
                 </div>
-            </a>
-            <div class="hidden md:flex items-center gap-2">
-                @if (app()->environment('production'))
-                    <span class="jb-badge-env jb-badge-prod">
-                        <span class="w-1.5 h-1.5 rounded-full bg-emerald-400"></span>
-                        Production
-                    </span>
-                @else
-                    <span class="jb-badge-env jb-badge-dev">
-                        <span class="w-1.5 h-1.5 rounded-full bg-amber-400"></span>
-                        {{ ucfirst(app()->environment()) }}
-                    </span>
-                @endif
-                <span class="jb-live-stream-badge">
-                    <span class="jb-pulse-dot" aria-hidden="true"></span>
-                    <span>Live Stream Active</span>
-                </span>
             </div>
         </div>
         <div class="flex items-center gap-3">
-            <a href="/admin" class="jb-back-btn" title="Return to Admin Dashboard">
+            <!-- Single, Dedicated Link Back to Admin Dashboard -->
+            <a href="/admin" class="jb-back-btn" title="Return to Admin Dashboard" aria-label="Back to Admin Dashboard">
                 <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
                     <path fill-rule="evenodd" d="M9.707 16.707a1 1 0 01-1.414 0l-6-6a1 1 0 010-1.414l6-6a1 1 0 011.414 1.414L5.414 9H17a1 1 0 110 2H5.414l4.293 4.293a1 1 0 010 1.414z" clip-rule="evenodd" />
                 </svg>
