@@ -8,6 +8,7 @@ use App\Models\BkashFailedTransaction;
 use App\Models\BkashTransaction;
 use Carbon\Carbon;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 
 class CbsResponseCallbackController extends Controller
@@ -67,26 +68,37 @@ class CbsResponseCallbackController extends Controller
 
             Log::warning("CBS Callback: Transaction {$txn->reference_id} marked as FAILED [Status 1007, Response ID: {$responseId}]: {$rejectReason}");
 
-            // Record in failed transaction report if not already recorded
-            BkashFailedTransaction::firstOrCreate(
-                [
-                    'reference_id' => $txn->reference_id ?? 'N/A',
-                    'batch_id'     => $txn->batch_id,
-                ],
-                [
-                    'file_name'         => $txn->file_name ?? 'bKash_File.xlsx',
-                    'row_number'        => ($txn->row_sequence !== null ? $txn->row_sequence + 1 : 1),
-                    'transaction_type'  => $txn->transaction_type,
-                    'debit_account_no'  => $txn->credit_account_no,
-                    'credit_account_no' => $txn->debit_account_no,
-                    'amount'            => $txn->amount,
-                    'failure_code'      => 'CBS_CALLBACK_REJECTED',
-                    'reject_reason'     => $rejectReason,
-                ]
-            );
+            try {
+                Log::channel('critical_financial')->critical("CBS Callback: Transaction {$txn->reference_id} marked as FAILED [Status 1007, Response ID: {$responseId}]: {$rejectReason}");
+            } catch (\Throwable $ignored) {
+            }
         }
 
-        $txn->update($updateData);
+        DB::transaction(function () use ($txn, $updateData, $statusId, $reason) {
+            if ($statusId === BkashTransaction::STATUS_CBS_RESPONSE_FAILED) {
+                $rejectReason = $reason ?: 'CBS reported settlement failure via callback.';
+
+                // Record in failed transaction report if not already recorded
+                BkashFailedTransaction::firstOrCreate(
+                    [
+                        'reference_id' => $txn->reference_id ?? 'N/A',
+                        'batch_id'     => $txn->batch_id,
+                    ],
+                    [
+                        'file_name'         => $txn->file_name ?? 'bKash_File.xlsx',
+                        'row_number'        => ($txn->row_sequence !== null ? $txn->row_sequence + 1 : 1),
+                        'transaction_type'  => $txn->transaction_type,
+                        'debit_account_no'  => $txn->credit_account_no,
+                        'credit_account_no' => $txn->debit_account_no,
+                        'amount'            => $txn->amount,
+                        'failure_code'      => 'CBS_CALLBACK_REJECTED',
+                        'reject_reason'     => $rejectReason,
+                    ]
+                );
+            }
+
+            $txn->update($updateData);
+        });
 
         return response()->json([
             'success'   => true,

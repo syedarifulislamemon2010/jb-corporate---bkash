@@ -11,7 +11,7 @@ use Illuminate\Support\Facades\Route;
 | Primary bank-to-portal integration route authenticated via X-CBS-API-Key.
 */
 Route::post('/cbs/response-callback', [CbsResponseCallbackController::class, 'store'])
-    ->middleware(['api.cbs.auth'])
+    ->middleware(['api.cbs.auth', 'throttle:120,1'])
     ->name('api.cbs.response-callback');
 
 /*

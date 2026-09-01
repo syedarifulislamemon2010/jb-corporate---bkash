@@ -10,7 +10,7 @@ Route::get('/', function () {
     return redirect('/admin');
 })->name('admin');
 
-Route::middleware(['web'])->group(function () {
+Route::middleware(['web', 'throttle:30,1'])->group(function () {
     Route::get('/admin/forgot-password', ForgotPasswordMobile::class)->name('filament.admin.auth.forgot-password');
     Route::get('/admin/verify-otp', VerifyOtp::class)->name('filament.admin.auth.verify-otp');
     Route::get('/admin/enter-temp-password', EnterTempPassword::class)->name('filament.admin.auth.enter-temp-password');
