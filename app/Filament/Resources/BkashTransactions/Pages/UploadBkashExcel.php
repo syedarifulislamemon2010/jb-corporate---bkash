@@ -160,9 +160,9 @@ class UploadBkashExcel extends Page implements HasForms
             $accountName      = BkashExcelParserService::cleanString($mapped['debit_account_title'] ?? null, 150);
             $accountNo        = BkashExcelParserService::cleanString($mapped['debit_account_no'] ?? null, 100);
             $amount           = (float)($mapped['amount'] ?? 0);
-            $routingNo        = BkashExcelParserService::cleanString($mapped['debit_routing'] ?? null, 20);
-            $bankName         = BkashExcelParserService::cleanString($mapped['credit_routing'] ?? null, 100);
-            $branchName       = BkashExcelParserService::cleanString($mapped['credit_bank'] ?? null, 255);
+            $routingNo        = BkashExcelParserService::cleanString($mapped['credit_routing'] ?? $mapped['debit_routing'] ?? null, 20);
+            $bankName         = BkashExcelParserService::cleanString($mapped['credit_bank'] ?? null, 255);
+            $branchName       = BkashExcelParserService::cleanString($mapped['branch_name'] ?? null, 255);
             $debitAccount     = BkashExcelParserService::cleanString($mapped['credit_account_no'] ?? null, 100);
             $txnId            = BkashExcelParserService::cleanString($mapped['txn_id'] ?? (string)Str::uuid(), 100);
             $createDate       = $mapped['create_date'] ?? null;
@@ -186,8 +186,8 @@ class UploadBkashExcel extends Page implements HasForms
                     'debit_account_no'     => $accountNo ? Str::limit($accountNo, 100, '') : null,
                     'debit_routing'        => $routingNo ? Str::limit($routingNo, 20, '') : null,
                     'credit_account_no'    => $debitAccount ? Str::limit($debitAccount, 100, '') : null,
-                    'credit_routing'       => $bankName ? Str::limit($bankName, 100, '') : null,
-                    'credit_bank'          => $branchName ? Str::limit($branchName, 255, '') : null,
+                    'credit_routing'       => $routingNo ? Str::limit($routingNo, 20, '') : null,
+                    'credit_bank'          => $bankName ? Str::limit($bankName, 255, '') : null,
                     'amount'               => $amount,
                     'status_id'            => BkashTransaction::STATUS_PENDING_CHECKER,
                     'created_by'           => Str::limit(auth()->user()->name ?? 'SYSTEM', 255, ''),

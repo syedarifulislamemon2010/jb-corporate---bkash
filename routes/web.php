@@ -17,6 +17,11 @@ Route::middleware(['web', 'throttle:30,1'])->group(function () {
     Route::get('/admin/set-new-password', SetNewPassword::class)->name('filament.admin.auth.set-new-password');
 });
 
+Route::middleware(['web'])->group(function () {
+    Route::get('/admin/bkash-transactions/download-batch', [\App\Http\Controllers\BatchFileDownloadController::class, 'download'])
+        ->name('admin.bkash.download-batch');
+});
+
 Route::fallback(function () {
     return redirect('/admin');
 });

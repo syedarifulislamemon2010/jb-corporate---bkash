@@ -154,7 +154,12 @@ class BkashExcelParserService
                 $routingVal = static::cleanString((string) $val, 20);
                 $mapped['credit_routing'] = $routingVal;
                 $mapped['debit_routing']  = $routingVal; // Backward compatibility
-            } elseif (in_array($cleanHeader, ['bankname', 'benebankname', 'branchname', 'benebranchname', 'bankbranchname'])) {
+            } elseif (in_array($cleanHeader, ['bankname', 'benebankname', 'bank'])) {
+                $mapped['credit_bank'] = static::cleanString((string) $val, 255);
+            } elseif (in_array($cleanHeader, ['branchname', 'benebranchname', 'branch'])) {
+                $mapped['branch_name'] = static::cleanString((string) $val, 255);
+            } elseif (in_array($cleanHeader, ['bankbranchname', 'bankandbranchname'])) {
+                // Combined Bank & Branch (e.g. in RTGS files: "MUTUAL TRUST BANK LTD.,GAZIPUR")
                 $mapped['credit_bank'] = static::cleanString((string) $val, 255);
             } elseif (in_array($cleanHeader, ['debitaccount', 'debitaccountno'])) {
                 // NOTE: 'credit_account_no' DB column actually stores the TCSA/Operational 
@@ -170,7 +175,93 @@ class BkashExcelParserService
             }
         }
 
+        // Auto-derive credit_bank from routing number (first 3 digits) if credit_bank is empty
+        if (empty($mapped['credit_bank']) && !empty($mapped['credit_routing'])) {
+            $derivedBank = static::deriveCreditBankFromRouting($mapped['credit_routing']);
+            if ($derivedBank) {
+                $mapped['credit_bank'] = $derivedBank;
+            }
+        }
+
         return $mapped;
+    }
+
+    /**
+     * Auto-derive scheduled bank name from Bangladesh Bank 9-digit routing number (first 3 digits = Bank Code).
+     */
+    public static function deriveCreditBankFromRouting(?string $routingNumber): ?string
+    {
+        if (empty($routingNumber) || strlen(trim($routingNumber)) < 3) {
+            return null;
+        }
+
+        $bankCode = substr(trim($routingNumber), 0, 3);
+
+        $bankDirectory = [
+            '010' => 'Sonali Bank PLC',
+            '015' => 'Bangladesh Krishi Bank',
+            '020' => 'Agrani Bank PLC',
+            '025' => 'Janata Bank PLC',
+            '030' => 'Rupali Bank PLC',
+            '035' => 'BRAC Bank PLC',
+            '040' => 'Bank Asia Limited',
+            '045' => 'BASIC Bank Limited',
+            '050' => 'Rajshahi Krishi Unnayan Bank',
+            '055' => 'Eastern Bank PLC',
+            '060' => 'First Security Islami Bank PLC',
+            '065' => 'AB Bank Limited',
+            '070' => 'The City Bank PLC',
+            '075' => 'Community Bank Bangladesh PLC',
+            '080' => 'Dhaka Bank PLC',
+            '085' => 'Dutch-Bangla Bank PLC',
+            '090' => 'Dhaka Bank PLC',
+            '095' => 'EXIM Bank PLC',
+            '105' => 'ICB Islamic Bank Limited',
+            '110' => 'IFIC Bank PLC',
+            '115' => 'Islami Bank Bangladesh PLC',
+            '120' => 'Jamuna Bank PLC',
+            '125' => 'Mercantile Bank PLC',
+            '130' => 'Meghna Bank PLC',
+            '135' => 'Midland Bank Limited',
+            '140' => 'Modhumoti Bank Limited',
+            '145' => 'Mutual Trust Bank PLC',
+            '150' => 'National Bank Limited',
+            '155' => 'National Credit & Commerce Bank PLC',
+            '160' => 'NRB Bank Limited',
+            '165' => 'NRB Commercial Bank PLC',
+            '170' => 'One Bank PLC',
+            '175' => 'Pubali Bank PLC',
+            '180' => 'Padma Bank Limited',
+            '185' => 'The Premier Bank PLC',
+            '190' => 'Prime Bank PLC',
+            '195' => 'Global Islami Bank PLC',
+            '200' => 'Shahjalal Islami Bank PLC',
+            '205' => 'Shimanto Bank Limited',
+            '210' => 'Social Islami Bank PLC',
+            '215' => 'Southeast Bank PLC',
+            '220' => 'South Bangla Agriculture & Commerce Bank PLC',
+            '225' => 'Standard Chartered Bank',
+            '230' => 'State Bank of India',
+            '235' => 'Standard Chartered Bank',
+            '240' => 'Standard Bank PLC',
+            '245' => 'Trust Bank Limited',
+            '250' => 'Union Bank PLC',
+            '255' => 'United Commercial Bank PLC',
+            '260' => 'United Commercial Bank PLC',
+            '265' => 'Uttara Bank PLC',
+            '270' => 'Woori Bank',
+            '275' => 'HSBC Bangladesh',
+            '280' => 'Citibank N.A.',
+            '285' => 'Commercial Bank of Ceylon PLC',
+            '290' => 'Habib Bank Limited',
+            '295' => 'National Bank of Pakistan',
+            '300' => 'Bengal Commercial Bank Limited',
+            '305' => 'Citizens Bank PLC',
+            '310' => 'Probashi Kallyan Bank',
+            '315' => 'Bengal Commercial Bank Limited',
+        ];
+
+        return $bankDirectory[$bankCode] ?? null;
     }
 
     /**

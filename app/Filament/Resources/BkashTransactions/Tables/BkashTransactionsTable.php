@@ -13,6 +13,9 @@ use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Auth;
 use Carbon\Carbon;
 
+use Filament\Tables\Grouping\Group;
+use Illuminate\Support\HtmlString;
+
 class BkashTransactionsTable
 {
     public static function configure(Table $table): Table
@@ -27,6 +30,48 @@ class BkashTransactionsTable
             ->modifyQueryUsing(function (Builder $query) {
                 $query->where('status_id', BkashTransaction::STATUS_PENDING_CHECKER);
             })
+            ->groups([
+                Group::make('file_name')
+                    ->label('Batch File')
+                    ->collapsible()
+                    ->titlePrefixedWithLabel(false)
+                    ->getTitleFromRecordUsing(function (BkashTransaction $record): HtmlString {
+                        $fileName = $record->file_name ?? 'Batch_File.xlsx';
+                        $batch = \App\Models\BkashTransactionBatch::where('file_name', $fileName)->first();
+                        $totalTrn = $batch ? $batch->total_data : \App\Models\BkashTransaction::where('file_name', $fileName)->where('status_id', BkashTransaction::STATUS_PENDING_CHECKER)->count();
+                        $totalAmount = $batch ? (float)$batch->total_amount : (float)\App\Models\BkashTransaction::where('file_name', $fileName)->where('status_id', BkashTransaction::STATUS_PENDING_CHECKER)->sum('amount');
+                        $formattedAmount = \App\Models\BkashTransaction::formatBdtAmount($totalAmount);
+                        $channel = $record->transaction_type ?? ($batch ? $batch->transaction_type : 'A2A');
+                        $ext = strtoupper(pathinfo($fileName, PATHINFO_EXTENSION) ?: 'XLSX');
+                        $channelColor = match ($channel) {
+                            'RTGS'  => 'bg-rose-100 text-rose-800 dark:bg-rose-900/40 dark:text-rose-300 border-rose-200 dark:border-rose-800',
+                            'BEFTN' => 'bg-amber-100 text-amber-800 dark:bg-amber-900/40 dark:text-amber-300 border-amber-200 dark:border-amber-800',
+                            'A2A'   => 'bg-emerald-100 text-emerald-800 dark:bg-emerald-900/40 dark:text-emerald-300 border-emerald-200 dark:border-emerald-800',
+                            default => 'bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-300 border-gray-200 dark:border-gray-700',
+                        };
+
+                        $downloadUrl = route('admin.bkash.download-batch', ['file' => $fileName]);
+
+                        return new HtmlString("
+                            <div class=\"flex items-center justify-between w-full flex-wrap gap-2 py-0.5\">
+                                <div class=\"flex items-center gap-2.5 flex-wrap\">
+                                    <span class=\"font-mono font-bold text-sm text-primary-600 dark:text-primary-400 tracking-tight\">{$fileName}</span>
+                                    <span class=\"px-2 py-0.5 text-xs font-semibold rounded bg-sky-100 text-sky-800 dark:bg-sky-900/40 dark:text-sky-300 border border-sky-200 dark:border-sky-800\">{$ext}</span>
+                                    <span class=\"px-2 py-0.5 text-xs font-semibold rounded border {$channelColor}\">{$channel}</span>
+                                    <span class=\"px-2.5 py-0.5 text-xs font-medium rounded-full bg-gray-100 text-gray-700 dark:bg-gray-800 dark:text-gray-300 border border-gray-200 dark:border-gray-700\">{$totalTrn} Trns</span>
+                                    <span class=\"px-2.5 py-0.5 text-xs font-bold rounded-full bg-emerald-50 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800\">BDT {$formattedAmount}</span>
+                                </div>
+                                <div class=\"flex items-center gap-2\" onclick=\"event.stopPropagation()\">
+                                    <a href=\"{$downloadUrl}\" target=\"_blank\" class=\"inline-flex items-center gap-1 px-2.5 py-1 text-xs font-medium text-gray-700 bg-white dark:bg-gray-800 dark:text-gray-200 border border-gray-300 dark:border-gray-600 rounded-md hover:bg-gray-50 dark:hover:bg-gray-700 shadow-sm transition-colors\">
+                                        <svg class=\"w-3.5 h-3.5 text-primary-600\" fill=\"none\" stroke=\"currentColor\" viewBox=\"0 0 24 24\"><path stroke-linecap=\"round\" stroke-linejoin=\"round\" stroke-width=\"2\" d=\"M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4\"/></svg>
+                                        Download (Excel)
+                                    </a>
+                                </div>
+                            </div>
+                        ");
+                    }),
+            ])
+            ->defaultGroup('file_name')
             ->columns([
                 TextColumn::make('index')
                     ->label('#')
@@ -56,6 +101,11 @@ class BkashTransactionsTable
                         default => 'gray',
                     }),
 
+                TextColumn::make('credit_account_no')
+                    ->label('Debit Account')
+                    ->searchable()
+                    ->toggleable(),
+
                 TextColumn::make('debit_account_title')
                     ->label('Beneficiary Name')
                     ->searchable()
@@ -72,24 +122,14 @@ class BkashTransactionsTable
                     ->alignRight()
                     ->sortable(),
 
-                TextColumn::make('debit_routing')
+                TextColumn::make('credit_routing')
                     ->label('Routing Number')
                     ->searchable()
                     ->alignRight()
                     ->toggleable(),
 
-                TextColumn::make('credit_routing')
-                    ->label('Bank Name')
-                    ->searchable()
-                    ->toggleable(),
-
                 TextColumn::make('credit_bank')
-                    ->label('Branch Name')
-                    ->searchable()
-                    ->toggleable(),
-
-                TextColumn::make('credit_account_no')
-                    ->label('Debit Account')
+                    ->label('Bank Name')
                     ->searchable()
                     ->toggleable(),
 

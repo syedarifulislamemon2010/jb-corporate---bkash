@@ -56,8 +56,8 @@ class ExcelExportService
                     $txn->row_number,
                     $txn->transaction_type,
                     $txn->reference_id,
-                    $txn->debit_account_no,
-                    $txn->credit_account_no,
+                    $txn->credit_account_no, // Debit Account (TCSA / Source)
+                    $txn->debit_account_no,  // Beneficiary Account (Credit / Destination)
                     number_format((float) $txn->amount, 2, '.', ''),
                     $txn->failure_code,
                     $txn->reject_reason,
