@@ -23,9 +23,9 @@ class BkashTransactionResource extends Resource
     protected static array $globallySearchableAttributes = [
         'reference_id',
         'txn_id',
-        'debit_account_no',
+        'beneficiary_account_no',
         'debit_account_title',
-        'credit_account_no',
+        'source_account_no',
         'file_name',
     ];
 
@@ -35,7 +35,7 @@ class BkashTransactionResource extends Resource
             'Txn ID'   => $record->txn_id ?? 'N/A',
             'Channel'  => $record->transaction_type,
             'Amount'   => 'BDT ' . BkashTransaction::formatBdtAmount((float) $record->amount),
-            'Account'  => $record->debit_account_no ?? 'N/A',
+            'Account'  => $record->beneficiary_account_no ?? 'N/A',
             'File'     => $record->file_name ?? 'N/A',
         ];
     }

@@ -87,10 +87,10 @@ class CbsResponseCallbackController extends Controller
                     [
                         'file_name'         => $txn->file_name ?? 'bKash_File.xlsx',
                         'row_number'        => ($txn->row_sequence !== null ? $txn->row_sequence + 1 : 1),
-                        'transaction_type'  => $txn->transaction_type,
-                        'debit_account_no'  => $txn->credit_account_no,
-                        'credit_account_no' => $txn->debit_account_no,
-                        'amount'            => $txn->amount,
+                        'transaction_type'       => $txn->transaction_type,
+                        'source_account_no'      => $txn->source_account_no,
+                        'beneficiary_account_no' => $txn->beneficiary_account_no,
+                        'amount'                 => $txn->amount,
                         'failure_code'      => 'CBS_CALLBACK_REJECTED',
                         'reject_reason'     => $rejectReason,
                     ]

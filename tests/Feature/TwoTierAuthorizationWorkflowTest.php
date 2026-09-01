@@ -54,8 +54,8 @@ class TwoTierAuthorizationWorkflowTest extends TestCase
             'reference_id'        => 'REF_STAGE_01',
             'txn_id'              => 'TXN_STAGE_01',
             'amount'              => 50000.00,
-            'debit_account_no'    => '0100111111111',
-            'credit_account_no'   => '0100202707747',
+            'beneficiary_account_no'    => '0100111111111',
+            'source_account_no'   => '0100202707747',
             'status_id'           => BkashTransaction::STATUS_PENDING_CHECKER,
         ]);
 

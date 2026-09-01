@@ -120,10 +120,10 @@ class ExecuteCbsSettlementJob implements ShouldQueue
                             'file_name'         => $txn->file_name ?? 'bKash_File.xlsx',
                             'row_number'        => ($txn->row_sequence !== null ? $txn->row_sequence + 1 : 1),
                             'transaction_type'  => $txn->transaction_type,
-                            'reference_id'      => $txn->reference_id ?? 'N/A',
-                            'debit_account_no'  => $txn->credit_account_no, // Sender / Debit account
-                            'credit_account_no' => $txn->debit_account_no,  // Beneficiary / Credit account
-                            'amount'            => $txn->amount,
+                            'reference_id'           => $txn->reference_id ?? 'N/A',
+                            'source_account_no'      => $txn->source_account_no,      // Sender / Source account
+                            'beneficiary_account_no' => $txn->beneficiary_account_no, // Beneficiary account
+                            'amount'                 => $txn->amount,
                             'failure_code'      => $failureCode,
                             'reject_reason'     => $rejectReason,
                         ]);

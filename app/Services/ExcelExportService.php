@@ -56,8 +56,8 @@ class ExcelExportService
                     $txn->row_number,
                     $txn->transaction_type,
                     $txn->reference_id,
-                    $txn->credit_account_no, // Debit Account (TCSA / Source)
-                    $txn->debit_account_no,  // Beneficiary Account (Credit / Destination)
+                    $txn->source_account_no,      // Debit Account (TCSA / Source)
+                    $txn->beneficiary_account_no, // Beneficiary Account (Credit / Destination)
                     number_format((float) $txn->amount, 2, '.', ''),
                     $txn->failure_code,
                     $txn->reject_reason,
@@ -113,11 +113,13 @@ class ExcelExportService
             $sheet1->setCellValue("A{$row1}", $t->create_date?->format('d/m/Y') ?? $t->created_at?->format('d/m/Y'));
             $sheet1->setCellValue("B{$row1}", $t->bb_reference_number ?: $t->reference_id);
             $sheet1->setCellValue("C{$row1}", $t->debit_account_title);
-            $sheet1->setCellValueExplicit("D{$row1}", (string) $t->debit_account_no, \PhpOffice\PhpSpreadsheet\Cell\DataType::TYPE_STRING);
+            $sheet1->setCellValueExplicit("D{$row1}", (string) $t->beneficiary_account_no, \PhpOffice\PhpSpreadsheet\Cell\DataType::TYPE_STRING);
+            $bankBranch = $t->credit_bank ?: ($t->credit_routing ?: '');
+            $routingCode = $t->credit_routing ?: ($t->debit_routing ?: '');
             $sheet1->setCellValue("E{$row1}", $bankBranch);
             $sheet1->setCellValueExplicit("F{$row1}", (string) $routingCode, \PhpOffice\PhpSpreadsheet\Cell\DataType::TYPE_STRING);
             $sheet1->setCellValue("G{$row1}", (float) $t->amount);
-            $sheet1->setCellValueExplicit("H{$row1}", (string) $t->credit_account_no, \PhpOffice\PhpSpreadsheet\Cell\DataType::TYPE_STRING);
+            $sheet1->setCellValueExplicit("H{$row1}", (string) $t->source_account_no, \PhpOffice\PhpSpreadsheet\Cell\DataType::TYPE_STRING);
             $sheet1->setCellValue("I{$row1}", $t->txn_id);
             $row1++;
         }
@@ -150,9 +152,9 @@ class ExcelExportService
             $sheet2->setCellValue("A{$row2}", $t->create_date?->format('d/m/Y') ?? $t->created_at?->format('d/m/Y'));
             $sheet2->setCellValue("B{$row2}", $t->reference_id);
             $sheet2->setCellValue("C{$row2}", $t->debit_account_title);
-            $sheet2->setCellValueExplicit("D{$row2}", (string) $t->debit_account_no, \PhpOffice\PhpSpreadsheet\Cell\DataType::TYPE_STRING);
+            $sheet2->setCellValueExplicit("D{$row2}", (string) $t->beneficiary_account_no, \PhpOffice\PhpSpreadsheet\Cell\DataType::TYPE_STRING);
             $sheet2->setCellValue("E{$row2}", (float) $t->amount);
-            $sheet2->setCellValueExplicit("F{$row2}", (string) $t->credit_account_no, \PhpOffice\PhpSpreadsheet\Cell\DataType::TYPE_STRING);
+            $sheet2->setCellValueExplicit("F{$row2}", (string) $t->source_account_no, \PhpOffice\PhpSpreadsheet\Cell\DataType::TYPE_STRING);
             $sheet2->setCellValue("G{$row2}", $t->txn_id);
             $row2++;
         }

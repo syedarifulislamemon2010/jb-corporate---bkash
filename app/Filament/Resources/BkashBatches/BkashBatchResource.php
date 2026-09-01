@@ -4,6 +4,7 @@ namespace App\Filament\Resources\BkashBatches;
 
 use App\Models\BkashTransaction;
 use App\Models\BkashTransactionBatch;
+use Filament\Actions\Action;
 use Filament\Resources\Resource;
 use Filament\Tables\Table;
 use Filament\Tables\Columns\TextColumn;
@@ -83,7 +84,19 @@ class BkashBatchResource extends Resource
                 TextColumn::make('file_name')
                     ->label('File Name')
                     ->searchable()
-                    ->sortable(),
+                    ->sortable()
+                    ->icon('heroicon-o-chevron-down')
+                    ->iconPosition('after')
+                    ->tooltip('Click to expand batch breakdown')
+                    ->action(
+                        Action::make('view_batch_column')
+                            ->slideOver()
+                            ->modalWidth('4xl')
+                            ->modalHeading(fn (BkashTransactionBatch $record): string => "Batch Audit: {$record->file_name}")
+                            ->modalContent(fn (BkashTransactionBatch $record) => view('filament.resources.bkash-batches.detail-modal', ['batch' => $record]))
+                            ->modalSubmitAction(false)
+                            ->modalCancelActionLabel('Close')
+                    ),
 
                 TextColumn::make('transaction_type')
                     ->label('Channel')
@@ -140,6 +153,18 @@ class BkashBatchResource extends Resource
                     ->label('Ingested At')
                     ->dateTime('d M Y, h:i A')
                     ->sortable(),
+            ])
+            ->actions([
+                Action::make('view_details')
+                    ->label('Details')
+                    ->icon('heroicon-o-chevron-down')
+                    ->color('gray')
+                    ->slideOver()
+                    ->modalWidth('4xl')
+                    ->modalHeading(fn (BkashTransactionBatch $record): string => "Batch Audit: {$record->file_name}")
+                    ->modalContent(fn (BkashTransactionBatch $record) => view('filament.resources.bkash-batches.detail-modal', ['batch' => $record]))
+                    ->modalSubmitAction(false)
+                    ->modalCancelActionLabel('Close'),
             ])
             ->filters([
                 SelectFilter::make('transaction_type')

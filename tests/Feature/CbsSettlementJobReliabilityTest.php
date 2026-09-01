@@ -28,8 +28,8 @@ class CbsSettlementJobReliabilityTest extends TestCase
             'reference_id'      => 'REF_FAIL_JOB_01',
             'txn_id'            => 'TXN_FAIL_JOB_01',
             'amount'            => 50000.00,
-            'credit_account_no' => '0100202707747',
-            'debit_account_no'  => '0100123456789',
+            'source_account_no' => '0100202707747',
+            'beneficiary_account_no'  => '0100123456789',
             'status_id'         => BkashTransaction::STATUS_FINAL_AUTHORIZED,
         ]);
 

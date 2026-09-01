@@ -30,8 +30,8 @@ class CbsApiRoutingPriorityTest extends TestCase
             'reference_id'        => 'REF_RTGS_TEST_01',
             'txn_id'              => 'TXN_RTGS_TEST_01',
             'amount'              => 500000.00,
-            'credit_account_no'   => '0100202707747',
-            'debit_account_no'    => '0370210009030',
+            'source_account_no'   => '0100202707747',
+            'beneficiary_account_no'    => '0370210009030',
             'debit_account_title' => 'Beneficiary Corp',
             'credit_routing'      => '225260856', // Beneficiary Routing
             'debit_routing'       => '315260856', // Debit Routing
@@ -72,8 +72,8 @@ class CbsApiRoutingPriorityTest extends TestCase
             'reference_id'        => 'REF_BEFTN_LEGACY_01',
             'txn_id'              => 'TXN_BEFTN_LEGACY_01',
             'amount'              => 25000.00,
-            'credit_account_no'   => '0100202707747',
-            'debit_account_no'    => '0500210006830',
+            'source_account_no'   => '0100202707747',
+            'beneficiary_account_no'    => '0500210006830',
             'debit_account_title' => 'Beneficiary Individual',
             'credit_routing'      => null,        // Missing in legacy
             'debit_routing'       => '125260856', // Stored in debit_routing
@@ -113,8 +113,8 @@ class CbsApiRoutingPriorityTest extends TestCase
             'reference_id'        => 'REF_A2A_UNIFIED_01',
             'txn_id'              => 'TXN_A2A_UNIFIED_01',
             'amount'              => 14137.17,
-            'credit_account_no'   => '0100202707747',
-            'debit_account_no'    => '0100224107522',
+            'source_account_no'   => '0100202707747',
+            'beneficiary_account_no'    => '0100224107522',
             'debit_account_title' => 'Janata Bank Beneficiary',
             'status_id'           => BkashTransaction::STATUS_FINAL_AUTHORIZED,
         ]);

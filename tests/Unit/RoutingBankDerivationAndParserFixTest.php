@@ -66,8 +66,8 @@ class RoutingBankDerivationAndParserFixTest extends TestCase
         $this->assertEquals('CORPORATE', $mapped['branch_name']);
 
         // Account mapping checks
-        $this->assertEquals('111613120722698', $mapped['credit_account_no']); // Debit Account (TCSA)
-        $this->assertEquals('1001141002472', $mapped['debit_account_no']);     // Beneficiary Account
+        $this->assertEquals('111613120722698', $mapped['source_account_no']); // Debit Account (TCSA)
+        $this->assertEquals('1001141002472', $mapped['beneficiary_account_no']);     // Beneficiary Account
         $this->assertEquals('315260856', $mapped['credit_routing']);           // Routing Code
         $this->assertEquals(675.11, $mapped['amount']);
     }

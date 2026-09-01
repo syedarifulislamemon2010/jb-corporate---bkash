@@ -158,12 +158,12 @@ class UploadBkashExcel extends Page implements HasForms
 
             $refId            = BkashExcelParserService::cleanString($mapped['reference_id'] ?? null, 255);
             $accountName      = BkashExcelParserService::cleanString($mapped['debit_account_title'] ?? null, 150);
-            $accountNo        = BkashExcelParserService::cleanString($mapped['debit_account_no'] ?? null, 100);
+            $accountNo        = BkashExcelParserService::cleanString($mapped['beneficiary_account_no'] ?? null, 100);
             $amount           = (float)($mapped['amount'] ?? 0);
             $routingNo        = BkashExcelParserService::cleanString($mapped['credit_routing'] ?? $mapped['debit_routing'] ?? null, 20);
             $bankName         = BkashExcelParserService::cleanString($mapped['credit_bank'] ?? null, 255);
             $branchName       = BkashExcelParserService::cleanString($mapped['branch_name'] ?? null, 255);
-            $debitAccount     = BkashExcelParserService::cleanString($mapped['credit_account_no'] ?? null, 100);
+            $debitAccount     = BkashExcelParserService::cleanString($mapped['source_account_no'] ?? null, 100);
             $txnId            = BkashExcelParserService::cleanString($mapped['txn_id'] ?? (string)Str::uuid(), 100);
             $createDate       = $mapped['create_date'] ?? null;
             $rejectReason     = BkashExcelParserService::cleanString($mapped['reject_reason'] ?? null, 255);
@@ -176,25 +176,25 @@ class UploadBkashExcel extends Page implements HasForms
                 $valueDate  = \App\Helper\ValueDateHelper::resolve($parsedDate)->toDateString();
 
                 $txnData = [
-                    'batch_id'             => $batch->id,
-                    'row_sequence'         => $index,
-                    'transaction_type'     => $channelType,
-                    'reference_id'         => Str::limit($refId, 255, ''),
-                    'bb_reference_number'  => $bbRef ? Str::limit($bbRef, 100, '') : null,
-                    'txn_id'               => Str::limit($txnId, 100, ''),
-                    'debit_account_title'  => $accountName ? Str::limit($accountName, 150, '') : null,
-                    'debit_account_no'     => $accountNo ? Str::limit($accountNo, 100, '') : null,
-                    'debit_routing'        => $routingNo ? Str::limit($routingNo, 20, '') : null,
-                    'credit_account_no'    => $debitAccount ? Str::limit($debitAccount, 100, '') : null,
-                    'credit_routing'       => $routingNo ? Str::limit($routingNo, 20, '') : null,
-                    'credit_bank'          => $bankName ? Str::limit($bankName, 255, '') : null,
-                    'amount'               => $amount,
-                    'status_id'            => BkashTransaction::STATUS_PENDING_CHECKER,
-                    'created_by'           => Str::limit(auth()->user()->name ?? 'SYSTEM', 255, ''),
-                    'created_by_id'        => auth()->id(),
-                    'create_date'          => $parsedDate,
-                    'value_date'           => $valueDate,
-                    'file_name'            => $fileName,
+                    'batch_id'               => $batch->id,
+                    'row_sequence'           => $index,
+                    'transaction_type'       => $channelType,
+                    'reference_id'           => Str::limit($refId, 255, ''),
+                    'bb_reference_number'    => $bbRef ? Str::limit($bbRef, 100, '') : null,
+                    'txn_id'                 => Str::limit($txnId, 100, ''),
+                    'debit_account_title'    => $accountName ? Str::limit($accountName, 150, '') : null,
+                    'beneficiary_account_no' => $accountNo ? Str::limit($accountNo, 100, '') : null,
+                    'debit_routing'          => $routingNo ? Str::limit($routingNo, 20, '') : null,
+                    'source_account_no'      => $debitAccount ? Str::limit($debitAccount, 100, '') : null,
+                    'credit_routing'         => $routingNo ? Str::limit($routingNo, 20, '') : null,
+                    'credit_bank'            => $bankName ? Str::limit($bankName, 255, '') : null,
+                    'amount'                 => $amount,
+                    'status_id'              => BkashTransaction::STATUS_PENDING_CHECKER,
+                    'created_by'             => Str::limit(auth()->user()->name ?? 'SYSTEM', 255, ''),
+                    'created_by_id'          => auth()->id(),
+                    'create_date'            => $parsedDate,
+                    'value_date'             => $valueDate,
+                    'file_name'              => $fileName,
                 ];
 
                 if ($rejectReason) {
@@ -204,12 +204,13 @@ class UploadBkashExcel extends Page implements HasForms
                 BkashTransaction::create($txnData);
             } else {
                 BkashFailedTransaction::create([
-                    'batch_id'         => $batch->id,
-                    'file_name'        => $fileName,
-                    'row_number'       => $index + 1,
-                    'transaction_type' => $channelType,
-                    'reference_id'     => $refId ? Str::limit($refId, 100, '') : 'N/A',
-                    'credit_account_no'=> $debitAccount ? Str::limit($debitAccount, 50, '') : null,
+                    'batch_id'               => $batch->id,
+                    'file_name'              => $fileName,
+                    'row_number'             => $index + 1,
+                    'transaction_type'       => $channelType,
+                    'reference_id'           => $refId ? Str::limit($refId, 100, '') : 'N/A',
+                    'source_account_no'      => $debitAccount ? Str::limit($debitAccount, 50, '') : null,
+                    'beneficiary_account_no' => $accountNo ? Str::limit($accountNo, 50, '') : null,
                     'amount'           => $amount,
                     'failure_code'     => 'INVALID_ROW',
                     'reject_reason'    => 'Missing reference ID or invalid amount',

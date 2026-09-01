@@ -80,16 +80,16 @@ class ProcessBkashFileJob implements ShouldQueue
 
             // Create failed transaction record so checker/admin sees the file-level error on UI
             BkashFailedTransaction::create([
-                'batch_id'          => $batch->id,
-                'file_name'         => $fileName,
-                'row_number'        => 0,
-                'transaction_type'  => $this->channelType,
-                'reference_id'      => 'FILE_LEVEL_ERROR',
-                'debit_account_no'  => null,
-                'credit_account_no' => implode(', ', $fileLevelValidation['debit_accounts']),
-                'amount'            => 0.00,
-                'failure_code'      => 'MULTI_DEBIT_ACC',
-                'reject_reason'     => $errorMsg,
+                'batch_id'               => $batch->id,
+                'file_name'              => $fileName,
+                'row_number'             => 0,
+                'transaction_type'       => $this->channelType,
+                'reference_id'           => 'FILE_LEVEL_ERROR',
+                'beneficiary_account_no' => null,
+                'source_account_no'      => implode(', ', $fileLevelValidation['debit_accounts']),
+                'amount'                 => 0.00,
+                'failure_code'           => 'MULTI_DEBIT_ACC',
+                'reject_reason'          => $errorMsg,
             ]);
 
             // Archive the processed file locally
@@ -145,12 +145,12 @@ class ProcessBkashFileJob implements ShouldQueue
             $refId        = BkashExcelParserService::cleanString($mapped['reference_id'] ?? null, 255);
             $bbRef        = BkashExcelParserService::cleanString($mapped['bb_reference_number'] ?? null, 100);
             $accountName  = BkashExcelParserService::cleanString($mapped['debit_account_title'] ?? null, 150);
-            $accountNo    = BkashExcelParserService::cleanString($mapped['debit_account_no'] ?? null, 100);
+            $accountNo    = BkashExcelParserService::cleanString($mapped['beneficiary_account_no'] ?? null, 100);
             $amount       = (float) ($mapped['amount'] ?? 0);
             $routingNo    = BkashExcelParserService::cleanString($mapped['credit_routing'] ?? $mapped['debit_routing'] ?? null, 20);
             $bankName     = BkashExcelParserService::cleanString($mapped['credit_bank'] ?? null, 255);
             $branchName   = BkashExcelParserService::cleanString($mapped['branch_name'] ?? null, 255);
-            $debitAccount = BkashExcelParserService::cleanString($mapped['credit_account_no'] ?? null, 100);
+            $debitAccount = BkashExcelParserService::cleanString($mapped['source_account_no'] ?? null, 100);
             $txnId        = BkashExcelParserService::cleanString($mapped['txn_id'] ?? null, 100) ?: (string) Str::uuid();
             $createDate   = $mapped['create_date'] ?? null;
 
@@ -162,34 +162,34 @@ class ProcessBkashFileJob implements ShouldQueue
                 $valueDate  = \App\Helper\ValueDateHelper::resolve($parsedDate)->toDateString();
 
                 BkashTransaction::create([
-                    'batch_id'             => $batch->id,
-                    'file_name'            => $fileName,
-                    'row_sequence'         => $index,
-                    'transaction_type'     => $this->channelType,
-                    'reference_id'         => Str::limit($refId, 255, ''),
-                    'bb_reference_number'  => $bbRef ? Str::limit($bbRef, 100, '') : null,
-                    'txn_id'               => Str::limit($txnId, 100, ''),
-                    'debit_account_title'  => $accountName ? Str::limit($accountName, 150, '') : null,
-                    'debit_account_no'     => $accountNo ? Str::limit($accountNo, 100, '') : null,
-                    'debit_routing'        => $routingNo ? Str::limit($routingNo, 20, '') : null,
-                    'credit_account_no'    => $debitAccount ? Str::limit($debitAccount, 100, '') : null,
-                    'credit_routing'       => $routingNo ? Str::limit($routingNo, 20, '') : null,
-                    'credit_bank'          => $bankName ? Str::limit($bankName, 255, '') : null,
-                    'amount'               => $amount,
-                    'status_id'            => BkashTransaction::STATUS_PENDING_CHECKER,
-                    'created_by'           => $this->createdBy,
-                    'create_date'          => $parsedDate,
-                    'value_date'           => $valueDate,
+                    'batch_id'               => $batch->id,
+                    'file_name'              => $fileName,
+                    'row_sequence'           => $index,
+                    'transaction_type'       => $this->channelType,
+                    'reference_id'           => Str::limit($refId, 255, ''),
+                    'bb_reference_number'    => $bbRef ? Str::limit($bbRef, 100, '') : null,
+                    'txn_id'                 => Str::limit($txnId, 100, ''),
+                    'debit_account_title'    => $accountName ? Str::limit($accountName, 150, '') : null,
+                    'beneficiary_account_no' => $accountNo ? Str::limit($accountNo, 100, '') : null,
+                    'debit_routing'          => $routingNo ? Str::limit($routingNo, 20, '') : null,
+                    'source_account_no'      => $debitAccount ? Str::limit($debitAccount, 100, '') : null,
+                    'credit_routing'         => $routingNo ? Str::limit($routingNo, 20, '') : null,
+                    'credit_bank'            => $bankName ? Str::limit($bankName, 255, '') : null,
+                    'amount'                 => $amount,
+                    'status_id'              => BkashTransaction::STATUS_PENDING_CHECKER,
+                    'created_by'             => $this->createdBy,
+                    'create_date'            => $parsedDate,
+                    'value_date'             => $valueDate,
                 ]);
             } else {
                 BkashFailedTransaction::create([
-                    'batch_id'          => $batch->id,
-                    'file_name'         => $fileName,
-                    'row_number'        => $index + 1,
-                    'transaction_type'  => $this->channelType,
-                    'reference_id'      => $refId ? Str::limit($refId, 100, '') : 'N/A',
-                    'debit_account_no'  => $accountNo ? Str::limit($accountNo, 34, '') : null,
-                    'credit_account_no' => $debitAccount ? Str::limit($debitAccount, 34, '') : null,
+                    'batch_id'               => $batch->id,
+                    'file_name'              => $fileName,
+                    'row_number'             => $index + 1,
+                    'transaction_type'       => $this->channelType,
+                    'reference_id'           => $refId ? Str::limit($refId, 100, '') : 'N/A',
+                    'beneficiary_account_no' => $accountNo ? Str::limit($accountNo, 34, '') : null,
+                    'source_account_no'      => $debitAccount ? Str::limit($debitAccount, 34, '') : null,
                     'amount'            => $amount,
                     'failure_code'      => $validation['failure_code'] ?? 'VALIDATION_FAILED',
                     'reject_reason'     => implode(', ', $validation['errors']),

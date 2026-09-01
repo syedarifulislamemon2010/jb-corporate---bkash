@@ -29,8 +29,8 @@ class DatabaseTransactionAtomicityTest extends TestCase
             'reference_id'      => 'REF_ATOMIC_FAIL_01',
             'txn_id'            => 'TXN_ATOMIC_FAIL_01',
             'amount'            => 35000.00,
-            'credit_account_no' => '0100202707747',
-            'debit_account_no'  => '0100987654321',
+            'source_account_no' => '0100202707747',
+            'beneficiary_account_no'  => '0100987654321',
             'status_id'         => BkashTransaction::STATUS_FINAL_AUTHORIZED,
         ]);
 
@@ -67,8 +67,8 @@ class DatabaseTransactionAtomicityTest extends TestCase
             'reference_id'      => 'REF_ATOMIC_JOB_OK',
             'txn_id'            => 'TXN_ATOMIC_JOB_OK',
             'amount'            => 20000.00,
-            'credit_account_no' => '0100202707747',
-            'debit_account_no'  => '0100555555555',
+            'source_account_no' => '0100202707747',
+            'beneficiary_account_no'  => '0100555555555',
             'status_id'         => BkashTransaction::STATUS_FINAL_AUTHORIZED,
         ]);
 
@@ -100,8 +100,8 @@ class DatabaseTransactionAtomicityTest extends TestCase
             'reference_id'      => 'REF_ATOMIC_JOB_FAIL',
             'txn_id'            => 'TXN_ATOMIC_JOB_FAIL',
             'amount'            => 150000.00,
-            'credit_account_no' => '0100202707747',
-            'debit_account_no'  => '0100666666666',
+            'source_account_no' => '0100202707747',
+            'beneficiary_account_no'  => '0100666666666',
             'status_id'         => BkashTransaction::STATUS_FINAL_AUTHORIZED,
         ]);
 

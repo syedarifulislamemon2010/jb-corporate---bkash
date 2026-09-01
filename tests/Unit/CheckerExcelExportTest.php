@@ -18,9 +18,9 @@ class CheckerExcelExportTest extends TestCase
             'reference_id'        => 'REF_A2A_01',
             'txn_id'              => 'TXN_A2A_01',
             'debit_account_title' => 'John Doe',
-            'debit_account_no'    => '0100123456789',
+            'beneficiary_account_no'    => '0100123456789',
             'amount'              => 5000.00,
-            'credit_account_no'   => '0100202707747',
+            'source_account_no'   => '0100202707747',
         ]);
         $t1->create_date = now();
 
@@ -30,11 +30,11 @@ class CheckerExcelExportTest extends TestCase
             'bb_reference_number' => 'REF_BEFTN_01',
             'txn_id'              => 'TXN_BEFTN_01',
             'debit_account_title' => 'Jane Smith',
-            'debit_account_no'    => '2050123456789',
+            'beneficiary_account_no'    => '2050123456789',
             'credit_routing'      => '125260856',
             'credit_bank'         => 'Islami Bank Gulshan Branch',
             'amount'              => 15000.00,
-            'credit_account_no'   => '0100202707747',
+            'source_account_no'   => '0100202707747',
         ]);
         $t2->create_date = now();
 
@@ -44,11 +44,11 @@ class CheckerExcelExportTest extends TestCase
             'bb_reference_number' => 'REF_RTGS_01',
             'txn_id'              => 'TXN_RTGS_01',
             'debit_account_title' => 'Acme Corp',
-            'debit_account_no'    => '3050123456789',
+            'beneficiary_account_no'    => '3050123456789',
             'credit_routing'      => '225260856',
             'credit_bank'         => 'City Bank Principal Branch',
             'amount'              => 250000.00,
-            'credit_account_no'   => '0100224107522',
+            'source_account_no'   => '0100224107522',
         ]);
         $t3->create_date = now();
 
@@ -129,9 +129,9 @@ class CheckerExcelExportTest extends TestCase
             'reference_id'        => 'REF_TEST_01',
             'txn_id'              => 'TXN_TEST_01',
             'debit_account_title' => 'Test Account',
-            'debit_account_no'    => '0100111111111',
+            'beneficiary_account_no'    => '0100111111111',
             'amount'              => 1000.00,
-            'credit_account_no'   => '0100202707747',
+            'source_account_no'   => '0100202707747',
         ]);
         $t1->create_date = now();
 

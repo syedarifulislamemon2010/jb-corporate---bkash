@@ -101,8 +101,8 @@ class BkashTransactionsTable
                         default => 'gray',
                     }),
 
-                TextColumn::make('credit_account_no')
-                    ->label('Debit Account')
+                TextColumn::make('source_account_no')
+                    ->label('Source Account (TCSA/Ops)')
                     ->searchable()
                     ->toggleable(),
 
@@ -111,8 +111,8 @@ class BkashTransactionsTable
                     ->searchable()
                     ->toggleable(),
 
-                TextColumn::make('debit_account_no')
-                    ->label('Beneficiary Acc')
+                TextColumn::make('beneficiary_account_no')
+                    ->label('Beneficiary Account')
                     ->searchable()
                     ->toggleable(),
 

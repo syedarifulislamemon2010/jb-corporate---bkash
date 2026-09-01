@@ -53,17 +53,10 @@ class BkashTransaction extends Model
         'value_date',
         'return_date',
 
-        // NOTE: 'credit_account_no' DB column actually stores the TCSA/Operational 
-        // (source/debit) account number from the Excel "Debit Account" column — 
-        // naming is inverted from its literal meaning but used consistently across 
-        // the codebase (parser, dashboard balance calc, reports). Do NOT rename 
-        // without updating all dependent code.
-        // NOTE: 'debit_account_no' DB column actually stores the beneficiary 
-        // (destination/credit) account number.
-        'debit_account_no',
+        'source_account_no',
+        'beneficiary_account_no',
         'debit_account_title',
         'debit_routing',
-        'credit_account_no',
         'credit_account_title',
         'credit_routing',
         'credit_bank',

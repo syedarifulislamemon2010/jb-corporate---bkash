@@ -143,9 +143,7 @@ class BkashExcelParserService
             } elseif (in_array($cleanHeader, ['acname', 'bankaccountname', 'benename', 'beneficiaryname', 'accountname', 'beneaccountname'])) {
                 $mapped['debit_account_title'] = static::cleanString((string) $val, 150);
             } elseif (in_array($cleanHeader, ['accountno', 'beneficiaryacno', 'bankaccountnumber', 'bankaccountno', 'beneaccountno', 'acno'])) {
-                // NOTE: 'debit_account_no' DB column actually stores the beneficiary 
-                // (destination/credit) account number.
-                $mapped['debit_account_no'] = static::cleanString((string) $val, 100);
+                $mapped['beneficiary_account_no'] = static::cleanString((string) $val, 100);
             } elseif (in_array($cleanHeader, ['amount', 'amountbdt', 'amountintaka'])) {
                 $cleanVal = preg_replace('/[^0-9.]/', '', str_replace(',', '', (string) $val));
                 $mapped['amount'] = (float) $cleanVal;
@@ -162,12 +160,7 @@ class BkashExcelParserService
                 // Combined Bank & Branch (e.g. in RTGS files: "MUTUAL TRUST BANK LTD.,GAZIPUR")
                 $mapped['credit_bank'] = static::cleanString((string) $val, 255);
             } elseif (in_array($cleanHeader, ['debitaccount', 'debitaccountno'])) {
-                // NOTE: 'credit_account_no' DB column actually stores the TCSA/Operational 
-                // (source/debit) account number from the Excel "Debit Account" column — 
-                // naming is inverted from its literal meaning but used consistently across 
-                // the codebase (parser, dashboard balance calc, reports). Do NOT rename 
-                // without updating all dependent code.
-                $mapped['credit_account_no'] = static::cleanString((string) $val, 100);
+                $mapped['source_account_no'] = static::cleanString((string) $val, 100);
             } elseif (in_array($cleanHeader, ['txnid', 'transactionid'])) {
                 $mapped['txn_id'] = static::cleanString((string) $val, 100);
             } elseif (in_array($cleanHeader, ['rejectreason'])) {
@@ -279,7 +272,7 @@ class BkashExcelParserService
 
         $refId = $mapped['reference_id'] ?? null;
         $amount = (float) ($mapped['amount'] ?? 0);
-        $debitAccount = $mapped['credit_account_no'] ?? null;
+        $debitAccount = $mapped['source_account_no'] ?? null;
         $txnId = $mapped['txn_id'] ?? null;
 
         // Required field checks
@@ -316,7 +309,7 @@ class BkashExcelParserService
         }
 
         // A2A-Specific Validation: Beneficiary account number required
-        $beneAccount = $mapped['debit_account_no'] ?? null;
+        $beneAccount = $mapped['beneficiary_account_no'] ?? null;
         if ($channelType === 'A2A' && empty($beneAccount)) {
             $errors[] = 'Beneficiary Account Number is required for Account-to-Account transfer.';
             $failureCode = 'INVALID_ACCOUNT_NO';
@@ -379,7 +372,7 @@ class BkashExcelParserService
 
             $rowArr = array_values((array) $row);
             $mapped = static::mapRowData($headerRow, $rowArr);
-            $debitAcc = static::cleanString($mapped['credit_account_no'] ?? null, 100);
+            $debitAcc = static::cleanString($mapped['source_account_no'] ?? null, 100);
 
             if (!empty($debitAcc)) {
                 $detectedAccounts[$debitAcc] = true;

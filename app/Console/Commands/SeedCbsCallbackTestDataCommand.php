@@ -131,22 +131,22 @@ class SeedCbsCallbackTestDataCommand extends Command
             'transaction_type'    => 'A2A',
             'reference_id'        => $testRefId,
             'txn_id'              => $testTxnId,
-            'debit_account_no'    => '0100111111111', // Beneficiary Acc
-            'debit_account_title' => 'Test Beneficiary User',
-            'credit_account_no'   => '0100202707747', // TCSA Pool (Debit Account)
-            'amount'              => 50000.00,
-            'status_id'           => BkashTransaction::STATUS_FINAL_AUTHORIZED, // 1003
-            'checked_by'          => 'Test Checker User',
-            'checked_at'          => Carbon::now()->subMinutes(15),
-            'approved_by_1'       => 'Test Authorizer 1',
-            'approved_at_1'       => Carbon::now()->subMinutes(10),
-            'approved_by_2'       => 'Test Authorizer 2',
-            'approved_at_2'       => Carbon::now()->subMinutes(5),
-            'confirmed_by'        => null,
-            'confirmed_at'        => null,
-            'response_id'         => null,
-            'cbs_success_at'      => null,
-            'reject_reason'       => null,
+            'beneficiary_account_no' => '0100111111111', // Beneficiary Acc
+            'debit_account_title'    => 'Test Beneficiary User',
+            'source_account_no'      => '0100202707747', // TCSA Pool (Source Account)
+            'amount'                 => 50000.00,
+            'status_id'              => BkashTransaction::STATUS_FINAL_AUTHORIZED, // 1003
+            'checked_by'             => 'Test Checker User',
+            'checked_at'             => Carbon::now()->subMinutes(15),
+            'approved_by_1'          => 'Test Authorizer 1',
+            'approved_at_1'          => Carbon::now()->subMinutes(10),
+            'approved_by_2'          => 'Test Authorizer 2',
+            'approved_at_2'          => Carbon::now()->subMinutes(5),
+            'confirmed_by'           => null,
+            'confirmed_at'           => null,
+            'response_id'            => null,
+            'cbs_success_at'         => null,
+            'reject_reason'          => null,
         ];
 
         if ($txn) {
@@ -164,8 +164,8 @@ class SeedCbsCallbackTestDataCommand extends Command
                 ['Reference ID', $txn->reference_id],
                 ['Status ID', $txn->status_id . ' (STATUS_FINAL_AUTHORIZED)'],
                 ['Amount (BDT)', number_format($txn->amount, 2)],
-                ['Beneficiary Acc', $txn->debit_account_no],
-                ['TCSA Pool Acc', $txn->credit_account_no],
+                ['Beneficiary Acc', $txn->beneficiary_account_no],
+                ['TCSA Pool Acc', $txn->source_account_no],
             ]
         );
         $this->newLine();

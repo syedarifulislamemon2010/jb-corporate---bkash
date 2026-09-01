@@ -112,13 +112,11 @@ class BkashFailedTransactionResource extends Resource
                     ->searchable()
                     ->sortable(),
 
-                // 8. Debit Account
-                TextColumn::make('debit_account_no')
-                    ->label('Debit Account')
+                TextColumn::make('source_account_no')
+                    ->label('Source Account (TCSA/Ops)')
                     ->searchable(),
 
-                // 9. Beneficiary Account
-                TextColumn::make('credit_account_no')
+                TextColumn::make('beneficiary_account_no')
                     ->label('Beneficiary Account')
                     ->searchable(),
 
