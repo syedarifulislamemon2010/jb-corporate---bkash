@@ -20,8 +20,9 @@ use Filament\Resources\Pages\Page;
 use Carbon\Carbon;
 
 use App\Services\BkashExcelParserService;
-use Illuminate\Support\Str;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
 
 class UploadBkashExcel extends Page implements HasForms
 {
@@ -71,6 +72,9 @@ class UploadBkashExcel extends Page implements HasForms
     {
         $formData = $this->form->getState();
         $relativeFile = $formData['file'] ?? '';
+        if (is_array($relativeFile)) {
+            $relativeFile = array_values($relativeFile)[0] ?? '';
+        }
 
         $possiblePaths = [
             Storage::disk('public')->path($relativeFile),
@@ -148,75 +152,51 @@ class UploadBkashExcel extends Page implements HasForms
         $validCount = 0;
         $totalAmount = 0.0;
 
-        foreach ($importRows as $index => $row) {
-            if ($index === 0 || empty(array_filter((array)$row))) {
-                continue;
-            }
+        $uploaderName = auth()->user()->name ?? 'SYSTEM';
+        $uploaderId   = auth()->id();
 
-            $rowArr = array_values((array)$row);
-            $mapped = BkashExcelParserService::mapRowData($headerRow, $rowArr, $channelType);
-
-            $refId            = BkashExcelParserService::cleanString($mapped['reference_id'] ?? null, 255);
-            $accountName      = BkashExcelParserService::cleanString($mapped['debit_account_title'] ?? null, 150);
-            $accountNo        = BkashExcelParserService::cleanString($mapped['beneficiary_account_no'] ?? null, 100);
-            $amount           = (float)($mapped['amount'] ?? 0);
-            $routingNo        = BkashExcelParserService::cleanString($mapped['credit_routing'] ?? $mapped['debit_routing'] ?? null, 20);
-            $bankName         = BkashExcelParserService::cleanString($mapped['credit_bank'] ?? null, 255);
-            $branchName       = BkashExcelParserService::cleanString($mapped['branch_name'] ?? null, 255);
-            $debitAccount     = BkashExcelParserService::cleanString($mapped['source_account_no'] ?? null, 100);
-            $txnId            = BkashExcelParserService::cleanString($mapped['txn_id'] ?? (string)Str::uuid(), 100);
-            $createDate       = $mapped['create_date'] ?? null;
-            $rejectReason     = BkashExcelParserService::cleanString($mapped['reject_reason'] ?? null, 255);
-
-            if ($refId && $amount > 0) {
-                $validCount++;
-                $totalAmount += $amount;
-
-                $parsedDate = $createDate ? Carbon::parse($createDate) : Carbon::now();
-                $valueDate  = \App\Helper\ValueDateHelper::resolve($parsedDate)->toDateString();
-
-                $txnData = [
-                    'batch_id'               => $batch->id,
-                    'row_sequence'           => $index,
-                    'transaction_type'       => $channelType,
-                    'reference_id'           => Str::limit($refId, 255, ''),
-                    'bb_reference_number'    => $bbRef ? Str::limit($bbRef, 100, '') : null,
-                    'txn_id'                 => Str::limit($txnId, 100, ''),
-                    'debit_account_title'    => $accountName ? Str::limit($accountName, 150, '') : null,
-                    'beneficiary_account_no' => $accountNo ? Str::limit($accountNo, 100, '') : null,
-                    'debit_routing'          => $routingNo ? Str::limit($routingNo, 20, '') : null,
-                    'source_account_no'      => $debitAccount ? Str::limit($debitAccount, 100, '') : null,
-                    'credit_routing'         => $routingNo ? Str::limit($routingNo, 20, '') : null,
-                    'credit_bank'            => $bankName ? Str::limit($bankName, 255, '') : null,
-                    'amount'                 => $amount,
-                    'status_id'              => BkashTransaction::STATUS_PENDING_CHECKER,
-                    'created_by'             => Str::limit(auth()->user()->name ?? 'SYSTEM', 255, ''),
-                    'created_by_id'          => auth()->id(),
-                    'create_date'            => $parsedDate,
-                    'value_date'             => $valueDate,
-                    'file_name'              => $fileName,
-                ];
-
-                if ($rejectReason) {
-                    $txnData['reject_reason'] = $rejectReason;
+        DB::transaction(function () use ($importRows, $headerRow, $channelType, $batch, $fileName, $uploaderName, $uploaderId, &$validCount, &$totalAmount) {
+            foreach ($importRows as $index => $row) {
+                if ($index === 0 || empty(array_filter((array)$row))) {
+                    continue;
                 }
 
-                BkashTransaction::create($txnData);
-            } else {
-                BkashFailedTransaction::create([
-                    'batch_id'               => $batch->id,
-                    'file_name'              => $fileName,
-                    'row_number'             => $index + 1,
-                    'transaction_type'       => $channelType,
-                    'reference_id'           => $refId ? Str::limit($refId, 100, '') : 'N/A',
-                    'source_account_no'      => $debitAccount ? Str::limit($debitAccount, 50, '') : null,
-                    'beneficiary_account_no' => $accountNo ? Str::limit($accountNo, 50, '') : null,
-                    'amount'           => $amount,
-                    'failure_code'     => 'INVALID_ROW',
-                    'reject_reason'    => 'Missing reference ID or invalid amount',
-                ]);
+                $rowArr = array_values((array)$row);
+                $mapped = BkashExcelParserService::mapRowData($headerRow, $rowArr, $channelType);
+
+                $refId  = BkashExcelParserService::cleanString($mapped['reference_id'] ?? null, 255);
+                $amount = (float)($mapped['amount'] ?? 0);
+
+                if ($refId && $amount > 0) {
+                    $validCount++;
+                    $totalAmount += $amount;
+
+                    $txnData = BkashExcelParserService::buildTransactionData(
+                        $mapped,
+                        $channelType,
+                        $batch,
+                        $index,
+                        $fileName,
+                        $uploaderName,
+                        $uploaderId
+                    );
+
+                    BkashTransaction::create($txnData);
+                } else {
+                    $failedData = BkashExcelParserService::buildFailedTransactionData(
+                        $mapped,
+                        $channelType,
+                        $batch,
+                        $index,
+                        $fileName,
+                        'INVALID_ROW',
+                        'Missing reference ID or invalid amount'
+                    );
+
+                    BkashFailedTransaction::create($failedData);
+                }
             }
-        }
+        });
 
         $updateData = ['total_data' => $validCount];
         if (\Illuminate\Support\Facades\Schema::hasColumn('bkash_transaction_batch', 'total_amount')) {

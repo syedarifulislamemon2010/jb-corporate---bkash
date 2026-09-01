@@ -2,7 +2,9 @@
 
 namespace App\Services;
 
+use App\Helper\ValueDateHelper;
 use App\Models\BkashTransaction;
+use Carbon\Carbon;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
 
@@ -403,5 +405,99 @@ class BkashExcelParserService
     public static function getDebitAccountsWhitelist(): array
     {
         return static::getWhitelistedAccounts();
+    }
+
+    /**
+     * Build standardized BkashTransaction attribute array from parsed row data.
+     */
+    public static function buildTransactionData(
+        array $mapped,
+        string $channelType,
+        $batch,
+        int $rowIndex,
+        string $fileName,
+        ?string $createdBy = null,
+        ?int $createdById = null
+    ): array {
+        $refId        = static::cleanString($mapped['reference_id'] ?? null, 255);
+        $bbRef        = static::cleanString($mapped['bb_reference_number'] ?? null, 100);
+        $accountName  = static::cleanString($mapped['debit_account_title'] ?? null, 150);
+        $accountNo    = static::cleanString($mapped['beneficiary_account_no'] ?? null, 100);
+        $amount       = (float) ($mapped['amount'] ?? 0);
+        $routingNo    = static::cleanString($mapped['credit_routing'] ?? $mapped['debit_routing'] ?? null, 20);
+        $bankName     = static::cleanString($mapped['credit_bank'] ?? null, 255);
+        $branchName   = static::cleanString($mapped['branch_name'] ?? null, 255);
+        $debitAccount = static::cleanString($mapped['source_account_no'] ?? null, 100);
+        $txnId        = static::cleanString($mapped['txn_id'] ?? null, 100) ?: (string) Str::uuid();
+        $createDate   = $mapped['create_date'] ?? null;
+        $rejectReason = static::cleanString($mapped['reject_reason'] ?? null, 255);
+
+        $parsedDate = $createDate ? Carbon::parse($createDate) : Carbon::now();
+        $valueDate  = ValueDateHelper::resolve($parsedDate)->toDateString();
+
+        $batchId = is_object($batch) ? $batch->id : $batch;
+
+        $txnData = [
+            'batch_id'               => $batchId,
+            'file_name'              => $fileName,
+            'row_sequence'           => $rowIndex,
+            'transaction_type'       => $channelType,
+            'reference_id'           => Str::limit($refId, 255, ''),
+            'bb_reference_number'    => $bbRef ? Str::limit($bbRef, 100, '') : null,
+            'txn_id'                 => Str::limit($txnId, 100, ''),
+            'debit_account_title'    => $accountName ? Str::limit($accountName, 150, '') : null,
+            'beneficiary_account_no' => $accountNo ? Str::limit($accountNo, 100, '') : null,
+            'debit_routing'          => $routingNo ? Str::limit($routingNo, 20, '') : null,
+            'source_account_no'      => $debitAccount ? Str::limit($debitAccount, 100, '') : null,
+            'credit_routing'         => $routingNo ? Str::limit($routingNo, 20, '') : null,
+            'credit_bank'            => $bankName ? Str::limit($bankName, 255, '') : null,
+            'amount'                 => $amount,
+            'status_id'              => BkashTransaction::STATUS_PENDING_CHECKER,
+            'created_by'             => Str::limit($createdBy ?? 'SYSTEM', 255, ''),
+            'create_date'            => $parsedDate,
+            'value_date'             => $valueDate,
+        ];
+
+        if ($createdById !== null) {
+            $txnData['created_by_id'] = $createdById;
+        }
+
+        if ($rejectReason) {
+            $txnData['reject_reason'] = $rejectReason;
+        }
+
+        return $txnData;
+    }
+
+    /**
+     * Build standardized BkashFailedTransaction attribute array from parsed row data.
+     */
+    public static function buildFailedTransactionData(
+        array $mapped,
+        string $channelType,
+        $batch,
+        int $rowIndex,
+        string $fileName,
+        ?string $failureCode = 'INVALID_ROW',
+        ?string $rejectReason = null
+    ): array {
+        $refId        = static::cleanString($mapped['reference_id'] ?? null, 100) ?: 'N/A';
+        $accountNo    = static::cleanString($mapped['beneficiary_account_no'] ?? null, 50);
+        $debitAccount = static::cleanString($mapped['source_account_no'] ?? null, 50);
+        $amount       = (float) ($mapped['amount'] ?? 0);
+        $batchId      = is_object($batch) ? $batch->id : $batch;
+
+        return [
+            'batch_id'               => $batchId,
+            'file_name'              => $fileName,
+            'row_number'             => $rowIndex + 1,
+            'transaction_type'       => $channelType,
+            'reference_id'           => Str::limit($refId, 100, ''),
+            'beneficiary_account_no' => $accountNo ? Str::limit($accountNo, 50, '') : null,
+            'source_account_no'      => $debitAccount ? Str::limit($debitAccount, 50, '') : null,
+            'amount'                 => $amount,
+            'failure_code'           => $failureCode ?: 'INVALID_ROW',
+            'reject_reason'          => $rejectReason ?: ($mapped['reject_reason'] ?? 'Validation failed'),
+        ];
     }
 }
