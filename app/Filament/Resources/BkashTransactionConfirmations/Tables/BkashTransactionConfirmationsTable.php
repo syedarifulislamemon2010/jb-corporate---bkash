@@ -105,6 +105,16 @@ class BkashTransactionConfirmationsTable
                     ->tooltip('Perform final confirmation and trigger automated CBS settlement')
                     ->color('success')
                     ->requiresConfirmation()
+                    ->modalHeading('Confirm Final Settlement')
+                    ->modalDescription(function (Collection $records) {
+                        $totalAmount = $records->sum('amount');
+                        $formattedAmount = \App\Models\BkashTransaction::formatBdtAmount((float) $totalAmount);
+                        return "You are about to FINALLY settle {$records->count()} transaction(s) " .
+                               "totaling BDT {$formattedAmount}. This will trigger instant CBS " .
+                               "settlement (debit + credit) and CANNOT be reversed. Please verify " .
+                               "the amounts carefully before proceeding.";
+                    })
+                    ->modalSubmitActionLabel('Yes, Settle Now')
                     ->action(function (Collection $records) {
                         $currentUser = Auth::user();
                         $currentUserId = $currentUser->id ?? null;

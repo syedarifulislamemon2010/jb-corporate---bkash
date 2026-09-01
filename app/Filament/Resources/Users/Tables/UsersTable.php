@@ -21,6 +21,9 @@ class UsersTable
             ->recordUrl(null)
             ->defaultPaginationPageOption(50)
             ->paginated([20, 50, 100])
+            ->emptyStateHeading('No Users Yet')
+            ->emptyStateDescription('Create your first user to get started with the approval workflow.')
+            ->emptyStateIcon('heroicon-o-user-plus')
             ->columns([
                 TextColumn::make('id')
                     ->label('ID')

@@ -105,6 +105,11 @@ class BkashTransactionAuthorizationsTable
                     ->tooltip('Approve selected transactions for 2nd / Final Authorization')
                     ->color('warning')
                     ->requiresConfirmation()
+                    ->modalHeading('Confirm 1st Level Authorization')
+                    ->modalDescription(function (Collection $records) {
+                        return "You are about to authorize {$records->count()} transaction(s) and forward them to the 2nd / Final Authorizer queue.";
+                    })
+                    ->modalSubmitActionLabel('Yes, Authorize Now')
                     ->action(function (Collection $records) {
                         $currentUser = Auth::user();
                         $currentUserId = $currentUser->id ?? null;

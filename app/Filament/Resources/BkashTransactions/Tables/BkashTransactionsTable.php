@@ -129,6 +129,11 @@ class BkashTransactionsTable
                     ->tooltip('Verify and forward selected transactions to 1st Authorizer')
                     ->color('info')
                     ->requiresConfirmation()
+                    ->modalHeading('Confirm Checker Verification')
+                    ->modalDescription(function (Collection $records) {
+                        return "You are about to verify {$records->count()} transaction(s) and forward them to the 1st Authorizer queue.";
+                    })
+                    ->modalSubmitActionLabel('Yes, Verify Now')
                     ->action(function (Collection $records) {
                         $currentUser = Auth::user();
                         $checkerName = $currentUser->name ?? 'Checker User';

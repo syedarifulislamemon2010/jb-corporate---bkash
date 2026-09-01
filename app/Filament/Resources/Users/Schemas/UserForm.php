@@ -26,8 +26,14 @@ class UserForm
 
                 TextInput::make('mobile_no')
                     ->label('Mobile No')
+                    ->tel()
+                    ->placeholder('01XXXXXXXXX')
+                    ->regex('/^01[3-9]\d{8}$/')
                     ->required()
-                    ->maxLength(255),
+                    ->maxLength(11)
+                    ->validationMessages([
+                        'regex' => 'Please enter a valid 11-digit Bangladeshi mobile number (e.g. 01712345678).',
+                    ]),
 
                 TextInput::make('email')
                     ->label('Email address')

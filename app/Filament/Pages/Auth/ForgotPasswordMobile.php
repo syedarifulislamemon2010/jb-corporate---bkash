@@ -62,9 +62,14 @@ class ForgotPasswordMobile extends SimplePage
     {
         return TextInput::make('mobile_no')
             ->label('Registered Mobile Number')
-            ->placeholder('e.g. 01712345678')
             ->tel()
+            ->placeholder('01XXXXXXXXX')
+            ->regex('/^01[3-9]\d{8}$/')
             ->required()
+            ->maxLength(11)
+            ->validationMessages([
+                'regex' => 'Please enter a valid 11-digit Bangladeshi mobile number (e.g. 01712345678).',
+            ])
             ->autofocus();
     }
 
