@@ -14,7 +14,8 @@
   - [🖼️ System Screenshots](#️-system-screenshots)
   - [📊 Key Business Metrics at a Glance](#-key-business-metrics-at-a-glance)
   - [✅ Requirement Compliance Checklist](#-requirement-compliance-checklist)
-  - [🏗️ Technology Stack](#️-technology-stack)
+  - [📋 Requirement Traceability Matrix](#-requirement-traceability-matrix)
+  - [🏗️ Technology Stack & C4 Architecture](#️-technology-stack--c4-architecture)
   - [🎤 Quick Presentation Talking Points](#-quick-presentation-talking-points)
 - [PART 2 — TECHNICAL DEEP-DIVE](#part-2--technical-deep-dive)
   - [📁 1. SFTP File Ingestion Pipeline](#-1-sftp-file-ingestion-pipeline)
@@ -22,9 +23,14 @@
   - [🔄 3. CBS Response Callback API (Inbound)](#-3-cbs-response-callback-api-inbound)
   - [🔐 4. Password Reset — Mobile OTP Flow](#-4-password-reset--mobile-otp-flow)
   - [🛠️ 5. Validation & Business Logic Engine](#️-5-validation--business-logic-engine)
+    - [🔄 3-Tier Segregation-of-Duties Workflow](#-3-tier-segregation-of-duties-workflow)
+    - [🚦 Finite State Machine (Lifecycle Diagram)](#-finite-state-machine-lifecycle-diagram)
+    - [🧩 Domain Class Architecture Diagram](#-domain-class-architecture-diagram)
   - [📐 6. Database Schema & Field Mapping](#-6-database-schema--field-mapping)
+    - [🗄️ Entity-Relationship Diagram (ERD)](#️-entity-relationship-diagram-erd)
   - [📲 7. Multi-Stage Notification Journey](#-7-multi-stage-notification-journey)
   - [🗺️ 8. Portal Navigation & UX Architecture](#-8-portal-navigation--ux-architecture)
+    - [🧭 Multi-Role Operational User Journey](#-multi-role-operational-user-journey)
   - [🚀 9. Setup & Execution Commands](#-9-setup--execution-commands)
   - [🔑 10. Environment Variables Reference](#-10-environment-variables-reference)
   - [✅ 11. Testing & Quality Assurance](#-11-testing--quality-assurance)
@@ -108,9 +114,84 @@ Below is the complete compliance matrix mapped against the official **bKash – 
 | **Mobile OTP Password Reset** | 4-step mobile OTP verification with 5-min TTL & lockout | ✅ | Dedicated mobile recovery flow with rate-limiting and temporary passwords |
 | **CBS Response Callback** | Inbound asynchronous settlement webhook from Bank CBS | ✅ | Webhook endpoint `POST /api/cbs/response-callback` secured with API key |
 
+### 📋 Requirement Traceability Matrix
+
+```mermaid
+requirementDiagram
+
+    requirement req_a2a_7days {
+        id: BRD-REQ-01
+        text: A2A settlements active 7 days a week with holiday tracking
+        risk: medium
+        verifymethod: test
+    }
+
+    requirement req_sftp_ingestion {
+        id: BRD-REQ-02
+        text: Automated SFTP file scanning every 15 minutes across 3 channels
+        risk: medium
+        verifymethod: test
+    }
+
+    requirement req_segregation {
+        id: BRD-REQ-03
+        text: Strict 3 distinct bank officers for Maker Checker Authorizer
+        risk: high
+        verifymethod: test
+    }
+
+    requirement req_rtgs_threshold {
+        id: BRD-REQ-04
+        text: RTGS transactions must enforce minimum 100000 BDT amount
+        risk: high
+        verifymethod: test
+    }
+
+    requirement req_cbs_h2h {
+        id: BRD-REQ-05
+        text: Real time Host to Host REST API settlement with async callback
+        risk: high
+        verifymethod: test
+    }
+
+    requirement req_security_auth {
+        id: BRD-REQ-06
+        text: Mandatory first login password change and mobile OTP verification
+        risk: high
+        verifymethod: test
+    }
+
+    element component_scheduler {
+        type: component
+    }
+
+    element component_segregation_policy {
+        type: component
+    }
+
+    element component_cbs_service {
+        type: component
+    }
+
+    element component_auth_guard {
+        type: component
+    }
+
+    element component_validator {
+        type: component
+    }
+
+    component_scheduler - satisfies -> req_sftp_ingestion
+    component_scheduler - satisfies -> req_a2a_7days
+    component_segregation_policy - satisfies -> req_segregation
+    component_validator - satisfies -> req_rtgs_threshold
+    component_cbs_service - satisfies -> req_cbs_h2h
+    component_auth_guard - satisfies -> req_security_auth
+```
+
 ---
 
-## 🏗️ Technology Stack
+## 🏗️ Technology Stack & C4 Architecture
 
 | Layer | Technology | Version / Implementation Details |
 | :--- | :--- | :--- |
@@ -122,7 +203,63 @@ Below is the complete compliance matrix mapped against the official **bKash – 
 | **Database Engine** | **Oracle Database / SQLite** | `yajra/laravel-oci8` (`v12.0`) for Enterprise Oracle; SQLite for local test suites |
 | **Log Management** | **Opcodes Log Viewer** | `v3.24` — Real-time system diagnostics & audit trail log viewer |
 | **API Authentication** | **Laravel Sanctum** | `v4.3` — Token-based security for test endpoints and internal APIs |
-| **Automated Test Suite** | **PHPUnit / Pest** | `PHPUnit 11.5` (`80 tests, 390 assertions, 100% passing`) |
+| **Automated Test Suite** | **PHPUnit / Pest** | `PHPUnit 11.5` (`163 tests, 820 assertions, 100% passing`) |
+
+### 🏛️ C4 System Container & Context Architecture
+
+```mermaid
+flowchart TB
+    subgraph External_Entities ["External Actors & Systems"]
+        BK_USER["bKash Operations Team<br/>(SFTP File Ingestion)"]
+        JB_OFFICERS["Janata Bank Officers<br/>(Checker, Auth 1, Auth 2, Admin)"]
+        BK_SFTP["bKash SFTP Server<br/>(/Account-to-Account, /BEFTN, /RTGS)"]
+        JB_CBS["Janata Bank Core Banking System (CBS)<br/>(Flora Bank REST API & Callback Webhook)"]
+        SMS_GW["Janata SMS Gateway<br/>(HTTP REST API)"]
+        SMTP_SRV["Corporate Mail Server<br/>(SMTP TLS)"]
+    end
+
+    subgraph Portal_Boundary ["Janata Bank Corporate Portal Infrastructure"]
+        subgraph Web_Tier ["Web & Presentation Tier"]
+            NGINX["Reverse Proxy & TLS Termination<br/>(Nginx)"]
+            FILAMENT["Filament v3 Admin Panel<br/>(Livewire 3, Tailwind CSS, Alpine.js)"]
+        end
+
+        subgraph App_Tier ["Application & Business Logic Tier"]
+            ROUTING["Routing & Security Middleware<br/>(ForcePasswordReset, Sanctum, RoleGuard)"]
+            AUTH_ENGINE["Auth & Access Control<br/>(Spatie Shield, 3-Tier Segregation Engine)"]
+            SERVICES["Core Banking Integration Services<br/>(CbsApiService, NotificationService, SMSGenerateHelper)"]
+            QUEUES["Background Queue & Asynchronous Workers<br/>(ProcessBkashFileJob, ExecuteCbsSettlementJob)"]
+            CRON["Linux Cron / Task Scheduler<br/>(15-min SFTP Sync, MT940 Generator)"]
+        end
+
+        subgraph Data_Tier ["Persistence & Storage Tier"]
+            ORACLE_DB[("Oracle 19c Enterprise Database<br/>(Transactions, Batches, Audit Logs)")]
+            REDIS_CACHE[("Cache Store<br/>(Rate Limits, OTP Tokens, JWT Cache)")]
+            STORAGE_FS["Local Storage Filesystem<br/>(Ingested Excel, Generated MT940 .sta)"]
+        end
+    end
+
+    BK_USER -->|1. Uploads .xls / .xlsx files| BK_SFTP
+    CRON -->|2. Auto-fetch every 15 min| BK_SFTP
+    CRON -->|3. Dispatches ingestion job| QUEUES
+    QUEUES -->|4. Parse & Store| STORAGE_FS
+    QUEUES -->|5. Insert records| ORACLE_DB
+
+    JB_OFFICERS -->|HTTPS| NGINX
+    NGINX --> FILAMENT
+    FILAMENT --> ROUTING
+    ROUTING --> AUTH_ENGINE
+    AUTH_ENGINE --> SERVICES
+    
+    SERVICES -->|Read / Write| ORACLE_DB
+    SERVICES -->|Session & OTP cache| REDIS_CACHE
+    SERVICES -->|6. Host-to-Host Settlement POST| JB_CBS
+    JB_CBS -.->|7. Inbound Callback Webhook| ROUTING
+    SERVICES -->|Broadcast Alerts| SMS_GW
+    SERVICES -->|Broadcast Emails| SMTP_SRV
+    SMS_GW -.->|SMS Notifications| JB_OFFICERS
+    SMTP_SRV -.->|Email Notifications| JB_OFFICERS
+```
 
 ---
 
@@ -139,7 +276,7 @@ Use these concise, high-impact bullet points when presenting this system to bank
 - **Multi-Stage SMS & Email Broadcasts**: Immediate operational awareness across all stages with role-scoped alerts, BDT Lakh/Crore comma formatting, and actor exclusion.
 - **Bank-Grade Mobile OTP Security**: Self-service 4-step password recovery via mobile OTP with rate-limiting, 5-minute TTL, and brute-force lockout safeguards.
 - **Enterprise Auditability**: Every single state change, file hash, user identifier, and CBS response ID is immutably logged with microsecond timestamps.
-- **Production-Tested Stability**: Backed by 80 automated unit and feature tests covering all 390 business assertions with 100% passing rate.
+- **Production-Tested Stability**: Backed by 163 automated unit and feature tests covering all 820 business assertions with 100% passing rate.
 
 ---
 
@@ -406,6 +543,7 @@ sequenceDiagram
 - **Interceptor Middleware:** `ForcePasswordResetOnFirstLogin` protects all admin and dashboard routes while permitting `/admin/force-password-change` and `/admin/logout`.
 - **Dedicated Security Interface:** Operates inside an isolated card layout (`SimplePage`) without exposing administrative navigation or sidebar controls until credentials are authenticated.
 - **Account Number Diagnostic:** For detailed technical audit comparing 13-digit customer accounts (`0100...`) vs 15-digit internal CBS GL accounts (`1116...`), refer to [ACCOUNT_NUMBER_MAPPING_DIAGNOSTIC.md](docs/ACCOUNT_NUMBER_MAPPING_DIAGNOSTIC.md).
+- **Recent Hardening (Sept 2, 2026):** Password-reset confirmation notifications (SMS+Email) now fire on both the mobile-OTP forgot-password flow and the first-login forced password change flow. The Failed Transactions search/table was made resilient to legacy database schema variations. The account-status was fixed to correctly transition to `active` when a user resets their password via the mobile forgot-password flow (previously only the forced first-login flow updated this status, which could cause a redirect loop for users who used forgot-password instead).
 
 ---
 
@@ -448,6 +586,151 @@ flowchart TD
     end
 ```
 
+### 🚦 Finite State Machine (Lifecycle Diagram)
+
+The state machine enforces transactional integrity across every batch and transaction row from ingestion to clearing:
+
+```mermaid
+stateDiagram-v2
+    [*] --> 1000_PENDING_CHECKER: SFTP Auto-Ingest / Manual Upload
+    
+    state "1000: PENDING_CHECKER" as 1000_PENDING_CHECKER
+    state "1001: CHECKED" as 1001_CHECKED
+    state "1002: AUTH_1_APPROVED" as 1002_AUTH_1_APPROVED
+    state "1003: FINAL_AUTHORIZED" as 1003_FINAL_AUTHORIZED
+    state "1004: CBS_SETTLED" as 1004_CBS_SETTLED
+    state "1006: CBS_ASYNC_CONFIRMED" as 1006_CBS_ASYNC_CONFIRMED
+    state "1007: CBS_FAILED" as 1007_CBS_FAILED
+    state "ISOLATED: FAILED_RECORDS" as FAILED_RECORDS
+
+    1000_PENDING_CHECKER --> 1001_CHECKED: Checker Verifies Batch (Maker != Checker)
+    1000_PENDING_CHECKER --> FAILED_RECORDS: Row Validation Failure (Invalid routing / Dormant account)
+
+    1001_CHECKED --> 1002_AUTH_1_APPROVED: 1st Authorizer Approves (Distinct Officer)
+    1001_CHECKED --> 1000_PENDING_CHECKER: Revert Batch (Defect detected during review)
+
+    1002_AUTH_1_APPROVED --> 1003_FINAL_AUTHORIZED: 2nd Authorizer Confirms (Distinct Officer)
+    1002_AUTH_1_APPROVED --> 1000_PENDING_CHECKER: Revert Batch (Rejection returned to Checker)
+
+    1003_FINAL_AUTHORIZED --> CBS_POSTING: Dispatch ExecuteCbsSettlementJob
+    
+    state CBS_POSTING {
+        [*] --> Send_REST_Payload
+        Send_REST_Payload --> Sync_Success: HTTP 200 OK
+        Send_REST_Payload --> Async_Pending: Webhook Expected
+        Send_REST_Payload --> Sync_Failed: Network Timeout / 4xx / 5xx
+    }
+
+    CBS_POSTING --> 1004_CBS_SETTLED: Sync_Success (Instant Ledger Debit)
+    CBS_POSTING --> 1006_CBS_ASYNC_CONFIRMED: Inbound Callback Status 1006
+    CBS_POSTING --> 1007_CBS_FAILED: Inbound Callback Status 1007 / Sync_Failed
+
+    1007_CBS_FAILED --> FAILED_RECORDS: Automatic Isolation with reject_reason
+    1004_CBS_SETTLED --> [*]
+    1006_CBS_ASYNC_CONFIRMED --> [*]
+```
+
+### 🧩 Domain Class Architecture Diagram
+
+Core object-oriented design and domain services powering the financial processing engine:
+
+```mermaid
+classDiagram
+    class BkashTransactionBatch {
+        +uuid id
+        +string file_name
+        +string transaction_type
+        +string sha256
+        +int total_data
+        +decimal total_amount
+        +int status_id
+        +string created_by
+        +datetime create_date
+        +transactions() HasMany
+        +failedTransactions() HasMany
+        +canBeAuthorizedBy(user) bool
+        +canBeConfirmedBy(user) bool
+        +isFullySettled() bool
+    }
+
+    class BkashTransaction {
+        +uuid id
+        +uuid batch_id
+        +string txn_id
+        +string reference_id
+        +string bb_reference_number
+        +string source_account_no
+        +string beneficiary_account_no
+        +decimal amount
+        +int status_id
+        +string transaction_type
+        +date value_date
+        +string cbs_status
+        +string response_id
+        +batch() BelongsTo
+        +statusLabel(statusId) string
+    }
+
+    class BkashFailedTransaction {
+        +int id
+        +uuid batch_id
+        +string txn_id
+        +string reference_id
+        +string source_account_no
+        +string beneficiary_account_no
+        +decimal amount
+        +string reject_reason
+        +batch() BelongsTo
+    }
+
+    class User {
+        +int id
+        +string name
+        +string email
+        +string mobile_no
+        +string organization
+        +string account_status
+        +roles() BelongsToMany
+        +isTempPasswordIssued() bool
+        +markPasswordChanged() void
+    }
+
+    class CbsApiService {
+        +executeSettlement(transaction) array
+        +authenticate() string
+        +handleCallback(payload) bool
+        -buildPayload(transaction) array
+    }
+
+    class NotificationService {
+        +broadcastStage1(file, count, amount) void
+        +broadcastStage2(file, count, amount, checker) void
+        +broadcastStage3(file, count, amount, auth1) void
+        +broadcastStage4(file, count, amount, auth2) void
+    }
+
+    class SMSGenerateHelper {
+        +sendDirectSms(mobile, message) bool
+        +generate(mobile, password, type) bool
+    }
+
+    class ProcessBkashFileJob {
+        +string filePath
+        +string channel
+        +handle() void
+        -validateRow(row) bool
+        -detectDuplicateTxn(txnId) bool
+    }
+
+    BkashTransactionBatch "1" *-- "many" BkashTransaction : contains
+    BkashTransactionBatch "1" *-- "many" BkashFailedTransaction : isolates
+    User "1" ..> "many" BkashTransactionBatch : verifies_or_approves
+    ProcessBkashFileJob ..> BkashTransactionBatch : creates
+    ProcessBkashFileJob ..> NotificationService : triggers_stage1
+    CbsApiService ..> BkashTransaction : updates_status
+    NotificationService ..> SMSGenerateHelper : dispatches_sms
+```
+
 ### Core Business Rules Summary
 1. **Strict 3-Person Segregation of Duties**:
    - `STATUS_PENDING_CHECKER` (`1000`): Ingested files pending Checker verification.
@@ -470,6 +753,105 @@ flowchart TD
 ---
 
 ## 📐 6. Database Schema & Field Mapping
+
+### 🗄️ Entity-Relationship Diagram (ERD)
+
+The relational schema maps transactions, batches, security roles, and audit trails across the Oracle database:
+
+```mermaid
+erDiagram
+    USERS ||--o{ BKASH_TRANSACTION_BATCH : "creates / checks / approves"
+    USERS ||--o{ BKASH_TRANSACTIONS : "confirms"
+    USERS ||--o{ ACTIVITY_LOG : "triggers"
+    USERS }o--o{ ROLES : "assigned"
+    ROLES }o--o{ PERMISSIONS : "has"
+    
+    BKASH_TRANSACTION_BATCH ||--o{ BKASH_TRANSACTIONS : "contains"
+    BKASH_TRANSACTION_BATCH ||--o{ BKASH_FAILED_TRANSACTIONS : "isolates"
+
+    USERS {
+        bigint id PK
+        string name
+        string email UK
+        string mobile_no UK
+        string organization
+        string account_status "temp_password_issued, active"
+        string password
+        timestamp created_at
+        timestamp updated_at
+    }
+
+    ROLES {
+        bigint id PK
+        string name "super_admin, bkash_checker, bkash_authorizer_1, bkash_authorizer_2"
+        string guard_name
+    }
+
+    PERMISSIONS {
+        bigint id PK
+        string name
+        string guard_name
+    }
+
+    BKASH_TRANSACTION_BATCH {
+        uuid id PK
+        string file_name UK
+        string transaction_type "A2A, BEFTN, RTGS"
+        string sha256
+        int total_data
+        decimal total_amount
+        int status_id "1000..1007"
+        string created_by
+        timestamp create_date
+        timestamp created_at
+    }
+
+    BKASH_TRANSACTIONS {
+        uuid id PK
+        uuid batch_id FK
+        string file_name
+        string txn_id UK
+        string reference_id
+        string bb_reference_number
+        string source_account_no "bKash TCSA / Ops"
+        string beneficiary_account_no "Beneficiary"
+        string debit_account_title
+        string debit_routing
+        decimal amount
+        int status_id "1000..1007"
+        string transaction_type
+        date value_date
+        string cbs_status
+        string response_id
+        string confirmed_by
+        timestamp created_at
+    }
+
+    BKASH_FAILED_TRANSACTIONS {
+        bigint id PK
+        uuid batch_id FK
+        string file_name
+        string txn_id
+        string reference_id
+        string source_account_no
+        string beneficiary_account_no
+        decimal amount
+        text reject_reason
+        timestamp created_at
+    }
+
+    ACTIVITY_LOG {
+        bigint id PK
+        string log_name
+        text description
+        string subject_type
+        uuid subject_id
+        string causer_type
+        bigint causer_id
+        json properties
+        timestamp created_at
+    }
+```
 
 | Field Label | Database Column (`snake_case`) | Data Type | Functional Description |
 | :--- | :--- | :--- | :--- |
@@ -573,6 +955,37 @@ All notifications format monetary values with standard comma separation (e.g., `
     └── Roles & Permissions (Filament Shield Multi-Tier Permission Matrix)
 ```
 
+### 🧭 Multi-Role Operational User Journey
+
+```mermaid
+journey
+    title 3-Tier Multi-Role Operational Journey
+    section File Ingestion
+      bKash Operator uploads batch to SFTP: 5: bKash Operator
+      Automated Cron ingests and validates file: 5: System
+      Stage 1 broadcast notification sent: 5: System
+    section Checker Verification
+      Checker logs into Corporate Portal: 4: Checker
+      Inspects TCSA balance & batch totals: 5: Checker
+      Reviews line items & detects failures: 4: Checker
+      Executes Verification (Status 1001): 5: Checker
+      Stage 2 notification broadcast: 5: System
+    section 1st Authorization
+      1st Authorizer logs into Portal: 4: 1st Authorizer
+      Checks Maker-Checker segregation: 5: 1st Authorizer
+      Grants Primary Approval (Status 1002): 5: 1st Authorizer
+      Stage 3 notification broadcast: 5: System
+    section 2nd Final Authorization
+      2nd Authorizer logs into Portal: 4: 2nd Authorizer
+      Validates non-repetition of approving officer: 5: 2nd Authorizer
+      Grants Final Approval (Status 1003): 5: 2nd Authorizer
+      System executes CBS H2H REST call: 5: System
+      Stage 4 notification broadcast: 5: System
+    section Post-Settlement & Audit
+      CBS Callback updates Status (1004 / 1006): 5: CBS Engine
+      Review Failed Queue & Audit Logs: 4: Checker, Admin
+```
+
 ---
 
 ## 🚀 9. Setup & Execution Commands
@@ -628,7 +1041,7 @@ Run the comprehensive PHPUnit test suite from the terminal:
 php artisan test
 ```
 
-### Test Suite Coverage (80 Tests, 390 Assertions, 100% Passing)
+### Test Suite Coverage (163 Tests, 820 Assertions, 100% Passing)
 - **3-Tier Workflow Segregation of Duties**: Enforces distinct user role constraints for Checker, 1st Authorizer, and 2nd Authorizer.
 - **Role-Scoped Multi-Stage Notifications**: Verifies correct recipient scoping and template generation across stages 1 through 4.
 - **CBS Host-to-Host & Response Callback API**: Tests token lifecycle, settlement dispatch, and callback processing.
