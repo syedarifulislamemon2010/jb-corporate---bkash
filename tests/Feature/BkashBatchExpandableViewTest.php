@@ -137,4 +137,21 @@ class BkashBatchExpandableViewTest extends TestCase
         $responseCsv->assertStatus(200);
         $responseCsv->assertHeader('Content-Type', 'text/csv; charset=UTF-8');
     }
+
+    public function test_guest_cannot_download_batch_and_is_redirected_to_login(): void
+    {
+        $batch = BkashTransactionBatch::create([
+            'file_name'        => 'JANATA_BANK_2026_09_02_GuestTest.xlsx',
+            'transaction_type' => 'A2A',
+            'sha256'           => 'dummy_guest_hash',
+            'total_data'       => 1,
+            'total_amount'     => 500.00,
+            'status_id'        => 1000,
+            'created_by'       => 'Tester',
+        ]);
+
+        $response = $this->get(route('admin.bkash.download-batch', ['file' => $batch->file_name]));
+
+        $response->assertRedirect('/admin/login');
+    }
 }

@@ -25,8 +25,8 @@ class NotificationService
         if (blank($org)) {
             return true; // default organization is Janata Bank
         }
-        $lower = strtolower($org);
-        return str_contains($lower, 'janata') || str_contains($lower, 'jb');
+        $lower = strtolower((string)$org);
+        return str_contains($lower, 'janata') || str_contains($lower, 'jb') || (string)$org === '1';
     }
 
     /**
@@ -37,7 +37,8 @@ class NotificationService
         if (blank($org)) {
             return false;
         }
-        return str_contains(strtolower($org), 10);
+        $lower = strtolower((string)$org);
+        return str_contains($lower, 'bkash') || (string)$org === '10';
     }
 
     /**
@@ -46,17 +47,22 @@ class NotificationService
      */
     public static function scopeOrganizationUsers(Builder $query, mixed $organization): Builder
     {
-        $orgStr = is_string($organization) ? $organization : '';
+        $orgStr = is_string($organization) || is_numeric($organization) ? (string)$organization : '';
 
         if (static::isBkash($orgStr)) {
             // bKash organization users only — Janata Bank users excluded
-            return $query->where('organization', 10)
-                         ->where('organization', '!=', 1);
+            return $query->where(function ($q) use ($orgStr) {
+                $q->where('organization', 10)
+                  ->orWhere('organization', '10')
+                  ->orWhere('organization', 'like', '%bkash%');
+            })->where('organization', '!=', 1)
+              ->where('organization', '!=', '1');
         }
 
         // Otherwise: Janata Bank organization users only — bKash users excluded
-        return $query->where(function ($q) use ($organization, $orgStr) {
+        return $query->where(function ($q) use ($orgStr) {
             $q->where('organization', 1)
+              ->orWhere('organization', '1')
               ->orWhereNull('organization');
 
             if (!empty($orgStr)) {

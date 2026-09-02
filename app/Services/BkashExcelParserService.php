@@ -28,8 +28,11 @@ class BkashExcelParserService
 
     private static function getWhitelistedAccounts(): array
     {
-        $csv = config('bkash.whitelisted_debit_accounts', '0100202707747,0100224107522');
-        return array_map('trim', explode(',', $csv));
+        $csv = config('bkash.whitelisted_debit_accounts');
+        if (filled($csv)) {
+            return array_values(array_filter(array_map('trim', explode(',', (string) $csv))));
+        }
+        return self::DEBIT_ACCOUNTS_WHITELIST;
     }
 
     /**

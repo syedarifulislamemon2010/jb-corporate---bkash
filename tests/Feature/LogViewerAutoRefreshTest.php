@@ -52,4 +52,19 @@ class LogViewerAutoRefreshTest extends TestCase
         $response->assertSee('15000', false);
         $response->assertSee('reload-logs-button', false);
     }
+
+    public function test_log_viewer_gate_authorizes_super_admin(): void
+    {
+        $this->assertTrue(\Illuminate\Support\Facades\Gate::forUser($this->user)->allows('viewLogViewer'));
+
+        $regularUser = User::create([
+            'name'         => 'Regular Officer',
+            'email'        => 'officer@jb.com',
+            'mobile_no'    => '01799887766',
+            'organization' => 'Janata Bank PLC.',
+            'password'     => bcrypt('Secret123'),
+        ]);
+
+        $this->assertFalse(\Illuminate\Support\Facades\Gate::forUser($regularUser)->allows('viewLogViewer'));
+    }
 }

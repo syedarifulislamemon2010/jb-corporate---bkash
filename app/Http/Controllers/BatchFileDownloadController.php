@@ -11,6 +11,10 @@ class BatchFileDownloadController extends Controller
 {
     public function download(Request $request): Response
     {
+        if (!auth()->check()) {
+            return redirect('/admin/login');
+        }
+
         $fileName = $request->query('file');
         $format = strtolower((string) $request->query('format', 'xlsx'));
 

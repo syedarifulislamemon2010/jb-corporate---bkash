@@ -29,7 +29,7 @@ Route::middleware([
     Route::get('/admin/force-password-change', ForcePasswordChange::class)->name('filament.admin.pages.force-password-change');
 });
 
-Route::middleware(['web'])->group(function () {
+Route::middleware(['web', 'auth'])->group(function () {
     Route::get('/admin/bkash-transactions/download-batch', [\App\Http\Controllers\BatchFileDownloadController::class, 'download'])
         ->name('admin.bkash.download-batch');
 });

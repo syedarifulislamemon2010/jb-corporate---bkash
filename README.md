@@ -203,7 +203,7 @@ requirementDiagram
 | **Database Engine** | **Oracle Database / SQLite** | `yajra/laravel-oci8` (`v12.0`) for Enterprise Oracle; SQLite for local test suites |
 | **Log Management** | **Opcodes Log Viewer** | `v3.24` — Real-time system diagnostics & audit trail log viewer |
 | **API Authentication** | **Laravel Sanctum** | `v4.3` — Token-based security for test endpoints and internal APIs |
-| **Automated Test Suite** | **PHPUnit / Pest** | `PHPUnit 11.5` (`163 tests, 820 assertions, 100% passing`) |
+| **Automated Test Suite** | **PHPUnit / Pest** | `PHPUnit 11.5` (`165 tests, 824 assertions, 100% passing`) |
 
 ### 🏛️ C4 System Container & Context Architecture
 
@@ -276,7 +276,7 @@ Use these concise, high-impact bullet points when presenting this system to bank
 - **Multi-Stage SMS & Email Broadcasts**: Immediate operational awareness across all stages with role-scoped alerts, BDT Lakh/Crore comma formatting, and actor exclusion.
 - **Bank-Grade Mobile OTP Security**: Self-service 4-step password recovery via mobile OTP with rate-limiting, 5-minute TTL, and brute-force lockout safeguards.
 - **Enterprise Auditability**: Every single state change, file hash, user identifier, and CBS response ID is immutably logged with microsecond timestamps.
-- **Production-Tested Stability**: Backed by 163 automated unit and feature tests covering all 820 business assertions with 100% passing rate.
+- **Production-Tested Stability**: Backed by 165 automated unit and feature tests covering all 824 business assertions with 100% passing rate.
 
 ---
 
@@ -1041,7 +1041,7 @@ Run the comprehensive PHPUnit test suite from the terminal:
 php artisan test
 ```
 
-### Test Suite Coverage (163 Tests, 820 Assertions, 100% Passing)
+### Test Suite Coverage (165 Tests, 824 Assertions, 100% Passing)
 - **3-Tier Workflow Segregation of Duties**: Enforces distinct user role constraints for Checker, 1st Authorizer, and 2nd Authorizer.
 - **Role-Scoped Multi-Stage Notifications**: Verifies correct recipient scoping and template generation across stages 1 through 4.
 - **CBS Host-to-Host & Response Callback API**: Tests token lifecycle, settlement dispatch, and callback processing.

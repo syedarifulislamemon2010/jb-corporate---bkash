@@ -13,6 +13,9 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware): void {
+        $middleware->redirectTo(
+            guests: '/admin/login',
+        );
         $middleware->alias([
             'api.cbs.auth' => AuthenticateCbsCallback::class,
         ]);

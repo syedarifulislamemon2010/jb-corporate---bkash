@@ -4,6 +4,7 @@ namespace App\Providers;
 
 use Illuminate\Support\ServiceProvider;
 use BezhanSalleh\FilamentShield\Facades\FilamentShield;
+use Illuminate\Support\Facades\Gate;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -24,5 +25,9 @@ class AppServiceProvider extends ServiceProvider
     public function boot(): void
     {
         FilamentShield::enforcePolicies();
+
+        Gate::define('viewLogViewer', function ($user = null) {
+            return (bool) ($user && $user->hasRole('super_admin'));
+        });
     }
 }
