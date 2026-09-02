@@ -19,6 +19,7 @@ use Illuminate\View\Middleware\ShareErrorsFromSession;
 use Filament\Navigation\NavigationGroup;
 use BezhanSalleh\FilamentShield\FilamentShieldPlugin;
 use App\Filament\Pages\Dashboard as CustomDashboard;
+use App\Http\Middleware\ForcePasswordResetOnFirstLogin;
 
 class AdminPanelProvider extends PanelProvider
 {
@@ -129,6 +130,7 @@ class AdminPanelProvider extends PanelProvider
             ])
             ->authMiddleware([
                 Authenticate::class,
+                ForcePasswordResetOnFirstLogin::class,
             ]);
     }
 }

@@ -365,10 +365,47 @@ flowchart TD
     VerifyTemp -->|No| Err3["Invalid Temporary Password"]
     
     VerifyTemp -->|Yes| Step4["Step 4: Set New Password at /admin/set-new-password"]
-    Step4 --> CheckPolicy{"Meets Banking Complexity Policy?"}
+    CheckPolicy{"Meets Banking Complexity Policy?"}
+    Step4 --> CheckPolicy
     CheckPolicy -->|No| Err4["Password Policy Requirements Not Met"]
     CheckPolicy -->|Yes| Success["Update Password Hash, Log In User and Redirect to Dashboard"]
 ```
+
+### 4.2 First-Login Forced Password Change Architecture
+
+To comply with banking security standards, all newly provisioned user accounts must change their temporary password upon initial login before accessing any portal features:
+
+```mermaid
+sequenceDiagram
+    autonumber
+    participant Admin as System Administrator
+    participant Portal as User Management (CreateUser)
+    participant Gateway as SMS / Email Gateway
+    participant User as Bank Officer
+    participant MW as ForcePasswordReset Middleware
+    participant Screen as ForcePasswordChange Page (/admin/force-password-change)
+    participant Dash as Dashboard & Settlement Engine
+
+    Admin->>Portal: Create new user account
+    Portal->>Portal: Generate temporary password & set account_status = 'temp_password_issued'
+    Portal->>Gateway: Dispatch credentials via SMS (Type 1) & Email
+    Portal->>Admin: Confirm creation & temp credentials issued
+    User->>Portal: First login with temporary credentials
+    Portal->>MW: Intercept authenticated request
+    alt account_status == 'temp_password_issued'
+        MW-->>User: Redirect to /admin/force-password-change
+        User->>Screen: Enter temporary password & new permanent password
+        Screen->>Screen: Validate complexity & confirm difference from temp password
+        Screen->>Portal: Update password hash & set account_status = 'active'
+        Screen-->>Dash: Redirect to Dashboard (/admin)
+    else account_status == 'active'
+        MW->>Dash: Allow direct access to requested route
+    end
+```
+
+- **Interceptor Middleware:** `ForcePasswordResetOnFirstLogin` protects all admin and dashboard routes while permitting `/admin/force-password-change` and `/admin/logout`.
+- **Dedicated Security Interface:** Operates inside an isolated card layout (`SimplePage`) without exposing administrative navigation or sidebar controls until credentials are authenticated.
+- **Account Number Diagnostic:** For detailed technical audit comparing 13-digit customer accounts (`0100...`) vs 15-digit internal CBS GL accounts (`1116...`), refer to [ACCOUNT_NUMBER_MAPPING_DIAGNOSTIC.md](docs/ACCOUNT_NUMBER_MAPPING_DIAGNOSTIC.md).
 
 ---
 

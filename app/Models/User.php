@@ -50,6 +50,7 @@ class User extends Authenticatable implements FilamentUser
         'password',
         'mobile_no',
         'organization',
+        'account_status',
     ];
 
     protected $hidden = [
@@ -68,5 +69,15 @@ class User extends Authenticatable implements FilamentUser
     public function organizationRelation()
     {
         return $this->belongsTo(Organization::class, 'organization', 'id');
+    }
+
+    public function isTempPasswordIssued(): bool
+    {
+        return $this->account_status === 'temp_password_issued';
+    }
+
+    public function markPasswordChanged(): void
+    {
+        $this->update(['account_status' => 'active']);
     }
 }

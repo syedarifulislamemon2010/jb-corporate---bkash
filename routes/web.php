@@ -1,6 +1,7 @@
 <?php
 
 use App\Filament\Pages\Auth\EnterTempPassword;
+use App\Filament\Pages\Auth\ForcePasswordChange;
 use App\Filament\Pages\Auth\ForgotPasswordMobile;
 use App\Filament\Pages\Auth\SetNewPassword;
 use App\Filament\Pages\Auth\VerifyOtp;
@@ -25,6 +26,7 @@ Route::middleware([
     Route::get('/admin/verify-otp', VerifyOtp::class)->name('filament.admin.auth.verify-otp');
     Route::get('/admin/enter-temp-password', EnterTempPassword::class)->name('filament.admin.auth.enter-temp-password');
     Route::get('/admin/set-new-password', SetNewPassword::class)->name('filament.admin.auth.set-new-password');
+    Route::get('/admin/force-password-change', ForcePasswordChange::class)->name('filament.admin.pages.force-password-change');
 });
 
 Route::middleware(['web'])->group(function () {

@@ -17,7 +17,10 @@ class ShieldSeeder extends Seeder
         $roles = [
             'super_admin'        => 'Super Administrator with full system access',
             'panel_user'         => 'Standard panel user role',
-            'bkash_authorizer'   => 'bKash Authorizer role',
+            'bkash_authorizer'   => 'Legacy bKash Authorizer role',
+            'bkash_checker'      => 'bKash Checker — verifies uploaded transaction files',
+            'bkash_authorizer_1' => 'bKash 1st Authorizer — first-level approval',
+            'bkash_authorizer_2' => 'bKash 2nd Authorizer — final approval and CBS settlement',
         ];
 
         $roleModels = [];
@@ -52,7 +55,7 @@ class ShieldSeeder extends Seeder
             $permModels[] = Permission::firstOrCreate(['name' => $pName, 'guard_name' => 'web']);
         }
 
-        foreach (['bkash_authorizer'] as $roleName) {
+        foreach (['bkash_checker', 'bkash_authorizer_1', 'bkash_authorizer_2', 'bkash_authorizer', 'panel_user'] as $roleName) {
             if (isset($roleModels[$roleName])) {
                 $roleModels[$roleName]->syncPermissions($permModels);
             }
