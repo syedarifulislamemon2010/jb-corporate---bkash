@@ -48,6 +48,16 @@ class BkashTransactionBatch extends Model
         return $this->hasMany(BkashFailedTransaction::class, 'batch_id', 'id');
     }
 
+    
+    public function getBatchTransactions()
+    {
+        $txns = $this->transactions()->get();
+        if ($txns->isEmpty() && filled($this->file_name)) {
+            $txns = BkashTransaction::where('file_name', $this->file_name)->get();
+        }
+        return $txns;
+    }
+
     public function creator(): \Illuminate\Database\Eloquent\Relations\BelongsTo
     {
         return $this->belongsTo(User::class, 'created_by', 'name');
