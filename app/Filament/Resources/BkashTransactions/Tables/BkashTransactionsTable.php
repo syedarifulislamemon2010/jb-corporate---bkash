@@ -3,7 +3,10 @@
 namespace App\Filament\Resources\BkashTransactions\Tables;
 
 use App\Models\BkashTransaction;
+use App\Models\BkashTransactionBatch;
+use App\Models\BkashFailedTransaction;
 use App\Services\NotificationService;
+use App\Services\ExcelExportService;
 use Filament\Actions\Action;
 use Filament\Actions\BulkAction;
 use Filament\Tables\Columns\TextColumn;
@@ -12,8 +15,8 @@ use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\HtmlString;
 use Carbon\Carbon;
-
 use Filament\Tables\Grouping\Group;
 
 class BkashTransactionsTable
@@ -36,16 +39,60 @@ class BkashTransactionsTable
                     ->collapsible()
                     ->titlePrefixedWithLabel(false)
                     ->getTitleFromRecordUsing(function (BkashTransaction $record): string {
-                        $fileName = $record->file_name ?? 'Batch_File.xlsx';
-                        $batch = \App\Models\BkashTransactionBatch::where('file_name', $fileName)->first();
-                        $totalTrn = $batch ? $batch->total_data : \App\Models\BkashTransaction::where('file_name', $fileName)->where('status_id', BkashTransaction::STATUS_PENDING_CHECKER)->count();
-                        $totalAmount = $batch ? (float)$batch->total_amount : (float)\App\Models\BkashTransaction::where('file_name', $fileName)->where('status_id', BkashTransaction::STATUS_PENDING_CHECKER)->sum('amount');
-                        $formattedAmount = \App\Models\BkashTransaction::formatBdtAmount($totalAmount);
+                        $fileName = (string) ($record->file_name ?? 'Batch_File.xlsx');
+                        $batch = BkashTransactionBatch::where('file_name', $fileName)->first();
                         $channel = $record->transaction_type ?? ($batch ? $batch->transaction_type : 'A2A');
+                        $totalTrn = $batch ? $batch->total_data : BkashTransaction::where('file_name', $fileName)->where('status_id', BkashTransaction::STATUS_PENDING_CHECKER)->count();
+                        $totalAmount = $batch ? (float)$batch->total_amount : (float)BkashTransaction::where('file_name', $fileName)->where('status_id', BkashTransaction::STATUS_PENDING_CHECKER)->sum('amount');
+                        $formattedAmount = BkashTransaction::formatBdtAmount($totalAmount);
                         return "{$fileName} · {$channel} · {$totalTrn} Trns · BDT {$formattedAmount}";
+                    })
+                    ->getDescriptionFromRecordUsing(function (BkashTransaction $record): HtmlString {
+                        $fileName = $record->file_name ?? 'Batch_File.xlsx';
+                        $batch = BkashTransactionBatch::where('file_name', $fileName)->first();
+
+                        $channel = $record->transaction_type ?? ($batch ? $batch->transaction_type : 'A2A');
+                        $totalTrn = $batch ? $batch->total_data : BkashTransaction::where('file_name', $fileName)->count();
+                        $totalAmount = $batch ? (float)$batch->total_amount : (float)BkashTransaction::where('file_name', $fileName)->sum('amount');
+                        $formattedAmount = BkashTransaction::formatBdtAmount($totalAmount);
+
+                        $successTrn = BkashTransaction::where('file_name', $fileName)
+                            ->whereIn('status_id', [
+                                BkashTransaction::STATUS_CBS_SUCCESS,
+                                BkashTransaction::STATUS_CBS_RESPONSE_SUCCESS,
+                            ])->count();
+
+                        $failedTrn = BkashTransaction::where('file_name', $fileName)
+                            ->whereIn('status_id', [
+                                BkashTransaction::STATUS_REJECTED,
+                                BkashTransaction::STATUS_CBS_RESPONSE_FAILED,
+                            ])->count() + BkashFailedTransaction::where('file_name', $fileName)->count();
+
+                        static $fileIndexMap = [];
+                        if (!isset($fileIndexMap[$fileName])) {
+                            $fileIndexMap[$fileName] = count($fileIndexMap) + 1;
+                        }
+                        $index = $fileIndexMap[$fileName];
+
+                        $downloadUrl = route('admin.bkash.download-batch', ['file' => $fileName]);
+
+                        return new HtmlString(
+                            view('filament.resources.bkash-transactions.file-group-header', [
+                                'index'           => $index,
+                                'fileName'        => $fileName,
+                                'channel'         => $channel,
+                                'totalTrn'        => $totalTrn,
+                                'successTrn'      => $successTrn,
+                                'failedTrn'       => $failedTrn,
+                                'formattedAmount' => $formattedAmount,
+                                'downloadUrl'     => $downloadUrl,
+                            ])->render()
+                        );
                     }),
             ])
             ->defaultGroup('file_name')
+            ->collapsedGroupsByDefault()
+            ->selectGroupsOnly()
             ->columns([
                 TextColumn::make('index')
                     ->label('#')
@@ -111,14 +158,6 @@ class BkashTransactionsTable
                     ->label('Txn ID')
                     ->searchable()
                     ->sortable(),
-
-                TextColumn::make('file_name')
-                    ->label('File Name')
-                    ->searchable()
-                    ->url(fn (BkashTransaction $record): string => route('admin.bkash.download-batch', ['file' => $record->file_name ?? '']))
-                    ->openUrlInNewTab()
-                    ->tooltip('Click to download original batch file')
-                    ->toggleable(isToggledHiddenByDefault: true),
             ])
             ->actions([
                 Action::make('download_file')
@@ -127,7 +166,8 @@ class BkashTransactionsTable
                     ->color('gray')
                     ->tooltip('Download source batch file')
                     ->url(fn (BkashTransaction $record): string => route('admin.bkash.download-batch', ['file' => $record->file_name ?? '']))
-                    ->openUrlInNewTab(),
+                    ->openUrlInNewTab()
+                    ->visible(false), // Hidden from transaction rows as per user specification: download is only on the file header
             ])
             ->filters([
                 SelectFilter::make('transaction_type')
@@ -139,37 +179,16 @@ class BkashTransactionsTable
                     ]),
             ])
             ->toolbarActions([
-                BulkAction::make('download_source_file')
-                    ->label('Download Batch File')
-                    ->icon('heroicon-o-arrow-down-tray')
-                    ->tooltip('Download original batch Excel file for selected records')
-                    ->color('gray')
-                    ->action(function (Collection $records) {
-                        $fileName = $records->first()?->file_name;
-                        if ($fileName) {
-                            return redirect()->route('admin.bkash.download-batch', ['file' => $fileName]);
-                        }
-                    }),
-
-                BulkAction::make('export_selected_excel')
-                    ->label('Export Selected (Excel)')
-                    ->icon('heroicon-o-arrow-down-tray')
-                    ->tooltip('Export selected transactions to Excel')
-                    ->color('info')
-                    ->action(function (Collection $records) {
-                        $fileName = 'Transaction_Process_Report_' . now()->format('Ymd_His') . '.xlsx';
-                        return ExcelExportService::exportCheckerReportXlsx($records, $fileName);
-                    }),
-
                 BulkAction::make('check_selected')
-                    ->label('Check Selected Transactions')
+                    ->label('Check Selected Batch Files')
                     ->icon('heroicon-o-check-circle')
-                    ->tooltip('Verify and forward selected transactions to 1st Authorizer')
+                    ->tooltip('Verify and forward selected files to 1st Authorizer')
                     ->color('info')
                     ->requiresConfirmation()
                     ->modalHeading('Confirm Checker Verification')
                     ->modalDescription(function (Collection $records) {
-                        return "You are about to verify {$records->count()} transaction(s) and forward them to the 1st Authorizer queue.";
+                        $files = $records->pluck('file_name')->unique()->count();
+                        return "You are about to verify all transactions across {$files} selected batch file(s) ({$records->count()} transactions) and forward them to 1st Authorizer.";
                     })
                     ->modalSubmitActionLabel('Yes, Verify Now')
                     ->action(function (Collection $records) {
@@ -178,29 +197,48 @@ class BkashTransactionsTable
                         $checkerId   = $currentUser->id ?? null;
                         $firstRecord = $records->first();
                         $fileName = $firstRecord->file_name ?? 'bKash_File.xlsx';
-                        $totalTrn = $records->count();
-                        $totalAmount = (float)$records->sum('amount');
 
-                        $records->each(function ($record) use ($checkerName, $checkerId) {
+                        foreach ($records as $record) {
                             $record->update([
                                 'status_id'     => BkashTransaction::STATUS_CHECKED,
                                 'checked_by'    => $checkerName,
                                 'checked_by_id' => $checkerId,
                                 'checked_at'    => Carbon::now(),
                             ]);
-                        });
+                        }
 
-                        // Refresh parent batch status
-                        $batchIds = $records->pluck('batch_id')->filter()->unique();
-                        \App\Models\BkashTransactionBatch::whereIn('id', $batchIds)->each(fn ($batch) => $batch->refreshStatusFromTransactions());
+                        $fileNames = $records->pluck('file_name')->unique();
+                        foreach ($fileNames as $fn) {
+                            BkashTransactionBatch::where('file_name', $fn)
+                                ->where('status_id', BkashTransaction::STATUS_PENDING_CHECKER)
+                                ->update(['status_id' => BkashTransaction::STATUS_CHECKED]);
+                        }
+
+                        $firstRecord->refresh();
+                        NotificationService::dispatchWorkflowNotification(
+                            stage: 2,
+                            transaction: $firstRecord,
+                            actorName: $checkerName,
+                            actorId: $checkerId
+                        );
 
                         \Filament\Notifications\Notification::make()
-                            ->title('Transactions Checked')
-                            ->body("Successfully checked {$totalTrn} transactions. Forwarded for 1st Authorization.")
+                            ->title('Checker Verification Completed')
+                            ->body("Successfully verified {$records->count()} transaction(s) across " . $fileNames->count() . " batch file(s).")
                             ->success()
                             ->send();
+                    }),
 
-                        NotificationService::dispatchStage2($fileName, $totalTrn, $totalAmount, $checkerName, $currentUser);
+                BulkAction::make('download_source_file')
+                    ->label('Download Source Batch')
+                    ->icon('heroicon-o-arrow-down-tray')
+                    ->tooltip('Download original batch Excel file for selected records')
+                    ->color('gray')
+                    ->action(function (Collection $records) {
+                        $fileName = $records->first()?->file_name;
+                        if ($fileName) {
+                            return redirect()->route('admin.bkash.download-batch', ['file' => $fileName]);
+                        }
                     }),
             ]);
     }

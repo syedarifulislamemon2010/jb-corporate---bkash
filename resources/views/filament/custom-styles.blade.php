@@ -2036,3 +2036,42 @@
         }, { passive: true });
     });
 </script>
+
+
+<style>
+    /* ===== BATCH FILE GROUP HEADER STYLING ===== */
+    .fi-ta-group-header-row {
+        background-color: rgba(241, 245, 249, 0.75) !important;
+        border-top: 1px solid #e2e8f0 !important;
+        border-bottom: 1px solid #cbd5e1 !important;
+    }
+    html.dark .fi-ta-group-header-row {
+        background-color: rgba(15, 23, 42, 0.85) !important;
+        border-top: 1px solid #1e293b !important;
+        border-bottom: 1px solid #334155 !important;
+    }
+    .fi-ta-group-header {
+        width: 100% !important;
+        display: flex !important;
+        align-items: center !important;
+        justify-content: space-between !important;
+        padding: 0.35rem 0.5rem !important;
+        cursor: pointer !important;
+    }
+    .fi-ta-group-header > div:first-child {
+        flex: 1 1 auto !important;
+        min-width: 0 !important;
+        width: 100% !important;
+    }
+    .fi-ta-group-header .fi-ta-group-heading {
+        display: none !important;
+    }
+    .fi-ta-group-header .fi-ta-group-description {
+        margin: 0 !important;
+        padding: 0 !important;
+        width: 100% !important;
+    }
+    .fi-batch-group-header-strip {
+        user-select: text;
+    }
+</style>
