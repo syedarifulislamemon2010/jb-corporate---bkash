@@ -2,6 +2,8 @@
 
 namespace App\Filament\Resources\Users\Schemas;
 
+use App\Helper\PasswordGenerateHelper;
+use Filament\Forms\Components\Hidden;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
 use Filament\Schemas\Schema;
@@ -44,11 +46,10 @@ class UserForm
                     ->relationship('roles', 'name')
                     ->multiple()
                     ->preload(),
-                TextInput::make('password')
-                    ->password()
+                Hidden::make('password')
                     ->required(fn (string $operation): bool => $operation === 'create')
+                    ->default(PasswordGenerateHelper::generate())
                     ->dehydrated(fn ($state): bool => filled($state))
-                    ->maxLength(255),
             ]);
     }
 }

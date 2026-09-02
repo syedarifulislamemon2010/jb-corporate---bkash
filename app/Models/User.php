@@ -65,8 +65,8 @@ class User extends Authenticatable implements FilamentUser
         ];
     }
 
-    public function organization()
+    public function organizationRelation()
     {
-        return $this->belongsTo(Organization::class, 'organization', 'label');
+        return $this->belongsTo(Organization::class, 'organization', 'id');
     }
 }

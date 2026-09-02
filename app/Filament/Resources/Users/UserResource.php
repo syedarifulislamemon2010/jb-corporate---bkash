@@ -60,7 +60,7 @@ class UserResource extends Resource
                 TextColumn::make('email')
                     ->searchable(),
                 TextColumn::make('mobile_no'),
-                TextColumn::make('organization'),
+                TextColumn::make('organizationRelation.name'),
             ])
             ->actions([
                 EditAction::make(),
