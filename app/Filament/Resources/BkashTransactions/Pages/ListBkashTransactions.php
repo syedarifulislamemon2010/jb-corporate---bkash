@@ -20,7 +20,7 @@ class ListBkashTransactions extends ListRecords
 {
     protected static string $resource = BkashTransactionResource::class;
 
-    protected string $view = 'filament.resources.bkash-transactions.pages.list-bkash-transactions';
+    protected string $view = 'filament.resources.bkash-transactions.pages.batch-pipeline-table';
 
     #[Url(as: 'channel')]
     public string $activeChannel = 'all';
@@ -31,6 +31,16 @@ class ListBkashTransactions extends ListRecords
     public array $selectedBatches = [];
 
     public bool $selectAll = false;
+
+    protected function getViewData(): array
+    {
+        return [
+            'actionLabel'      => 'Check Selected Batch Files',
+            'actionMethod'     => 'checkSelectedBatches',
+            'emptyHeading'     => 'All Caught Up!',
+            'emptyDescription' => 'No files are currently pending Checker verification.',
+        ];
+    }
 
     protected function getHeaderActions(): array
     {
@@ -70,7 +80,6 @@ class ListBkashTransactions extends ListRecords
 
     public function getBatches(): Collection
     {
-        // Get all pending checker batches
         $query = BkashTransactionBatch::query()
             ->where('status_id', BkashTransaction::STATUS_PENDING_CHECKER);
 
@@ -91,7 +100,6 @@ class ListBkashTransactions extends ListRecords
 
         $batches = $query->orderBy('created_at', 'desc')->get();
 
-        // Also check if there are any files in BkashTransaction pending checker without a batch record
         $fileNames = BkashTransaction::where('status_id', BkashTransaction::STATUS_PENDING_CHECKER)
             ->pluck('file_name')
             ->unique()
