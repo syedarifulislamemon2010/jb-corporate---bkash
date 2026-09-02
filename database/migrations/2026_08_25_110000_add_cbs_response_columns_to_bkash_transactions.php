@@ -31,6 +31,7 @@ return new class extends Migration
     {
         Schema::table('bkash_transactions', function (Blueprint $table) {
             if (Schema::hasColumn('bkash_transactions', 'response_id')) {
+                $table->dropIndex(['response_id']);
                 $table->dropColumn('response_id');
             }
             if (Schema::hasColumn('bkash_transactions', 'confirmed_by')) {

@@ -52,7 +52,7 @@ class DatabaseSeeder extends Seeder
                 'organization' => '1',
             ]
         );
-        $checker->syncRoles(['bkash_checker', 'panel_user']);
+        $checker->syncRoles(['bkash_authorizer']);
 
         $auth1 = User::updateOrCreate(
             ['email' => 'authorizer1@jb.com'],
@@ -63,7 +63,7 @@ class DatabaseSeeder extends Seeder
                 'organization' => '1',
             ]
         );
-        $auth1->syncRoles(['bkash_authorizer_1', 'bkash_authorizer', 'panel_user']);
+        $auth1->syncRoles(['bkash_authorizer']);
 
         $auth2 = User::updateOrCreate(
             ['email' => 'authorizer2@jb.com'],
@@ -74,6 +74,6 @@ class DatabaseSeeder extends Seeder
                 'organization' => '1',
             ]
         );
-        $auth2->syncRoles(['bkash_authorizer_2', 'panel_user']);
+        $auth2->syncRoles(['bkash_authorizer']);
     }
 }
