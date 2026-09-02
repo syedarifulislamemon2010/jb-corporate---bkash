@@ -98,4 +98,12 @@ class DashboardRouteAccessTest extends TestCase
         $responseAuth2 = $this->actingAs($auth2)->get('/admin/bkash-transaction-confirmations');
         $this->assertNotEquals(403, $responseAuth2->getStatusCode(), 'Authorizer 2 received 403 on confirmations.');
     }
+
+    public function test_failed_transactions_card_on_dashboard_links_to_bkash_failed_transactions(): void
+    {
+        $response = $this->actingAs($this->user)->get('/admin/dashboard');
+        $response->assertStatus(200);
+        $response->assertSee('/admin/bkash-failed-transactions');
+        $response->assertDontSee('/admin/bkash-reports" class="db-card db-exception-link');
+    }
 }
