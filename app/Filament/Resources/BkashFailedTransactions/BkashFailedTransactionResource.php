@@ -124,16 +124,49 @@ class BkashFailedTransactionResource extends Resource
                 // 7. Ref No
                 TextColumn::make('reference_id')
                     ->label('Ref No')
-                    ->searchable()
+                    ->searchable(query: function (Builder $query, string $search): Builder {
+                        try {
+                            if (\Illuminate\Support\Facades\Schema::hasColumn('bkash_failed_transactions', 'reference_id')) {
+                                return $query->where('reference_id', 'like', "%{$search}%");
+                            }
+                            if (\Illuminate\Support\Facades\Schema::hasColumn('bkash_failed_transactions', 'reference')) {
+                                return $query->where('reference', 'like', "%{$search}%");
+                            }
+                        } catch (\Throwable $e) {
+                        }
+                        return $query;
+                    })
                     ->sortable(),
 
                 TextColumn::make('source_account_no')
                     ->label('Source Account (TCSA/Ops)')
-                    ->searchable(),
+                    ->searchable(query: function (Builder $query, string $search): Builder {
+                        try {
+                            if (\Illuminate\Support\Facades\Schema::hasColumn('bkash_failed_transactions', 'source_account_no')) {
+                                return $query->where('source_account_no', 'like', "%{$search}%");
+                            }
+                            if (\Illuminate\Support\Facades\Schema::hasColumn('bkash_failed_transactions', 'credit_account')) {
+                                return $query->where('credit_account', 'like', "%{$search}%");
+                            }
+                        } catch (\Throwable $e) {
+                        }
+                        return $query;
+                    }),
 
                 TextColumn::make('beneficiary_account_no')
                     ->label('Beneficiary Account')
-                    ->searchable(),
+                    ->searchable(query: function (Builder $query, string $search): Builder {
+                        try {
+                            if (\Illuminate\Support\Facades\Schema::hasColumn('bkash_failed_transactions', 'beneficiary_account_no')) {
+                                return $query->where('beneficiary_account_no', 'like', "%{$search}%");
+                            }
+                            if (\Illuminate\Support\Facades\Schema::hasColumn('bkash_failed_transactions', 'debit_account')) {
+                                return $query->where('debit_account', 'like', "%{$search}%");
+                            }
+                        } catch (\Throwable $e) {
+                        }
+                        return $query;
+                    }),
 
                 // 10. Amount (BDT)
                 TextColumn::make('amount')
@@ -175,19 +208,33 @@ class BkashFailedTransactionResource extends Resource
 
     public static function getGloballySearchableAttributes(): array
     {
-        return ['txn_id', 'reference_id', 'file_name'];
+        try {
+            $table = (new static::$model)->getTable();
+            $searchable = ['file_name'];
+            if (\Illuminate\Support\Facades\Schema::hasColumn($table, 'txn_id')) {
+                $searchable[] = 'txn_id';
+            }
+            if (\Illuminate\Support\Facades\Schema::hasColumn($table, 'reference_id')) {
+                $searchable[] = 'reference_id';
+            } elseif (\Illuminate\Support\Facades\Schema::hasColumn($table, 'reference')) {
+                $searchable[] = 'reference';
+            }
+            return $searchable;
+        } catch (\Throwable $e) {
+            return ['file_name'];
+        }
     }
 
     public static function getGlobalSearchResultTitle(\Illuminate\Database\Eloquent\Model $record): string
     {
-        $id = $record->txn_id ?: $record->reference_id ?: 'Record';
+        $id = $record->txn_id ?: $record->reference_id ?: ($record->reference ?? 'Record');
         return "Failed Txn: {$id}";
     }
 
     public static function getGlobalSearchResultDetails(\Illuminate\Database\Eloquent\Model $record): array
     {
         return [
-            'Ref No' => $record->reference_id ?? 'N/A',
+            'Ref No' => $record->reference_id ?? $record->reference ?? 'N/A',
             'File'   => $record->file_name ?? 'N/A',
             'Reason' => $record->reject_reason ?? 'Validation/CBS Error',
         ];

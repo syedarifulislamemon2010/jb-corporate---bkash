@@ -45,6 +45,14 @@ class BkashFailedTransaction extends Model
     }
 
     /**
+     * Accessor for reference_id supporting legacy reference column.
+     */
+    public function getReferenceIdAttribute(?string $value): ?string
+    {
+        return $value ?? $this->attributes['reference'] ?? null;
+    }
+
+    /**
      * Backward-compatibility accessor for credit_account.
      */
     public function getCreditAccountAttribute(?string $value): ?string
@@ -53,11 +61,27 @@ class BkashFailedTransaction extends Model
     }
 
     /**
+     * Accessor for source_account_no supporting legacy credit_account column.
+     */
+    public function getSourceAccountNoAttribute(?string $value): ?string
+    {
+        return $value ?? $this->attributes['credit_account'] ?? null;
+    }
+
+    /**
      * Backward-compatibility accessor for debit_account.
      */
     public function getDebitAccountAttribute(?string $value): ?string
     {
         return $value ?? $this->attributes['beneficiary_account_no'] ?? null;
+    }
+
+    /**
+     * Accessor for beneficiary_account_no supporting legacy debit_account column.
+     */
+    public function getBeneficiaryAccountNoAttribute(?string $value): ?string
+    {
+        return $value ?? $this->attributes['debit_account'] ?? null;
     }
 
     protected function casts(): array
