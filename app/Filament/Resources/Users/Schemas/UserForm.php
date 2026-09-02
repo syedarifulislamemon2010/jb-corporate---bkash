@@ -18,7 +18,7 @@ class UserForm
 
                 Select::make('organization')
                     ->label('Organization')
-                    ->relationship('organizationRelation', 'label')
+                    ->relationship('organizationRelation', 'name')
                     ->searchable()
                     ->preload()
                     ->native(false)
