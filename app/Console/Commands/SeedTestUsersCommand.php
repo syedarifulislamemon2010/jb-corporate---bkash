@@ -44,6 +44,7 @@ class SeedTestUsersCommand extends Command
 
         // 2. Ensure Roles Exist
         $roles = [
+            'super_admin'        => 'Super Administrator with full system access',
             'bkash_checker'      => 'bKash Checker — verifies uploaded transaction files',
             'bkash_authorizer_1' => 'bKash 1st Authorizer — first-level approval',
             'bkash_authorizer_2' => 'bKash 2nd Authorizer — final approval and CBS settlement',
@@ -53,8 +54,24 @@ class SeedTestUsersCommand extends Command
             Role::firstOrCreate(['name' => $roleName, 'guard_name' => 'web']);
         }
 
-        // 3. Create or update test users with known password Test@Pass123
+        // 3. Create or update test users with known credentials
         $usersData = [
+            [
+                'name'         => 'Syed Ariful Islam Emon',
+                'email'        => 'emon@jb.com',
+                'mobile_no'    => '01711223344',
+                'organization' => 'Janata Bank PLC.',
+                'role'         => 'super_admin',
+                'password'     => '123456',
+            ],
+            [
+                'name'         => 'G S Kibria',
+                'email'        => 'kibria@jb.com',
+                'mobile_no'    => '01738535099',
+                'organization' => 'Janata Bank PLC.',
+                'role'         => 'super_admin',
+                'password'     => 'password',
+            ],
             [
                 'name'         => 'bKash Checker Test User',
                 'email'        => 'checker@test.jbcorporate.com',
