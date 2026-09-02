@@ -227,7 +227,7 @@ class BkashFailedTransactionResource extends Resource
 
     public static function getGlobalSearchResultTitle(\Illuminate\Database\Eloquent\Model $record): string
     {
-        $id = $record->txn_id ?: $record->reference_id ?: ($record->reference ?? 'Record');
+        $id = $record->txn_id ?: ($record->reference_id ?? ($record->reference ?? 'Record'));
         return "Failed Txn: {$id}";
     }
 

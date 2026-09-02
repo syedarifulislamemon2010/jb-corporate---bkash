@@ -17,7 +17,7 @@ class BkashTransactionConfirmationResource extends Resource
 {
     protected static ?string $model = BkashTransaction::class;
 
-    protected static ?string $recordTitleAttribute = 'reference_id';
+    protected static ?string $recordTitleAttribute = 'txn_id';
 
     protected static \UnitEnum|string|null $navigationGroup = 'Transaction Pipeline';
 
@@ -118,12 +118,31 @@ class BkashTransactionConfirmationResource extends Resource
 
     public static function getGloballySearchableAttributes(): array
     {
-        return ['txn_id', 'reference_id', 'file_name'];
+        try {
+            $table = (new static::$model)->getTable();
+            $searchable = ['file_name'];
+
+            if (\Illuminate\Support\Facades\Schema::hasColumn($table, 'txn_id')) {
+                $searchable[] = 'txn_id';
+            }
+            if (\Illuminate\Support\Facades\Schema::hasColumn($table, 'reference_id')) {
+                $searchable[] = 'reference_id';
+            } elseif (\Illuminate\Support\Facades\Schema::hasColumn($table, 'bb_reference_number')) {
+                $searchable[] = 'bb_reference_number';
+            } elseif (\Illuminate\Support\Facades\Schema::hasColumn($table, 'reference')) {
+                $searchable[] = 'reference';
+            }
+
+            return $searchable;
+        } catch (\Throwable $e) {
+            return ['file_name'];
+        }
     }
 
     public static function getGlobalSearchResultTitle(\Illuminate\Database\Eloquent\Model $record): string
     {
-        return "Txn: {$record->txn_id}";
+        $id = $record->txn_id ?: ($record->reference_id ?? ($record->bb_reference_number ?? ($record->reference ?? 'Record')));
+        return "Txn: {$id}";
     }
 
     public static function getGlobalSearchResultDetails(\Illuminate\Database\Eloquent\Model $record): array

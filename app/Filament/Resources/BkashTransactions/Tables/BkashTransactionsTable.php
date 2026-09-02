@@ -101,7 +101,21 @@ class BkashTransactionsTable
 
                 TextColumn::make('reference_id')
                     ->label('Ref No')
-                    ->searchable()
+                    ->searchable(query: function (Builder $query, string $search): Builder {
+                        try {
+                            if (\Illuminate\Support\Facades\Schema::hasColumn('bkash_transactions', 'reference_id')) {
+                                return $query->where('reference_id', 'like', "%{$search}%");
+                            }
+                            if (\Illuminate\Support\Facades\Schema::hasColumn('bkash_transactions', 'bb_reference_number')) {
+                                return $query->where('bb_reference_number', 'like', "%{$search}%");
+                            }
+                            if (\Illuminate\Support\Facades\Schema::hasColumn('bkash_transactions', 'reference')) {
+                                return $query->where('reference', 'like', "%{$search}%");
+                            }
+                        } catch (\Throwable $e) {
+                        }
+                        return $query;
+                    })
                     ->sortable(),
 
                 TextColumn::make('transaction_type')

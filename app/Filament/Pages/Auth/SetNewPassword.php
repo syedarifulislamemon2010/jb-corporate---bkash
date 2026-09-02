@@ -18,6 +18,10 @@ use Illuminate\Contracts\Support\Htmlable;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Facades\Schema as DbSchema;
+use App\Helper\SMSGenerateHelper;
 use Livewire\Attributes\Locked;
 
 /**
@@ -154,10 +158,40 @@ class SetNewPassword extends SimplePage
             return;
         }
 
-        // Update to new user-provided password
-        $user->update([
+        // Update to new user-provided password and transition account status to active
+        $updateData = [
             'password' => Hash::make($password),
-        ]);
+        ];
+
+        if (DbSchema::hasColumn('users', 'account_status')) {
+            $updateData['account_status'] = 'active';
+        }
+
+        $user->update($updateData);
+
+        // Send confirmation SMS if mobile number is present and SMS is enabled
+        if (!empty($user->mobile_no) && config('bkash.sms_enabled', true)) {
+            try {
+                SMSGenerateHelper::sendDirectSms(
+                    $user->mobile_no,
+                    "Dear {$user->name}, your JB Corporate account password has been successfully reset. If you did not perform this, please contact IT Support immediately."
+                );
+            } catch (\Throwable $e) {
+                Log::warning('Password reset confirmation SMS failed: ' . $e->getMessage());
+            }
+        }
+
+        // Send confirmation email if email is present and email notifications are enabled
+        if (!empty($user->email) && config('bkash.email_enabled', true)) {
+            try {
+                Mail::raw(
+                    "Dear {$user->name},\n\nYour JB Corporate account password has been successfully reset.\n\nIf you did not perform this action, please contact Janata Bank IT Support immediately.\n\nBest Regards,\nJanata Bank PLC",
+                    fn ($message) => $message->to($user->email)->subject('Password Reset Confirmation - Janata Bank Corporate Portal')
+                );
+            } catch (\Throwable $e) {
+                Log::warning('Password reset confirmation email failed: ' . $e->getMessage());
+            }
+        }
 
         // Invalidate token and session keys
         Cache::forget("reset_token_{$mobileNo}");

@@ -195,6 +195,30 @@ class ForcedPasswordResetOnFirstLoginTest extends TestCase
         $transport = app('mailer')->getSymfonyTransport();
         $this->assertGreaterThanOrEqual(1, count($transport->messages()));
     }
+
+    public function test_temp_user_resetting_password_via_forgot_password_flow_becomes_active_and_avoids_redirect_loop(): void
+    {
+        $resetToken = 'test_token_temp_user_123456';
+        \Illuminate\Support\Facades\Cache::put("reset_token_{$this->tempUser->mobile_no}", $resetToken, now()->addMinutes(10));
+        session([
+            'reset_verified_mobile' => $this->tempUser->mobile_no,
+            'reset_token'           => $resetToken,
+        ]);
+
+        Livewire::test(\App\Filament\Pages\Auth\SetNewPassword::class)
+            ->set('data.password', 'NewPermanentPass@2026')
+            ->set('data.password_confirmation', 'NewPermanentPass@2026')
+            ->call('setNewPassword')
+            ->assertRedirect('/admin');
+
+        $this->tempUser->refresh();
+        $this->assertEquals('active', $this->tempUser->account_status);
+        $this->assertTrue(Hash::check('NewPermanentPass@2026', $this->tempUser->password));
+
+        // Verify user can access admin / dashboard without being redirected back to force-password-change
+        $response = $this->actingAs($this->tempUser)->get('/admin');
+        $this->assertNotEquals('/admin/force-password-change', $response->headers->get('Location'));
+    }
 }
 
 

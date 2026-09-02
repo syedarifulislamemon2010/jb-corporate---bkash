@@ -15,16 +15,46 @@ class BkashReportsResource extends Resource
 {
     protected static ?string $model = BkashTransaction::class;
 
-    protected static ?string $recordTitleAttribute = 'reference_id';
+    protected static ?string $recordTitleAttribute = 'txn_id';
 
-    protected static array $globallySearchableAttributes = [
-        'reference_id',
-        'txn_id',
-        'beneficiary_account_no',
-        'debit_account_title',
-        'source_account_no',
-        'file_name',
-    ];
+    public static function getGloballySearchableAttributes(): array
+    {
+        try {
+            $table = (new static::$model)->getTable();
+            $searchable = ['file_name'];
+
+            if (\Illuminate\Support\Facades\Schema::hasColumn($table, 'txn_id')) {
+                $searchable[] = 'txn_id';
+            }
+            if (\Illuminate\Support\Facades\Schema::hasColumn($table, 'reference_id')) {
+                $searchable[] = 'reference_id';
+            } elseif (\Illuminate\Support\Facades\Schema::hasColumn($table, 'bb_reference_number')) {
+                $searchable[] = 'bb_reference_number';
+            } elseif (\Illuminate\Support\Facades\Schema::hasColumn($table, 'reference')) {
+                $searchable[] = 'reference';
+            }
+            if (\Illuminate\Support\Facades\Schema::hasColumn($table, 'beneficiary_account_no')) {
+                $searchable[] = 'beneficiary_account_no';
+            } elseif (\Illuminate\Support\Facades\Schema::hasColumn($table, 'debit_account_no')) {
+                $searchable[] = 'debit_account_no';
+            }
+            if (\Illuminate\Support\Facades\Schema::hasColumn($table, 'source_account_no')) {
+                $searchable[] = 'source_account_no';
+            } elseif (\Illuminate\Support\Facades\Schema::hasColumn($table, 'credit_account_no')) {
+                $searchable[] = 'credit_account_no';
+            }
+
+            return $searchable;
+        } catch (\Throwable $e) {
+            return ['file_name'];
+        }
+    }
+
+    public static function getGlobalSearchResultTitle(\Illuminate\Database\Eloquent\Model $record): string
+    {
+        $id = $record->txn_id ?: ($record->reference_id ?? ($record->bb_reference_number ?? ($record->reference ?? 'Record')));
+        return "Report: {$id}";
+    }
 
     public static function getGlobalSearchResultDetails(\Illuminate\Database\Eloquent\Model $record): array
     {
@@ -162,7 +192,21 @@ class BkashReportsResource extends Resource
                 // 12. Ref No.
                 TextColumn::make('reference_id')
                     ->label('Ref No.')
-                    ->searchable()
+                    ->searchable(query: function (Builder $query, string $search): Builder {
+                        try {
+                            if (\Illuminate\Support\Facades\Schema::hasColumn('bkash_transactions', 'reference_id')) {
+                                return $query->where('reference_id', 'like', "%{$search}%");
+                            }
+                            if (\Illuminate\Support\Facades\Schema::hasColumn('bkash_transactions', 'bb_reference_number')) {
+                                return $query->where('bb_reference_number', 'like', "%{$search}%");
+                            }
+                            if (\Illuminate\Support\Facades\Schema::hasColumn('bkash_transactions', 'reference')) {
+                                return $query->where('reference', 'like', "%{$search}%");
+                            }
+                        } catch (\Throwable $e) {
+                        }
+                        return $query;
+                    })
                     ->sortable(),
 
                 // 13. Settled Date (Toggleable hidden by default)

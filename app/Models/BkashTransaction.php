@@ -105,6 +105,30 @@ class BkashTransaction extends Model
         ];
     }
 
+    /**
+     * Backward-compatibility accessor for reference column.
+     */
+    public function getReferenceAttribute(?string $value): ?string
+    {
+        return $value ?? $this->attributes['reference_id'] ?? ($this->attributes['bb_reference_number'] ?? null);
+    }
+
+    /**
+     * Backward-compatibility mutator for reference column.
+     */
+    public function setReferenceAttribute(?string $value): void
+    {
+        $this->attributes['reference_id'] = $value;
+    }
+
+    /**
+     * Accessor for reference_id supporting legacy reference / bb_reference_number column.
+     */
+    public function getReferenceIdAttribute(?string $value): ?string
+    {
+        return $value ?? $this->attributes['reference'] ?? ($this->attributes['bb_reference_number'] ?? null);
+    }
+
     public function batch(): \Illuminate\Database\Eloquent\Relations\BelongsTo
     {
         return $this->belongsTo(BkashTransactionBatch::class, 'batch_id', 'id');
