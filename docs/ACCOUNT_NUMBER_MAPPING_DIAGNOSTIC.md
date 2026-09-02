@@ -3,7 +3,8 @@
 **Document Reference:** `DOC-JB-BKASH-ACC-001`  
 **Date:** September 2, 2026  
 **Status:** AWAITING BANK TREASURY / IT SIGN-OFF  
-**Scope:** Read-only diagnostic report; no configuration or code modification performed.
+**Scope:** Read-only diagnostic report; no configuration or code modification performed.  
+**Verification:** This report was verified against actual source code and local storage on September 2, 2026.
 
 ---
 
@@ -11,8 +12,8 @@
 
 During transaction processing and dashboard reconciliation in the Janata Bank Corporate Portal (bKash Module), an account numbering format divergence was identified:
 - **Configuration & Whitelist:** Configured with 13-digit customer account numbers (`0100202707747` and `0100224107522`).
-- **Batch Transaction Files (Excel):** Uploaded files contain 15-digit internal General Ledger (GL) account numbers (`111613120722698` and `111613134119657`) under the `Debit Account` column.
-- **Result:** `BkashCalculationService::calculateBalance()` groups debits strictly by exact account string. When 15-digit account transactions are processed against 13-digit initial balance keys, the debits are not matched to the configured initial balances, leaving the dashboard balance card unchanged or miscalculated.
+- **Batch Transaction Files (Excel):** Uploaded files contain 15-digit internal General Ledger (GL) account numbers (`111613120722698` and `111613134119657`) under the `Debit Account` column (ingested into database table `BKASH_TRANSACTIONS` as `source_account_no`).
+- **Result:** In `app/Filament/Pages/Dashboard.php`, `calculateBalance(string $accountNumber): float` filters debits strictly by exact account string: `BkashTransaction::where('source_account_no', $accountNumber)...`. When 15-digit account transactions are processed against 13-digit initial balance keys, the debits are not matched to the configured initial balances, leaving the dashboard balance card unchanged (displaying the static initial balance rather than reflecting net deductions).
 
 Per governance guidelines, **no code-level alias mapping or balance calculation adjustments are applied** without explicit, written confirmation from the Janata Bank Treasury and IT Core Banking System (CBS) teams.
 
@@ -22,14 +23,11 @@ Per governance guidelines, **no code-level alias mapping or balance calculation 
 
 ### A. Configuration Layer (`config/bkash.php`)
 ```php
-'whitelisted_debit_accounts' => [
-    '0100202707747',
-    '0100224107522',
-],
+'whitelisted_debit_accounts' => env('BKASH_WHITELISTED_DEBIT_ACCOUNTS', '0100202707747,0100224107522,111613120722698,111613134119657'),
 
 'initial_balances' => [
-    '0100202707747' => 50000000.00, // 5 Crore BDT
-    '0100224107522' => 50000000.00, // 5 Crore BDT
+    '0100202707747' => (float) env('BKASH_TCSA_INITIAL_BALANCE', 5420000000.50),
+    '0100224107522' => (float) env('BKASH_OPS_INITIAL_BALANCE', 185000000.00),
 ],
 ```
 
@@ -39,31 +37,36 @@ Inspection of production sample batch files:
 - `JANATA_BANK_2026_07_28_1Sloty.xlsx`
 - `RTGS_JANATA_BANK_2026_07_28_2Sloty.xlsx`
 
-| Column Header | Value Observed in Batch Files | Format |
-|---|---|---|
-| `Debit Account` | `111613120722698` | 15-digit CBS GL/Internal Ledger |
-| `Debit Account` | `111613134119657` | 15-digit CBS GL/Internal Ledger |
+*(Note: These production sample files physically reside in `storage/app/public/Bkash_Files/` as untracked fixtures; analysis is cross-referenced with both disk samples and codebase configurations.)*
 
-### C. Service Calculation Layer (`app/Services/BkashCalculationService.php`)
-In `calculateBalance()`:
+| Column Header (Excel) | Value Observed in Batch Files | Database Column (`BKASH_TRANSACTIONS`) | Format |
+|---|---|---|---|
+| `Debit Account` | `111613120722698` | `source_account_no` | 15-digit CBS GL/Internal Ledger |
+| `Debit Account` | `111613134119657` | `source_account_no` | 15-digit CBS GL/Internal Ledger |
+
+### C. Service Calculation Layer (`app/Filament/Pages/Dashboard.php`)
+In `calculateBalance(string $accountNumber): float`:
 ```php
-// Step 1: Initial balances keyed by configured account numbers (13-digit)
-$initialBalances = config('bkash.initial_balances', []);
+private function calculateBalance(string $accountNumber): float
+{
+    try {
+        $totalDebited = (float) BkashTransaction::where('source_account_no', $accountNumber)
+            ->whereIn('status_id', [
+                BkashTransaction::STATUS_FINAL_AUTHORIZED,
+                BkashTransaction::STATUS_CBS_SUCCESS,
+            ])
+            ->sum('amount');
 
-// Step 2: Sum debits grouped by transaction Debit Account from database
-$debits = BkashTransaction::selectRaw('debit_account, SUM(amount) as total_debit')
-    ->whereIn('status_id', [StatusHelper::SUCCESS, StatusHelper::APPROVED])
-    ->groupBy('debit_account')
-    ->pluck('total_debit', 'debit_account');
+        $balances = config('bkash.initial_balances', []);
+        $initialBalance = (float) ($balances[$accountNumber] ?? 0.00);
 
-// Step 3: Exact-key lookup
-foreach ($initialBalances as $account => $initialBalance) {
-    $totalDebit = $debits->get($account, 0); // Exact string match!
-    $currentBalance = $initialBalance - $totalDebit;
-    ...
+        return max(0.0, $initialBalance - $totalDebited);
+    } catch (\Throwable $e) {
+        return 0.00;
+    }
 }
 ```
-Because `'111613120722698' !== '0100202707747'`, `$debits->get('0100202707747', 0)` evaluates to `0`, causing the balance card to display the static initial balance rather than reflecting net deductions.
+Because `'111613120722698' !== '0100202707747'`, query `BkashTransaction::where('source_account_no', '0100202707747')` yields `0.00` total debited, causing the balance card to display the static initial balance rather than reflecting net deductions.
 
 ---
 
@@ -93,7 +96,7 @@ Before applying any alias mapping or modifying `config/bkash.php`, the following
 4. **Whitelist Enforcement:**  
    Should the system whitelist both 13-digit and 15-digit formats in `config/bkash.php`, or should incoming 15-digit accounts be normalized to 13-digit numbers upon file upload?
 5. **Initial Balance Allocation:**  
-   Are the initial balances (e.g., 50,000,000.00 BDT) held at the customer account level (`0100...`) or at the internal GL clearing account level (`1116...`)?
+   Are the initial balances held at the customer account level (`0100...`) or at the internal GL clearing account level (`1116...`)?
 
 ---
 
@@ -102,11 +105,11 @@ Before applying any alias mapping or modifying `config/bkash.php`, the following
 Upon receipt of written confirmation from Treasury/IT, the recommended implementation approach is:
 ```php
 // config/bkash.php
-'account_aliases' => [
-    '111613120722698' => '0100202707747',
-    '111613134119657' => '0100224107522',
+'account_number_aliases' => [
+    '0100202707747' => ['0100202707747', '111613120722698'],
+    '0100224107522' => ['0100224107522', '111613134119657'],
 ],
 ```
-And in `BkashCalculationService::calculateBalance()`, normalize `$debit_account` through the alias map before aggregating balances.
+And in `app/Filament/Pages/Dashboard.php`'s `calculateBalance()`, query transactions where `source_account_no` matches any alias for the specified account number before subtracting from initial balance.
 
-*Action: No code changes will be committed for Item 2 until formal answers to the above questions are recorded.*
+*Action: No code or configuration changes will be committed for dashboard balance mapping until formal answers to the above questions are recorded.*

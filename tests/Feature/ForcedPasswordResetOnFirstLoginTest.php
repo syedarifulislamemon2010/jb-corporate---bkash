@@ -168,4 +168,33 @@ class ForcedPasswordResetOnFirstLoginTest extends TestCase
         $this->assertEquals('active', $this->tempUser->account_status);
         $this->assertFalse($this->tempUser->isTempPasswordIssued());
     }
+
+    public function test_user_successfully_changing_password_triggers_confirmation_dispatch(): void
+    {
+        config([
+            'bkash.email_enabled' => true,
+            'bkash.sms_enabled'   => false, // Keep SMS disabled to avoid actual HTTP in test
+        ]);
+
+        $this->actingAs($this->tempUser);
+
+        Livewire::test(ForcePasswordChange::class)
+            ->fillForm([
+                'current_password'      => 'TempPass@123',
+                'password'              => 'BrandNewSecurePass@2026',
+                'password_confirmation' => 'BrandNewSecurePass@2026',
+            ])
+            ->call('changePassword')
+            ->assertRedirect('/admin');
+
+        $this->tempUser->refresh();
+        $this->assertEquals('active', $this->tempUser->account_status);
+        $this->assertTrue(Hash::check('BrandNewSecurePass@2026', $this->tempUser->password));
+
+        // When MAIL_MAILER=array, verify that confirmation email was sent to user email
+        $transport = app('mailer')->getSymfonyTransport();
+        $this->assertGreaterThanOrEqual(1, count($transport->messages()));
+    }
 }
+
+

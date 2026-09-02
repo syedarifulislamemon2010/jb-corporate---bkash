@@ -17,6 +17,9 @@ use Filament\Support\Enums\Alignment;
 use Illuminate\Contracts\Support\Htmlable;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Mail;
+use App\Helper\SMSGenerateHelper;
 use Illuminate\Validation\ValidationException;
 
 /**
@@ -180,6 +183,30 @@ class ForcePasswordChange extends SimplePage
             'password' => Hash::make($newPassword),
             'account_status' => 'active',
         ]);
+
+        // Send confirmation SMS if mobile number is present and SMS is enabled
+        if (!empty($user->mobile_no) && config('bkash.sms_enabled', true)) {
+            try {
+                SMSGenerateHelper::sendDirectSms(
+                    $user->mobile_no,
+                    "Dear {$user->name}, your JB Corporate account password has been successfully reset. If you did not perform this, please contact IT Support immediately."
+                );
+            } catch (\Throwable $e) {
+                Log::warning('Password reset confirmation SMS failed: ' . $e->getMessage());
+            }
+        }
+
+        // Send confirmation email if email is present and email notifications are enabled
+        if (!empty($user->email) && config('bkash.email_enabled', true)) {
+            try {
+                Mail::raw(
+                    "Dear {$user->name},\n\nYour JB Corporate account password has been successfully reset.\n\nIf you did not perform this action, please contact Janata Bank IT Support immediately.\n\nBest Regards,\nJanata Bank PLC",
+                    fn ($message) => $message->to($user->email)->subject('Password Reset Confirmation - Janata Bank Corporate Portal')
+                );
+            } catch (\Throwable $e) {
+                Log::warning('Password reset confirmation email failed: ' . $e->getMessage());
+            }
+        }
 
         Notification::make()
             ->title('Password Changed Successfully')
