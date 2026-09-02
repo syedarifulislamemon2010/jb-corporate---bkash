@@ -4,6 +4,7 @@
         .jb-batch-container {
             width: 100%;
             margin-top: 0.25rem;
+            font-family: inherit;
         }
 
         /* Tabs Bar */
@@ -31,13 +32,14 @@
         .jb-tab-btn {
             padding: 0.4rem 0.85rem;
             font-size: 0.8125rem;
-            font-weight: 600;
+            font-weight: 500;
             border-radius: 0.5rem;
             border: 1px solid #cbd5e1;
             cursor: pointer;
             transition: all 0.15s ease-in-out;
-            background-color: #f8fafc;
-            color: #475569;
+            background-color: #ffffff;
+            color: #334155;
+            font-family: inherit;
         }
         html.dark .jb-tab-btn, .dark .jb-tab-btn {
             background-color: #1e293b;
@@ -45,7 +47,7 @@
             color: #94a3b8;
         }
         .jb-tab-btn:hover {
-            background-color: #e2e8f0;
+            background-color: #f1f5f9;
             color: #0f172a;
         }
         html.dark .jb-tab-btn:hover, .dark .jb-tab-btn:hover {
@@ -56,7 +58,8 @@
             background-color: #0284c7;
             border-color: #0284c7;
             color: #ffffff;
-            box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.08);
+            font-weight: 600;
+            box-shadow: 0 1px 2px 0 rgba(2, 132, 199, 0.2);
         }
 
         .jb-search-box {
@@ -73,6 +76,7 @@
             color: #0f172a;
             outline: none;
             transition: border-color 0.15s ease;
+            font-family: inherit;
         }
         html.dark .jb-search-input, .dark .jb-search-input {
             background-color: #0f172a;
@@ -102,20 +106,20 @@
             gap: 1rem;
             padding: 0.65rem 1rem;
             margin-bottom: 1rem;
-            background: linear-gradient(135deg, rgba(2, 132, 199, 0.08), rgba(2, 132, 199, 0.03));
-            border: 1px solid rgba(2, 132, 199, 0.3);
+            background-color: #f0f9ff;
+            border: 1px solid #bae6fd;
             border-radius: 0.5rem;
         }
         html.dark .jb-bulk-bar, .dark .jb-bulk-bar {
-            background: linear-gradient(135deg, rgba(56, 189, 248, 0.12), rgba(15, 23, 42, 0.6));
-            border-color: rgba(56, 189, 248, 0.3);
+            background-color: rgba(2, 132, 199, 0.1);
+            border-color: rgba(2, 132, 199, 0.3);
         }
 
         .jb-btn-verify {
             display: inline-flex;
             align-items: center;
             gap: 0.4rem;
-            padding: 0.4rem 0.85rem;
+            padding: 0.45rem 0.9rem;
             font-size: 0.8125rem;
             font-weight: 600;
             color: #ffffff;
@@ -124,6 +128,7 @@
             border-radius: 0.375rem;
             cursor: pointer;
             transition: background-color 0.15s ease;
+            font-family: inherit;
         }
         .jb-btn-verify:hover {
             background-color: #047857;
@@ -132,9 +137,10 @@
         /* Master Table Card */
         .jb-table-card {
             background-color: #ffffff;
-            border: 1px solid #cbd5e1;
+            border: 1px solid #e2e8f0;
             border-radius: 0.75rem;
-            overflow: hidden;
+            overflow-x: auto; /* Horizontal scroll enables full visibility without clipping */
+            width: 100%;
             box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.05);
         }
         html.dark .jb-table-card, .dark .jb-table-card {
@@ -145,14 +151,16 @@
 
         .jb-master-table {
             width: 100%;
+            min-width: 980px;
             border-collapse: collapse;
             text-align: left;
             font-size: 0.8125rem;
+            font-family: inherit;
         }
 
         .jb-master-thead {
-            background-color: #f1f5f9;
-            border-bottom: 2px solid #cbd5e1;
+            background-color: #f8fafc;
+            border-bottom: 2px solid #e2e8f0;
         }
         html.dark .jb-master-thead, .dark .jb-master-thead {
             background-color: #1e293b;
@@ -161,10 +169,8 @@
 
         .jb-master-thead th {
             padding: 0.75rem 0.85rem;
-            font-size: 0.6875rem;
-            font-weight: 700;
-            letter-spacing: 0.05em;
-            text-transform: uppercase;
+            font-size: 0.75rem;
+            font-weight: 600;
             color: #475569;
             white-space: nowrap;
         }
@@ -178,22 +184,23 @@
             transition: background-color 0.15s ease;
         }
         html.dark .jb-master-row, .dark .jb-master-row {
-            border-bottom-color: #1e293b;
+            border-bottom-color: #334155;
         }
         .jb-master-row:hover {
             background-color: #f8fafc;
         }
         html.dark .jb-master-row:hover, .dark .jb-master-row:hover {
-            background-color: rgba(30, 41, 59, 0.5);
+            background-color: rgba(30, 41, 59, 0.4);
         }
 
         .jb-master-row td {
-            padding: 0.85rem 0.85rem;
+            padding: 0.75rem 0.85rem;
             vertical-align: middle;
             color: #1e293b;
+            white-space: nowrap;
         }
         html.dark .jb-master-row td, .dark .jb-master-row td {
-            color: #e2e8f0;
+            color: #f1f5f9;
         }
 
         /* Badges */
@@ -253,6 +260,7 @@
             text-decoration: none;
             cursor: pointer;
             transition: all 0.15s ease;
+            white-space: nowrap;
         }
         html.dark .jb-btn-download, .dark .jb-btn-download {
             background-color: rgba(2, 132, 199, 0.15);
@@ -281,6 +289,7 @@
             color: #0284c7;
             text-align: left;
             padding: 0;
+            font-family: inherit;
         }
         html.dark .jb-expand-btn, .dark .jb-expand-btn {
             color: #38bdf8;
@@ -305,20 +314,24 @@
             border-bottom: 2px solid #cbd5e1;
         }
         html.dark .jb-subtable-row, .dark .jb-subtable-row {
-            background-color: rgba(15, 23, 42, 0.95);
+            background-color: #090d16;
             border-bottom-color: #334155;
         }
 
         .jb-subtable-wrapper {
-            padding: 0.75rem 1rem 1rem 2rem;
+            padding: 0.75rem 1rem 1rem 1.5rem;
+            overflow-x: auto;
+            width: 100%;
+            box-sizing: border-box;
         }
 
         .jb-subtable-card {
             background-color: #ffffff;
             border: 1px solid #cbd5e1;
             border-radius: 0.5rem;
-            overflow: hidden;
+            overflow-x: auto;
             box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+            width: 100%;
         }
         html.dark .jb-subtable-card, .dark .jb-subtable-card {
             background-color: #1e293b;
@@ -329,10 +342,8 @@
             padding: 0.5rem 0.85rem;
             background-color: #f1f5f9;
             border-bottom: 1px solid #e2e8f0;
-            font-size: 0.6875rem;
-            font-weight: 700;
-            text-transform: uppercase;
-            letter-spacing: 0.04em;
+            font-size: 0.725rem;
+            font-weight: 600;
             color: #475569;
             display: flex;
             justify-content: space-between;
@@ -346,17 +357,18 @@
 
         .jb-subtable {
             width: 100%;
+            min-width: 960px;
             border-collapse: collapse;
             font-size: 0.75rem;
             text-align: left;
+            font-family: inherit;
         }
         .jb-subtable th {
             padding: 0.5rem 0.75rem;
-            font-size: 0.6875rem;
-            font-weight: 700;
-            text-transform: uppercase;
+            font-size: 0.725rem;
+            font-weight: 600;
             background-color: #f8fafc;
-            color: #64748b;
+            color: #475569;
             border-bottom: 1px solid #e2e8f0;
             white-space: nowrap;
         }
@@ -371,6 +383,7 @@
             border-bottom: 1px solid #f1f5f9;
             color: #334155;
             vertical-align: middle;
+            white-space: nowrap;
         }
         html.dark .jb-subtable td, .dark .jb-subtable td {
             border-bottom-color: #334155;
@@ -488,37 +501,36 @@
             <table class="jb-master-table">
                 <thead class="jb-master-thead">
                     <tr>
-                        <th style="width: 44px; text-align: center;">
+                        <th style="width: 44px; min-width: 44px; text-align: center;">
                             <input
                                 type="checkbox"
                                 wire:model.live="selectAll"
                                 class="jb-checkbox"
                             />
                         </th>
-                        <th style="width: 50px;">#</th>
-                        <th>File Name</th>
-                        <th>Channel</th>
-                        <th style="text-align: center;">Total Transaction</th>
-                        <th style="text-align: center;">Success Transaction</th>
-                        <th style="text-align: center;">Failed Transaction</th>
-                        <th style="text-align: right;">Amount BDT</th>
-                        <th style="text-align: center; width: 120px;">Action</th>
+                        <th style="width: 48px; min-width: 48px;">#</th>
+                        <th style="min-width: 260px;">File Name</th>
+                        <th style="width: 90px; min-width: 90px; text-align: center;">Channel</th>
+                        <th style="width: 120px; min-width: 120px; text-align: center;">Total Transaction</th>
+                        <th style="width: 130px; min-width: 130px; text-align: center;">Success Transaction</th>
+                        <th style="width: 120px; min-width: 120px; text-align: center;">Failed Transaction</th>
+                        <th style="width: 140px; min-width: 140px; text-align: right;">Amount BDT</th>
+                        <th style="width: 120px; min-width: 120px; text-align: center; padding-right: 1rem;">Action</th>
                     </tr>
                 </thead>
-                <tbody>
-                    @forelse($batches as $batch)
-                        @php
-                            $txns = $batch->getBatchTransactions();
-                            $totalCount = $batch->total_data ?: $txns->count();
-                            $successCount = $txns->whereIn('status_id', [1001, 1002, 1003, 1004, 1006])->count();
-                            $failedCount = $txns->whereIn('status_id', [1007, 9000])->count() + $batch->failedTransactions->count();
-                            $batchAmount = (float) ($batch->total_amount ?: $txns->sum('amount'));
-                            $downloadUrl = route('admin.bkash.download-batch', ['file' => $batch->file_name]);
-                        @endphp
-                        <tr
-                            x-data="{ open: false }"
-                            class="jb-master-row"
-                        >
+
+                @forelse($batches as $batch)
+                    @php
+                        $txns = $batch->getBatchTransactions();
+                        $totalCount = $batch->total_data ?: $txns->count();
+                        $successCount = $txns->whereIn('status_id', [1001, 1002, 1003, 1004, 1006])->count();
+                        $failedCount = $txns->whereIn('status_id', [1007, 9000])->count() + $batch->failedTransactions->count();
+                        $batchAmount = (float) ($batch->total_amount ?: $txns->sum('amount'));
+                        $downloadUrl = route('admin.bkash.download-batch', ['file' => $batch->file_name]);
+                    @endphp
+                    <!-- Scoped tbody per batch ensures reliable default-collapsed Alpine state -->
+                    <tbody x-data="{ open: false }" class="jb-batch-tbody">
+                        <tr class="jb-master-row">
                             <!-- Checkbox (Only on file row) -->
                             <td style="text-align: center;" onclick="event.stopPropagation()">
                                 <input
@@ -530,7 +542,7 @@
                             </td>
 
                             <!-- # Index -->
-                            <td style="font-weight: 600; color: #64748b;" class="jb-num">
+                            <td style="font-weight: 500; color: #64748b;" class="jb-num">
                                 {{ $loop->iteration }}
                             </td>
 
@@ -550,7 +562,7 @@
                             </td>
 
                             <!-- Channel -->
-                            <td>
+                            <td style="text-align: center;">
                                 @if($batch->transaction_type === 'A2A')
                                     <span class="jb-badge jb-badge-a2a">A2A</span>
                                 @elseif($batch->transaction_type === 'BEFTN')
@@ -563,17 +575,17 @@
                             </td>
 
                             <!-- Total Transaction -->
-                            <td style="text-align: center; font-weight: 700;" class="jb-num">
+                            <td style="text-align: center; font-weight: 600;" class="jb-num">
                                 {{ number_format($totalCount) }}
                             </td>
 
                             <!-- Success Transaction -->
-                            <td style="text-align: center; font-weight: 700; color: #059669;" class="jb-num">
+                            <td style="text-align: center; font-weight: 600; color: #059669;" class="jb-num">
                                 {{ number_format($successCount) }}
                             </td>
 
                             <!-- Failed Transaction -->
-                            <td style="text-align: center; font-weight: 700; color: {{ $failedCount > 0 ? '#e11d48' : '#94a3b8' }};" class="jb-num">
+                            <td style="text-align: center; font-weight: 600; color: {{ $failedCount > 0 ? '#e11d48' : '#94a3b8' }};" class="jb-num">
                                 {{ number_format($failedCount) }}
                             </td>
 
@@ -583,7 +595,7 @@
                             </td>
 
                             <!-- Action: Download Button -->
-                            <td style="text-align: center; white-space: nowrap;" onclick="event.stopPropagation()">
+                            <td style="text-align: center; white-space: nowrap; padding-right: 1rem;" onclick="event.stopPropagation()">
                                 <a
                                     href="{{ $downloadUrl }}"
                                     target="_blank"
@@ -598,29 +610,29 @@
                             </td>
                         </tr>
 
-                        <!-- Sub-table Row: Child Transactions (Collapsed by Default) -->
+                        <!-- Sub-table Row: Child Transactions (Default Collapsed via x-show="open") -->
                         <tr x-show="open" x-cloak class="jb-subtable-row">
                             <td colspan="9" style="padding: 0;">
                                 <div class="jb-subtable-wrapper">
                                     <div class="jb-subtable-card">
                                         <div class="jb-subtable-header-title">
                                             <span>Transactions breakdown for {{ $batch->file_name }} ({{ $txns->count() }} items)</span>
-                                            <span style="font-weight: 400; text-transform: none; color: #64748b;">No select option for individual transactions</span>
+                                            <span style="font-weight: 400; color: #64748b;">No select options for individual transaction rows</span>
                                         </div>
-                                        <div style="overflow-x: auto;">
+                                        <div style="overflow-x: auto; width: 100%;">
                                             <table class="jb-subtable">
                                                 <thead>
                                                     <tr>
-                                                        <th style="width: 40px; text-align: center;">#</th>
-                                                        <th>Ref No</th>
-                                                        <th>Channel</th>
-                                                        <th>Source Account (TCSA/Ops)</th>
-                                                        <th>Beneficiary Name</th>
-                                                        <th>Beneficiary Account</th>
-                                                        <th style="text-align: right;">Amount (BDT)</th>
-                                                        <th style="text-align: right;">Routing Number</th>
-                                                        <th>Bank Name</th>
-                                                        <th>Txn ID</th>
+                                                        <th style="width: 40px; min-width: 40px; text-align: center;">#</th>
+                                                        <th style="min-width: 160px;">Ref No</th>
+                                                        <th style="width: 70px; min-width: 70px; text-align: center;">Channel</th>
+                                                        <th style="min-width: 160px;">Source Account (TCSA/Ops)</th>
+                                                        <th style="min-width: 160px;">Beneficiary Name</th>
+                                                        <th style="min-width: 160px;">Beneficiary Account</th>
+                                                        <th style="min-width: 110px; text-align: right;">Amount (BDT)</th>
+                                                        <th style="min-width: 100px; text-align: right;">Routing Number</th>
+                                                        <th style="min-width: 120px;">Bank Name</th>
+                                                        <th style="min-width: 180px;">Txn ID</th>
                                                     </tr>
                                                 </thead>
                                                 <tbody>
@@ -628,7 +640,7 @@
                                                         <tr>
                                                             <td style="text-align: center; color: #64748b;" class="jb-num">{{ $loop->iteration }}</td>
                                                             <td style="font-weight: 600; color: #0284c7;">{{ $txn->reference_id }}</td>
-                                                            <td>
+                                                            <td style="text-align: center;">
                                                                 <span class="jb-badge" style="background-color: #f1f5f9; color: #334155; font-size: 10px; padding: 1px 5px;">
                                                                     {{ $txn->transaction_type }}
                                                                 </span>
@@ -636,7 +648,7 @@
                                                             <td style="font-family: monospace;">{{ $txn->source_account_no ?? '0100202707747' }}</td>
                                                             <td style="font-weight: 500;">{{ $txn->debit_account_title }}</td>
                                                             <td style="font-family: monospace;">{{ $txn->beneficiary_account_no }}</td>
-                                                            <td style="text-align: right; font-weight: 700; font-family: monospace;" class="jb-num">{{ number_format($txn->amount, 2) }}</td>
+                                                            <td style="text-align: right; font-weight: 600; font-family: monospace;" class="jb-num">{{ number_format($txn->amount, 2) }}</td>
                                                             <td style="text-align: right; font-family: monospace;" class="jb-num">{{ $txn->credit_routing ?? '-' }}</td>
                                                             <td>{{ $txn->credit_bank ?? '-' }}</td>
                                                             <td style="font-family: monospace; color: #64748b;">{{ $txn->txn_id }}</td>
@@ -655,20 +667,22 @@
                                 </div>
                             </td>
                         </tr>
-                    @empty
+                    </tbody>
+                @empty
+                    <tbody>
                         <tr>
                             <td colspan="9" style="padding: 3rem; text-align: center; color: #94a3b8;">
                                 <div style="display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 0.5rem;">
                                     <svg style="width: 36px; height: 36px; color: #cbd5e1;" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
                                     </svg>
-                                    <p style="font-weight: 700; font-size: 0.9375rem; margin: 0; color: #475569;">All Caught Up!</p>
+                                    <p style="font-weight: 600; font-size: 0.9375rem; margin: 0; color: #475569;">All Caught Up!</p>
                                     <p style="font-size: 0.8125rem; margin: 0; color: #94a3b8;">No files are currently pending Checker verification.</p>
                                 </div>
                             </td>
                         </tr>
-                    @endforelse
-                </tbody>
+                    </tbody>
+                @endforelse
             </table>
         </div>
 
