@@ -103,8 +103,8 @@ class BkashBatchResource extends Resource
                     ->badge()
                     ->color(fn (string $state): string => match ($state) {
                         'A2A'   => 'success',
-                        'BEFTN' => 'warning',
-                        'RTGS'  => 'danger',
+                        'BEFTN' => 'purple',
+                        'RTGS'  => 'warning',
                         default => 'gray',
                     }),
 
@@ -123,7 +123,7 @@ class BkashBatchResource extends Resource
                 TextColumn::make('failed_count')
                     ->label('Failed')
                     ->badge()
-                    ->color('danger')
+                    ->color(fn ($state): string => ((int) $state) > 0 ? 'danger' : 'gray')
                     ->alignCenter()
                     ->getStateUsing(fn ($record) => $record->failed_transactions_count ?? \App\Models\BkashFailedTransaction::where('batch_id', $record->id)->count()),
 

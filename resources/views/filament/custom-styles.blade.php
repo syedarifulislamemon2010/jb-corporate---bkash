@@ -18,12 +18,12 @@
         --color-stage-auth2-bg: rgba(13, 148, 136, 0.05);
 
         /* ─── CHANNEL COLOR PALETTE (Payment Modes) ─── */
-        --color-channel-a2a: #0284C7;   /* Sky Blue for Account-to-Account */
-        --color-channel-a2a-bg: rgba(2, 132, 199, 0.04);
+        --color-channel-a2a: #10B981;   /* Emerald Green for Account-to-Account */
+        --color-channel-a2a-bg: rgba(16, 185, 129, 0.04);
         --color-channel-beftn: #8B5CF6; /* Violet for BEFTN Clearing Batch */
         --color-channel-beftn-bg: rgba(139, 92, 246, 0.04);
-        --color-channel-rtgs: #EA580C;  /* Deep Orange for High-Value RTGS */
-        --color-channel-rtgs-bg: rgba(234, 88, 12, 0.04);
+        --color-channel-rtgs: #F59E0B;  /* Warm Amber for High-Value RTGS */
+        --color-channel-rtgs-bg: rgba(245, 158, 11, 0.04);
     }
 
     html.dark, .dark {
@@ -42,12 +42,12 @@
         --color-stage-auth2-bg: rgba(20, 184, 166, 0.08);
 
         /* Dark Mode Channel Palette */
-        --color-channel-a2a: #38BDF8;
-        --color-channel-a2a-bg: rgba(56, 189, 248, 0.08);
+        --color-channel-a2a: #34D399;
+        --color-channel-a2a-bg: rgba(52, 211, 153, 0.08);
         --color-channel-beftn: #A78BFA;
         --color-channel-beftn-bg: rgba(167, 139, 250, 0.08);
-        --color-channel-rtgs: #FB923C;
-        --color-channel-rtgs-bg: rgba(251, 146, 60, 0.08);
+        --color-channel-rtgs: #FBBF24;
+        --color-channel-rtgs-bg: rgba(251, 191, 36, 0.08);
     }
 
     body, button, input, select, textarea, .fi-body {

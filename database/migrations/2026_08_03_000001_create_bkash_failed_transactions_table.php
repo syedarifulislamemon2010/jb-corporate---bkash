@@ -14,6 +14,7 @@ return new class extends Migration
             $table->string('file_name', 255)->nullable();
             $table->integer('row_number')->nullable();
             $table->string('transaction_type', 20)->nullable();
+            $table->string('txn_id', 100)->nullable();
             $table->string('reference_id', 100)->nullable();
             $table->string('debit_account_no', 34)->nullable();
             $table->string('credit_account_no', 34)->nullable();

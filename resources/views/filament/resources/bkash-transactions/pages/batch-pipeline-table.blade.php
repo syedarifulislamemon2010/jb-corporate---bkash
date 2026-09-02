@@ -320,14 +320,14 @@
             border: 1px solid transparent;
         }
         .jb-badge-a2a {
-            background-color: #e0f2fe;
-            color: #0369a1;
-            border-color: #bae6fd;
+            background-color: #ecfdf5;
+            color: #047857;
+            border-color: #a7f3d0;
         }
         html.dark .jb-badge-a2a, .dark .jb-badge-a2a {
-            background-color: rgba(2, 132, 199, 0.2);
-            color: #38bdf8;
-            border-color: rgba(2, 132, 199, 0.4);
+            background-color: rgba(16, 185, 129, 0.25);
+            color: #6ee7b7;
+            border-color: rgba(16, 185, 129, 0.4);
         }
         .jb-badge-beftn {
             background-color: #f3e8ff;
@@ -857,7 +857,15 @@
                                                             <td style="text-align: center; color: #64748b;" class="jb-num">{{ $loop->iteration }}</td>
                                                             <td style="font-weight: 600; color: #0284c7;">{{ $txn->reference_id }}</td>
                                                             <td style="text-align: center;">
-                                                                <span class="jb-badge" style="background-color: #f1f5f9; color: #334155; font-size: 10px; padding: 1px 5px;">
+                                                                @php
+                                                                    $txnBadgeClass = match($txn->transaction_type) {
+                                                                        'A2A'   => 'jb-badge-a2a',
+                                                                        'BEFTN' => 'jb-badge-beftn',
+                                                                        'RTGS'  => 'jb-badge-rtgs',
+                                                                        default => '',
+                                                                    };
+                                                                @endphp
+                                                                <span class="jb-badge {{ $txnBadgeClass }}" style="font-size: 10px; padding: 1px 5px; {{ empty($txnBadgeClass) ? 'background-color: #f1f5f9; color: #334155;' : '' }}">
                                                                     {{ $txn->transaction_type }}
                                                                 </span>
                                                             </td>

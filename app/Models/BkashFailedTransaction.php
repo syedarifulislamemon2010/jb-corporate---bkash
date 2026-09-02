@@ -19,6 +19,7 @@ class BkashFailedTransaction extends Model
         'file_name',
         'row_number',
         'transaction_type',
+        'txn_id',
         'reference_id',
         'source_account_no',
         'beneficiary_account_no',
@@ -26,6 +27,38 @@ class BkashFailedTransaction extends Model
         'failure_code',
         'reject_reason',
     ];
+
+    /**
+     * Backward-compatibility accessor for reference column.
+     */
+    public function getReferenceAttribute(?string $value): ?string
+    {
+        return $value ?? $this->attributes['reference_id'] ?? null;
+    }
+
+    /**
+     * Backward-compatibility mutator for reference column.
+     */
+    public function setReferenceAttribute(?string $value): void
+    {
+        $this->attributes['reference_id'] = $value;
+    }
+
+    /**
+     * Backward-compatibility accessor for credit_account.
+     */
+    public function getCreditAccountAttribute(?string $value): ?string
+    {
+        return $value ?? $this->attributes['source_account_no'] ?? null;
+    }
+
+    /**
+     * Backward-compatibility accessor for debit_account.
+     */
+    public function getDebitAccountAttribute(?string $value): ?string
+    {
+        return $value ?? $this->attributes['beneficiary_account_no'] ?? null;
+    }
 
     protected function casts(): array
     {

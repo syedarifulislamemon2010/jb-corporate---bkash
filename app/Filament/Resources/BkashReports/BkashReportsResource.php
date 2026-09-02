@@ -95,8 +95,8 @@ class BkashReportsResource extends Resource
                     ->sortable()
                     ->color(fn (string $state): string => match ($state) {
                         'A2A'   => 'success',
-                        'BEFTN' => 'warning',
-                        'RTGS'  => 'danger',
+                        'BEFTN' => 'purple',
+                        'RTGS'  => 'warning',
                         default => 'gray',
                     }),
 
