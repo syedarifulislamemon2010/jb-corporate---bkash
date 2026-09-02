@@ -119,7 +119,7 @@ return [
     */
 
     'api_middleware' => [
-        EnsureFrontendRequestsAreStateful::class,
+        'web',
         AuthorizeLogViewer::class,
         AuthenticateSession::class,
     ],

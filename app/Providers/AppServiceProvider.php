@@ -27,7 +27,15 @@ class AppServiceProvider extends ServiceProvider
         FilamentShield::enforcePolicies();
 
         Gate::define('viewLogViewer', function ($user = null) {
-            return (bool) ($user && $user->hasRole('super_admin'));
+            if (! $user) {
+                return false;
+            }
+
+            if (app()->environment('local')) {
+                return true;
+            }
+
+            return $user->hasAnyRole(['super_admin', 'Admin', 'admin']);
         });
     }
 }

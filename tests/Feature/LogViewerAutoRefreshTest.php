@@ -67,4 +67,32 @@ class LogViewerAutoRefreshTest extends TestCase
 
         $this->assertFalse(\Illuminate\Support\Facades\Gate::forUser($regularUser)->allows('viewLogViewer'));
     }
+
+    public function test_log_viewer_api_files_endpoint(): void
+    {
+        $response = $this->actingAs($this->user)->get('/admin/log-viewer/api/files');
+        $response->assertStatus(200);
+    }
+
+    public function test_log_viewer_api_files_denies_unauthenticated_guest(): void
+    {
+        $response = $this->getJson('/admin/log-viewer/api/files');
+        $response->assertStatus(403);
+    }
+
+    public function test_log_viewer_gate_allows_authenticated_user_in_local_environment(): void
+    {
+        $regularUser = User::create([
+            'name'         => 'Local Officer',
+            'email'        => 'local@jb.com',
+            'mobile_no'    => '01711224466',
+            'organization' => 'Janata Bank PLC.',
+            'password'     => bcrypt('Secret123'),
+        ]);
+
+        $this->app->detectEnvironment(fn () => 'local');
+
+        $this->assertTrue(\Illuminate\Support\Facades\Gate::forUser($regularUser)->allows('viewLogViewer'));
+        $this->assertFalse(\Illuminate\Support\Facades\Gate::forUser(null)->allows('viewLogViewer'));
+    }
 }
