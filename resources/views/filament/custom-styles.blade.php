@@ -1768,6 +1768,147 @@
             border-right-width: 1px;
         }
     }
+
+    /* ─── High-Priority Failed / Partial Transactions Critical Monitor Card ─── */
+    .db-exception-link {
+        text-decoration: none !important;
+        display: block !important;
+    }
+    .db-card-danger,
+    a.db-exception-link {
+        background-color: #fff1f2 !important;
+        border: 2px solid #f43f5e !important;
+        border-left: 6px solid #e11d48 !important;
+        box-shadow: 0 4px 14px rgba(225, 29, 72, 0.15) !important;
+        border-radius: 0.75rem !important;
+        transition: all 0.2s ease-in-out !important;
+    }
+    html.dark .db-card-danger,
+    html.dark a.db-exception-link,
+    .dark .db-card-danger,
+    .dark a.db-exception-link {
+        background-color: rgba(225, 29, 72, 0.1) !important;
+        border-color: #e11d48 !important;
+        box-shadow: 0 4px 14px rgba(225, 29, 72, 0.25) !important;
+    }
+    a.db-exception-link:hover {
+        transform: translateY(-2px) !important;
+        box-shadow: 0 6px 18px rgba(225, 29, 72, 0.25) !important;
+    }
+    .db-exception-icon-ok,
+    .db-exception-icon-err {
+        background: #ffe4e6 !important;
+        color: #e11d48 !important;
+        border: 1px solid #fecdd3 !important;
+        border-radius: 0.5rem !important;
+        padding: 0.5rem !important;
+    }
+    html.dark .db-exception-icon-ok,
+    html.dark .db-exception-icon-err {
+        background: rgba(225, 29, 72, 0.2) !important;
+        color: #fb7185 !important;
+        border-color: rgba(225, 29, 72, 0.4) !important;
+    }
+    .db-exception-label {
+        color: #be123c !important;
+        font-weight: 700 !important;
+        letter-spacing: 0.05em !important;
+    }
+    html.dark .db-exception-label {
+        color: #fda4af !important;
+    }
+    .db-exception-headline {
+        color: #9f1239 !important;
+        font-size: 0.9375rem !important;
+        font-weight: 700 !important;
+    }
+    html.dark .db-exception-headline {
+        color: #fff1f2 !important;
+    }
+    .db-exception-action {
+        color: #e11d48 !important;
+        font-weight: 700 !important;
+    }
+
+    /* ─── Recent Activity & Pipeline Audit Feed Larger Font Sizes ─── */
+    .db-timeline-file-tag {
+        font-family: var(--font-mono, monospace) !important;
+        font-size: 0.875rem !important;
+        font-weight: 700 !important;
+        padding: 0.2rem 0.6rem !important;
+        border-radius: 6px !important;
+        background-color: #f1f5f9 !important;
+        color: #0f172a !important;
+        border: 1.5px solid #cbd5e1 !important;
+        letter-spacing: 0.02em !important;
+    }
+    html.dark .db-timeline-file-tag,
+    .dark .db-timeline-file-tag {
+        background-color: #090d16 !important;
+        color: #38bdf8 !important;
+        border-color: #334155 !important;
+    }
+    .db-timeline-action-title {
+        font-size: 0.9375rem !important;
+        font-weight: 600 !important;
+    }
+    .db-stage-badge {
+        font-size: 0.75rem !important;
+        font-weight: 700 !important;
+    }
+    .db-timeline-human-time {
+        font-size: 0.8125rem !important;
+    }
+    .db-timeline-actor,
+    .db-timeline-full-time {
+        font-size: 0.8125rem !important;
+    }
+
+    /* ─── 2-Line Text Wrapping & No Horizontal Scrolling on 4 Report / Audit Tables ─── */
+    .fi-resource-bkash-failed-transactions .fi-ta-ctn,
+    .fi-resource-bkash-batches .fi-ta-ctn,
+    .fi-resource-bkash-reports .fi-ta-ctn,
+    .fi-resource-eft-returns .fi-ta-ctn {
+        overflow-x: hidden !important;
+    }
+    .fi-resource-bkash-failed-transactions .fi-ta-table,
+    .fi-resource-bkash-batches .fi-ta-table,
+    .fi-resource-bkash-reports .fi-ta-table,
+    .fi-resource-eft-returns .fi-ta-table {
+        table-layout: auto !important;
+        width: 100% !important;
+    }
+    .fi-resource-bkash-failed-transactions .fi-ta-cell,
+    .fi-resource-bkash-batches .fi-ta-cell,
+    .fi-resource-bkash-reports .fi-ta-cell,
+    .fi-resource-eft-returns .fi-ta-cell {
+        white-space: normal !important;
+        word-break: break-word !important;
+        overflow-wrap: break-word !important;
+        padding-top: 0.5rem !important;
+        padding-bottom: 0.5rem !important;
+    }
+    .fi-resource-bkash-failed-transactions .fi-ta-cell p,
+    .fi-resource-bkash-failed-transactions .fi-ta-cell span,
+    .fi-resource-bkash-batches .fi-ta-cell p,
+    .fi-resource-bkash-batches .fi-ta-cell span,
+    .fi-resource-bkash-reports .fi-ta-cell p,
+    .fi-resource-bkash-reports .fi-ta-cell span,
+    .fi-resource-eft-returns .fi-ta-cell p,
+    .fi-resource-eft-returns .fi-ta-cell span {
+        white-space: normal !important;
+        word-break: break-word !important;
+        line-height: 1.25 !important;
+    }
+
+    /* ─── Clean Topbar Icons Styling ─── */
+    .fi-topbar-end select,
+    .fi-topbar-end input[type="number"]::-webkit-inner-spin-button,
+    .fi-topbar-end input[type="number"]::-webkit-outer-spin-button {
+        display: none !important;
+        -webkit-appearance: none !important;
+        margin: 0 !important;
+    }
 </style>
 
 <script>
@@ -2073,5 +2214,146 @@
     }
     .fi-batch-group-header-strip {
         user-select: text;
+    }
+
+    /* ─── High-Priority Failed / Partial Transactions Critical Monitor Card ─── */
+    .db-exception-link {
+        text-decoration: none !important;
+        display: block !important;
+    }
+    .db-card-danger,
+    a.db-exception-link {
+        background-color: #fff1f2 !important;
+        border: 2px solid #f43f5e !important;
+        border-left: 6px solid #e11d48 !important;
+        box-shadow: 0 4px 14px rgba(225, 29, 72, 0.15) !important;
+        border-radius: 0.75rem !important;
+        transition: all 0.2s ease-in-out !important;
+    }
+    html.dark .db-card-danger,
+    html.dark a.db-exception-link,
+    .dark .db-card-danger,
+    .dark a.db-exception-link {
+        background-color: rgba(225, 29, 72, 0.1) !important;
+        border-color: #e11d48 !important;
+        box-shadow: 0 4px 14px rgba(225, 29, 72, 0.25) !important;
+    }
+    a.db-exception-link:hover {
+        transform: translateY(-2px) !important;
+        box-shadow: 0 6px 18px rgba(225, 29, 72, 0.25) !important;
+    }
+    .db-exception-icon-ok,
+    .db-exception-icon-err {
+        background: #ffe4e6 !important;
+        color: #e11d48 !important;
+        border: 1px solid #fecdd3 !important;
+        border-radius: 0.5rem !important;
+        padding: 0.5rem !important;
+    }
+    html.dark .db-exception-icon-ok,
+    html.dark .db-exception-icon-err {
+        background: rgba(225, 29, 72, 0.2) !important;
+        color: #fb7185 !important;
+        border-color: rgba(225, 29, 72, 0.4) !important;
+    }
+    .db-exception-label {
+        color: #be123c !important;
+        font-weight: 700 !important;
+        letter-spacing: 0.05em !important;
+    }
+    html.dark .db-exception-label {
+        color: #fda4af !important;
+    }
+    .db-exception-headline {
+        color: #9f1239 !important;
+        font-size: 0.9375rem !important;
+        font-weight: 700 !important;
+    }
+    html.dark .db-exception-headline {
+        color: #fff1f2 !important;
+    }
+    .db-exception-action {
+        color: #e11d48 !important;
+        font-weight: 700 !important;
+    }
+
+    /* ─── Recent Activity & Pipeline Audit Feed Larger Font Sizes ─── */
+    .db-timeline-file-tag {
+        font-family: var(--font-mono, monospace) !important;
+        font-size: 0.875rem !important;
+        font-weight: 700 !important;
+        padding: 0.2rem 0.6rem !important;
+        border-radius: 6px !important;
+        background-color: #f1f5f9 !important;
+        color: #0f172a !important;
+        border: 1.5px solid #cbd5e1 !important;
+        letter-spacing: 0.02em !important;
+    }
+    html.dark .db-timeline-file-tag,
+    .dark .db-timeline-file-tag {
+        background-color: #090d16 !important;
+        color: #38bdf8 !important;
+        border-color: #334155 !important;
+    }
+    .db-timeline-action-title {
+        font-size: 0.9375rem !important;
+        font-weight: 600 !important;
+    }
+    .db-stage-badge {
+        font-size: 0.75rem !important;
+        font-weight: 700 !important;
+    }
+    .db-timeline-human-time {
+        font-size: 0.8125rem !important;
+    }
+    .db-timeline-actor,
+    .db-timeline-full-time {
+        font-size: 0.8125rem !important;
+    }
+
+    /* ─── 2-Line Text Wrapping & No Horizontal Scrolling on 4 Report / Audit Tables ─── */
+    .fi-resource-bkash-failed-transactions .fi-ta-ctn,
+    .fi-resource-bkash-batches .fi-ta-ctn,
+    .fi-resource-bkash-reports .fi-ta-ctn,
+    .fi-resource-eft-returns .fi-ta-ctn {
+        overflow-x: hidden !important;
+    }
+    .fi-resource-bkash-failed-transactions .fi-ta-table,
+    .fi-resource-bkash-batches .fi-ta-table,
+    .fi-resource-bkash-reports .fi-ta-table,
+    .fi-resource-eft-returns .fi-ta-table {
+        table-layout: auto !important;
+        width: 100% !important;
+    }
+    .fi-resource-bkash-failed-transactions .fi-ta-cell,
+    .fi-resource-bkash-batches .fi-ta-cell,
+    .fi-resource-bkash-reports .fi-ta-cell,
+    .fi-resource-eft-returns .fi-ta-cell {
+        white-space: normal !important;
+        word-break: break-word !important;
+        overflow-wrap: break-word !important;
+        padding-top: 0.5rem !important;
+        padding-bottom: 0.5rem !important;
+    }
+    .fi-resource-bkash-failed-transactions .fi-ta-cell p,
+    .fi-resource-bkash-failed-transactions .fi-ta-cell span,
+    .fi-resource-bkash-batches .fi-ta-cell p,
+    .fi-resource-bkash-batches .fi-ta-cell span,
+    .fi-resource-bkash-reports .fi-ta-cell p,
+    .fi-resource-bkash-reports .fi-ta-cell span,
+    .fi-resource-eft-returns .fi-ta-cell p,
+    .fi-resource-eft-returns .fi-ta-cell span {
+        white-space: normal !important;
+        word-break: break-word !important;
+        line-height: 1.25 !important;
+    }
+
+    /* ─── Clean Topbar Icons Styling ─── */
+    .fi-topbar-end select,
+    .fi-topbar-end input[type="number"]::-webkit-inner-spin-button,
+    .fi-topbar-end input[type="number"]::-webkit-outer-spin-button {
+        display: none !important;
+        -webkit-appearance: none !important;
+        margin: 0 !important;
     }
 </style>

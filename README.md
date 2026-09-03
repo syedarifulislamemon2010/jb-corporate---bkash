@@ -1,6 +1,8 @@
 # Janata Bank Corporate Payment Portal
 ## Enterprise bKash Automated Host-to-Host (H2H) Payment Settlement System
 
+[![Tests](https://github.com/syedarifulislamemon2010/jb-corporate---bkash/actions/workflows/tests.yml/badge.svg)](https://github.com/syedarifulislamemon2010/jb-corporate---bkash/actions/workflows/tests.yml)
+
 > **An enterprise-grade financial settlement engine engineered for Janata Bank PLC. to ingest, validate, multi-tier authorize, and execute instant Host-to-Host (H2H) settlements for bKash Limited across Account to Account (A2A), BEFTN, and RTGS clearing networks.**
 
 ---

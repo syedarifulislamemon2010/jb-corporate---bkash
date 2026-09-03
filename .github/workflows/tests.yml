@@ -1,0 +1,47 @@
+name: Tests
+
+on:
+  push:
+    branches: [main, master, emon, develop]
+  pull_request:
+    branches: [main, master, emon, develop]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.3'
+          extensions: mbstring, dom, fileinfo, mysql, sqlite3, zip, gd
+          coverage: none
+
+      - name: Copy .env
+        run: cp .env.example .env
+
+      - name: Install Composer dependencies
+        run: composer install --no-interaction --prefer-dist --optimize-autoloader --ignore-platform-req=ext-oci8
+
+      - name: Generate application key
+        run: php artisan key:generate
+
+      - name: Configure SQLite test database
+        run: |
+          touch database/test.sqlite
+          sed -i "s/DB_CONNECTION=.*/DB_CONNECTION=sqlite/" .env
+          sed -i "s|DB_DATABASE=.*|DB_DATABASE=${{ github.workspace }}/database/test.sqlite|" .env
+
+      - name: Run migrations
+        run: php artisan migrate --force
+
+      - name: Run test suite
+        run: php artisan test --parallel
+
+      - name: Run Pint (code style check, non-blocking)
+        run: vendor/bin/pint --test || true
+        continue-on-error: true

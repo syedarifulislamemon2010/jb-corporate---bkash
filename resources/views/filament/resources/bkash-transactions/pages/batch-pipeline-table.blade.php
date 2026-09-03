@@ -7,15 +7,15 @@
             font-family: inherit;
         }
 
-        /* Distinct Channel Tabs Bar */
+        /* High-Contrast Uniform Channel Tabs Bar */
         .jb-tabs-bar {
             display: flex;
             align-items: center;
             justify-content: space-between;
             gap: 0.75rem;
             padding-bottom: 0.75rem;
-            border-bottom: 1px solid #e2e8f0;
-            margin-bottom: 1rem;
+            border-bottom: 1.5px solid #cbd5e1;
+            margin-bottom: 1.25rem;
             flex-wrap: wrap;
         }
         html.dark .jb-tabs-bar, .dark .jb-tabs-bar {
@@ -29,146 +29,51 @@
             flex-wrap: wrap;
         }
 
-        /* 1. All Transactions Tab */
-        .jb-tab-all {
-            padding: 0.42rem 0.9rem;
+        /* High Contrast Uniform Button Styles Across All 4 Tabs */
+        .jb-tab-btn {
+            padding: 0.5rem 1rem;
             font-size: 0.8125rem;
-            font-weight: 500;
+            font-weight: 600;
             border-radius: 0.5rem;
             cursor: pointer;
-            transition: all 0.15s ease-in-out;
+            transition: all 0.2s ease-in-out;
             font-family: inherit;
             background-color: #ffffff;
-            color: #334155;
-            border: 1px solid #cbd5e1;
-        }
-        html.dark .jb-tab-all, .dark .jb-tab-all {
-            background-color: #1e293b;
-            border-color: #334155;
-            color: #94a3b8;
-        }
-        .jb-tab-all:hover {
-            background-color: #f1f5f9;
             color: #0f172a;
+            border: 1.5px solid #64748b;
+            box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
         }
-        html.dark .jb-tab-all:hover, .dark .jb-tab-all:hover {
-            background-color: #334155;
+        html.dark .jb-tab-btn, .dark .jb-tab-btn {
+            background-color: #1e293b;
+            border-color: #475569;
             color: #f8fafc;
         }
-        .jb-tab-all.active {
-            background-color: #0f172a;
-            border-color: #0f172a;
-            color: #ffffff;
-            font-weight: 600;
-            box-shadow: 0 2px 4px rgba(15, 23, 42, 0.25);
-        }
-        html.dark .jb-tab-all.active, .dark .jb-tab-all.active {
-            background-color: #0284c7;
+        .jb-tab-btn:hover {
+            background-color: #f1f5f9;
             border-color: #0284c7;
-            color: #ffffff;
-            box-shadow: 0 2px 4px rgba(2, 132, 199, 0.3);
+            color: #0284c7;
+            transform: translateY(-1px);
         }
-
-        /* 2. Account to Account (A2A) - Emerald Green Theme */
-        .jb-tab-a2a {
-            padding: 0.42rem 0.9rem;
-            font-size: 0.8125rem;
-            font-weight: 500;
-            border-radius: 0.5rem;
-            cursor: pointer;
-            transition: all 0.15s ease-in-out;
-            font-family: inherit;
-            background-color: #f0fdf4;
-            color: #15803d;
-            border: 1px solid #bbf7d0;
+        html.dark .jb-tab-btn:hover, .dark .jb-tab-btn:hover {
+            background-color: #334155;
+            border-color: #38bdf8;
+            color: #38bdf8;
         }
-        html.dark .jb-tab-a2a, .dark .jb-tab-a2a {
-            background-color: rgba(16, 185, 129, 0.1);
-            border-color: rgba(16, 185, 129, 0.3);
-            color: #34d399;
+        .jb-tab-btn.active {
+            background-color: #0284c7;
+            border-color: #0369a1;
+            color: #ffffff !important;
+            font-weight: 700;
+            box-shadow: 0 3px 8px rgba(2, 132, 199, 0.35);
         }
-        .jb-tab-a2a:hover {
-            background-color: #dcfce7;
-            color: #166534;
-        }
-        html.dark .jb-tab-a2a:hover, .dark .jb-tab-a2a:hover {
-            background-color: rgba(16, 185, 129, 0.2);
-            color: #6ee7b7;
-        }
-        .jb-tab-a2a.active {
-            background-color: #10b981;
-            border-color: #059669;
-            color: #ffffff;
-            font-weight: 600;
-            box-shadow: 0 2px 4px rgba(16, 185, 129, 0.3);
-        }
-
-        /* 3. BEFTN - Royal Purple Theme */
-        .jb-tab-beftn {
-            padding: 0.42rem 0.9rem;
-            font-size: 0.8125rem;
-            font-weight: 500;
-            border-radius: 0.5rem;
-            cursor: pointer;
-            transition: all 0.15s ease-in-out;
-            font-family: inherit;
-            background-color: #faf5ff;
-            color: #7e22ce;
-            border: 1px solid #e9d5ff;
-        }
-        html.dark .jb-tab-beftn, .dark .jb-tab-beftn {
-            background-color: rgba(139, 92, 246, 0.1);
-            border-color: rgba(139, 92, 246, 0.3);
-            color: #c084fc;
-        }
-        .jb-tab-beftn:hover {
-            background-color: #f3e8ff;
-            color: #6b21a8;
-        }
-        html.dark .jb-tab-beftn:hover, .dark .jb-tab-beftn:hover {
-            background-color: rgba(139, 92, 246, 0.2);
-            color: #d8b4fe;
-        }
-        .jb-tab-beftn.active {
-            background-color: #8b5cf6;
-            border-color: #7c3aed;
-            color: #ffffff;
-            font-weight: 600;
-            box-shadow: 0 2px 4px rgba(139, 92, 246, 0.3);
-        }
-
-        /* 4. RTGS - Warm Amber/Orange Theme */
-        .jb-tab-rtgs {
-            padding: 0.42rem 0.9rem;
-            font-size: 0.8125rem;
-            font-weight: 500;
-            border-radius: 0.5rem;
-            cursor: pointer;
-            transition: all 0.15s ease-in-out;
-            font-family: inherit;
-            background-color: #fffbeb;
-            color: #b45309;
-            border: 1px solid #fde68a;
-        }
-        html.dark .jb-tab-rtgs, .dark .jb-tab-rtgs {
-            background-color: rgba(245, 158, 11, 0.1);
-            border-color: rgba(245, 158, 11, 0.3);
-            color: #fbbf24;
-        }
-        .jb-tab-rtgs:hover {
-            background-color: #fef3c7;
-            color: #92400e;
-        }
-        html.dark .jb-tab-rtgs:hover, .dark .jb-tab-rtgs:hover {
-            background-color: rgba(245, 158, 11, 0.2);
-            color: #fcd34d;
-        }
-        .jb-tab-rtgs.active {
-            background-color: #f59e0b;
-            border-color: #d97706;
-            color: #ffffff;
-            font-weight: 600;
-            box-shadow: 0 2px 4px rgba(245, 158, 11, 0.3);
+        html.dark .jb-tab-btn.active, .dark .jb-tab-btn.active {
+            background-color: #0284c7;
+            border-color: #38bdf8;
+            color: #ffffff !important;
+            box-shadow: 0 3px 8px rgba(2, 132, 199, 0.5);
         }
 
         /* Search input */
@@ -180,22 +85,23 @@
             width: 100%;
             padding: 0.45rem 0.75rem 0.45rem 2.25rem;
             font-size: 0.8125rem;
-            border: 1px solid #cbd5e1;
+            border: 1.5px solid #94a3b8;
             border-radius: 0.5rem;
             background-color: #ffffff;
             color: #0f172a;
             outline: none;
             transition: border-color 0.15s ease;
             font-family: inherit;
+            font-weight: 500;
         }
         html.dark .jb-search-input, .dark .jb-search-input {
             background-color: #0f172a;
-            border-color: #334155;
+            border-color: #475569;
             color: #f8fafc;
         }
         .jb-search-input:focus {
             border-color: #0284c7;
-            box-shadow: 0 0 0 2px rgba(2, 132, 199, 0.2);
+            box-shadow: 0 0 0 2px rgba(2, 132, 199, 0.25);
         }
         .jb-search-icon {
             position: absolute;
@@ -204,7 +110,7 @@
             transform: translateY(-50%);
             width: 14px;
             height: 14px;
-            color: #94a3b8;
+            color: #64748b;
             pointer-events: none;
         }
 
@@ -217,7 +123,7 @@
             padding: 0.65rem 1rem;
             margin-bottom: 1rem;
             background-color: #f0f9ff;
-            border: 1px solid #bae6fd;
+            border: 1.5px solid #bae6fd;
             border-radius: 0.5rem;
         }
         html.dark .jb-bulk-bar, .dark .jb-bulk-bar {
@@ -386,26 +292,38 @@
             color: #7dd3fc;
         }
 
-        /* Expand Button / Trigger */
+        /* Expand Button / Trigger - Clean UI with NO URL underline */
         .jb-expand-btn {
             display: inline-flex;
             align-items: center;
-            gap: 0.45rem;
+            gap: 0.5rem;
             cursor: pointer;
             background: none;
-            border: none;
+            border: 1px solid transparent;
+            border-radius: 0.375rem;
             font-size: 0.8125rem;
             font-weight: 600;
             color: #0284c7;
             text-align: left;
-            padding: 0;
+            padding: 0.2rem 0.4rem;
             font-family: inherit;
+            transition: all 0.15s ease;
+            text-decoration: none !important;
         }
         html.dark .jb-expand-btn, .dark .jb-expand-btn {
             color: #38bdf8;
         }
         .jb-expand-btn:hover {
-            text-decoration: underline;
+            background-color: #f0f9ff;
+            border-color: #bae6fd;
+            color: #0369a1;
+            text-decoration: none !important;
+        }
+        html.dark .jb-expand-btn:hover, .dark .jb-expand-btn:hover {
+            background-color: rgba(2, 132, 199, 0.15);
+            border-color: rgba(2, 132, 199, 0.3);
+            color: #7dd3fc;
+            text-decoration: none !important;
         }
         .jb-expand-chevron {
             width: 14px;
@@ -413,6 +331,10 @@
             min-width: 14px;
             transition: transform 0.2s ease-in-out;
             display: inline-block;
+            color: #0284c7;
+        }
+        html.dark .jb-expand-chevron, .dark .jb-expand-chevron {
+            color: #38bdf8;
         }
         .jb-expand-chevron.is-open {
             transform: rotate(90deg);
@@ -523,34 +445,34 @@
     </style>
 
     <div class="jb-batch-container">
-        <!-- Distinctly Styled Channel Tabs & Search Header -->
+        <!-- High-Contrast Uniform Channel Tabs & Search Header -->
         <div class="jb-tabs-bar">
             <div class="jb-tabs-group">
                 <button
                     type="button"
                     wire:click="$set('activeChannel', 'all')"
-                    class="jb-tab-all {{ $activeChannel === 'all' ? 'active' : '' }}"
+                    class="jb-tab-btn {{ $activeChannel === 'all' ? 'active' : '' }}"
                 >
                     All Transactions
                 </button>
                 <button
                     type="button"
                     wire:click="$set('activeChannel', 'a2a')"
-                    class="jb-tab-a2a {{ $activeChannel === 'a2a' ? 'active' : '' }}"
+                    class="jb-tab-btn {{ $activeChannel === 'a2a' ? 'active' : '' }}"
                 >
                     Account to Account (A2A) - Janata Bank PLC.
                 </button>
                 <button
                     type="button"
                     wire:click="$set('activeChannel', 'beftn')"
-                    class="jb-tab-beftn {{ $activeChannel === 'beftn' ? 'active' : '' }}"
+                    class="jb-tab-btn {{ $activeChannel === 'beftn' ? 'active' : '' }}"
                 >
                     BEFTN
                 </button>
                 <button
                     type="button"
                     wire:click="$set('activeChannel', 'rtgs')"
-                    class="jb-tab-rtgs {{ $activeChannel === 'rtgs' ? 'active' : '' }}"
+                    class="jb-tab-btn {{ $activeChannel === 'rtgs' ? 'active' : '' }}"
                 >
                     RTGS
                 </button>
@@ -656,7 +578,7 @@
                                 {{ $loop->iteration }}
                             </td>
 
-                            <!-- File Name with expand toggle -->
+                            <!-- File Name with expand toggle (No URL Underline) -->
                             <td>
                                 <button
                                     type="button"

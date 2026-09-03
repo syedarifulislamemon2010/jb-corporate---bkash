@@ -90,7 +90,7 @@ class ListBkashReports extends ListRecords
     {
         return [
             'all' => Tab::make('All Transactions'),
-            'a2a' => Tab::make('Account to Account (A2A)')
+            'a2a' => Tab::make('Account to Account (A2A) - Janata Bank PLC.')
                 ->modifyQueryUsing(fn (Builder $query) => $query->where('transaction_type', 'A2A')),
             'beftn' => Tab::make('BEFTN')
                 ->modifyQueryUsing(fn (Builder $query) => $query->where('transaction_type', 'BEFTN')),
