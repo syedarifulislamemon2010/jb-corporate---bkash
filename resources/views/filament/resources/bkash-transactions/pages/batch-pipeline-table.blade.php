@@ -29,51 +29,140 @@
             flex-wrap: wrap;
         }
 
-        /* High Contrast Uniform Button Styles Across All 4 Tabs */
-        .jb-tab-btn {
-            padding: 0.5rem 1rem;
-            font-size: 0.8125rem;
-            font-weight: 600;
-            border-radius: 0.5rem;
-            cursor: pointer;
-            transition: all 0.2s ease-in-out;
-            font-family: inherit;
-            background-color: #ffffff;
-            color: #0f172a;
-            border: 1.5px solid #64748b;
-            box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
+        /* High-Contrast Distinct Channel Tabs Across Pipeline & Reports */
+        .jb-tab-all, .jb-tab-a2a, .jb-tab-beftn, .jb-tab-rtgs {
+            padding: 0.5rem 1.15rem !important;
+            font-size: 0.8125rem !important;
+            font-weight: 600 !important;
+            border-radius: 0.5rem !important;
+            cursor: pointer !important;
+            transition: all 0.2s ease-in-out !important;
+            font-family: inherit !important;
+            box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05) !important;
+            display: inline-flex !important;
+            align-items: center !important;
+            justify-content: center !important;
+            text-decoration: none !important;
         }
-        html.dark .jb-tab-btn, .dark .jb-tab-btn {
-            background-color: #1e293b;
-            border-color: #475569;
-            color: #f8fafc;
+
+        /* 1. All Transactions (Slate / Charcoal) */
+        .jb-tab-all {
+            background-color: #ffffff !important;
+            color: #1e293b !important;
+            border: 1.5px solid #94a3b8 !important;
         }
-        .jb-tab-btn:hover {
-            background-color: #f1f5f9;
-            border-color: #0284c7;
-            color: #0284c7;
-            transform: translateY(-1px);
+        html.dark .jb-tab-all, .dark .jb-tab-all {
+            background-color: #1e293b !important;
+            border-color: #475569 !important;
+            color: #f1f5f9 !important;
         }
-        html.dark .jb-tab-btn:hover, .dark .jb-tab-btn:hover {
-            background-color: #334155;
-            border-color: #38bdf8;
-            color: #38bdf8;
+        .jb-tab-all:hover {
+            background-color: #f1f5f9 !important;
+            border-color: #475569 !important;
+            color: #0f172a !important;
+            transform: translateY(-1px) !important;
         }
-        .jb-tab-btn.active {
-            background-color: #0284c7;
-            border-color: #0369a1;
+        .jb-tab-all.active {
+            background-color: #0f172a !important;
+            border-color: #020617 !important;
             color: #ffffff !important;
-            font-weight: 700;
-            box-shadow: 0 3px 8px rgba(2, 132, 199, 0.35);
+            font-weight: 700 !important;
+            box-shadow: 0 3px 8px rgba(15, 23, 42, 0.4) !important;
         }
-        html.dark .jb-tab-btn.active, .dark .jb-tab-btn.active {
-            background-color: #0284c7;
-            border-color: #38bdf8;
+        html.dark .jb-tab-all.active, .dark .jb-tab-all.active {
+            background-color: #0284c7 !important;
+            border-color: #38bdf8 !important;
             color: #ffffff !important;
-            box-shadow: 0 3px 8px rgba(2, 132, 199, 0.5);
+        }
+
+        /* 2. A2A (Vibrant Emerald Green) */
+        .jb-tab-a2a {
+            background-color: #f0fdf4 !important;
+            color: #15803d !important;
+            border: 1.5px solid #86efac !important;
+        }
+        html.dark .jb-tab-a2a, .dark .jb-tab-a2a {
+            background-color: rgba(16, 185, 129, 0.12) !important;
+            border-color: rgba(16, 185, 129, 0.35) !important;
+            color: #34d399 !important;
+        }
+        .jb-tab-a2a:hover {
+            background-color: #dcfce7 !important;
+            color: #166534 !important;
+            border-color: #4ade80 !important;
+            transform: translateY(-1px) !important;
+        }
+        .jb-tab-a2a.active {
+            background-color: #10b981 !important;
+            border-color: #059669 !important;
+            color: #ffffff !important;
+            font-weight: 700 !important;
+            box-shadow: 0 3px 10px rgba(16, 185, 129, 0.4) !important;
+        }
+        html.dark .jb-tab-a2a.active, .dark .jb-tab-a2a.active {
+            background-color: #10b981 !important;
+            border-color: #34d399 !important;
+            color: #ffffff !important;
+        }
+
+        /* 3. BEFTN (Vibrant Royal Purple) */
+        .jb-tab-beftn {
+            background-color: #faf5ff !important;
+            color: #7e22ce !important;
+            border: 1.5px solid #d8b4fe !important;
+        }
+        html.dark .jb-tab-beftn, .dark .jb-tab-beftn {
+            background-color: rgba(139, 92, 246, 0.12) !important;
+            border-color: rgba(139, 92, 246, 0.35) !important;
+            color: #c084fc !important;
+        }
+        .jb-tab-beftn:hover {
+            background-color: #f3e8ff !important;
+            color: #6b21a8 !important;
+            border-color: #c084fc !important;
+            transform: translateY(-1px) !important;
+        }
+        .jb-tab-beftn.active {
+            background-color: #8b5cf6 !important;
+            border-color: #7c3aed !important;
+            color: #ffffff !important;
+            font-weight: 700 !important;
+            box-shadow: 0 3px 10px rgba(139, 92, 246, 0.4) !important;
+        }
+        html.dark .jb-tab-beftn.active, .dark .jb-tab-beftn.active {
+            background-color: #8b5cf6 !important;
+            border-color: #a78bfa !important;
+            color: #ffffff !important;
+        }
+
+        /* 4. RTGS (Vibrant Warm Amber Orange) */
+        .jb-tab-rtgs {
+            background-color: #fffbeb !important;
+            color: #b45309 !important;
+            border: 1.5px solid #fde68a !important;
+        }
+        html.dark .jb-tab-rtgs, .dark .jb-tab-rtgs {
+            background-color: rgba(245, 158, 11, 0.12) !important;
+            border-color: rgba(245, 158, 11, 0.35) !important;
+            color: #fbbf24 !important;
+        }
+        .jb-tab-rtgs:hover {
+            background-color: #fef3c7 !important;
+            color: #92400e !important;
+            border-color: #fcd34d !important;
+            transform: translateY(-1px) !important;
+        }
+        .jb-tab-rtgs.active {
+            background-color: #f59e0b !important;
+            border-color: #d97706 !important;
+            color: #ffffff !important;
+            font-weight: 700 !important;
+            box-shadow: 0 3px 10px rgba(245, 158, 11, 0.4) !important;
+        }
+        html.dark .jb-tab-rtgs.active, .dark .jb-tab-rtgs.active {
+            background-color: #f59e0b !important;
+            border-color: #fbbf24 !important;
+            color: #ffffff !important;
         }
 
         /* Search input */

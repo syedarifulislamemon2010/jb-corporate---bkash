@@ -7,12 +7,40 @@ use App\Models\BkashTransaction;
 use App\Services\ExcelExportService;
 use Filament\Actions\Action;
 use Filament\Resources\Pages\ListRecords;
-use Filament\Schemas\Components\Tabs\Tab;
 use Illuminate\Database\Eloquent\Builder;
 
 class ListBkashReports extends ListRecords
 {
     protected static string $resource = BkashReportsResource::class;
+
+    protected string $view = 'filament.resources.bkash-reports.pages.list-bkash-reports';
+
+    public ?string $activeTab = 'all';
+
+    public function updatedActiveTab(): void
+    {
+        $this->resetPage();
+    }
+
+    protected function getTableQuery(): Builder
+    {
+        $query = static::getResource()::getEloquentQuery();
+
+        if ($this->activeTab === 'a2a') {
+            $query->where('transaction_type', 'A2A');
+        } elseif ($this->activeTab === 'beftn') {
+            $query->where('transaction_type', 'BEFTN');
+        } elseif ($this->activeTab === 'rtgs') {
+            $query->where('transaction_type', 'RTGS');
+        }
+
+        return $query;
+    }
+
+    public function getTabs(): array
+    {
+        return [];
+    }
 
     protected function getHeaderActions(): array
     {
@@ -83,19 +111,6 @@ class ListBkashReports extends ListRecords
             ->tooltip('Download transaction reports by time period')
             ->color('primary')
             ->button(),
-        ];
-    }
-
-    public function getTabs(): array
-    {
-        return [
-            'all' => Tab::make('All Transactions'),
-            'a2a' => Tab::make('Account to Account (A2A) - Janata Bank PLC.')
-                ->modifyQueryUsing(fn (Builder $query) => $query->where('transaction_type', 'A2A')),
-            'beftn' => Tab::make('BEFTN')
-                ->modifyQueryUsing(fn (Builder $query) => $query->where('transaction_type', 'BEFTN')),
-            'rtgs' => Tab::make('RTGS')
-                ->modifyQueryUsing(fn (Builder $query) => $query->where('transaction_type', 'RTGS')),
         ];
     }
 }

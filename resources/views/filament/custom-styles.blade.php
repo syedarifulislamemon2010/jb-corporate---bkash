@@ -2150,6 +2150,161 @@
     .dark .fi-resource-bkash-reports .fi-ta-record:hover {
         background-color: rgba(30, 41, 59, 0.4) !important;
     }
+        /* High-Contrast Distinct Channel Tabs Across Pipeline & Reports */
+        .jb-tab-all, .jb-tab-a2a, .jb-tab-beftn, .jb-tab-rtgs {
+            padding: 0.5rem 1.15rem !important;
+            font-size: 0.8125rem !important;
+            font-weight: 600 !important;
+            border-radius: 0.5rem !important;
+            cursor: pointer !important;
+            transition: all 0.2s ease-in-out !important;
+            font-family: inherit !important;
+            box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05) !important;
+            display: inline-flex !important;
+            align-items: center !important;
+            justify-content: center !important;
+            text-decoration: none !important;
+        }
+
+        /* 1. All Transactions (Slate / Charcoal) */
+        .jb-tab-all {
+            background-color: #ffffff !important;
+            color: #1e293b !important;
+            border: 1.5px solid #94a3b8 !important;
+        }
+        html.dark .jb-tab-all, .dark .jb-tab-all {
+            background-color: #1e293b !important;
+            border-color: #475569 !important;
+            color: #f1f5f9 !important;
+        }
+        .jb-tab-all:hover {
+            background-color: #f1f5f9 !important;
+            border-color: #475569 !important;
+            color: #0f172a !important;
+            transform: translateY(-1px) !important;
+        }
+        .jb-tab-all.active {
+            background-color: #0f172a !important;
+            border-color: #020617 !important;
+            color: #ffffff !important;
+            font-weight: 700 !important;
+            box-shadow: 0 3px 8px rgba(15, 23, 42, 0.4) !important;
+        }
+        html.dark .jb-tab-all.active, .dark .jb-tab-all.active {
+            background-color: #0284c7 !important;
+            border-color: #38bdf8 !important;
+            color: #ffffff !important;
+        }
+
+        /* 2. A2A (Vibrant Emerald Green) */
+        .jb-tab-a2a {
+            background-color: #f0fdf4 !important;
+            color: #15803d !important;
+            border: 1.5px solid #86efac !important;
+        }
+        html.dark .jb-tab-a2a, .dark .jb-tab-a2a {
+            background-color: rgba(16, 185, 129, 0.12) !important;
+            border-color: rgba(16, 185, 129, 0.35) !important;
+            color: #34d399 !important;
+        }
+        .jb-tab-a2a:hover {
+            background-color: #dcfce7 !important;
+            color: #166534 !important;
+            border-color: #4ade80 !important;
+            transform: translateY(-1px) !important;
+        }
+        .jb-tab-a2a.active {
+            background-color: #10b981 !important;
+            border-color: #059669 !important;
+            color: #ffffff !important;
+            font-weight: 700 !important;
+            box-shadow: 0 3px 10px rgba(16, 185, 129, 0.4) !important;
+        }
+        html.dark .jb-tab-a2a.active, .dark .jb-tab-a2a.active {
+            background-color: #10b981 !important;
+            border-color: #34d399 !important;
+            color: #ffffff !important;
+        }
+
+        /* 3. BEFTN (Vibrant Royal Purple) */
+        .jb-tab-beftn {
+            background-color: #faf5ff !important;
+            color: #7e22ce !important;
+            border: 1.5px solid #d8b4fe !important;
+        }
+        html.dark .jb-tab-beftn, .dark .jb-tab-beftn {
+            background-color: rgba(139, 92, 246, 0.12) !important;
+            border-color: rgba(139, 92, 246, 0.35) !important;
+            color: #c084fc !important;
+        }
+        .jb-tab-beftn:hover {
+            background-color: #f3e8ff !important;
+            color: #6b21a8 !important;
+            border-color: #c084fc !important;
+            transform: translateY(-1px) !important;
+        }
+        .jb-tab-beftn.active {
+            background-color: #8b5cf6 !important;
+            border-color: #7c3aed !important;
+            color: #ffffff !important;
+            font-weight: 700 !important;
+            box-shadow: 0 3px 10px rgba(139, 92, 246, 0.4) !important;
+        }
+        html.dark .jb-tab-beftn.active, .dark .jb-tab-beftn.active {
+            background-color: #8b5cf6 !important;
+            border-color: #a78bfa !important;
+            color: #ffffff !important;
+        }
+
+        /* 4. RTGS (Vibrant Warm Amber Orange) */
+        .jb-tab-rtgs {
+            background-color: #fffbeb !important;
+            color: #b45309 !important;
+            border: 1.5px solid #fde68a !important;
+        }
+        html.dark .jb-tab-rtgs, .dark .jb-tab-rtgs {
+            background-color: rgba(245, 158, 11, 0.12) !important;
+            border-color: rgba(245, 158, 11, 0.35) !important;
+            color: #fbbf24 !important;
+        }
+        .jb-tab-rtgs:hover {
+            background-color: #fef3c7 !important;
+            color: #92400e !important;
+            border-color: #fcd34d !important;
+            transform: translateY(-1px) !important;
+        }
+        .jb-tab-rtgs.active {
+            background-color: #f59e0b !important;
+            border-color: #d97706 !important;
+            color: #ffffff !important;
+            font-weight: 700 !important;
+            box-shadow: 0 3px 10px rgba(245, 158, 11, 0.4) !important;
+        }
+        html.dark .jb-tab-rtgs.active, .dark .jb-tab-rtgs.active {
+            background-color: #f59e0b !important;
+            border-color: #fbbf24 !important;
+            color: #ffffff !important;
+        }
+
+    /* ─── Suppress Any Stray Up/Down Arrows, Select, or Spinners in Topbar ─── */
+    .fi-topbar-end select,
+    .fi-topbar-end input,
+    .fi-topbar select,
+    header select,
+    .fi-topbar-end input[type="number"]::-webkit-inner-spin-button,
+    .fi-topbar-end input[type="number"]::-webkit-outer-spin-button,
+    .fi-topbar-end [role="spinbutton"],
+    .fi-topbar-end [aria-label*="sort" i],
+    .fi-topbar-database-notifications-btn + *:not(.fi-dropdown):not(.fi-user-menu) {
+        display: none !important;
+        visibility: hidden !important;
+        opacity: 0 !important;
+        width: 0 !important;
+        height: 0 !important;
+        pointer-events: none !important;
+        margin: 0 !important;
+        padding: 0 !important;
+    }
 </style>
 
 <script>
@@ -2837,5 +2992,160 @@
     html.dark .fi-resource-bkash-reports .fi-ta-record:hover,
     .dark .fi-resource-bkash-reports .fi-ta-record:hover {
         background-color: rgba(30, 41, 59, 0.4) !important;
+    }
+        /* High-Contrast Distinct Channel Tabs Across Pipeline & Reports */
+        .jb-tab-all, .jb-tab-a2a, .jb-tab-beftn, .jb-tab-rtgs {
+            padding: 0.5rem 1.15rem !important;
+            font-size: 0.8125rem !important;
+            font-weight: 600 !important;
+            border-radius: 0.5rem !important;
+            cursor: pointer !important;
+            transition: all 0.2s ease-in-out !important;
+            font-family: inherit !important;
+            box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05) !important;
+            display: inline-flex !important;
+            align-items: center !important;
+            justify-content: center !important;
+            text-decoration: none !important;
+        }
+
+        /* 1. All Transactions (Slate / Charcoal) */
+        .jb-tab-all {
+            background-color: #ffffff !important;
+            color: #1e293b !important;
+            border: 1.5px solid #94a3b8 !important;
+        }
+        html.dark .jb-tab-all, .dark .jb-tab-all {
+            background-color: #1e293b !important;
+            border-color: #475569 !important;
+            color: #f1f5f9 !important;
+        }
+        .jb-tab-all:hover {
+            background-color: #f1f5f9 !important;
+            border-color: #475569 !important;
+            color: #0f172a !important;
+            transform: translateY(-1px) !important;
+        }
+        .jb-tab-all.active {
+            background-color: #0f172a !important;
+            border-color: #020617 !important;
+            color: #ffffff !important;
+            font-weight: 700 !important;
+            box-shadow: 0 3px 8px rgba(15, 23, 42, 0.4) !important;
+        }
+        html.dark .jb-tab-all.active, .dark .jb-tab-all.active {
+            background-color: #0284c7 !important;
+            border-color: #38bdf8 !important;
+            color: #ffffff !important;
+        }
+
+        /* 2. A2A (Vibrant Emerald Green) */
+        .jb-tab-a2a {
+            background-color: #f0fdf4 !important;
+            color: #15803d !important;
+            border: 1.5px solid #86efac !important;
+        }
+        html.dark .jb-tab-a2a, .dark .jb-tab-a2a {
+            background-color: rgba(16, 185, 129, 0.12) !important;
+            border-color: rgba(16, 185, 129, 0.35) !important;
+            color: #34d399 !important;
+        }
+        .jb-tab-a2a:hover {
+            background-color: #dcfce7 !important;
+            color: #166534 !important;
+            border-color: #4ade80 !important;
+            transform: translateY(-1px) !important;
+        }
+        .jb-tab-a2a.active {
+            background-color: #10b981 !important;
+            border-color: #059669 !important;
+            color: #ffffff !important;
+            font-weight: 700 !important;
+            box-shadow: 0 3px 10px rgba(16, 185, 129, 0.4) !important;
+        }
+        html.dark .jb-tab-a2a.active, .dark .jb-tab-a2a.active {
+            background-color: #10b981 !important;
+            border-color: #34d399 !important;
+            color: #ffffff !important;
+        }
+
+        /* 3. BEFTN (Vibrant Royal Purple) */
+        .jb-tab-beftn {
+            background-color: #faf5ff !important;
+            color: #7e22ce !important;
+            border: 1.5px solid #d8b4fe !important;
+        }
+        html.dark .jb-tab-beftn, .dark .jb-tab-beftn {
+            background-color: rgba(139, 92, 246, 0.12) !important;
+            border-color: rgba(139, 92, 246, 0.35) !important;
+            color: #c084fc !important;
+        }
+        .jb-tab-beftn:hover {
+            background-color: #f3e8ff !important;
+            color: #6b21a8 !important;
+            border-color: #c084fc !important;
+            transform: translateY(-1px) !important;
+        }
+        .jb-tab-beftn.active {
+            background-color: #8b5cf6 !important;
+            border-color: #7c3aed !important;
+            color: #ffffff !important;
+            font-weight: 700 !important;
+            box-shadow: 0 3px 10px rgba(139, 92, 246, 0.4) !important;
+        }
+        html.dark .jb-tab-beftn.active, .dark .jb-tab-beftn.active {
+            background-color: #8b5cf6 !important;
+            border-color: #a78bfa !important;
+            color: #ffffff !important;
+        }
+
+        /* 4. RTGS (Vibrant Warm Amber Orange) */
+        .jb-tab-rtgs {
+            background-color: #fffbeb !important;
+            color: #b45309 !important;
+            border: 1.5px solid #fde68a !important;
+        }
+        html.dark .jb-tab-rtgs, .dark .jb-tab-rtgs {
+            background-color: rgba(245, 158, 11, 0.12) !important;
+            border-color: rgba(245, 158, 11, 0.35) !important;
+            color: #fbbf24 !important;
+        }
+        .jb-tab-rtgs:hover {
+            background-color: #fef3c7 !important;
+            color: #92400e !important;
+            border-color: #fcd34d !important;
+            transform: translateY(-1px) !important;
+        }
+        .jb-tab-rtgs.active {
+            background-color: #f59e0b !important;
+            border-color: #d97706 !important;
+            color: #ffffff !important;
+            font-weight: 700 !important;
+            box-shadow: 0 3px 10px rgba(245, 158, 11, 0.4) !important;
+        }
+        html.dark .jb-tab-rtgs.active, .dark .jb-tab-rtgs.active {
+            background-color: #f59e0b !important;
+            border-color: #fbbf24 !important;
+            color: #ffffff !important;
+        }
+
+    /* ─── Suppress Any Stray Up/Down Arrows, Select, or Spinners in Topbar ─── */
+    .fi-topbar-end select,
+    .fi-topbar-end input,
+    .fi-topbar select,
+    header select,
+    .fi-topbar-end input[type="number"]::-webkit-inner-spin-button,
+    .fi-topbar-end input[type="number"]::-webkit-outer-spin-button,
+    .fi-topbar-end [role="spinbutton"],
+    .fi-topbar-end [aria-label*="sort" i],
+    .fi-topbar-database-notifications-btn + *:not(.fi-dropdown):not(.fi-user-menu) {
+        display: none !important;
+        visibility: hidden !important;
+        opacity: 0 !important;
+        width: 0 !important;
+        height: 0 !important;
+        pointer-events: none !important;
+        margin: 0 !important;
+        padding: 0 !important;
     }
 </style>
