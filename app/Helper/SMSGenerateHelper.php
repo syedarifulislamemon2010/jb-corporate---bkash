@@ -145,7 +145,7 @@ class SMSGenerateHelper extends Controller
     private static function logSmsError(\Exception $ex): void
     {
         try {
-            Log::channel('BEFTN')->error($ex->getMessage());
+            Log::error('SMS Gateway Error: ' . $ex->getMessage());
         } catch (\Throwable $t) {
             Log::error("SMS Gateway Error: " . $ex->getMessage());
         }
