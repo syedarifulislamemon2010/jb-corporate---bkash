@@ -125,7 +125,8 @@ class BkashExcelParserService
             $cleanHeader = strtolower(preg_replace('/[^a-zA-Z0-9]/', '', $rawHeader));
             $val = $row[$colIndex] ?? null;
 
-            if ($cleanHeader === '' || $cleanHeader === 'sl') {
+            // Skip empty, sequence/serial counter headers ('sl', 'id') to prevent duplicate collision
+            if ($cleanHeader === '' || $cleanHeader === 'sl' || $cleanHeader === 'id') {
                 continue;
             }
 
@@ -142,14 +143,26 @@ class BkashExcelParserService
                 $mapped['create_date'] = $val;
             } elseif (in_array($cleanHeader, ['returndate'])) {
                 $mapped['return_date'] = $val;
-            } elseif (in_array($cleanHeader, ['acname', 'bankaccountname', 'benename', 'beneficiaryname', 'accountname', 'beneaccountname'])) {
+            } elseif (in_array($cleanHeader, [
+                'acname', 'bankaccountname', 'benename', 'beneficiaryname', 'accountname', 'beneaccountname',
+                // NOTE: inverted naming — receivername maps to debit_account_title which stores beneficiary name
+                'receivername',
+            ])) {
                 $mapped['debit_account_title'] = static::cleanString((string) $val, 150);
-            } elseif (in_array($cleanHeader, ['accountno', 'beneficiaryacno', 'bankaccountnumber', 'bankaccountno', 'beneaccountno', 'acno'])) {
+            } elseif (in_array($cleanHeader, [
+                'accountno', 'beneficiaryacno', 'bankaccountnumber', 'bankaccountno', 'beneaccountno', 'acno',
+                // NOTE: receiver account variants mapping to beneficiary_account_no
+                'receiveraccno', 'receiveracc', 'receiveraccountno',
+            ])) {
                 $mapped['beneficiary_account_no'] = static::cleanString((string) $val, 100);
             } elseif (in_array($cleanHeader, ['amount', 'amountbdt', 'amountintaka'])) {
                 $cleanVal = preg_replace('/[^0-9.]/', '', str_replace(',', '', (string) $val));
                 $mapped['amount'] = (float) $cleanVal;
-            } elseif (in_array($cleanHeader, ['routingcode', 'routingnumber', 'beneroutingno', 'routingno'])) {
+            } elseif (in_array($cleanHeader, [
+                'routingcode', 'routingnumber', 'beneroutingno', 'routingno',
+                // NOTE: receiver routing variants mapping to credit_routing and debit_routing (backward compatibility)
+                'receiverroutingno', 'receiverrouting', 'receiverroutingnumber',
+            ])) {
                 // Beneficiary Routing Number (Credit-side routing)
                 $routingVal = static::cleanString((string) $val, 20);
                 $mapped['credit_routing'] = $routingVal;
@@ -161,13 +174,22 @@ class BkashExcelParserService
             } elseif (in_array($cleanHeader, ['bankbranchname', 'bankandbranchname'])) {
                 // Combined Bank & Branch (e.g. in RTGS files: "MUTUAL TRUST BANK LTD.,GAZIPUR")
                 $mapped['credit_bank'] = static::cleanString((string) $val, 255);
-            } elseif (in_array($cleanHeader, ['debitaccount', 'debitaccountno'])) {
+            } elseif (in_array($cleanHeader, [
+                'debitaccount', 'debitaccountno',
+                // NOTE: sender/source/TCSA account variants mapping to source_account_no
+                'senderaccno', 'senderacc', 'senderaccountno',
+            ])) {
                 $mapped['source_account_no'] = static::cleanString((string) $val, 100);
             } elseif (in_array($cleanHeader, ['txnid', 'transactionid'])) {
                 $mapped['txn_id'] = static::cleanString((string) $val, 100);
             } elseif (in_array($cleanHeader, ['rejectreason'])) {
                 $mapped['reject_reason'] = static::cleanString((string) $val, 255);
             }
+        }
+
+        // Auto-generate fallback reference_id if omitted from row/headers to prevent INVALID_ROW rejection
+        if (empty($mapped['reference_id'])) {
+            $mapped['reference_id'] = 'REF_' . date('YmdHis') . '_' . substr(md5(uniqid('', true)), 0, 8);
         }
 
         // Auto-derive credit_bank from routing number (first 3 digits) if credit_bank is empty
