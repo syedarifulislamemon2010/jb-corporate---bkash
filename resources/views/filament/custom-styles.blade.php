@@ -1909,6 +1909,247 @@
         -webkit-appearance: none !important;
         margin: 0 !important;
     }
+
+    /* ==========================================================================
+       DISTINCT CHANNEL BUTTON COLORS ACROSS ALL 4 PAGES
+       (bkash-transactions, bkash-transaction-authorizations, 
+        bkash-transaction-confirmations, bkash-reports)
+       ========================================================================== */
+
+    /* Tabs Container on bkash-reports */
+    .fi-resource-bkash-reports .fi-tabs,
+    .fi-resource-bkash-reports nav[role="tablist"] {
+        display: flex !important;
+        align-items: center !important;
+        gap: 0.6rem !important;
+        border-bottom: 1.5px solid #cbd5e1 !important;
+        padding-bottom: 0.85rem !important;
+        margin-bottom: 1.25rem !important;
+        background: transparent !important;
+        flex-wrap: wrap !important;
+        border-top: none !important;
+    }
+    html.dark .fi-resource-bkash-reports .fi-tabs,
+    .dark .fi-resource-bkash-reports .fi-tabs {
+        border-bottom-color: #334155 !important;
+    }
+
+    /* Common Button Reset for Tabs */
+    .jb-tab-all, .jb-tab-a2a, .jb-tab-beftn, .jb-tab-rtgs,
+    .fi-resource-bkash-reports .fi-tabs-item {
+        padding: 0.45rem 1rem !important;
+        font-size: 0.8125rem !important;
+        font-weight: 600 !important;
+        border-radius: 0.5rem !important;
+        cursor: pointer !important;
+        transition: all 0.2s ease-in-out !important;
+        font-family: inherit !important;
+        display: inline-flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        text-decoration: none !important;
+        box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05) !important;
+        border-bottom-width: 1.5px !important;
+    }
+    .fi-resource-bkash-reports .fi-tabs-item:after,
+    .fi-resource-bkash-reports .fi-tabs-item:before {
+        display: none !important;
+    }
+
+    /* ─── 1. ALL TRANSACTIONS TAB (Neutral Dark Slate / Navy) ─── */
+    .jb-tab-all,
+    .fi-resource-bkash-reports .fi-tabs-item[wire\:click*="'all'"] {
+        background-color: #ffffff !important;
+        color: #1e293b !important;
+        border: 1.5px solid #94a3b8 !important;
+    }
+    html.dark .jb-tab-all,
+    html.dark .fi-resource-bkash-reports .fi-tabs-item[wire\:click*="'all'"],
+    .dark .jb-tab-all,
+    .dark .fi-resource-bkash-reports .fi-tabs-item[wire\:click*="'all'"] {
+        background-color: #1e293b !important;
+        border-color: #475569 !important;
+        color: #f1f5f9 !important;
+    }
+    .jb-tab-all:hover,
+    .fi-resource-bkash-reports .fi-tabs-item[wire\:click*="'all'"]:hover {
+        background-color: #f1f5f9 !important;
+        color: #0f172a !important;
+        border-color: #475569 !important;
+        transform: translateY(-1px) !important;
+    }
+    .jb-tab-all.active,
+    .fi-resource-bkash-reports .fi-tabs-item[wire\:click*="'all'"].fi-active {
+        background-color: #0f172a !important;
+        border-color: #020617 !important;
+        color: #ffffff !important;
+        font-weight: 700 !important;
+        box-shadow: 0 3px 8px rgba(15, 23, 42, 0.4) !important;
+    }
+    html.dark .jb-tab-all.active,
+    html.dark .fi-resource-bkash-reports .fi-tabs-item[wire\:click*="'all'"].fi-active,
+    .dark .jb-tab-all.active,
+    .dark .fi-resource-bkash-reports .fi-tabs-item[wire\:click*="'all'"].fi-active {
+        background-color: #0284c7 !important;
+        border-color: #38bdf8 !important;
+        color: #ffffff !important;
+    }
+
+    /* ─── 2. A2A TAB (Vibrant Emerald Green) ─── */
+    .jb-tab-a2a,
+    .fi-resource-bkash-reports .fi-tabs-item[wire\:click*="'a2a'"] {
+        background-color: #f0fdf4 !important;
+        color: #15803d !important;
+        border: 1.5px solid #86efac !important;
+    }
+    html.dark .jb-tab-a2a,
+    html.dark .fi-resource-bkash-reports .fi-tabs-item[wire\:click*="'a2a'"],
+    .dark .jb-tab-a2a,
+    .dark .fi-resource-bkash-reports .fi-tabs-item[wire\:click*="'a2a'"] {
+        background-color: rgba(16, 185, 129, 0.12) !important;
+        border-color: rgba(16, 185, 129, 0.35) !important;
+        color: #34d399 !important;
+    }
+    .jb-tab-a2a:hover,
+    .fi-resource-bkash-reports .fi-tabs-item[wire\:click*="'a2a'"]:hover {
+        background-color: #dcfce7 !important;
+        color: #166534 !important;
+        border-color: #4ade80 !important;
+        transform: translateY(-1px) !important;
+    }
+    .jb-tab-a2a.active,
+    .fi-resource-bkash-reports .fi-tabs-item[wire\:click*="'a2a'"].fi-active {
+        background-color: #10b981 !important;
+        border-color: #059669 !important;
+        color: #ffffff !important;
+        font-weight: 700 !important;
+        box-shadow: 0 3px 10px rgba(16, 185, 129, 0.4) !important;
+    }
+    html.dark .jb-tab-a2a.active,
+    html.dark .fi-resource-bkash-reports .fi-tabs-item[wire\:click*="'a2a'"].fi-active,
+    .dark .jb-tab-a2a.active,
+    .dark .fi-resource-bkash-reports .fi-tabs-item[wire\:click*="'a2a'"].fi-active {
+        background-color: #10b981 !important;
+        border-color: #34d399 !important;
+        color: #ffffff !important;
+    }
+
+    /* ─── 3. BEFTN TAB (Vibrant Royal Purple) ─── */
+    .jb-tab-beftn,
+    .fi-resource-bkash-reports .fi-tabs-item[wire\:click*="'beftn'"] {
+        background-color: #faf5ff !important;
+        color: #7e22ce !important;
+        border: 1.5px solid #d8b4fe !important;
+    }
+    html.dark .jb-tab-beftn,
+    html.dark .fi-resource-bkash-reports .fi-tabs-item[wire\:click*="'beftn'"],
+    .dark .jb-tab-beftn,
+    .dark .fi-resource-bkash-reports .fi-tabs-item[wire\:click*="'beftn'"] {
+        background-color: rgba(139, 92, 246, 0.12) !important;
+        border-color: rgba(139, 92, 246, 0.35) !important;
+        color: #c084fc !important;
+    }
+    .jb-tab-beftn:hover,
+    .fi-resource-bkash-reports .fi-tabs-item[wire\:click*="'beftn'"]:hover {
+        background-color: #f3e8ff !important;
+        color: #6b21a8 !important;
+        border-color: #c084fc !important;
+        transform: translateY(-1px) !important;
+    }
+    .jb-tab-beftn.active,
+    .fi-resource-bkash-reports .fi-tabs-item[wire\:click*="'beftn'"].fi-active {
+        background-color: #8b5cf6 !important;
+        border-color: #7c3aed !important;
+        color: #ffffff !important;
+        font-weight: 700 !important;
+        box-shadow: 0 3px 10px rgba(139, 92, 246, 0.4) !important;
+    }
+    html.dark .jb-tab-beftn.active,
+    html.dark .fi-resource-bkash-reports .fi-tabs-item[wire\:click*="'beftn'"].fi-active,
+    .dark .jb-tab-beftn.active,
+    .dark .fi-resource-bkash-reports .fi-tabs-item[wire\:click*="'beftn'"].fi-active {
+        background-color: #8b5cf6 !important;
+        border-color: #a78bfa !important;
+        color: #ffffff !important;
+    }
+
+    /* ─── 4. RTGS TAB (Vibrant Warm Amber Orange) ─── */
+    .jb-tab-rtgs,
+    .fi-resource-bkash-reports .fi-tabs-item[wire\:click*="'rtgs'"] {
+        background-color: #fffbeb !important;
+        color: #b45309 !important;
+        border: 1.5px solid #fde68a !important;
+    }
+    html.dark .jb-tab-rtgs,
+    html.dark .fi-resource-bkash-reports .fi-tabs-item[wire\:click*="'rtgs'"],
+    .dark .jb-tab-rtgs,
+    .dark .fi-resource-bkash-reports .fi-tabs-item[wire\:click*="'rtgs'"] {
+        background-color: rgba(245, 158, 11, 0.12) !important;
+        border-color: rgba(245, 158, 11, 0.35) !important;
+        color: #fbbf24 !important;
+    }
+    .jb-tab-rtgs:hover,
+    .fi-resource-bkash-reports .fi-tabs-item[wire\:click*="'rtgs'"]:hover {
+        background-color: #fef3c7 !important;
+        color: #92400e !important;
+        border-color: #fcd34d !important;
+        transform: translateY(-1px) !important;
+    }
+    .jb-tab-rtgs.active,
+    .fi-resource-bkash-reports .fi-tabs-item[wire\:click*="'rtgs'"].fi-active {
+        background-color: #f59e0b !important;
+        border-color: #d97706 !important;
+        color: #ffffff !important;
+        font-weight: 700 !important;
+        box-shadow: 0 3px 10px rgba(245, 158, 11, 0.4) !important;
+    }
+    html.dark .jb-tab-rtgs.active,
+    html.dark .fi-resource-bkash-reports .fi-tabs-item[wire\:click*="'rtgs'"].fi-active,
+    .dark .jb-tab-rtgs.active,
+    .dark .fi-resource-bkash-reports .fi-tabs-item[wire\:click*="'rtgs'"].fi-active {
+        background-color: #f59e0b !important;
+        border-color: #fbbf24 !important;
+        color: #ffffff !important;
+    }
+
+    /* ─── BKASH-REPORTS ENTERPRISE TABLE POLISH ─── */
+    .fi-resource-bkash-reports .fi-ta-ctn {
+        border: 1px solid #cbd5e1 !important;
+        border-radius: 0.75rem !important;
+        overflow: hidden !important;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06) !important;
+    }
+    html.dark .fi-resource-bkash-reports .fi-ta-ctn,
+    .dark .fi-resource-bkash-reports .fi-ta-ctn {
+        border-color: #334155 !important;
+        background-color: #0f172a !important;
+    }
+    .fi-resource-bkash-reports .fi-ta-table thead {
+        background-color: #f8fafc !important;
+        border-bottom: 2px solid #cbd5e1 !important;
+    }
+    html.dark .fi-resource-bkash-reports .fi-ta-table thead,
+    .dark .fi-resource-bkash-reports .fi-ta-table thead {
+        background-color: #1e293b !important;
+        border-bottom-color: #334155 !important;
+    }
+    .fi-resource-bkash-reports .fi-ta-header-cell {
+        padding: 0.75rem 0.6rem !important;
+        font-size: 0.75rem !important;
+        font-weight: 700 !important;
+        color: #334155 !important;
+    }
+    html.dark .fi-resource-bkash-reports .fi-ta-header-cell,
+    .dark .fi-resource-bkash-reports .fi-ta-header-cell {
+        color: #94a3b8 !important;
+    }
+    .fi-resource-bkash-reports .fi-ta-record:hover {
+        background-color: #f8fafc !important;
+    }
+    html.dark .fi-resource-bkash-reports .fi-ta-record:hover,
+    .dark .fi-resource-bkash-reports .fi-ta-record:hover {
+        background-color: rgba(30, 41, 59, 0.4) !important;
+    }
 </style>
 
 <script>
@@ -2355,5 +2596,246 @@
         display: none !important;
         -webkit-appearance: none !important;
         margin: 0 !important;
+    }
+
+    /* ==========================================================================
+       DISTINCT CHANNEL BUTTON COLORS ACROSS ALL 4 PAGES
+       (bkash-transactions, bkash-transaction-authorizations, 
+        bkash-transaction-confirmations, bkash-reports)
+       ========================================================================== */
+
+    /* Tabs Container on bkash-reports */
+    .fi-resource-bkash-reports .fi-tabs,
+    .fi-resource-bkash-reports nav[role="tablist"] {
+        display: flex !important;
+        align-items: center !important;
+        gap: 0.6rem !important;
+        border-bottom: 1.5px solid #cbd5e1 !important;
+        padding-bottom: 0.85rem !important;
+        margin-bottom: 1.25rem !important;
+        background: transparent !important;
+        flex-wrap: wrap !important;
+        border-top: none !important;
+    }
+    html.dark .fi-resource-bkash-reports .fi-tabs,
+    .dark .fi-resource-bkash-reports .fi-tabs {
+        border-bottom-color: #334155 !important;
+    }
+
+    /* Common Button Reset for Tabs */
+    .jb-tab-all, .jb-tab-a2a, .jb-tab-beftn, .jb-tab-rtgs,
+    .fi-resource-bkash-reports .fi-tabs-item {
+        padding: 0.45rem 1rem !important;
+        font-size: 0.8125rem !important;
+        font-weight: 600 !important;
+        border-radius: 0.5rem !important;
+        cursor: pointer !important;
+        transition: all 0.2s ease-in-out !important;
+        font-family: inherit !important;
+        display: inline-flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        text-decoration: none !important;
+        box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05) !important;
+        border-bottom-width: 1.5px !important;
+    }
+    .fi-resource-bkash-reports .fi-tabs-item:after,
+    .fi-resource-bkash-reports .fi-tabs-item:before {
+        display: none !important;
+    }
+
+    /* ─── 1. ALL TRANSACTIONS TAB (Neutral Dark Slate / Navy) ─── */
+    .jb-tab-all,
+    .fi-resource-bkash-reports .fi-tabs-item[wire\:click*="'all'"] {
+        background-color: #ffffff !important;
+        color: #1e293b !important;
+        border: 1.5px solid #94a3b8 !important;
+    }
+    html.dark .jb-tab-all,
+    html.dark .fi-resource-bkash-reports .fi-tabs-item[wire\:click*="'all'"],
+    .dark .jb-tab-all,
+    .dark .fi-resource-bkash-reports .fi-tabs-item[wire\:click*="'all'"] {
+        background-color: #1e293b !important;
+        border-color: #475569 !important;
+        color: #f1f5f9 !important;
+    }
+    .jb-tab-all:hover,
+    .fi-resource-bkash-reports .fi-tabs-item[wire\:click*="'all'"]:hover {
+        background-color: #f1f5f9 !important;
+        color: #0f172a !important;
+        border-color: #475569 !important;
+        transform: translateY(-1px) !important;
+    }
+    .jb-tab-all.active,
+    .fi-resource-bkash-reports .fi-tabs-item[wire\:click*="'all'"].fi-active {
+        background-color: #0f172a !important;
+        border-color: #020617 !important;
+        color: #ffffff !important;
+        font-weight: 700 !important;
+        box-shadow: 0 3px 8px rgba(15, 23, 42, 0.4) !important;
+    }
+    html.dark .jb-tab-all.active,
+    html.dark .fi-resource-bkash-reports .fi-tabs-item[wire\:click*="'all'"].fi-active,
+    .dark .jb-tab-all.active,
+    .dark .fi-resource-bkash-reports .fi-tabs-item[wire\:click*="'all'"].fi-active {
+        background-color: #0284c7 !important;
+        border-color: #38bdf8 !important;
+        color: #ffffff !important;
+    }
+
+    /* ─── 2. A2A TAB (Vibrant Emerald Green) ─── */
+    .jb-tab-a2a,
+    .fi-resource-bkash-reports .fi-tabs-item[wire\:click*="'a2a'"] {
+        background-color: #f0fdf4 !important;
+        color: #15803d !important;
+        border: 1.5px solid #86efac !important;
+    }
+    html.dark .jb-tab-a2a,
+    html.dark .fi-resource-bkash-reports .fi-tabs-item[wire\:click*="'a2a'"],
+    .dark .jb-tab-a2a,
+    .dark .fi-resource-bkash-reports .fi-tabs-item[wire\:click*="'a2a'"] {
+        background-color: rgba(16, 185, 129, 0.12) !important;
+        border-color: rgba(16, 185, 129, 0.35) !important;
+        color: #34d399 !important;
+    }
+    .jb-tab-a2a:hover,
+    .fi-resource-bkash-reports .fi-tabs-item[wire\:click*="'a2a'"]:hover {
+        background-color: #dcfce7 !important;
+        color: #166534 !important;
+        border-color: #4ade80 !important;
+        transform: translateY(-1px) !important;
+    }
+    .jb-tab-a2a.active,
+    .fi-resource-bkash-reports .fi-tabs-item[wire\:click*="'a2a'"].fi-active {
+        background-color: #10b981 !important;
+        border-color: #059669 !important;
+        color: #ffffff !important;
+        font-weight: 700 !important;
+        box-shadow: 0 3px 10px rgba(16, 185, 129, 0.4) !important;
+    }
+    html.dark .jb-tab-a2a.active,
+    html.dark .fi-resource-bkash-reports .fi-tabs-item[wire\:click*="'a2a'"].fi-active,
+    .dark .jb-tab-a2a.active,
+    .dark .fi-resource-bkash-reports .fi-tabs-item[wire\:click*="'a2a'"].fi-active {
+        background-color: #10b981 !important;
+        border-color: #34d399 !important;
+        color: #ffffff !important;
+    }
+
+    /* ─── 3. BEFTN TAB (Vibrant Royal Purple) ─── */
+    .jb-tab-beftn,
+    .fi-resource-bkash-reports .fi-tabs-item[wire\:click*="'beftn'"] {
+        background-color: #faf5ff !important;
+        color: #7e22ce !important;
+        border: 1.5px solid #d8b4fe !important;
+    }
+    html.dark .jb-tab-beftn,
+    html.dark .fi-resource-bkash-reports .fi-tabs-item[wire\:click*="'beftn'"],
+    .dark .jb-tab-beftn,
+    .dark .fi-resource-bkash-reports .fi-tabs-item[wire\:click*="'beftn'"] {
+        background-color: rgba(139, 92, 246, 0.12) !important;
+        border-color: rgba(139, 92, 246, 0.35) !important;
+        color: #c084fc !important;
+    }
+    .jb-tab-beftn:hover,
+    .fi-resource-bkash-reports .fi-tabs-item[wire\:click*="'beftn'"]:hover {
+        background-color: #f3e8ff !important;
+        color: #6b21a8 !important;
+        border-color: #c084fc !important;
+        transform: translateY(-1px) !important;
+    }
+    .jb-tab-beftn.active,
+    .fi-resource-bkash-reports .fi-tabs-item[wire\:click*="'beftn'"].fi-active {
+        background-color: #8b5cf6 !important;
+        border-color: #7c3aed !important;
+        color: #ffffff !important;
+        font-weight: 700 !important;
+        box-shadow: 0 3px 10px rgba(139, 92, 246, 0.4) !important;
+    }
+    html.dark .jb-tab-beftn.active,
+    html.dark .fi-resource-bkash-reports .fi-tabs-item[wire\:click*="'beftn'"].fi-active,
+    .dark .jb-tab-beftn.active,
+    .dark .fi-resource-bkash-reports .fi-tabs-item[wire\:click*="'beftn'"].fi-active {
+        background-color: #8b5cf6 !important;
+        border-color: #a78bfa !important;
+        color: #ffffff !important;
+    }
+
+    /* ─── 4. RTGS TAB (Vibrant Warm Amber Orange) ─── */
+    .jb-tab-rtgs,
+    .fi-resource-bkash-reports .fi-tabs-item[wire\:click*="'rtgs'"] {
+        background-color: #fffbeb !important;
+        color: #b45309 !important;
+        border: 1.5px solid #fde68a !important;
+    }
+    html.dark .jb-tab-rtgs,
+    html.dark .fi-resource-bkash-reports .fi-tabs-item[wire\:click*="'rtgs'"],
+    .dark .jb-tab-rtgs,
+    .dark .fi-resource-bkash-reports .fi-tabs-item[wire\:click*="'rtgs'"] {
+        background-color: rgba(245, 158, 11, 0.12) !important;
+        border-color: rgba(245, 158, 11, 0.35) !important;
+        color: #fbbf24 !important;
+    }
+    .jb-tab-rtgs:hover,
+    .fi-resource-bkash-reports .fi-tabs-item[wire\:click*="'rtgs'"]:hover {
+        background-color: #fef3c7 !important;
+        color: #92400e !important;
+        border-color: #fcd34d !important;
+        transform: translateY(-1px) !important;
+    }
+    .jb-tab-rtgs.active,
+    .fi-resource-bkash-reports .fi-tabs-item[wire\:click*="'rtgs'"].fi-active {
+        background-color: #f59e0b !important;
+        border-color: #d97706 !important;
+        color: #ffffff !important;
+        font-weight: 700 !important;
+        box-shadow: 0 3px 10px rgba(245, 158, 11, 0.4) !important;
+    }
+    html.dark .jb-tab-rtgs.active,
+    html.dark .fi-resource-bkash-reports .fi-tabs-item[wire\:click*="'rtgs'"].fi-active,
+    .dark .jb-tab-rtgs.active,
+    .dark .fi-resource-bkash-reports .fi-tabs-item[wire\:click*="'rtgs'"].fi-active {
+        background-color: #f59e0b !important;
+        border-color: #fbbf24 !important;
+        color: #ffffff !important;
+    }
+
+    /* ─── BKASH-REPORTS ENTERPRISE TABLE POLISH ─── */
+    .fi-resource-bkash-reports .fi-ta-ctn {
+        border: 1px solid #cbd5e1 !important;
+        border-radius: 0.75rem !important;
+        overflow: hidden !important;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06) !important;
+    }
+    html.dark .fi-resource-bkash-reports .fi-ta-ctn,
+    .dark .fi-resource-bkash-reports .fi-ta-ctn {
+        border-color: #334155 !important;
+        background-color: #0f172a !important;
+    }
+    .fi-resource-bkash-reports .fi-ta-table thead {
+        background-color: #f8fafc !important;
+        border-bottom: 2px solid #cbd5e1 !important;
+    }
+    html.dark .fi-resource-bkash-reports .fi-ta-table thead,
+    .dark .fi-resource-bkash-reports .fi-ta-table thead {
+        background-color: #1e293b !important;
+        border-bottom-color: #334155 !important;
+    }
+    .fi-resource-bkash-reports .fi-ta-header-cell {
+        padding: 0.75rem 0.6rem !important;
+        font-size: 0.75rem !important;
+        font-weight: 700 !important;
+        color: #334155 !important;
+    }
+    html.dark .fi-resource-bkash-reports .fi-ta-header-cell,
+    .dark .fi-resource-bkash-reports .fi-ta-header-cell {
+        color: #94a3b8 !important;
+    }
+    .fi-resource-bkash-reports .fi-ta-record:hover {
+        background-color: #f8fafc !important;
+    }
+    html.dark .fi-resource-bkash-reports .fi-ta-record:hover,
+    .dark .fi-resource-bkash-reports .fi-ta-record:hover {
+        background-color: rgba(30, 41, 59, 0.4) !important;
     }
 </style>

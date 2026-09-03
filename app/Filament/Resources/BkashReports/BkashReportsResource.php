@@ -53,6 +53,7 @@ class BkashReportsResource extends Resource
             ->emptyStateHeading('No Transaction Reports Found')
             ->emptyStateDescription('No transactions match the selected filter criteria.')
             ->emptyStateIcon('heroicon-o-document-chart-bar')
+            ->striped()
             ->columns([
                 // 1. Global Serial Number — Continuous across pagination
                 TextColumn::make('index')

@@ -451,28 +451,28 @@
                 <button
                     type="button"
                     wire:click="$set('activeChannel', 'all')"
-                    class="jb-tab-btn {{ $activeChannel === 'all' ? 'active' : '' }}"
+                    class="jb-tab-all {{ $activeChannel === 'all' ? 'active' : '' }}"
                 >
                     All Transactions
                 </button>
                 <button
                     type="button"
                     wire:click="$set('activeChannel', 'a2a')"
-                    class="jb-tab-btn {{ $activeChannel === 'a2a' ? 'active' : '' }}"
+                    class="jb-tab-a2a {{ $activeChannel === 'a2a' ? 'active' : '' }}"
                 >
                     Account to Account (A2A) - Janata Bank PLC.
                 </button>
                 <button
                     type="button"
                     wire:click="$set('activeChannel', 'beftn')"
-                    class="jb-tab-btn {{ $activeChannel === 'beftn' ? 'active' : '' }}"
+                    class="jb-tab-beftn {{ $activeChannel === 'beftn' ? 'active' : '' }}"
                 >
                     BEFTN
                 </button>
                 <button
                     type="button"
                     wire:click="$set('activeChannel', 'rtgs')"
-                    class="jb-tab-btn {{ $activeChannel === 'rtgs' ? 'active' : '' }}"
+                    class="jb-tab-rtgs {{ $activeChannel === 'rtgs' ? 'active' : '' }}"
                 >
                     RTGS
                 </button>
