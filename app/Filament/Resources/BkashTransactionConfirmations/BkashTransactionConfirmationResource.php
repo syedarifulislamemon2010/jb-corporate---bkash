@@ -48,6 +48,26 @@ class BkashTransactionConfirmationResource extends Resource
             ]);
     }
 
+        public static function getNavigationBadge(): ?string
+    {
+        try {
+            $count = \App\Models\BkashTransaction::where('status_id', 1002)->count();
+            return $count > 0 ? (string) $count : null;
+        } catch (\Throwable $e) {
+            return null;
+        }
+    }
+
+    public static function getNavigationBadgeColor(): ?string
+    {
+        return 'success';
+    }
+
+    public static function getNavigationBadgeTooltip(): ?string
+    {
+        return 'Transactions ready for Final Confirmation';
+    }
+
     public static function form(Schema $schema): Schema
     {
         return BkashTransactionConfirmationForm::configure($schema);

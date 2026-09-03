@@ -71,6 +71,26 @@ class BkashTransactionResource extends Resource
             ]);
     }
 
+        public static function getNavigationBadge(): ?string
+    {
+        try {
+            $count = \App\Models\BkashTransaction::where('status_id', 1000)->count();
+            return $count > 0 ? (string) $count : null;
+        } catch (\Throwable $e) {
+            return null;
+        }
+    }
+
+    public static function getNavigationBadgeColor(): ?string
+    {
+        return 'warning';
+    }
+
+    public static function getNavigationBadgeTooltip(): ?string
+    {
+        return 'Transactions pending Checker verification';
+    }
+
     public static function form(Schema $schema): Schema
     {
         return BkashTransactionForm::configure($schema);

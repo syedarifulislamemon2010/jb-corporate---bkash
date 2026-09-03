@@ -46,6 +46,26 @@ class BkashTransactionAuthorizationResource extends Resource
             ]);
     }
 
+        public static function getNavigationBadge(): ?string
+    {
+        try {
+            $count = \App\Models\BkashTransaction::where('status_id', 1001)->count();
+            return $count > 0 ? (string) $count : null;
+        } catch (\Throwable $e) {
+            return null;
+        }
+    }
+
+    public static function getNavigationBadgeColor(): ?string
+    {
+        return 'info';
+    }
+
+    public static function getNavigationBadgeTooltip(): ?string
+    {
+        return 'Transactions awaiting 1st Authorization';
+    }
+
     public static function form(Schema $schema): Schema
     {
         return BkashTransactionAuthorizationForm::configure($schema);

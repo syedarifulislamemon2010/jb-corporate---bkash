@@ -2305,6 +2305,269 @@
         margin: 0 !important;
         padding: 0 !important;
     }
+
+    /* ==========================================================================
+       MODERN INSTITUTIONAL FINTECH SIDEBAR SYSTEM (Janata Bank · bKash H2H)
+       ========================================================================== */
+
+    /* ─── Brand Header Container ─── */
+    .jb-brand-container {
+        display: flex;
+        align-items: center;
+        gap: 0.65rem;
+        padding: 0.25rem 0;
+        width: 100%;
+    }
+    .jb-brand-emblem {
+        flex-shrink: 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+    .jb-brand-svg {
+        width: 30px;
+        height: 30px;
+        border-radius: 7px;
+        box-shadow: 0 2px 6px rgba(2, 132, 199, 0.35);
+    }
+    .jb-brand-text {
+        display: flex;
+        flex-direction: column;
+        line-height: 1.15;
+    }
+    .jb-brand-title {
+        font-size: 0.9375rem;
+        font-weight: 800;
+        color: #0f172a;
+        letter-spacing: -0.01em;
+    }
+    html.dark .jb-brand-title,
+    .dark .jb-brand-title {
+        color: #f8fafc;
+    }
+    .jb-brand-sub {
+        font-size: 0.6875rem;
+        font-weight: 600;
+        color: #0284c7;
+        letter-spacing: 0.02em;
+    }
+    html.dark .jb-brand-sub,
+    .dark .jb-brand-sub {
+        color: #38bdf8;
+    }
+    .jb-brand-live-badge {
+        margin-left: auto;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.35rem;
+        padding: 0.2rem 0.5rem;
+        border-radius: 9999px;
+        font-size: 0.625rem;
+        font-weight: 800;
+        letter-spacing: 0.04em;
+        background-color: #ecfdf5;
+        color: #059669;
+        border: 1px solid #a7f3d0;
+    }
+    html.dark .jb-brand-live-badge,
+    .dark .jb-brand-live-badge {
+        background-color: rgba(16, 185, 129, 0.15);
+        color: #34d399;
+        border-color: rgba(16, 185, 129, 0.35);
+    }
+    .jb-live-dot {
+        width: 6px;
+        height: 6px;
+        border-radius: 50%;
+        background-color: #10b981;
+        box-shadow: 0 0 6px #10b981;
+        animation: jbPulse 2s infinite;
+    }
+    @keyframes jbPulse {
+        0%, 100% { opacity: 1; transform: scale(1); }
+        50% { opacity: 0.4; transform: scale(0.85); }
+    }
+
+    /* ─── Sidebar Theme (Corporate Midnight Navy in Dark Mode) ─── */
+    html.dark aside.fi-sidebar,
+    .dark aside.fi-sidebar {
+        background-color: #0b1329 !important; /* Deep Corporate Midnight Navy */
+        border-right: 1px solid #1e293b !important;
+        box-shadow: 4px 0 24px rgba(0, 0, 0, 0.35) !important;
+    }
+    html:not(.dark) aside.fi-sidebar {
+        background-color: #ffffff !important;
+        border-right: 1.5px solid #e2e8f0 !important;
+        box-shadow: 2px 0 12px rgba(0, 0, 0, 0.03) !important;
+    }
+
+    /* ─── Navigation Groups & Section Labels ─── */
+    .fi-sidebar-group-label,
+    .fi-sidebar-group-button span {
+        font-size: 0.6875rem !important;
+        font-weight: 800 !important;
+        letter-spacing: 0.08em !important;
+        text-transform: uppercase !important;
+    }
+    html.dark .fi-sidebar-group-label,
+    html.dark .fi-sidebar-group-button span,
+    .dark .fi-sidebar-group-label,
+    .dark .fi-sidebar-group-button span {
+        color: #64748b !important;
+    }
+    html:not(.dark) .fi-sidebar-group-label,
+    html:not(.dark) .fi-sidebar-group-button span {
+        color: #64748b !important;
+    }
+
+    /* ─── Navigation Item Modern Interactive States ─── */
+    .fi-sidebar-item a,
+    .fi-sidebar-item button {
+        border-radius: 0.5rem !important;
+        transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1) !important;
+        padding: 0.45rem 0.65rem !important;
+        margin: 0.15rem 0 !important;
+    }
+    .fi-sidebar-item a:hover,
+    .fi-sidebar-item button:hover {
+        transform: translateX(3px) !important;
+    }
+    html.dark .fi-sidebar-item a:hover,
+    html.dark .fi-sidebar-item button:hover,
+    .dark .fi-sidebar-item a:hover,
+    .dark .fi-sidebar-item button:hover {
+        background-color: rgba(30, 41, 59, 0.7) !important;
+        color: #38bdf8 !important;
+    }
+    html:not(.dark) .fi-sidebar-item a:hover,
+    html:not(.dark) .fi-sidebar-item button:hover {
+        background-color: #f1f5f9 !important;
+        color: #0284c7 !important;
+    }
+
+    /* Active Menu Indicator */
+    .fi-sidebar-item-active a,
+    .fi-sidebar-item-active button {
+        font-weight: 700 !important;
+        border-left: 3.5px solid #0284c7 !important;
+    }
+    html.dark .fi-sidebar-item-active a,
+    html.dark .fi-sidebar-item-active button,
+    .dark .fi-sidebar-item-active a,
+    .dark .fi-sidebar-item-active button {
+        background: linear-gradient(90deg, rgba(2, 132, 199, 0.2), rgba(2, 132, 199, 0.04)) !important;
+        color: #38bdf8 !important;
+        box-shadow: 0 1px 4px rgba(2, 132, 199, 0.15) !important;
+    }
+    html:not(.dark) .fi-sidebar-item-active a,
+    html:not(.dark) .fi-sidebar-item-active button {
+        background: linear-gradient(90deg, #e0f2fe, #f0f9ff) !important;
+        color: #0369a1 !important;
+        border-color: #0284c7 !important;
+        box-shadow: 0 1px 4px rgba(2, 132, 199, 0.1) !important;
+    }
+
+    /* ─── Navigation Badges (Live Status Counters) ─── */
+    .fi-sidebar-item .fi-badge {
+        font-size: 0.6875rem !important;
+        font-weight: 800 !important;
+        padding: 0.15rem 0.5rem !important;
+        border-radius: 9999px !important;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.15) !important;
+    }
+
+    /* ─── Bottom Profile & CBS Widget ─── */
+    .jb-sidebar-profile-card {
+        margin: 0.75rem 0.5rem 0.5rem 0.5rem;
+        padding: 0.65rem 0.75rem;
+        border-radius: 0.65rem;
+        transition: all 0.2s ease;
+        border: 1px solid transparent;
+    }
+    html.dark .jb-sidebar-profile-card,
+    .dark .jb-sidebar-profile-card {
+        background-color: rgba(15, 23, 42, 0.6);
+        border-color: #1e293b;
+    }
+    html:not(.dark) .jb-sidebar-profile-card {
+        background-color: #f8fafc;
+        border-color: #e2e8f0;
+    }
+    .jb-profile-row {
+        display: flex;
+        align-items: center;
+        gap: 0.6rem;
+    }
+    .jb-profile-avatar {
+        width: 32px;
+        height: 32px;
+        min-width: 32px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 0.75rem;
+        font-weight: 800;
+        color: #ffffff;
+        background: linear-gradient(135deg, #0284c7, #0f172a);
+        box-shadow: 0 2px 5px rgba(2, 132, 199, 0.3);
+    }
+    .jb-profile-info {
+        display: flex;
+        flex-direction: column;
+        overflow: hidden;
+    }
+    .jb-profile-name {
+        font-size: 0.8125rem;
+        font-weight: 700;
+        color: #0f172a;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+    html.dark .jb-profile-name,
+    .dark .jb-profile-name {
+        color: #f8fafc;
+    }
+    .jb-profile-role {
+        font-size: 0.6875rem;
+        color: #64748b;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+    html.dark .jb-profile-role,
+    .dark .jb-profile-role {
+        color: #94a3b8;
+    }
+    .jb-profile-cbs-status {
+        display: flex;
+        align-items: center;
+        gap: 0.35rem;
+        margin-top: 0.5rem;
+        padding-top: 0.4rem;
+        border-top: 1px solid #e2e8f0;
+        font-size: 0.6875rem;
+        font-weight: 600;
+    }
+    html.dark .jb-profile-cbs-status,
+    .dark .jb-profile-cbs-status {
+        border-top-color: #1e293b;
+    }
+    .jb-cbs-dot {
+        width: 6px;
+        height: 6px;
+        border-radius: 50%;
+        background-color: #10b981;
+        box-shadow: 0 0 5px #10b981;
+    }
+    .jb-cbs-text {
+        color: #059669;
+    }
+    html.dark .jb-cbs-text,
+    .dark .jb-cbs-text {
+        color: #34d399;
+    }
 </style>
 
 <script>
@@ -3147,5 +3410,268 @@
         pointer-events: none !important;
         margin: 0 !important;
         padding: 0 !important;
+    }
+
+    /* ==========================================================================
+       MODERN INSTITUTIONAL FINTECH SIDEBAR SYSTEM (Janata Bank · bKash H2H)
+       ========================================================================== */
+
+    /* ─── Brand Header Container ─── */
+    .jb-brand-container {
+        display: flex;
+        align-items: center;
+        gap: 0.65rem;
+        padding: 0.25rem 0;
+        width: 100%;
+    }
+    .jb-brand-emblem {
+        flex-shrink: 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+    .jb-brand-svg {
+        width: 30px;
+        height: 30px;
+        border-radius: 7px;
+        box-shadow: 0 2px 6px rgba(2, 132, 199, 0.35);
+    }
+    .jb-brand-text {
+        display: flex;
+        flex-direction: column;
+        line-height: 1.15;
+    }
+    .jb-brand-title {
+        font-size: 0.9375rem;
+        font-weight: 800;
+        color: #0f172a;
+        letter-spacing: -0.01em;
+    }
+    html.dark .jb-brand-title,
+    .dark .jb-brand-title {
+        color: #f8fafc;
+    }
+    .jb-brand-sub {
+        font-size: 0.6875rem;
+        font-weight: 600;
+        color: #0284c7;
+        letter-spacing: 0.02em;
+    }
+    html.dark .jb-brand-sub,
+    .dark .jb-brand-sub {
+        color: #38bdf8;
+    }
+    .jb-brand-live-badge {
+        margin-left: auto;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.35rem;
+        padding: 0.2rem 0.5rem;
+        border-radius: 9999px;
+        font-size: 0.625rem;
+        font-weight: 800;
+        letter-spacing: 0.04em;
+        background-color: #ecfdf5;
+        color: #059669;
+        border: 1px solid #a7f3d0;
+    }
+    html.dark .jb-brand-live-badge,
+    .dark .jb-brand-live-badge {
+        background-color: rgba(16, 185, 129, 0.15);
+        color: #34d399;
+        border-color: rgba(16, 185, 129, 0.35);
+    }
+    .jb-live-dot {
+        width: 6px;
+        height: 6px;
+        border-radius: 50%;
+        background-color: #10b981;
+        box-shadow: 0 0 6px #10b981;
+        animation: jbPulse 2s infinite;
+    }
+    @keyframes jbPulse {
+        0%, 100% { opacity: 1; transform: scale(1); }
+        50% { opacity: 0.4; transform: scale(0.85); }
+    }
+
+    /* ─── Sidebar Theme (Corporate Midnight Navy in Dark Mode) ─── */
+    html.dark aside.fi-sidebar,
+    .dark aside.fi-sidebar {
+        background-color: #0b1329 !important; /* Deep Corporate Midnight Navy */
+        border-right: 1px solid #1e293b !important;
+        box-shadow: 4px 0 24px rgba(0, 0, 0, 0.35) !important;
+    }
+    html:not(.dark) aside.fi-sidebar {
+        background-color: #ffffff !important;
+        border-right: 1.5px solid #e2e8f0 !important;
+        box-shadow: 2px 0 12px rgba(0, 0, 0, 0.03) !important;
+    }
+
+    /* ─── Navigation Groups & Section Labels ─── */
+    .fi-sidebar-group-label,
+    .fi-sidebar-group-button span {
+        font-size: 0.6875rem !important;
+        font-weight: 800 !important;
+        letter-spacing: 0.08em !important;
+        text-transform: uppercase !important;
+    }
+    html.dark .fi-sidebar-group-label,
+    html.dark .fi-sidebar-group-button span,
+    .dark .fi-sidebar-group-label,
+    .dark .fi-sidebar-group-button span {
+        color: #64748b !important;
+    }
+    html:not(.dark) .fi-sidebar-group-label,
+    html:not(.dark) .fi-sidebar-group-button span {
+        color: #64748b !important;
+    }
+
+    /* ─── Navigation Item Modern Interactive States ─── */
+    .fi-sidebar-item a,
+    .fi-sidebar-item button {
+        border-radius: 0.5rem !important;
+        transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1) !important;
+        padding: 0.45rem 0.65rem !important;
+        margin: 0.15rem 0 !important;
+    }
+    .fi-sidebar-item a:hover,
+    .fi-sidebar-item button:hover {
+        transform: translateX(3px) !important;
+    }
+    html.dark .fi-sidebar-item a:hover,
+    html.dark .fi-sidebar-item button:hover,
+    .dark .fi-sidebar-item a:hover,
+    .dark .fi-sidebar-item button:hover {
+        background-color: rgba(30, 41, 59, 0.7) !important;
+        color: #38bdf8 !important;
+    }
+    html:not(.dark) .fi-sidebar-item a:hover,
+    html:not(.dark) .fi-sidebar-item button:hover {
+        background-color: #f1f5f9 !important;
+        color: #0284c7 !important;
+    }
+
+    /* Active Menu Indicator */
+    .fi-sidebar-item-active a,
+    .fi-sidebar-item-active button {
+        font-weight: 700 !important;
+        border-left: 3.5px solid #0284c7 !important;
+    }
+    html.dark .fi-sidebar-item-active a,
+    html.dark .fi-sidebar-item-active button,
+    .dark .fi-sidebar-item-active a,
+    .dark .fi-sidebar-item-active button {
+        background: linear-gradient(90deg, rgba(2, 132, 199, 0.2), rgba(2, 132, 199, 0.04)) !important;
+        color: #38bdf8 !important;
+        box-shadow: 0 1px 4px rgba(2, 132, 199, 0.15) !important;
+    }
+    html:not(.dark) .fi-sidebar-item-active a,
+    html:not(.dark) .fi-sidebar-item-active button {
+        background: linear-gradient(90deg, #e0f2fe, #f0f9ff) !important;
+        color: #0369a1 !important;
+        border-color: #0284c7 !important;
+        box-shadow: 0 1px 4px rgba(2, 132, 199, 0.1) !important;
+    }
+
+    /* ─── Navigation Badges (Live Status Counters) ─── */
+    .fi-sidebar-item .fi-badge {
+        font-size: 0.6875rem !important;
+        font-weight: 800 !important;
+        padding: 0.15rem 0.5rem !important;
+        border-radius: 9999px !important;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.15) !important;
+    }
+
+    /* ─── Bottom Profile & CBS Widget ─── */
+    .jb-sidebar-profile-card {
+        margin: 0.75rem 0.5rem 0.5rem 0.5rem;
+        padding: 0.65rem 0.75rem;
+        border-radius: 0.65rem;
+        transition: all 0.2s ease;
+        border: 1px solid transparent;
+    }
+    html.dark .jb-sidebar-profile-card,
+    .dark .jb-sidebar-profile-card {
+        background-color: rgba(15, 23, 42, 0.6);
+        border-color: #1e293b;
+    }
+    html:not(.dark) .jb-sidebar-profile-card {
+        background-color: #f8fafc;
+        border-color: #e2e8f0;
+    }
+    .jb-profile-row {
+        display: flex;
+        align-items: center;
+        gap: 0.6rem;
+    }
+    .jb-profile-avatar {
+        width: 32px;
+        height: 32px;
+        min-width: 32px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 0.75rem;
+        font-weight: 800;
+        color: #ffffff;
+        background: linear-gradient(135deg, #0284c7, #0f172a);
+        box-shadow: 0 2px 5px rgba(2, 132, 199, 0.3);
+    }
+    .jb-profile-info {
+        display: flex;
+        flex-direction: column;
+        overflow: hidden;
+    }
+    .jb-profile-name {
+        font-size: 0.8125rem;
+        font-weight: 700;
+        color: #0f172a;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+    html.dark .jb-profile-name,
+    .dark .jb-profile-name {
+        color: #f8fafc;
+    }
+    .jb-profile-role {
+        font-size: 0.6875rem;
+        color: #64748b;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+    html.dark .jb-profile-role,
+    .dark .jb-profile-role {
+        color: #94a3b8;
+    }
+    .jb-profile-cbs-status {
+        display: flex;
+        align-items: center;
+        gap: 0.35rem;
+        margin-top: 0.5rem;
+        padding-top: 0.4rem;
+        border-top: 1px solid #e2e8f0;
+        font-size: 0.6875rem;
+        font-weight: 600;
+    }
+    html.dark .jb-profile-cbs-status,
+    .dark .jb-profile-cbs-status {
+        border-top-color: #1e293b;
+    }
+    .jb-cbs-dot {
+        width: 6px;
+        height: 6px;
+        border-radius: 50%;
+        background-color: #10b981;
+        box-shadow: 0 0 5px #10b981;
+    }
+    .jb-cbs-text {
+        color: #059669;
+    }
+    html.dark .jb-cbs-text,
+    .dark .jb-cbs-text {
+        color: #34d399;
     }
 </style>

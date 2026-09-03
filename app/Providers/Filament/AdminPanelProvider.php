@@ -30,7 +30,9 @@ class AdminPanelProvider extends PanelProvider
             ->path('admin')
             ->login(\App\Filament\Pages\Auth\CustomLogin::class)
             ->passwordReset(false)
-            ->brandName('JB Corporate')
+            ->brandName('Janata Bank PLC.')
+            ->brandLogo(fn () => view('filament.components.brand-logo'))
+            ->brandLogoHeight('2.75rem')
             ->favicon(asset('favicon.svg'))
             ->sidebarCollapsibleOnDesktop()
             ->sidebarWidth('17rem')
@@ -93,6 +95,10 @@ class AdminPanelProvider extends PanelProvider
             ->renderHook(
                 \Filament\View\PanelsRenderHook::BODY_END,
                 fn () => view('filament.custom-styles')
+            )
+            ->renderHook(
+                \Filament\View\PanelsRenderHook::SIDEBAR_FOOTER,
+                fn () => view('filament.components.sidebar-footer-profile')
             )
             ->widgets([])
             ->plugins([

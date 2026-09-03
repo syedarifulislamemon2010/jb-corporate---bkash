@@ -26,6 +26,21 @@ class BkashFailedTransactionResource extends Resource
 
     protected static ?string $navigationIconColor = 'danger';
 
+        public static function getNavigationBadge(): ?string
+    {
+        try {
+            $count = \App\Models\BkashFailedTransaction::count();
+            return $count > 0 ? (string) $count : '0';
+        } catch (\Throwable $e) {
+            return null;
+        }
+    }
+
+    public static function getNavigationBadgeColor(): ?string
+    {
+        return 'danger';
+    }
+
     public static function table(Table $table): Table
     {
         return $table
