@@ -38,6 +38,7 @@ class AdminPanelProvider extends PanelProvider
             ->font('Plus Jakarta Sans')
             ->databaseNotifications()
             ->databaseNotificationsPolling('15s')
+            ->databaseNotificationsLivewireComponent(\App\Filament\Livewire\CustomDatabaseNotifications::class)
             ->globalSearchKeybindings(['command+k', 'ctrl+k'])
             ->colors([
                 'primary' => Color::Sky,

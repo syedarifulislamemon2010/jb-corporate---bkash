@@ -2490,6 +2490,421 @@
     .dark .jb-cbs-text {
         color: #34d399;
     }
+
+    /* ==========================================================================
+       IMAGE-3 STYLE RICH DATABASE NOTIFICATIONS SLIDEOVER & BADGES
+       ========================================================================== */
+
+    /* ─── Topbar Bell Unread Badge Polish ─── */
+    .fi-topbar-database-notifications-btn .fi-icon-btn-badge-ctn {
+        top: -3px !important;
+        right: -3px !important;
+    }
+    .fi-topbar-database-notifications-btn .fi-badge {
+        background-color: #ef4444 !important;
+        color: #ffffff !important;
+        font-weight: 800 !important;
+        font-size: 0.6875rem !important;
+        padding: 0.15rem 0.45rem !important;
+        border-radius: 9999px !important;
+        box-shadow: 0 2px 6px rgba(239, 68, 68, 0.4) !important;
+        border: 1.5px solid #ffffff !important;
+    }
+    html.dark .fi-topbar-database-notifications-btn .fi-badge,
+    .dark .fi-topbar-database-notifications-btn .fi-badge {
+        border-color: #0f172a !important;
+    }
+
+    /* ─── Slideover Header ─── */
+    .jb-notif-header {
+        display: flex;
+        flex-direction: column;
+        gap: 0.75rem;
+        padding-bottom: 0.5rem;
+        width: 100%;
+    }
+    .jb-notif-header-title-row {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 0.5rem;
+    }
+    .jb-notif-title-group {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+    .jb-notif-heading {
+        font-size: 1.125rem;
+        font-weight: 800;
+        color: #0f172a;
+        margin: 0;
+    }
+    html.dark .jb-notif-heading,
+    .dark .jb-notif-heading {
+        color: #f8fafc;
+    }
+    .jb-notif-unread-badge {
+        font-size: 0.6875rem;
+        font-weight: 700;
+        padding: 0.15rem 0.5rem;
+        border-radius: 9999px;
+        background-color: #fee2e2;
+        color: #dc2626;
+        border: 1px solid #fca5a5;
+    }
+    html.dark .jb-notif-unread-badge,
+    .dark .jb-notif-unread-badge {
+        background-color: rgba(239, 68, 68, 0.2);
+        color: #f87171;
+        border-color: rgba(239, 68, 68, 0.4);
+    }
+    .jb-mark-all-btn {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.35rem;
+        font-size: 0.75rem;
+        font-weight: 700;
+        color: #0284c7;
+        background: transparent;
+        border: none;
+        cursor: pointer;
+        padding: 0.25rem 0.5rem;
+        border-radius: 0.375rem;
+        transition: all 0.15s ease;
+    }
+    .jb-mark-all-btn:hover {
+        background-color: #f0f9ff;
+        color: #0369a1;
+    }
+    html.dark .jb-mark-all-btn,
+    .dark .jb-mark-all-btn {
+        color: #38bdf8;
+    }
+    html.dark .jb-mark-all-btn:hover,
+    .dark .jb-mark-all-btn:hover {
+        background-color: rgba(56, 189, 248, 0.1);
+        color: #7dd3fc;
+    }
+
+    /* ─── Category Tabs Bar ─── */
+    .jb-notif-tabs-bar {
+        display: flex;
+        align-items: center;
+        gap: 0.35rem;
+        background-color: #f1f5f9;
+        padding: 0.25rem;
+        border-radius: 0.65rem;
+        border: 1px solid #e2e8f0;
+    }
+    html.dark .jb-notif-tabs-bar,
+    .dark .jb-notif-tabs-bar {
+        background-color: #0f172a;
+        border-color: #1e293b;
+    }
+    .jb-notif-tab {
+        flex: 1;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.35rem;
+        padding: 0.35rem 0.5rem;
+        font-size: 0.75rem;
+        font-weight: 700;
+        border-radius: 0.5rem;
+        border: none;
+        background: transparent;
+        color: #64748b;
+        cursor: pointer;
+        transition: all 0.15s ease;
+    }
+    .jb-notif-tab:hover {
+        color: #0f172a;
+        background-color: rgba(255, 255, 255, 0.6);
+    }
+    html.dark .jb-notif-tab:hover,
+    .dark .jb-notif-tab:hover {
+        color: #f8fafc;
+        background-color: rgba(30, 41, 59, 0.6);
+    }
+    .jb-notif-tab.active {
+        background-color: #ffffff;
+        color: #0284c7;
+        box-shadow: 0 1px 4px rgba(0, 0, 0, 0.08);
+    }
+    html.dark .jb-notif-tab.active,
+    .dark .jb-notif-tab.active {
+        background-color: #1e293b;
+        color: #38bdf8;
+        box-shadow: 0 1px 4px rgba(0, 0, 0, 0.3);
+    }
+    .jb-notif-tab-count {
+        font-size: 0.6875rem;
+        font-weight: 800;
+        padding: 0.05rem 0.35rem;
+        border-radius: 9999px;
+        background-color: #e2e8f0;
+        color: #475569;
+    }
+    .jb-notif-tab.active .jb-notif-tab-count {
+        background-color: #e0f2fe;
+        color: #0284c7;
+    }
+    html.dark .jb-notif-tab-count,
+    .dark .jb-notif-tab-count {
+        background-color: #334155;
+        color: #94a3b8;
+    }
+    html.dark .jb-notif-tab.active .jb-notif-tab-count,
+    .dark .jb-notif-tab.active .jb-notif-tab-count {
+        background-color: rgba(2, 132, 199, 0.25);
+        color: #38bdf8;
+    }
+
+    /* ─── Notification Items ─── */
+    .jb-notif-list {
+        display: flex;
+        flex-direction: column;
+        gap: 0.65rem;
+        padding: 0.5rem 0;
+    }
+    .jb-notif-card {
+        border-radius: 0.75rem;
+        background-color: #ffffff;
+        border: 1.5px solid #e2e8f0;
+        padding: 0.85rem;
+        transition: all 0.15s ease;
+        position: relative;
+    }
+    html.dark .jb-notif-card,
+    .dark .jb-notif-card {
+        background-color: #0b1329;
+        border-color: #1e293b;
+    }
+    .jb-notif-card:hover {
+        border-color: #cbd5e1;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+    }
+    html.dark .jb-notif-card:hover,
+    .dark .jb-notif-card:hover {
+        border-color: #334155;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
+    }
+    .jb-notif-card.is-unread {
+        background-color: #f8fafc;
+        border-color: #93c5fd;
+        border-left: 4px solid #0284c7;
+    }
+    html.dark .jb-notif-card.is-unread,
+    .dark .jb-notif-card.is-unread {
+        background-color: rgba(2, 132, 199, 0.08);
+        border-color: rgba(56, 189, 248, 0.4);
+        border-left: 4px solid #38bdf8;
+    }
+    .jb-notif-card-inner {
+        display: flex;
+        gap: 0.75rem;
+        align-items: flex-start;
+    }
+    .jb-notif-icon-col {
+        flex-shrink: 0;
+        margin-top: 0.15rem;
+    }
+    .jb-notif-icon-box {
+        width: 34px;
+        height: 34px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+    .icon-checker {
+        background-color: #fef3c7;
+        color: #d97706;
+    }
+    html.dark .icon-checker,
+    .dark .icon-checker {
+        background-color: rgba(217, 119, 6, 0.2);
+        color: #fbbf24;
+    }
+    .icon-auth1 {
+        background-color: #e0f2fe;
+        color: #0284c7;
+    }
+    html.dark .icon-auth1,
+    .dark .icon-auth1 {
+        background-color: rgba(2, 132, 199, 0.2);
+        color: #38bdf8;
+    }
+    .icon-auth2 {
+        background-color: #fae8ff;
+        color: #a855f7;
+    }
+    html.dark .icon-auth2,
+    .dark .icon-auth2 {
+        background-color: rgba(168, 85, 247, 0.2);
+        color: #c084fc;
+    }
+    .icon-system {
+        background-color: #f1f5f9;
+        color: #64748b;
+    }
+    html.dark .icon-system,
+    .dark .icon-system {
+        background-color: #1e293b;
+        color: #94a3b8;
+    }
+    .jb-notif-body-col {
+        flex: 1;
+        min-width: 0;
+        display: flex;
+        flex-direction: column;
+        gap: 0.35rem;
+    }
+    .jb-notif-title-row {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 0.5rem;
+    }
+    .jb-notif-title {
+        font-size: 0.84rem;
+        font-weight: 700;
+        color: #0f172a;
+        line-height: 1.25;
+    }
+    html.dark .jb-notif-title,
+    .dark .jb-notif-title {
+        color: #f8fafc;
+    }
+    .jb-unread-dot {
+        width: 8px;
+        height: 8px;
+        min-width: 8px;
+        border-radius: 50%;
+        background-color: #0284c7;
+        box-shadow: 0 0 6px #0284c7;
+    }
+    html.dark .jb-unread-dot,
+    .dark .jb-unread-dot {
+        background-color: #38bdf8;
+        box-shadow: 0 0 8px #38bdf8;
+    }
+    .jb-notif-desc {
+        font-size: 0.75rem;
+        color: #475569;
+        line-height: 1.4;
+        word-break: break-word;
+    }
+    html.dark .jb-notif-desc,
+    .dark .jb-notif-desc {
+        color: #94a3b8;
+    }
+    .jb-notif-footer-row {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 0.5rem;
+        margin-top: 0.35rem;
+        padding-top: 0.35rem;
+        border-top: 1px solid #f1f5f9;
+    }
+    html.dark .jb-notif-footer-row,
+    .dark .jb-notif-footer-row {
+        border-top-color: #1e293b;
+    }
+    .jb-notif-time {
+        font-size: 0.6875rem;
+        color: #94a3b8;
+        font-weight: 500;
+    }
+    .jb-notif-item-actions {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+    .jb-notif-action-btn {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.25rem;
+        font-size: 0.6875rem;
+        font-weight: 700;
+        padding: 0.2rem 0.55rem;
+        border-radius: 0.375rem;
+        background-color: #0284c7;
+        color: #ffffff !important;
+        text-decoration: none !important;
+        transition: all 0.15s ease;
+    }
+    .jb-notif-action-btn:hover {
+        background-color: #0369a1;
+        transform: translateY(-1px);
+        box-shadow: 0 2px 5px rgba(2, 132, 199, 0.3);
+    }
+    .jb-mark-single-read-btn {
+        font-size: 0.6875rem;
+        font-weight: 600;
+        color: #64748b;
+        background: transparent;
+        border: none;
+        cursor: pointer;
+        padding: 0.15rem 0.35rem;
+        border-radius: 0.25rem;
+    }
+    .jb-mark-single-read-btn:hover {
+        color: #0f172a;
+        background-color: #f1f5f9;
+    }
+    html.dark .jb-mark-single-read-btn:hover,
+    .dark .jb-mark-single-read-btn:hover {
+        color: #f8fafc;
+        background-color: #1e293b;
+    }
+
+    /* ─── Empty State ─── */
+    .jb-notif-empty-state {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        text-align: center;
+        padding: 3rem 1.5rem;
+    }
+    .jb-notif-empty-icon {
+        width: 56px;
+        height: 56px;
+        border-radius: 50%;
+        background-color: #f1f5f9;
+        color: #94a3b8;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-bottom: 1rem;
+    }
+    html.dark .jb-notif-empty-icon,
+    .dark .jb-notif-empty-icon {
+        background-color: #1e293b;
+        color: #64748b;
+    }
+    .jb-notif-empty-title {
+        font-size: 0.9375rem;
+        font-weight: 700;
+        color: #0f172a;
+        margin: 0 0 0.25rem 0;
+    }
+    html.dark .jb-notif-empty-title,
+    .dark .jb-notif-empty-title {
+        color: #f8fafc;
+    }
+    .jb-notif-empty-desc {
+        font-size: 0.8125rem;
+        color: #64748b;
+        margin: 0;
+    }
+    html.dark .jb-notif-empty-desc,
+    .dark .jb-notif-empty-desc {
+        color: #94a3b8;
+    }
 </style>
 
 <script>
@@ -3517,5 +3932,420 @@
     html.dark .jb-cbs-text,
     .dark .jb-cbs-text {
         color: #34d399;
+    }
+
+    /* ==========================================================================
+       IMAGE-3 STYLE RICH DATABASE NOTIFICATIONS SLIDEOVER & BADGES
+       ========================================================================== */
+
+    /* ─── Topbar Bell Unread Badge Polish ─── */
+    .fi-topbar-database-notifications-btn .fi-icon-btn-badge-ctn {
+        top: -3px !important;
+        right: -3px !important;
+    }
+    .fi-topbar-database-notifications-btn .fi-badge {
+        background-color: #ef4444 !important;
+        color: #ffffff !important;
+        font-weight: 800 !important;
+        font-size: 0.6875rem !important;
+        padding: 0.15rem 0.45rem !important;
+        border-radius: 9999px !important;
+        box-shadow: 0 2px 6px rgba(239, 68, 68, 0.4) !important;
+        border: 1.5px solid #ffffff !important;
+    }
+    html.dark .fi-topbar-database-notifications-btn .fi-badge,
+    .dark .fi-topbar-database-notifications-btn .fi-badge {
+        border-color: #0f172a !important;
+    }
+
+    /* ─── Slideover Header ─── */
+    .jb-notif-header {
+        display: flex;
+        flex-direction: column;
+        gap: 0.75rem;
+        padding-bottom: 0.5rem;
+        width: 100%;
+    }
+    .jb-notif-header-title-row {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 0.5rem;
+    }
+    .jb-notif-title-group {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+    .jb-notif-heading {
+        font-size: 1.125rem;
+        font-weight: 800;
+        color: #0f172a;
+        margin: 0;
+    }
+    html.dark .jb-notif-heading,
+    .dark .jb-notif-heading {
+        color: #f8fafc;
+    }
+    .jb-notif-unread-badge {
+        font-size: 0.6875rem;
+        font-weight: 700;
+        padding: 0.15rem 0.5rem;
+        border-radius: 9999px;
+        background-color: #fee2e2;
+        color: #dc2626;
+        border: 1px solid #fca5a5;
+    }
+    html.dark .jb-notif-unread-badge,
+    .dark .jb-notif-unread-badge {
+        background-color: rgba(239, 68, 68, 0.2);
+        color: #f87171;
+        border-color: rgba(239, 68, 68, 0.4);
+    }
+    .jb-mark-all-btn {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.35rem;
+        font-size: 0.75rem;
+        font-weight: 700;
+        color: #0284c7;
+        background: transparent;
+        border: none;
+        cursor: pointer;
+        padding: 0.25rem 0.5rem;
+        border-radius: 0.375rem;
+        transition: all 0.15s ease;
+    }
+    .jb-mark-all-btn:hover {
+        background-color: #f0f9ff;
+        color: #0369a1;
+    }
+    html.dark .jb-mark-all-btn,
+    .dark .jb-mark-all-btn {
+        color: #38bdf8;
+    }
+    html.dark .jb-mark-all-btn:hover,
+    .dark .jb-mark-all-btn:hover {
+        background-color: rgba(56, 189, 248, 0.1);
+        color: #7dd3fc;
+    }
+
+    /* ─── Category Tabs Bar ─── */
+    .jb-notif-tabs-bar {
+        display: flex;
+        align-items: center;
+        gap: 0.35rem;
+        background-color: #f1f5f9;
+        padding: 0.25rem;
+        border-radius: 0.65rem;
+        border: 1px solid #e2e8f0;
+    }
+    html.dark .jb-notif-tabs-bar,
+    .dark .jb-notif-tabs-bar {
+        background-color: #0f172a;
+        border-color: #1e293b;
+    }
+    .jb-notif-tab {
+        flex: 1;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.35rem;
+        padding: 0.35rem 0.5rem;
+        font-size: 0.75rem;
+        font-weight: 700;
+        border-radius: 0.5rem;
+        border: none;
+        background: transparent;
+        color: #64748b;
+        cursor: pointer;
+        transition: all 0.15s ease;
+    }
+    .jb-notif-tab:hover {
+        color: #0f172a;
+        background-color: rgba(255, 255, 255, 0.6);
+    }
+    html.dark .jb-notif-tab:hover,
+    .dark .jb-notif-tab:hover {
+        color: #f8fafc;
+        background-color: rgba(30, 41, 59, 0.6);
+    }
+    .jb-notif-tab.active {
+        background-color: #ffffff;
+        color: #0284c7;
+        box-shadow: 0 1px 4px rgba(0, 0, 0, 0.08);
+    }
+    html.dark .jb-notif-tab.active,
+    .dark .jb-notif-tab.active {
+        background-color: #1e293b;
+        color: #38bdf8;
+        box-shadow: 0 1px 4px rgba(0, 0, 0, 0.3);
+    }
+    .jb-notif-tab-count {
+        font-size: 0.6875rem;
+        font-weight: 800;
+        padding: 0.05rem 0.35rem;
+        border-radius: 9999px;
+        background-color: #e2e8f0;
+        color: #475569;
+    }
+    .jb-notif-tab.active .jb-notif-tab-count {
+        background-color: #e0f2fe;
+        color: #0284c7;
+    }
+    html.dark .jb-notif-tab-count,
+    .dark .jb-notif-tab-count {
+        background-color: #334155;
+        color: #94a3b8;
+    }
+    html.dark .jb-notif-tab.active .jb-notif-tab-count,
+    .dark .jb-notif-tab.active .jb-notif-tab-count {
+        background-color: rgba(2, 132, 199, 0.25);
+        color: #38bdf8;
+    }
+
+    /* ─── Notification Items ─── */
+    .jb-notif-list {
+        display: flex;
+        flex-direction: column;
+        gap: 0.65rem;
+        padding: 0.5rem 0;
+    }
+    .jb-notif-card {
+        border-radius: 0.75rem;
+        background-color: #ffffff;
+        border: 1.5px solid #e2e8f0;
+        padding: 0.85rem;
+        transition: all 0.15s ease;
+        position: relative;
+    }
+    html.dark .jb-notif-card,
+    .dark .jb-notif-card {
+        background-color: #0b1329;
+        border-color: #1e293b;
+    }
+    .jb-notif-card:hover {
+        border-color: #cbd5e1;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+    }
+    html.dark .jb-notif-card:hover,
+    .dark .jb-notif-card:hover {
+        border-color: #334155;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
+    }
+    .jb-notif-card.is-unread {
+        background-color: #f8fafc;
+        border-color: #93c5fd;
+        border-left: 4px solid #0284c7;
+    }
+    html.dark .jb-notif-card.is-unread,
+    .dark .jb-notif-card.is-unread {
+        background-color: rgba(2, 132, 199, 0.08);
+        border-color: rgba(56, 189, 248, 0.4);
+        border-left: 4px solid #38bdf8;
+    }
+    .jb-notif-card-inner {
+        display: flex;
+        gap: 0.75rem;
+        align-items: flex-start;
+    }
+    .jb-notif-icon-col {
+        flex-shrink: 0;
+        margin-top: 0.15rem;
+    }
+    .jb-notif-icon-box {
+        width: 34px;
+        height: 34px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+    .icon-checker {
+        background-color: #fef3c7;
+        color: #d97706;
+    }
+    html.dark .icon-checker,
+    .dark .icon-checker {
+        background-color: rgba(217, 119, 6, 0.2);
+        color: #fbbf24;
+    }
+    .icon-auth1 {
+        background-color: #e0f2fe;
+        color: #0284c7;
+    }
+    html.dark .icon-auth1,
+    .dark .icon-auth1 {
+        background-color: rgba(2, 132, 199, 0.2);
+        color: #38bdf8;
+    }
+    .icon-auth2 {
+        background-color: #fae8ff;
+        color: #a855f7;
+    }
+    html.dark .icon-auth2,
+    .dark .icon-auth2 {
+        background-color: rgba(168, 85, 247, 0.2);
+        color: #c084fc;
+    }
+    .icon-system {
+        background-color: #f1f5f9;
+        color: #64748b;
+    }
+    html.dark .icon-system,
+    .dark .icon-system {
+        background-color: #1e293b;
+        color: #94a3b8;
+    }
+    .jb-notif-body-col {
+        flex: 1;
+        min-width: 0;
+        display: flex;
+        flex-direction: column;
+        gap: 0.35rem;
+    }
+    .jb-notif-title-row {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 0.5rem;
+    }
+    .jb-notif-title {
+        font-size: 0.84rem;
+        font-weight: 700;
+        color: #0f172a;
+        line-height: 1.25;
+    }
+    html.dark .jb-notif-title,
+    .dark .jb-notif-title {
+        color: #f8fafc;
+    }
+    .jb-unread-dot {
+        width: 8px;
+        height: 8px;
+        min-width: 8px;
+        border-radius: 50%;
+        background-color: #0284c7;
+        box-shadow: 0 0 6px #0284c7;
+    }
+    html.dark .jb-unread-dot,
+    .dark .jb-unread-dot {
+        background-color: #38bdf8;
+        box-shadow: 0 0 8px #38bdf8;
+    }
+    .jb-notif-desc {
+        font-size: 0.75rem;
+        color: #475569;
+        line-height: 1.4;
+        word-break: break-word;
+    }
+    html.dark .jb-notif-desc,
+    .dark .jb-notif-desc {
+        color: #94a3b8;
+    }
+    .jb-notif-footer-row {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 0.5rem;
+        margin-top: 0.35rem;
+        padding-top: 0.35rem;
+        border-top: 1px solid #f1f5f9;
+    }
+    html.dark .jb-notif-footer-row,
+    .dark .jb-notif-footer-row {
+        border-top-color: #1e293b;
+    }
+    .jb-notif-time {
+        font-size: 0.6875rem;
+        color: #94a3b8;
+        font-weight: 500;
+    }
+    .jb-notif-item-actions {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+    .jb-notif-action-btn {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.25rem;
+        font-size: 0.6875rem;
+        font-weight: 700;
+        padding: 0.2rem 0.55rem;
+        border-radius: 0.375rem;
+        background-color: #0284c7;
+        color: #ffffff !important;
+        text-decoration: none !important;
+        transition: all 0.15s ease;
+    }
+    .jb-notif-action-btn:hover {
+        background-color: #0369a1;
+        transform: translateY(-1px);
+        box-shadow: 0 2px 5px rgba(2, 132, 199, 0.3);
+    }
+    .jb-mark-single-read-btn {
+        font-size: 0.6875rem;
+        font-weight: 600;
+        color: #64748b;
+        background: transparent;
+        border: none;
+        cursor: pointer;
+        padding: 0.15rem 0.35rem;
+        border-radius: 0.25rem;
+    }
+    .jb-mark-single-read-btn:hover {
+        color: #0f172a;
+        background-color: #f1f5f9;
+    }
+    html.dark .jb-mark-single-read-btn:hover,
+    .dark .jb-mark-single-read-btn:hover {
+        color: #f8fafc;
+        background-color: #1e293b;
+    }
+
+    /* ─── Empty State ─── */
+    .jb-notif-empty-state {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        text-align: center;
+        padding: 3rem 1.5rem;
+    }
+    .jb-notif-empty-icon {
+        width: 56px;
+        height: 56px;
+        border-radius: 50%;
+        background-color: #f1f5f9;
+        color: #94a3b8;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-bottom: 1rem;
+    }
+    html.dark .jb-notif-empty-icon,
+    .dark .jb-notif-empty-icon {
+        background-color: #1e293b;
+        color: #64748b;
+    }
+    .jb-notif-empty-title {
+        font-size: 0.9375rem;
+        font-weight: 700;
+        color: #0f172a;
+        margin: 0 0 0.25rem 0;
+    }
+    html.dark .jb-notif-empty-title,
+    .dark .jb-notif-empty-title {
+        color: #f8fafc;
+    }
+    .jb-notif-empty-desc {
+        font-size: 0.8125rem;
+        color: #64748b;
+        margin: 0;
+    }
+    html.dark .jb-notif-empty-desc,
+    .dark .jb-notif-empty-desc {
+        color: #94a3b8;
     }
 </style>

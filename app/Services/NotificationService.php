@@ -27,7 +27,8 @@ class NotificationService
         string $icon = 'heroicon-o-bell',
         string $color = 'info',
         ?string $actionUrl = null,
-        ?string $actionLabel = null
+        ?string $actionLabel = null,
+        ?string $category = null
     ): void {
         $sender = $senderUser ?? Auth::user();
         if (!$sender) {
@@ -55,6 +56,10 @@ class NotificationService
                 ->body($body)
                 ->icon($icon)
                 ->color($color);
+
+            if ($category) {
+                $notification->viewData(['category' => $category]);
+            }
 
             if ($actionUrl && $actionLabel) {
                 $notification->actions([
@@ -110,7 +115,8 @@ class NotificationService
             'heroicon-o-arrow-down-tray',
             'warning',
             '/admin/bkash-transactions',
-            'Check File →'
+            'Check File →',
+            'checker'
         );
 
         return static::createOutbox('STAGE_1_SFTP', $fileName, $totalTrn, $totalAmount, null, 'ALL_AUTHORIZERS', $body, $senderUser, $recipientRoles);
@@ -141,7 +147,8 @@ class NotificationService
             'heroicon-o-shield-check',
             'info',
             '/admin/bkash-transaction-authorizations',
-            '1st Authorizer Approval →'
+            '1st Authorizer Approval →',
+            'authorizer_1'
         );
 
         return static::createOutbox('STAGE_2_CHECKED', $fileName, $totalTrn, $totalAmount, $authorizerName, 'ALL_CONFIRMERS', $body, $senderUser, $recipientRoles);
@@ -172,7 +179,8 @@ class NotificationService
             'heroicon-o-key',
             'primary',
             '/admin/bkash-transaction-confirmations',
-            'Final Confirmation →'
+            'Final Confirmation →',
+            'authorizer_2'
         );
 
         return static::createOutbox('STAGE_3_AUTH1', $fileName, $totalTrn, $totalAmount, $authorizerName1, 'ALL_AUTHORIZERS_2', $body, $senderUser, $recipientRoles);
@@ -203,7 +211,8 @@ class NotificationService
             'heroicon-o-check-badge',
             'success',
             '/admin/bkash-transactions',
-            'View Transactions →'
+            'View Transactions →',
+            'authorizer_2'
         );
 
         return static::createOutbox('STAGE_4_AUTH2', $fileName, $totalTrn, $totalAmount, $confirmerName, 'ALL_USERS', $body, $senderUser, $recipientRoles);
