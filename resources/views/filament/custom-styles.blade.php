@@ -4942,6 +4942,40 @@
         box-shadow: 0 0 10px rgba(99, 102, 241, 0.5) !important;
     }
 
+    /* ─── 2a. Failed Transaction Report Badge (Explicit Striking Red for "3" / Failure Count) ─── */
+    .fi-sidebar-item a[href*="bkash-failed-transactions"] .fi-badge,
+    .fi-sidebar-item a[href*="failed-transaction"] .fi-badge,
+    .fi-sidebar-item .fi-badge.fi-color-danger,
+    .fi-sidebar-item .fi-badge[class*="danger"],
+    .fi-sidebar-group a[href*="bkash-failed-transactions"] .fi-badge,
+    .fi-sidebar-nav a[href*="bkash-failed-transactions"] .fi-badge,
+    a[href*="bkash-failed-transactions"] .fi-badge {
+        background-color: #dc2626 !important; /* Pure Striking Alert Red */
+        color: #ffffff !important;
+        font-weight: 800 !important;
+        font-size: 0.6875rem !important;
+        padding: 0.12rem 0.52rem !important;
+        border-radius: 9999px !important;
+        border: 1px solid #ef4444 !important;
+        box-shadow: 0 2px 6px rgba(220, 38, 38, 0.5) !important;
+    }
+    html.dark .fi-sidebar-item a[href*="bkash-failed-transactions"] .fi-badge,
+    html.dark .fi-sidebar-item a[href*="failed-transaction"] .fi-badge,
+    html.dark .fi-sidebar-item .fi-badge.fi-color-danger,
+    html.dark .fi-sidebar-item .fi-badge[class*="danger"],
+    .dark .fi-sidebar-item a[href*="bkash-failed-transactions"] .fi-badge,
+    .dark .fi-sidebar-item a[href*="failed-transaction"] .fi-badge,
+    .dark .fi-sidebar-item .fi-badge.fi-color-danger,
+    .dark .fi-sidebar-item .fi-badge[class*="danger"],
+    .dark .fi-sidebar-group a[href*="bkash-failed-transactions"] .fi-badge,
+    .dark .fi-sidebar-nav a[href*="bkash-failed-transactions"] .fi-badge,
+    .dark a[href*="bkash-failed-transactions"] .fi-badge {
+        background-color: #ef4444 !important;
+        color: #ffffff !important;
+        border-color: #f87171 !important;
+        box-shadow: 0 0 10px rgba(239, 68, 68, 0.6) !important;
+    }
+
     /* ─── 3. Global Search Bar & Icon Unhide + Active Styling ─── */
     .fi-global-search-ctn,
     .fi-global-search,
