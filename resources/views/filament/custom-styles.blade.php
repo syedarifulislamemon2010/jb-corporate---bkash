@@ -1916,6 +1916,26 @@
         line-height: 1.25 !important;
     }
 
+    /* ─── Batch Slide-Over Detail Modal Safety Guard ─── */
+    .jb-batch-modal-wrapper svg {
+        display: inline-block !important;
+        vertical-align: middle !important;
+        flex-shrink: 0 !important;
+    }
+    .jb-batch-modal-wrapper .jb-metric-icon-box svg {
+        width: 18px !important;
+        height: 18px !important;
+        max-width: 18px !important;
+        max-height: 18px !important;
+    }
+    .jb-batch-modal-wrapper .jb-btn-excel svg,
+    .jb-batch-modal-wrapper .jb-btn-csv svg {
+        width: 15px !important;
+        height: 15px !important;
+        max-width: 15px !important;
+        max-height: 15px !important;
+    }
+
     /* ─── Clean Topbar Icons Styling ─── */
     .fi-topbar-end select,
     .fi-topbar-end input[type="number"]::-webkit-inner-spin-button,
@@ -3633,6 +3653,23 @@
     .fi-batch-group-header-strip {
         user-select: text;
     }
+
+    /* ===== SVG UTILITY SIZING FALLBACKS FOR CUSTOM COMPONENTS, TABLES & MODALS ===== */
+    svg.w-3, .w-3 > svg, svg[class*="w-3 "] { width: 0.75rem !important; height: 0.75rem !important; min-width: 0.75rem !important; }
+    svg.w-3\.5, svg.w-3_5, .w-3\.5 > svg { width: 0.875rem !important; height: 0.875rem !important; min-width: 0.875rem !important; }
+    svg.w-4, .w-4 > svg, svg[class*="w-4 "] { width: 1rem !important; height: 1rem !important; min-width: 1rem !important; }
+    svg.w-5, .w-5 > svg, svg[class*="w-5 "] { width: 1.25rem !important; height: 1.25rem !important; min-width: 1.25rem !important; }
+    svg.w-6, .w-6 > svg, svg[class*="w-6 "] { width: 1.5rem !important; height: 1.5rem !important; min-width: 1.5rem !important; }
+    svg.w-7, .w-7 > svg, svg[class*="w-7 "] { width: 1.75rem !important; height: 1.75rem !important; min-width: 1.75rem !important; }
+    svg.w-8, .w-8 > svg, svg[class*="w-8 "] { width: 2rem !important; height: 2rem !important; min-width: 2rem !important; }
+
+    svg.h-3, svg[class*="h-3 "] { height: 0.75rem !important; }
+    svg.h-3\.5, svg.h-3_5 { height: 0.875rem !important; }
+    svg.h-4, svg[class*="h-4 "] { height: 1rem !important; }
+    svg.h-5, svg[class*="h-5 "] { height: 1.25rem !important; }
+    svg.h-6, svg[class*="h-6 "] { height: 1.5rem !important; }
+    svg.h-7, svg[class*="h-7 "] { height: 1.75rem !important; }
+    svg.h-8, svg[class*="h-8 "] { height: 2rem !important; }
 
     /* ─── High-Priority Failed / Partial Transactions Critical Monitor Card ─── */
     .db-exception-link {
