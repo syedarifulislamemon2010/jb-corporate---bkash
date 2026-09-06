@@ -82,9 +82,9 @@ class BkashReportsResource extends Resource
                     ->sortable()
                     ->toggleable(),
 
-                // 3. Ref No.
-                TextColumn::make('reference_id')
-                    ->label('Ref No.')
+                // 3. Txn ID
+                TextColumn::make('txn_id')
+                    ->label('Txn ID')
                     ->searchable()
                     ->sortable(),
 
@@ -158,9 +158,9 @@ class BkashReportsResource extends Resource
                     ->label('Source Account (TCSA/Ops)')
                     ->searchable(),
 
-                // 12. Txn ID
-                TextColumn::make('txn_id')
-                    ->label('Txn ID')
+                // 12. Ref No.
+                TextColumn::make('reference_id')
+                    ->label('Ref No.')
                     ->searchable()
                     ->sortable(),
 
