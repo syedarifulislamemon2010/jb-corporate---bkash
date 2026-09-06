@@ -56,6 +56,9 @@ class ListBkashTransactionAuthorizations extends ListRecords
 
     public function getBatches(): Collection
     {
+        // Automatically revert any failed batch files back to Checker
+        BkashTransactionBatch::revertFailedBatchesToChecker();
+
         $query = BkashTransactionBatch::query()
             ->where('status_id', BkashTransaction::STATUS_CHECKED);
 
@@ -74,7 +77,19 @@ class ListBkashTransactionAuthorizations extends ListRecords
             });
         }
 
+        // Exclude failed batches from authorization queue
+        $failedBatchIds = \App\Models\BkashFailedTransaction::whereNotNull('batch_id')->pluck('batch_id')->unique()->all();
+        $failedFileNames = \App\Models\BkashFailedTransaction::whereNotNull('file_name')->pluck('file_name')->unique()->all();
+
+        if (!empty($failedBatchIds)) {
+            $query->whereNotIn('id', $failedBatchIds);
+        }
+        if (!empty($failedFileNames)) {
+            $query->whereNotIn('file_name', $failedFileNames);
+        }
+
         $batches = $query->orderBy('created_at', 'desc')->get();
+        $batches = $batches->filter(fn ($b) => !$b->hasFailedTransactions())->values();
 
         $fileNames = BkashTransaction::where('status_id', BkashTransaction::STATUS_CHECKED)
             ->pluck('file_name')
@@ -82,6 +97,10 @@ class ListBkashTransactionAuthorizations extends ListRecords
             ->filter();
 
         foreach ($fileNames as $fn) {
+            if (in_array($fn, $failedFileNames)) {
+                continue;
+            }
+
             if (!$batches->contains('file_name', $fn)) {
                 $channel = BkashTransaction::where('file_name', $fn)->value('transaction_type') ?? 'A2A';
                 if ($this->activeChannel !== 'all' && strtolower($channel) !== strtolower($this->activeChannel)) {
@@ -101,7 +120,9 @@ class ListBkashTransactionAuthorizations extends ListRecords
                         'created_at'       => Carbon::now(),
                     ]
                 );
-                $batches->push($newBatch);
+                if (!$newBatch->hasFailedTransactions()) {
+                    $batches->push($newBatch);
+                }
             }
         }
 
@@ -128,6 +149,17 @@ class ListBkashTransactionAuthorizations extends ListRecords
         $totalAuthorized = 0;
 
         foreach ($batches as $batch) {
+            // Guard: Failed transaction files can NEVER be authorized. Automatically revert to checker!
+            if ($batch->hasFailedTransactions()) {
+                BkashTransactionBatch::revertFailedBatchesToChecker($batch->id, $batch->file_name);
+                \Filament\Notifications\Notification::make()
+                    ->title('Authorization Blocked (Failed Transactions)')
+                    ->body("File '{$batch->file_name}' contains failed transactions and cannot be authorized. It has been automatically returned to Checker - Verify Files.")
+                    ->danger()
+                    ->persistent()
+                    ->send();
+                continue;
+            }
             $txns = BkashTransaction::where(function (Builder $q) use ($batch) {
                 $q->where('batch_id', $batch->id)
                   ->orWhere('file_name', $batch->file_name);

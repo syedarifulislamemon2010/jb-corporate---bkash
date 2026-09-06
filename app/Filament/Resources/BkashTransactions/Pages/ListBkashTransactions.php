@@ -80,6 +80,9 @@ class ListBkashTransactions extends ListRecords
 
     public function getBatches(): Collection
     {
+        // Automatically revert any failed batch files back to Checker
+        BkashTransactionBatch::revertFailedBatchesToChecker();
+
         $query = BkashTransactionBatch::query()
             ->where('status_id', BkashTransaction::STATUS_PENDING_CHECKER);
 

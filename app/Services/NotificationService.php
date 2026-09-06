@@ -141,9 +141,14 @@ class NotificationService
 
     /**
      * Dispatch Stage 1: SFTP / Upload File Ingested -> Pending Checker
-     * Recipient Roles: ['bkash_checker']
      */
-    public static function dispatchStage1(string $fileName, int $totalTrn, float $totalAmount, ?User $senderUser = null): NotificationOutbox
+    public static function dispatchStage1(
+        string $fileName,
+        int $totalTrn,
+        float $totalAmount,
+        ?User $senderUser = null,
+        array $recipientRoles = []
+    ): NotificationOutbox
     {
         $formattedAmount = BkashTransaction::formatBdtAmount($totalAmount);
         $uploadTimeStr   = Carbon::now()->timezone('Asia/Dhaka')->format('d M Y, h:i A');
@@ -162,8 +167,6 @@ class NotificationService
               . "Upload Time: {$uploadTimeStr}\n"
               . "Total Files Uploaded Today: {$todayFilesCount}";
 
-        $recipientRoles = ['bkash_checker'];
-
         static::sendOrganizationDatabaseNotification(
             "New bKash Settlement File: {$fileName}",
             "Uploaded at {$uploadTimeStr} | Total Trn: {$totalTrn}, Amount: BDT {$formattedAmount} (File #{$todayFilesCount} today). Pending Authorization.",
@@ -181,10 +184,16 @@ class NotificationService
 
     /**
      * Dispatch Stage 2: Checked by Checker -> Pending Authorization
-     * Recipient Roles: ['bkash_checker', 'bkash_authorizer_1']
+     * By default notifies all Janata Bank users (excluding actor), including Authorizer 1 & 2.
      */
-    public static function dispatchStage2(string $fileName, int $totalTrn, float $totalAmount, string $authorizerName, ?User $senderUser = null): NotificationOutbox
-    {
+    public static function dispatchStage2(
+        string $fileName,
+        int $totalTrn,
+        float $totalAmount,
+        string $authorizerName,
+        ?User $senderUser = null,
+        array $recipientRoles = []
+    ): NotificationOutbox {
         $formattedAmount = BkashTransaction::formatBdtAmount($totalAmount);
 
         $body = "Dear Sir/Madam,\n"
@@ -193,8 +202,6 @@ class NotificationService
               . "is checked by \"{$authorizerName}\" (Checker name) & is pending for further Authorization/Approval.\n"
               . "Thank you\n"
               . "JANATA BANK";
-
-        $recipientRoles = ['bkash_checker', 'bkash_authorizer_1'];
 
         static::sendOrganizationDatabaseNotification(
             "Transactions Checked by {$authorizerName}",
@@ -213,10 +220,16 @@ class NotificationService
 
     /**
      * Dispatch Stage 3: Authorized by 1st Authorizer -> Pending Further Authorization/Approval
-     * Recipient Roles: ['bkash_checker', 'bkash_authorizer_1', 'bkash_authorizer_2']
+     * By default notifies all Janata Bank users (excluding actor), including Checkers & Authorizer 2.
      */
-    public static function dispatchStage3(string $fileName, int $totalTrn, float $totalAmount, string $authorizerName1, ?User $senderUser = null): NotificationOutbox
-    {
+    public static function dispatchStage3(
+        string $fileName,
+        int $totalTrn,
+        float $totalAmount,
+        string $authorizerName1,
+        ?User $senderUser = null,
+        array $recipientRoles = []
+    ): NotificationOutbox {
         $formattedAmount = BkashTransaction::formatBdtAmount($totalAmount);
 
         $body = "Dear Sir/Madam,\n"
@@ -225,8 +238,6 @@ class NotificationService
               . "is Authorized by \"{$authorizerName1}\" (First Authorizer's name) & is pending for further Authorization/Approval or final authorization.\n"
               . "Thank you\n"
               . "JANATA BANK";
-
-        $recipientRoles = ['bkash_checker', 'bkash_authorizer_1', 'bkash_authorizer_2'];
 
         static::sendOrganizationDatabaseNotification(
             "Transactions 1st Authorized by {$authorizerName1}",
@@ -245,10 +256,16 @@ class NotificationService
 
     /**
      * Dispatch Stage 4: Authorized by 2nd Authorizer -> Finally Authorized
-     * Recipient Roles: ['bkash_checker', 'bkash_authorizer_1', 'bkash_authorizer_2']
+     * By default notifies all Janata Bank users (excluding actor), including Checkers & Authorizer 1.
      */
-    public static function dispatchStage4(string $fileName, int $totalTrn, float $totalAmount, string $confirmerName, ?User $senderUser = null): NotificationOutbox
-    {
+    public static function dispatchStage4(
+        string $fileName,
+        int $totalTrn,
+        float $totalAmount,
+        string $confirmerName,
+        ?User $senderUser = null,
+        array $recipientRoles = []
+    ): NotificationOutbox {
         $formattedAmount = BkashTransaction::formatBdtAmount($totalAmount);
 
         $body = "Dear Sir/Madam,\n"
@@ -257,8 +274,6 @@ class NotificationService
               . "is Authorized by \"{$confirmerName}\" (Second Authorizer's name) & is finally authorized.\n"
               . "Thank you\n"
               . "JANATA BANK";
-
-        $recipientRoles = ['bkash_checker', 'bkash_authorizer_1', 'bkash_authorizer_2'];
 
         static::sendOrganizationDatabaseNotification(
             "Final Confirmation Completed by {$confirmerName}",
@@ -273,6 +288,30 @@ class NotificationService
         );
 
         return static::createOutbox('STAGE_4_AUTH2', $fileName, $totalTrn, $totalAmount, $confirmerName, 'ALL_USERS', $body, $senderUser, $recipientRoles);
+    }
+
+    /**
+     * Dispatch workflow stage notification dynamically from transaction record and actor.
+     */
+    public static function dispatchWorkflowNotification(
+        int $stage,
+        BkashTransaction $transaction,
+        string $actorName,
+        int|string|null $actorId = null
+    ): ?NotificationOutbox {
+        $fileName = $transaction->file_name ?? 'Batch';
+        $batch = BkashTransactionBatch::where('file_name', $fileName)->first();
+        $totalTrn = $batch?->total_transactions ?? BkashTransaction::where('file_name', $fileName)->count();
+        $totalAmount = (float) ($batch?->total_amount ?? BkashTransaction::where('file_name', $fileName)->sum('amount'));
+        $actor = $actorId ? User::find($actorId) : Auth::user();
+
+        return match ($stage) {
+            1 => static::dispatchStage1($fileName, $totalTrn, $totalAmount, $actor),
+            2 => static::dispatchStage2($fileName, $totalTrn, $totalAmount, $actorName, $actor),
+            3 => static::dispatchStage3($fileName, $totalTrn, $totalAmount, $actorName, $actor),
+            4 => static::dispatchStage4($fileName, $totalTrn, $totalAmount, $actorName, $actor),
+            default => null,
+        };
     }
 
     private static function createOutbox(

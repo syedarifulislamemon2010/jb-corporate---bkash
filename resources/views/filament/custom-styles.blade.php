@@ -3267,49 +3267,62 @@
 
 <script>
     (function () {
-        function sendLogoutSignal() {
-            try {
-                if ('BroadcastChannel' in window) {
-                    var bc = new BroadcastChannel('jb-corporate-auth');
-                    bc.postMessage('logout');
-                }
-                localStorage.setItem('jb_logout_event', Date.now().toString());
-            } catch (e) {}
+        var isLoginPage = window.location.pathname.indexOf('/admin/login') !== -1;
+
+        if (isLoginPage) {
+            // Once the server has terminated the session and redirected to the login page
+            if (window.location.search.indexOf('logged_out') !== -1) {
+                try {
+                    if ('BroadcastChannel' in window) {
+                        var bc = new BroadcastChannel('jb-corporate-auth');
+                        bc.postMessage('logout');
+                        setTimeout(function () {
+                            try { bc.close(); } catch(e) {}
+                        }, 1000);
+                    }
+                    localStorage.setItem('jb_logout_event', Date.now().toString());
+
+                    // Clean URL parameter cleanly without reloading the page
+                    if (window.history && window.history.replaceState) {
+                        var cleanUrl = window.location.origin + window.location.pathname;
+                        window.history.replaceState({}, document.title, cleanUrl);
+                    }
+                } catch (e) {}
+            }
+            return;
         }
 
-        // Attach listener to sign-out form submit & click
+        // On authenticated pages: visual feedback on submit to prevent duplicate submissions
         document.addEventListener('submit', function (e) {
             var form = e.target;
-            if (form && (form.action && form.action.indexOf('/logout') !== -1)) {
-                sendLogoutSignal();
-            }
-        }, true);
-
-        document.addEventListener('click', function (e) {
-            var el = e.target.closest('button, a, form');
-            if (el) {
-                var text = (el.textContent || '').toLowerCase();
-                var href = el.getAttribute('href') || '';
-                var action = el.getAttribute('action') || '';
-                if (text.indexOf('sign out') !== -1 || text.indexOf('logout') !== -1 || href.indexOf('/logout') !== -1 || action.indexOf('/logout') !== -1) {
-                    sendLogoutSignal();
+            if (form && form.action && form.action.indexOf('/logout') !== -1) {
+                var btn = form.querySelector('button[type="submit"]');
+                if (btn) {
+                    btn.style.opacity = '0.5';
+                    btn.style.pointerEvents = 'none';
                 }
             }
-        }, true);
+        });
 
-        // Receive logout signal from other tabs
+        // Listen for logout events broadcast from other tabs (triggered only AFTER server-side logout)
+        var redirectToLogin = function () {
+            if (window.location.pathname.indexOf('/admin/login') === -1) {
+                window.location.href = '/admin/login';
+            }
+        };
+
         try {
             if ('BroadcastChannel' in window) {
                 var authChannel = new BroadcastChannel('jb-corporate-auth');
                 authChannel.onmessage = function (ev) {
                     if (ev && ev.data === 'logout') {
-                        window.location.href = '/admin/login';
+                        redirectToLogin();
                     }
                 };
             }
             window.addEventListener('storage', function (ev) {
                 if (ev.key === 'jb_logout_event') {
-                    window.location.href = '/admin/login';
+                    redirectToLogin();
                 }
             });
         } catch (e) {}
@@ -5001,56 +5014,6 @@
 
 </style>
 
-<script>
-    (function () {
-        function sendLogoutSignal() {
-            try {
-                if ('BroadcastChannel' in window) {
-                    var bc = new BroadcastChannel('jb-corporate-auth');
-                    bc.postMessage('logout');
-                }
-                localStorage.setItem('jb_logout_event', Date.now().toString());
-            } catch (e) {}
-        }
-
-        // Attach listener to sign-out form submit & click
-        document.addEventListener('submit', function (e) {
-            var form = e.target;
-            if (form && (form.action && form.action.indexOf('/logout') !== -1)) {
-                sendLogoutSignal();
-            }
-        }, true);
-
-        document.addEventListener('click', function (e) {
-            var el = e.target.closest('button, a, form');
-            if (el) {
-                var text = (el.textContent || '').toLowerCase();
-                var href = el.getAttribute('href') || '';
-                var action = el.getAttribute('action') || '';
-                if (text.indexOf('sign out') !== -1 || text.indexOf('logout') !== -1 || href.indexOf('/logout') !== -1 || action.indexOf('/logout') !== -1) {
-                    sendLogoutSignal();
-                }
-            }
-        }, true);
-
-        // Receive logout signal from other tabs
-        try {
-            if ('BroadcastChannel' in window) {
-                var authChannel = new BroadcastChannel('jb-corporate-auth');
-                authChannel.onmessage = function (ev) {
-                    if (ev && ev.data === 'logout') {
-                        window.location.href = '/admin/login';
-                    }
-                };
-            }
-            window.addEventListener('storage', function (ev) {
-                if (ev.key === 'jb_logout_event') {
-                    window.location.href = '/admin/login';
-                }
-            });
-        } catch (e) {}
-    })();
-</script>
 <script>
     (function () {
         function purgeStrayArrow() {

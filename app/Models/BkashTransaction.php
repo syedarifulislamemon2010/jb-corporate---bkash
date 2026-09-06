@@ -155,4 +155,31 @@ class BkashTransaction extends Model
 
         return $formattedInteger . '.' . $decimalPart;
     }
+
+    /**
+     * Check if this transaction belongs to a batch/file that has failed transactions.
+     */
+    public function belongsToFailedBatch(): bool
+    {
+        if (in_array($this->status_id, [self::STATUS_REJECTED, self::STATUS_CBS_RESPONSE_FAILED])) {
+            return true;
+        }
+
+        $hasFailedRecords = BkashFailedTransaction::where(function ($q) {
+            if ($this->batch_id && filled($this->file_name)) {
+                $q->where('batch_id', $this->batch_id)
+                  ->orWhere('file_name', $this->file_name);
+            } elseif ($this->batch_id) {
+                $q->where('batch_id', $this->batch_id);
+            } elseif (filled($this->file_name)) {
+                $q->where('file_name', $this->file_name);
+            }
+        });
+
+        if (!$this->batch_id && blank($this->file_name)) {
+            return false;
+        }
+
+        return $hasFailedRecords->exists();
+    }
 }

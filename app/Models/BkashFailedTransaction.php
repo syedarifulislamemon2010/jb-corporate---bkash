@@ -39,4 +39,11 @@ class BkashFailedTransaction extends Model
     {
         return $this->belongsTo(BkashTransactionBatch::class, 'batch_id');
     }
+
+    protected static function booted(): void
+    {
+        static::created(function (BkashFailedTransaction $failed) {
+            BkashTransactionBatch::revertFailedBatchesToChecker($failed->batch_id, $failed->file_name);
+        });
+    }
 }

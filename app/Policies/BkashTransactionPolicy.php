@@ -94,6 +94,11 @@ class BkashTransactionPolicy
             return \Illuminate\Auth\Access\Response::deny('Transaction is not in Checked state awaiting 1st authorization.');
         }
 
+        // Failed transaction files can NEVER be authorized
+        if ($bkashTransaction->belongsToFailedBatch()) {
+            return \Illuminate\Auth\Access\Response::deny('File contains failed transactions and cannot be authorized.');
+        }
+
         // Self-Approval Prevention: Checker != 1st Authorizer
         $isChecker = ($authUser->id && $bkashTransaction->checked_by_id && (int) $authUser->id === (int) $bkashTransaction->checked_by_id) ||
                      ($authUser->name && $bkashTransaction->checked_by && $authUser->name === $bkashTransaction->checked_by);
@@ -113,6 +118,11 @@ class BkashTransactionPolicy
     {
         if ($bkashTransaction->status_id !== BkashTransaction::STATUS_AUTH_1_APPROVED) {
             return \Illuminate\Auth\Access\Response::deny('Transaction is not in 1st-Authorized state awaiting final confirmation.');
+        }
+
+        // Failed transaction files can NEVER be confirmed/settled
+        if ($bkashTransaction->belongsToFailedBatch()) {
+            return \Illuminate\Auth\Access\Response::deny('File contains failed transactions and cannot be confirmed.');
         }
 
         // Self-Approval Prevention: Confirmer != Checker

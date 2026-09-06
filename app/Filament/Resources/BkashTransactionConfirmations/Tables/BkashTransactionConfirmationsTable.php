@@ -29,6 +29,11 @@ class BkashTransactionConfirmationsTable
                     return false;
                 }
 
+                // Failed transaction files can NEVER be authorized/confirmed
+                if ($record->belongsToFailedBatch()) {
+                    return false;
+                }
+
                 // 3-Person Segregation of Duties / Self-Approval Prevention via Policy
                 return \Illuminate\Support\Facades\Gate::forUser($currentUser)->allows('confirm', $record);
             })
@@ -119,6 +124,30 @@ class BkashTransactionConfirmationsTable
                         $currentUser = Auth::user();
                         $currentUserId = $currentUser->id ?? null;
                         $currentUserName = $currentUser->name ?? '2nd Authorizer';
+
+                        if ($records->isEmpty()) {
+                            return;
+                        }
+
+                        // Guard: Failed transaction files can NEVER be confirmed/settled
+                        $failedRecords = $records->filter(fn ($r) => $r->belongsToFailedBatch());
+                        if ($failedRecords->isNotEmpty()) {
+                            foreach ($failedRecords as $fr) {
+                                \App\Models\BkashTransactionBatch::revertFailedBatchesToChecker($fr->batch_id, $fr->file_name);
+                            }
+                            \Filament\Notifications\Notification::make()
+                                ->title('Confirmation Blocked (Failed Transactions)')
+                                ->body('Transactions belonging to files with failed transactions cannot be confirmed and have been returned to Checker.')
+                                ->danger()
+                                ->persistent()
+                                ->send();
+                        }
+
+                        $records = $records->diff($failedRecords);
+
+                        if ($records->isEmpty()) {
+                            return;
+                        }
 
                         // 3-Person Segregation of Duties Check: 2nd Authorizer != Checker AND 2nd Authorizer != 1st Authorizer
                         $ineligibleRecords = $records->filter(function ($record) use ($currentUserId, $currentUserName) {

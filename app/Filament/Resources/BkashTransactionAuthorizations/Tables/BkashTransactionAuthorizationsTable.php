@@ -28,6 +28,11 @@ class BkashTransactionAuthorizationsTable
                     return false;
                 }
 
+                // Failed transaction files can NEVER be authorized
+                if ($record->belongsToFailedBatch()) {
+                    return false;
+                }
+
                 // Segregation of Duties / Self-Approval Prevention via Policy
                 return \Illuminate\Support\Facades\Gate::forUser($currentUser)->allows('authorize', $record);
             })
@@ -114,6 +119,26 @@ class BkashTransactionAuthorizationsTable
                         $currentUser = Auth::user();
                         $currentUserId = $currentUser->id ?? null;
                         $currentUserName = $currentUser->name ?? '1st Authorizer';
+
+                        if ($records->isEmpty()) {
+                            return;
+                        }
+
+                        // Guard: Failed transaction files can NEVER be authorized
+                        $failedRecords = $records->filter(fn ($r) => $r->belongsToFailedBatch());
+                        if ($failedRecords->isNotEmpty()) {
+                            foreach ($failedRecords as $fr) {
+                                \App\Models\BkashTransactionBatch::revertFailedBatchesToChecker($fr->batch_id, $fr->file_name);
+                            }
+                            \Filament\Notifications\Notification::make()
+                                ->title('Authorization Blocked (Failed Transactions)')
+                                ->body('Transactions belonging to files with failed transactions cannot be authorized and have been returned to Checker.')
+                                ->danger()
+                                ->persistent()
+                                ->send();
+                        }
+
+                        $records = $records->diff($failedRecords);
 
                         if ($records->isEmpty()) {
                             return;

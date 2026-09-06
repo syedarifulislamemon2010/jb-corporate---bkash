@@ -35,11 +35,17 @@ class CustomDatabaseNotifications extends BaseComponent
         return Filament::getDatabaseNotificationsPollingInterval();
     }
 
-    public function getTrigger(): ?View
+  public function getTrigger(): ?View
     {
-        return (($this->position ?? filament()->getDatabaseNotificationsPosition()) === DatabaseNotificationsPosition::Topbar)
-            ? view('filament.components.database-notifications-trigger')
-            : view('filament-panels::components.sidebar.database-notifications-trigger');
+        $isTopbar = ($this->position ?? filament()->getDatabaseNotificationsPosition()) === DatabaseNotificationsPosition::Topbar;
+
+        if ($isTopbar && view()->exists('filament.components.database-notifications-trigger')) {
+            return view('filament.components.database-notifications-trigger', [
+                'unreadNotificationsCount' => $this->getUnreadNotificationsCount(),
+            ]);
+        }
+
+        return parent::getTrigger();
     }
 
     public function getNotificationsQuery(): Builder | Relation
