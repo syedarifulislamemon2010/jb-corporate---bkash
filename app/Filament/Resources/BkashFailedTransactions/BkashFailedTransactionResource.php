@@ -172,4 +172,22 @@ class BkashFailedTransactionResource extends Resource
             'index' => Pages\ListBkashFailedTransactions::route('/'),
         ];
     }
+
+    public static function getGloballySearchableAttributes(): array
+    {
+        return ['txn_id', 'reference_id', 'file_name'];
+    }
+
+    public static function getGlobalSearchResultTitle(\Illuminate\Database\Eloquent\Model $record): string
+    {
+        return "Failed Txn: {$record->txn_id}";
+    }
+
+    public static function getGlobalSearchResultDetails(\Illuminate\Database\Eloquent\Model $record): array
+    {
+        return [
+            'File'   => $record->file_name ?? 'N/A',
+            'Reason' => $record->reject_reason ?? 'Validation/CBS Error',
+        ];
+    }
 }

@@ -1,15 +1,8 @@
 @php
     use App\Models\BkashTransaction;
 
-    $successCount = $batch->transactions()->whereIn('status_id', [
-        BkashTransaction::STATUS_CBS_SUCCESS,
-        BkashTransaction::STATUS_CBS_RESPONSE_SUCCESS,
-    ])->count();
-
-    $failedCount = $batch->failedTransactions()->count() + $batch->transactions()->whereIn('status_id', [
-        BkashTransaction::STATUS_REJECTED,
-        BkashTransaction::STATUS_CBS_RESPONSE_FAILED,
-    ])->count();
+    $successCount = $batch->transactions()->count();
+    $failedCount = $batch->failedTransactions()->count();
 
     $pendingCount = $batch->transactions()->whereIn('status_id', [
         BkashTransaction::STATUS_PENDING_CHECKER,

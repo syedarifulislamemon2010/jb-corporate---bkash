@@ -11,7 +11,13 @@ Route::get('/', function () {
 })->name('admin');
 
 Route::middleware(['web', 'throttle:30,1'])->group(function () {
-    Route::get('/admin/forgot-password', ForgotPasswordMobile::class)->name('filament.admin.auth.forgot-password');
+    Route::get('/admin/reset-password', ForgotPasswordMobile::class)->name('filament.admin.auth.reset-password');
+    Route::get('/admin/forgot-password', function () {
+        return redirect('/admin/reset-password');
+    })->name('filament.admin.auth.forgot-password');
+    Route::get('/admin/dashboard', function () {
+        return redirect('/admin');
+    })->name('filament.admin.dashboard');
     Route::get('/admin/verify-otp', VerifyOtp::class)->name('filament.admin.auth.verify-otp');
     Route::get('/admin/enter-temp-password', EnterTempPassword::class)->name('filament.admin.auth.enter-temp-password');
     Route::get('/admin/set-new-password', SetNewPassword::class)->name('filament.admin.auth.set-new-password');

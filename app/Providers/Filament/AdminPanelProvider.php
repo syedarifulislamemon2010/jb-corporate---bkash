@@ -77,7 +77,7 @@ class AdminPanelProvider extends PanelProvider
                 \Filament\Navigation\MenuItem::make()
                     ->label('Reset Password')
                     ->icon('heroicon-o-key')
-                    ->url('/admin/forgot-password'),
+                    ->url('/admin/reset-password'),
             ])
             ->navigationItems([
                 NavigationItem::make('Log Viewer')
@@ -95,10 +95,6 @@ class AdminPanelProvider extends PanelProvider
             ->renderHook(
                 \Filament\View\PanelsRenderHook::BODY_END,
                 fn () => view('filament.custom-styles')
-            )
-            ->renderHook(
-                \Filament\View\PanelsRenderHook::SIDEBAR_FOOTER,
-                fn () => view('filament.components.sidebar-footer-profile')
             )
             ->widgets([])
             ->plugins([

@@ -29,7 +29,7 @@ class BkashTransactionResource extends Resource
         'file_name',
     ];
 
-    public static function getGlobalSearchResultDetails(Model $record): array
+    public static function getGlobalSearchResultDetails(\Illuminate\Database\Eloquent\Model $record): array
     {
         return [
             'Txn ID'   => $record->txn_id ?? 'N/A',
@@ -122,12 +122,12 @@ class BkashTransactionResource extends Resource
         return false;
     }
 
-    public static function canEdit(Model $record): bool
+    public static function canEdit(\Illuminate\Database\Eloquent\Model $record): bool
     {
         return false;
     }
 
-    public static function canDelete(Model $record): bool
+    public static function canDelete(\Illuminate\Database\Eloquent\Model $record): bool
     {
         return false;
     }
@@ -138,5 +138,15 @@ class BkashTransactionResource extends Resource
             'index'  => ListBkashTransactions::route('/'),
             'upload' => UploadBkashExcel::route('/upload'),
         ];
+    }
+
+    public static function getGloballySearchableAttributes(): array
+    {
+        return ['txn_id', 'reference_id', 'file_name'];
+    }
+
+    public static function getGlobalSearchResultTitle(\Illuminate\Database\Eloquent\Model $record): string
+    {
+        return "Txn: {$record->txn_id}";
     }
 }

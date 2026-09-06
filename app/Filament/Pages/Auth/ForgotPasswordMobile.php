@@ -30,7 +30,7 @@ class ForgotPasswordMobile extends SimplePage
     use RestrictsFileUploadsToSchemaComponents;
     use WithRateLimiting;
 
-    protected static ?string $slug = 'forgot-password';
+    protected static ?string $slug = 'reset-password';
 
     /**
      * @var array<string, mixed> | null
@@ -75,12 +75,12 @@ class ForgotPasswordMobile extends SimplePage
 
     public function getTitle(): string | Htmlable
     {
-        return 'Forgot Password';
+        return 'Reset Password';
     }
 
     public function getHeading(): string | Htmlable | null
     {
-        return 'Forgot Password';
+        return 'Reset Password';
     }
 
     public function getSubheading(): string | Htmlable | null
@@ -101,9 +101,9 @@ class ForgotPasswordMobile extends SimplePage
     {
         return Action::make('login')
             ->link()
-            ->label('Back to login')
+            ->label('Back to Dashboard')
             ->icon('heroicon-o-arrow-left')
-            ->url('/admin/login');
+            ->url('/admin/dashboard');
     }
 
     public function content(Schema $schema): Schema

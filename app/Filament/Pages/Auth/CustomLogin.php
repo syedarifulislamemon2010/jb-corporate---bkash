@@ -30,7 +30,7 @@ class CustomLogin extends BaseLogin
         return Flex::make([
             Checkbox::make('remember')
                 ->label(__('filament-panels::auth/pages/login.form.remember.label')),
-            Html::make(new HtmlString(Blade::render('<x-filament::link href="/admin/forgot-password" tabindex="-1">Forgot password?</x-filament::link>'))),
+            Html::make(new HtmlString(Blade::render('<x-filament::link href="/admin/reset-password" tabindex="-1">Forgot password?</x-filament::link>'))),
         ])
             ->alignment(Alignment::Between)
             ->verticalAlignment(VerticalAlignment::Center);

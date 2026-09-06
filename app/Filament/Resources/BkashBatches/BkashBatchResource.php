@@ -113,6 +113,20 @@ class BkashBatchResource extends Resource
                     ->alignRight()
                     ->sortable(),
 
+                TextColumn::make('success_count')
+                    ->label('Success')
+                    ->badge()
+                    ->color('success')
+                    ->alignCenter()
+                    ->getStateUsing(fn ($record) => $record->transactions_count ?? \App\Models\BkashTransaction::where('batch_id', $record->id)->count()),
+
+                TextColumn::make('failed_count')
+                    ->label('Failed')
+                    ->badge()
+                    ->color('danger')
+                    ->alignCenter()
+                    ->getStateUsing(fn ($record) => $record->failed_transactions_count ?? \App\Models\BkashFailedTransaction::where('batch_id', $record->id)->count()),
+
                 TextColumn::make('total_amount')
                     ->label('Total Amount (BDT)')
                     ->formatStateUsing(fn ($state) => BkashTransaction::formatBdtAmount((float) ($state ?? 0)))
@@ -181,5 +195,11 @@ class BkashBatchResource extends Resource
         return [
             'index' => Pages\ListBkashBatches::route('/'),
         ];
+    }
+
+    public static function getEloquentQuery(): \Illuminate\Database\Eloquent\Builder
+    {
+        return parent::getEloquentQuery()
+            ->withCount(['transactions', 'failedTransactions']);
     }
 }

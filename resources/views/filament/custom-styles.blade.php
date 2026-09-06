@@ -2288,7 +2288,7 @@
 
     /* ─── Suppress Any Stray Up/Down Arrows, Select, or Spinners in Topbar ─── */
     .fi-topbar-end select,
-    .fi-topbar-end input,
+    
     .fi-topbar select,
     header select,
     .fi-topbar-end input[type="number"]::-webkit-inner-spin-button,
@@ -3023,7 +3023,132 @@
         margin: 0 !important;
         padding: 0 !important;
     }
+
+    /* ==========================================================================
+       TARGETED FIX: SIDEBAR SPACING, DISTINCT INDIGO BADGE, SEARCH BAR, ARROW FIX
+       ========================================================================== */
+
+    /* ─── 1. Explicit Sidebar Spacing Reduction (30-40% compact) ─── */
+    .fi-sidebar-item {
+        margin-bottom: 0.125rem !important;
+    }
+    .fi-sidebar-group {
+        margin-bottom: 0.35rem !important;
+        padding-top: 0.15rem !important;
+        padding-bottom: 0.15rem !important;
+    }
+    .fi-sidebar-group-items,
+    .fi-sidebar-nav-groups {
+        gap: 0.25rem !important;
+    }
+    .fi-sidebar-item a,
+    .fi-sidebar-item button {
+        padding-top: 0.35rem !important;
+        padding-bottom: 0.35rem !important;
+        padding-left: 0.55rem !important;
+        padding-right: 0.55rem !important;
+        min-height: 38px !important;
+        line-height: 1.25 !important;
+    }
+    .fi-sidebar-group-label,
+    .fi-sidebar-group-button span {
+        font-size: 0.65rem !important;
+        letter-spacing: 0.08em !important;
+        padding-top: 0.15rem !important;
+        padding-bottom: 0.15rem !important;
+    }
+
+    /* ─── 2. Unique Electric Indigo Badge (3, 2, 1) — Completely distinct from RTGS Amber ─── */
+    .fi-sidebar-item .fi-badge {
+        background-color: #4f46e5 !important; /* Striking Electric Indigo */
+        color: #ffffff !important;
+        font-weight: 800 !important;
+        font-size: 0.6875rem !important;
+        padding: 0.12rem 0.52rem !important;
+        border-radius: 9999px !important;
+        box-shadow: 0 2px 5px rgba(79, 70, 229, 0.4) !important;
+        border: 1px solid #6366f1 !important;
+    }
+    html.dark .fi-sidebar-item .fi-badge,
+    .dark .fi-sidebar-item .fi-badge {
+        background-color: #6366f1 !important;
+        color: #ffffff !important;
+        border-color: #818cf8 !important;
+        box-shadow: 0 0 10px rgba(99, 102, 241, 0.5) !important;
+    }
+
+    /* ─── 3. Global Search Bar & Icon Unhide + Active Styling ─── */
+    .fi-global-search-ctn,
+    .fi-global-search,
+    .fi-global-search-field {
+        display: flex !important;
+        align-items: center !important;
+        width: 100% !important;
+        max-width: 460px !important;
+        opacity: 1 !important;
+        visibility: visible !important;
+        pointer-events: auto !important;
+    }
+    .fi-global-search-field input,
+    .fi-global-search input,
+    input[type="search"].fi-input {
+        display: block !important;
+        visibility: visible !important;
+        opacity: 1 !important;
+        pointer-events: auto !important;
+        cursor: text !important;
+        width: 100% !important;
+        height: 38px !important;
+        font-size: 0.84rem !important;
+    }
+    .fi-global-search-field svg,
+    .fi-global-search svg,
+    .fi-global-search-field .fi-icon {
+        display: inline-block !important;
+        visibility: visible !important;
+        opacity: 1 !important;
+        color: #0284c7 !important;
+    }
+    html.dark .fi-global-search-field svg,
+    .dark .fi-global-search-field svg {
+        color: #38bdf8 !important;
+    }
+
+    /* ─── 4. Complete Eradication of Bell Adjacent Stray Arrow / Select ─── */
+    .fi-topbar select,
+    .fi-topbar input[type="number"],
+    .fi-topbar [role="spinbutton"],
+    .fi-topbar [aria-label*="sort" i],
+    .fi-topbar ::-webkit-inner-spin-button,
+    .fi-topbar ::-webkit-outer-spin-button,
+    .fi-no-database select,
+    .fi-modal-trigger select,
+    .fi-topbar-database-notifications-btn select,
+    .fi-topbar-database-notifications-btn + select,
+    .fi-topbar-database-notifications-btn ~ select,
+    .fi-modal-trigger + select,
+    .fi-modal-trigger ~ select,
+    .fi-modal-trigger ~ button:not(.fi-user-menu-trigger):not(.fi-dropdown-trigger),
+    .fi-topbar-database-notifications-btn + svg,
+    .fi-topbar-database-notifications-btn ~ svg {
+        display: none !important;
+        visibility: hidden !important;
+        opacity: 0 !important;
+        width: 0 !important;
+        height: 0 !important;
+        max-width: 0 !important;
+        max-height: 0 !important;
+        pointer-events: none !important;
+        margin: 0 !important;
+        padding: 0 !important;
+        border: none !important;
+        overflow: hidden !important;
+        -webkit-appearance: none !important;
+        appearance: none !important;
+    }
+
 </style>
+
 <script>
     (function () {
         function sendLogoutSignal() {
@@ -3899,7 +4024,7 @@
 
     /* ─── Suppress Any Stray Up/Down Arrows, Select, or Spinners in Topbar ─── */
     .fi-topbar-end select,
-    .fi-topbar-end input,
+    
     .fi-topbar select,
     header select,
     .fi-topbar-end input[type="number"]::-webkit-inner-spin-button,
@@ -4634,7 +4759,132 @@
         margin: 0 !important;
         padding: 0 !important;
     }
+
+    /* ==========================================================================
+       TARGETED FIX: SIDEBAR SPACING, DISTINCT INDIGO BADGE, SEARCH BAR, ARROW FIX
+       ========================================================================== */
+
+    /* ─── 1. Explicit Sidebar Spacing Reduction (30-40% compact) ─── */
+    .fi-sidebar-item {
+        margin-bottom: 0.125rem !important;
+    }
+    .fi-sidebar-group {
+        margin-bottom: 0.35rem !important;
+        padding-top: 0.15rem !important;
+        padding-bottom: 0.15rem !important;
+    }
+    .fi-sidebar-group-items,
+    .fi-sidebar-nav-groups {
+        gap: 0.25rem !important;
+    }
+    .fi-sidebar-item a,
+    .fi-sidebar-item button {
+        padding-top: 0.35rem !important;
+        padding-bottom: 0.35rem !important;
+        padding-left: 0.55rem !important;
+        padding-right: 0.55rem !important;
+        min-height: 38px !important;
+        line-height: 1.25 !important;
+    }
+    .fi-sidebar-group-label,
+    .fi-sidebar-group-button span {
+        font-size: 0.65rem !important;
+        letter-spacing: 0.08em !important;
+        padding-top: 0.15rem !important;
+        padding-bottom: 0.15rem !important;
+    }
+
+    /* ─── 2. Unique Electric Indigo Badge (3, 2, 1) — Completely distinct from RTGS Amber ─── */
+    .fi-sidebar-item .fi-badge {
+        background-color: #4f46e5 !important; /* Striking Electric Indigo */
+        color: #ffffff !important;
+        font-weight: 800 !important;
+        font-size: 0.6875rem !important;
+        padding: 0.12rem 0.52rem !important;
+        border-radius: 9999px !important;
+        box-shadow: 0 2px 5px rgba(79, 70, 229, 0.4) !important;
+        border: 1px solid #6366f1 !important;
+    }
+    html.dark .fi-sidebar-item .fi-badge,
+    .dark .fi-sidebar-item .fi-badge {
+        background-color: #6366f1 !important;
+        color: #ffffff !important;
+        border-color: #818cf8 !important;
+        box-shadow: 0 0 10px rgba(99, 102, 241, 0.5) !important;
+    }
+
+    /* ─── 3. Global Search Bar & Icon Unhide + Active Styling ─── */
+    .fi-global-search-ctn,
+    .fi-global-search,
+    .fi-global-search-field {
+        display: flex !important;
+        align-items: center !important;
+        width: 100% !important;
+        max-width: 460px !important;
+        opacity: 1 !important;
+        visibility: visible !important;
+        pointer-events: auto !important;
+    }
+    .fi-global-search-field input,
+    .fi-global-search input,
+    input[type="search"].fi-input {
+        display: block !important;
+        visibility: visible !important;
+        opacity: 1 !important;
+        pointer-events: auto !important;
+        cursor: text !important;
+        width: 100% !important;
+        height: 38px !important;
+        font-size: 0.84rem !important;
+    }
+    .fi-global-search-field svg,
+    .fi-global-search svg,
+    .fi-global-search-field .fi-icon {
+        display: inline-block !important;
+        visibility: visible !important;
+        opacity: 1 !important;
+        color: #0284c7 !important;
+    }
+    html.dark .fi-global-search-field svg,
+    .dark .fi-global-search-field svg {
+        color: #38bdf8 !important;
+    }
+
+    /* ─── 4. Complete Eradication of Bell Adjacent Stray Arrow / Select ─── */
+    .fi-topbar select,
+    .fi-topbar input[type="number"],
+    .fi-topbar [role="spinbutton"],
+    .fi-topbar [aria-label*="sort" i],
+    .fi-topbar ::-webkit-inner-spin-button,
+    .fi-topbar ::-webkit-outer-spin-button,
+    .fi-no-database select,
+    .fi-modal-trigger select,
+    .fi-topbar-database-notifications-btn select,
+    .fi-topbar-database-notifications-btn + select,
+    .fi-topbar-database-notifications-btn ~ select,
+    .fi-modal-trigger + select,
+    .fi-modal-trigger ~ select,
+    .fi-modal-trigger ~ button:not(.fi-user-menu-trigger):not(.fi-dropdown-trigger),
+    .fi-topbar-database-notifications-btn + svg,
+    .fi-topbar-database-notifications-btn ~ svg {
+        display: none !important;
+        visibility: hidden !important;
+        opacity: 0 !important;
+        width: 0 !important;
+        height: 0 !important;
+        max-width: 0 !important;
+        max-height: 0 !important;
+        pointer-events: none !important;
+        margin: 0 !important;
+        padding: 0 !important;
+        border: none !important;
+        overflow: hidden !important;
+        -webkit-appearance: none !important;
+        appearance: none !important;
+    }
+
 </style>
+
 <script>
     (function () {
         function sendLogoutSignal() {
@@ -4683,5 +4933,50 @@
                 }
             });
         } catch (e) {}
+    })();
+</script>
+<script>
+    (function () {
+        function purgeStrayArrow() {
+            var bellBtn = document.querySelector('.fi-topbar-database-notifications-btn');
+            if (bellBtn) {
+                var sibling = bellBtn.nextElementSibling;
+                while (sibling) {
+                    if (!sibling.classList.contains('fi-icon-btn-badge-ctn')) {
+                        sibling.style.display = 'none';
+                        sibling.style.visibility = 'hidden';
+                        try { sibling.remove(); } catch(e) {}
+                    }
+                    sibling = sibling.nextElementSibling;
+                }
+                var trigger = bellBtn.closest('.fi-modal-trigger') || bellBtn.parentElement;
+                if (trigger) {
+                    var pSibling = trigger.nextElementSibling;
+                    while (pSibling) {
+                        var isUserMenu = pSibling.classList.contains('fi-user-menu') || 
+                                         pSibling.classList.contains('fi-dropdown') || 
+                                         pSibling.querySelector('.fi-user-menu-trigger') ||
+                                         pSibling.querySelector('img, [class*="avatar"]');
+                        if (!isUserMenu && pSibling.tagName !== 'TEMPLATE' && pSibling.tagName !== 'SCRIPT') {
+                            pSibling.style.display = 'none';
+                            pSibling.style.visibility = 'hidden';
+                            try { pSibling.remove(); } catch(e) {}
+                        }
+                        pSibling = pSibling.nextElementSibling;
+                    }
+                }
+            }
+        }
+
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', purgeStrayArrow);
+        } else {
+            purgeStrayArrow();
+        }
+        setTimeout(purgeStrayArrow, 300);
+        setTimeout(purgeStrayArrow, 800);
+        setTimeout(purgeStrayArrow, 2000);
+        window.addEventListener('livewire:navigated', purgeStrayArrow);
+        window.addEventListener('livewire:load', purgeStrayArrow);
     })();
 </script>
