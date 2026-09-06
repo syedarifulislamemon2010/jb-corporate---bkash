@@ -2905,7 +2905,175 @@
     .dark .jb-notif-empty-desc {
         color: #94a3b8;
     }
+
+    /* ==========================================================================
+       ENTERPRISE POLISH PATCH (Spacing, Notification Arrow, Card Flex, Sync)
+       ========================================================================== */
+
+    /* ─── Item 5: Compact Sidebar Spacing (30-40% reduction) ─── */
+    .fi-sidebar-item a,
+    .fi-sidebar-item button {
+        padding: 0.28rem 0.55rem !important;
+        margin: 0.04rem 0 !important;
+        min-height: 36px !important;
+        font-size: 0.8125rem !important;
+    }
+    .fi-sidebar-group {
+        padding-top: 0.2rem !important;
+        padding-bottom: 0.2rem !important;
+        margin-top: 0.15rem !important;
+        margin-bottom: 0.15rem !important;
+    }
+    .fi-sidebar-group-label,
+    .fi-sidebar-group-button span {
+        font-size: 0.65rem !important;
+        letter-spacing: 0.08em !important;
+        text-transform: uppercase !important;
+        padding-top: 0.2rem !important;
+        padding-bottom: 0.2rem !important;
+    }
+    .fi-sidebar-nav {
+        padding-left: 0.5rem !important;
+        padding-right: 0.5rem !important;
+        gap: 0.15rem !important;
+    }
+    .fi-sidebar-item .fi-badge {
+        font-size: 0.65rem !important;
+        font-weight: 800 !important;
+        padding: 0.1rem 0.45rem !important;
+        border-radius: 9999px !important;
+    }
+
+    /* ─── Item 6: Eradicate Notification Bell Adjacent Stray Arrows/Select Elements ─── */
+    .fi-topbar-end select,
+    .fi-topbar select,
+    header select,
+    .fi-topbar-end input[type="number"]::-webkit-inner-spin-button,
+    .fi-topbar-end input[type="number"]::-webkit-outer-spin-button,
+    .fi-topbar-end [role="spinbutton"],
+    .fi-topbar-end [aria-label*="sort" i],
+    .fi-topbar-end select,
+    .fi-no-database select,
+    .fi-modal-trigger select,
+    .fi-topbar-database-notifications-btn + select,
+    .fi-modal-trigger + select {
+        display: none !important;
+        visibility: hidden !important;
+        opacity: 0 !important;
+        width: 0 !important;
+        height: 0 !important;
+        pointer-events: none !important;
+        margin: 0 !important;
+        padding: 0 !important;
+        -webkit-appearance: none !important;
+        appearance: none !important;
+    }
+
+    /* ─── Item 9: Robust Flexbox Layout for Database Notification Cards ─── */
+    .jb-notif-card {
+        display: block !important;
+        box-sizing: border-box !important;
+        width: 100% !important;
+        margin-bottom: 0.5rem !important;
+    }
+    .jb-notif-card-inner {
+        display: flex !important;
+        flex-direction: row !important;
+        align-items: flex-start !important;
+        gap: 0.75rem !important;
+        width: 100% !important;
+        box-sizing: border-box !important;
+    }
+    .jb-notif-icon-col {
+        display: flex !important;
+        flex-shrink: 0 !important;
+        align-items: center !important;
+        justify-content: center !important;
+    }
+    .jb-notif-body-col {
+        display: flex !important;
+        flex-direction: column !important;
+        flex: 1 1 0% !important;
+        min-width: 0 !important;
+        gap: 0.35rem !important;
+    }
+    .jb-notif-title-row {
+        display: flex !important;
+        flex-direction: row !important;
+        align-items: center !important;
+        justify-content: space-between !important;
+        gap: 0.5rem !important;
+        width: 100% !important;
+    }
+    .jb-notif-footer-row {
+        display: flex !important;
+        flex-direction: row !important;
+        align-items: center !important;
+        justify-content: space-between !important;
+        gap: 0.5rem !important;
+        width: 100% !important;
+        margin-top: 0.25rem !important;
+    }
+
+    /* ─── Item 4 Polish: Remove any residual footer margins / paddings ─── */
+    .jb-portal-footer,
+    footer[role="contentinfo"] {
+        display: none !important;
+        height: 0 !important;
+        margin: 0 !important;
+        padding: 0 !important;
+    }
 </style>
+<script>
+    (function () {
+        function sendLogoutSignal() {
+            try {
+                if ('BroadcastChannel' in window) {
+                    var bc = new BroadcastChannel('jb-corporate-auth');
+                    bc.postMessage('logout');
+                }
+                localStorage.setItem('jb_logout_event', Date.now().toString());
+            } catch (e) {}
+        }
+
+        // Attach listener to sign-out form submit & click
+        document.addEventListener('submit', function (e) {
+            var form = e.target;
+            if (form && (form.action && form.action.indexOf('/logout') !== -1)) {
+                sendLogoutSignal();
+            }
+        }, true);
+
+        document.addEventListener('click', function (e) {
+            var el = e.target.closest('button, a, form');
+            if (el) {
+                var text = (el.textContent || '').toLowerCase();
+                var href = el.getAttribute('href') || '';
+                var action = el.getAttribute('action') || '';
+                if (text.indexOf('sign out') !== -1 || text.indexOf('logout') !== -1 || href.indexOf('/logout') !== -1 || action.indexOf('/logout') !== -1) {
+                    sendLogoutSignal();
+                }
+            }
+        }, true);
+
+        // Receive logout signal from other tabs
+        try {
+            if ('BroadcastChannel' in window) {
+                var authChannel = new BroadcastChannel('jb-corporate-auth');
+                authChannel.onmessage = function (ev) {
+                    if (ev && ev.data === 'logout') {
+                        window.location.href = '/admin/login';
+                    }
+                };
+            }
+            window.addEventListener('storage', function (ev) {
+                if (ev.key === 'jb_logout_event') {
+                    window.location.href = '/admin/login';
+                }
+            });
+        } catch (e) {}
+    })();
+</script>
 
 <script>
     document.addEventListener('DOMContentLoaded', function () {
@@ -4348,4 +4516,172 @@
     .dark .jb-notif-empty-desc {
         color: #94a3b8;
     }
+
+    /* ==========================================================================
+       ENTERPRISE POLISH PATCH (Spacing, Notification Arrow, Card Flex, Sync)
+       ========================================================================== */
+
+    /* ─── Item 5: Compact Sidebar Spacing (30-40% reduction) ─── */
+    .fi-sidebar-item a,
+    .fi-sidebar-item button {
+        padding: 0.28rem 0.55rem !important;
+        margin: 0.04rem 0 !important;
+        min-height: 36px !important;
+        font-size: 0.8125rem !important;
+    }
+    .fi-sidebar-group {
+        padding-top: 0.2rem !important;
+        padding-bottom: 0.2rem !important;
+        margin-top: 0.15rem !important;
+        margin-bottom: 0.15rem !important;
+    }
+    .fi-sidebar-group-label,
+    .fi-sidebar-group-button span {
+        font-size: 0.65rem !important;
+        letter-spacing: 0.08em !important;
+        text-transform: uppercase !important;
+        padding-top: 0.2rem !important;
+        padding-bottom: 0.2rem !important;
+    }
+    .fi-sidebar-nav {
+        padding-left: 0.5rem !important;
+        padding-right: 0.5rem !important;
+        gap: 0.15rem !important;
+    }
+    .fi-sidebar-item .fi-badge {
+        font-size: 0.65rem !important;
+        font-weight: 800 !important;
+        padding: 0.1rem 0.45rem !important;
+        border-radius: 9999px !important;
+    }
+
+    /* ─── Item 6: Eradicate Notification Bell Adjacent Stray Arrows/Select Elements ─── */
+    .fi-topbar-end select,
+    .fi-topbar select,
+    header select,
+    .fi-topbar-end input[type="number"]::-webkit-inner-spin-button,
+    .fi-topbar-end input[type="number"]::-webkit-outer-spin-button,
+    .fi-topbar-end [role="spinbutton"],
+    .fi-topbar-end [aria-label*="sort" i],
+    .fi-topbar-end select,
+    .fi-no-database select,
+    .fi-modal-trigger select,
+    .fi-topbar-database-notifications-btn + select,
+    .fi-modal-trigger + select {
+        display: none !important;
+        visibility: hidden !important;
+        opacity: 0 !important;
+        width: 0 !important;
+        height: 0 !important;
+        pointer-events: none !important;
+        margin: 0 !important;
+        padding: 0 !important;
+        -webkit-appearance: none !important;
+        appearance: none !important;
+    }
+
+    /* ─── Item 9: Robust Flexbox Layout for Database Notification Cards ─── */
+    .jb-notif-card {
+        display: block !important;
+        box-sizing: border-box !important;
+        width: 100% !important;
+        margin-bottom: 0.5rem !important;
+    }
+    .jb-notif-card-inner {
+        display: flex !important;
+        flex-direction: row !important;
+        align-items: flex-start !important;
+        gap: 0.75rem !important;
+        width: 100% !important;
+        box-sizing: border-box !important;
+    }
+    .jb-notif-icon-col {
+        display: flex !important;
+        flex-shrink: 0 !important;
+        align-items: center !important;
+        justify-content: center !important;
+    }
+    .jb-notif-body-col {
+        display: flex !important;
+        flex-direction: column !important;
+        flex: 1 1 0% !important;
+        min-width: 0 !important;
+        gap: 0.35rem !important;
+    }
+    .jb-notif-title-row {
+        display: flex !important;
+        flex-direction: row !important;
+        align-items: center !important;
+        justify-content: space-between !important;
+        gap: 0.5rem !important;
+        width: 100% !important;
+    }
+    .jb-notif-footer-row {
+        display: flex !important;
+        flex-direction: row !important;
+        align-items: center !important;
+        justify-content: space-between !important;
+        gap: 0.5rem !important;
+        width: 100% !important;
+        margin-top: 0.25rem !important;
+    }
+
+    /* ─── Item 4 Polish: Remove any residual footer margins / paddings ─── */
+    .jb-portal-footer,
+    footer[role="contentinfo"] {
+        display: none !important;
+        height: 0 !important;
+        margin: 0 !important;
+        padding: 0 !important;
+    }
 </style>
+<script>
+    (function () {
+        function sendLogoutSignal() {
+            try {
+                if ('BroadcastChannel' in window) {
+                    var bc = new BroadcastChannel('jb-corporate-auth');
+                    bc.postMessage('logout');
+                }
+                localStorage.setItem('jb_logout_event', Date.now().toString());
+            } catch (e) {}
+        }
+
+        // Attach listener to sign-out form submit & click
+        document.addEventListener('submit', function (e) {
+            var form = e.target;
+            if (form && (form.action && form.action.indexOf('/logout') !== -1)) {
+                sendLogoutSignal();
+            }
+        }, true);
+
+        document.addEventListener('click', function (e) {
+            var el = e.target.closest('button, a, form');
+            if (el) {
+                var text = (el.textContent || '').toLowerCase();
+                var href = el.getAttribute('href') || '';
+                var action = el.getAttribute('action') || '';
+                if (text.indexOf('sign out') !== -1 || text.indexOf('logout') !== -1 || href.indexOf('/logout') !== -1 || action.indexOf('/logout') !== -1) {
+                    sendLogoutSignal();
+                }
+            }
+        }, true);
+
+        // Receive logout signal from other tabs
+        try {
+            if ('BroadcastChannel' in window) {
+                var authChannel = new BroadcastChannel('jb-corporate-auth');
+                authChannel.onmessage = function (ev) {
+                    if (ev && ev.data === 'logout') {
+                        window.location.href = '/admin/login';
+                    }
+                };
+            }
+            window.addEventListener('storage', function (ev) {
+                if (ev.key === 'jb_logout_event') {
+                    window.location.href = '/admin/login';
+                }
+            });
+        } catch (e) {}
+    })();
+</script>

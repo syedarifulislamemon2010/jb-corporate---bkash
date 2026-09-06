@@ -51,7 +51,18 @@ class BkashTransactionConfirmationResource extends Resource
         public static function getNavigationBadge(): ?string
     {
         try {
-            $count = \App\Models\BkashTransaction::where('status_id', 1002)->count();
+            $count = static::getEloquentQuery()
+                ->whereNotNull('batch_id')
+                ->distinct('batch_id')
+                ->count('batch_id');
+
+            if ($count === 0) {
+                $count = static::getEloquentQuery()
+                    ->whereNotNull('file_name')
+                    ->distinct('file_name')
+                    ->count('file_name');
+            }
+
             return $count > 0 ? (string) $count : null;
         } catch (\Throwable $e) {
             return null;
@@ -60,12 +71,12 @@ class BkashTransactionConfirmationResource extends Resource
 
     public static function getNavigationBadgeColor(): ?string
     {
-        return 'success';
+        return 'warning';
     }
 
     public static function getNavigationBadgeTooltip(): ?string
     {
-        return 'Transactions ready for Final Confirmation';
+        return 'Batch files ready for Final Confirmation';
     }
 
     public static function form(Schema $schema): Schema

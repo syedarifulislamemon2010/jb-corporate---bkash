@@ -56,17 +56,9 @@ class BkashTransactionsTable
                         $totalAmount = $batch ? (float)$batch->total_amount : (float)BkashTransaction::where('file_name', $fileName)->sum('amount');
                         $formattedAmount = BkashTransaction::formatBdtAmount($totalAmount);
 
-                        $successTrn = BkashTransaction::where('file_name', $fileName)
-                            ->whereIn('status_id', [
-                                BkashTransaction::STATUS_CBS_SUCCESS,
-                                BkashTransaction::STATUS_CBS_RESPONSE_SUCCESS,
-                            ])->count();
+                        $successTrn = BkashTransaction::where('file_name', $fileName)->count();
 
-                        $failedTrn = BkashTransaction::where('file_name', $fileName)
-                            ->whereIn('status_id', [
-                                BkashTransaction::STATUS_REJECTED,
-                                BkashTransaction::STATUS_CBS_RESPONSE_FAILED,
-                            ])->count() + BkashFailedTransaction::where('file_name', $fileName)->count();
+                        $failedTrn = BkashFailedTransaction::where('file_name', $fileName)->count();
 
                         static $fileIndexMap = [];
                         if (!isset($fileIndexMap[$fileName])) {

@@ -97,7 +97,7 @@
                             'active' => $currentTab === 'all',
                         ])
                     >
-                        <span>সব</span>
+                        <span>All</span>
                         <span class="jb-notif-tab-count">{{ $tabCounts['all'] ?? 0 }}</span>
                     </button>
 

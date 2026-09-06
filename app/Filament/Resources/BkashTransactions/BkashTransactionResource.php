@@ -74,7 +74,18 @@ class BkashTransactionResource extends Resource
         public static function getNavigationBadge(): ?string
     {
         try {
-            $count = \App\Models\BkashTransaction::where('status_id', 1000)->count();
+            $count = static::getEloquentQuery()
+                ->whereNotNull('batch_id')
+                ->distinct('batch_id')
+                ->count('batch_id');
+
+            if ($count === 0) {
+                $count = static::getEloquentQuery()
+                    ->whereNotNull('file_name')
+                    ->distinct('file_name')
+                    ->count('file_name');
+            }
+
             return $count > 0 ? (string) $count : null;
         } catch (\Throwable $e) {
             return null;
@@ -88,7 +99,7 @@ class BkashTransactionResource extends Resource
 
     public static function getNavigationBadgeTooltip(): ?string
     {
-        return 'Transactions pending Checker verification';
+        return 'Batch files pending Checker verification';
     }
 
     public static function form(Schema $schema): Schema

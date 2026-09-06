@@ -643,9 +643,25 @@
                 @forelse($batches as $batch)
                     @php
                         $txns = $batch->getBatchTransactions();
-                        $totalCount = $batch->total_data ?: $txns->count();
-                        $successCount = $txns->whereIn('status_id', [1001, 1002, 1003, 1004, 1006])->count();
-                        $failedCount = $txns->whereIn('status_id', [1007, 9000])->count() + $batch->failedTransactions->count();
+                        $successCount = $batch->id
+                            ? \App\Models\BkashTransaction::where(function ($q) use ($batch) {
+                                $q->where('batch_id', $batch->id);
+                                if ($batch->file_name) {
+                                    $q->orWhere('file_name', $batch->file_name);
+                                }
+                            })->count()
+                            : $txns->count();
+
+                        $failedCount = $batch->id
+                            ? \App\Models\BkashFailedTransaction::where(function ($q) use ($batch) {
+                                $q->where('batch_id', $batch->id);
+                                if ($batch->file_name) {
+                                    $q->orWhere('file_name', $batch->file_name);
+                                }
+                            })->count()
+                            : 0;
+
+                        $totalCount = $batch->total_data ?: ($successCount + $failedCount);
                         $batchAmount = (float) ($batch->total_amount ?: $txns->sum('amount'));
                         $downloadUrl = route('admin.bkash.download-batch', ['file' => $batch->file_name]);
                     @endphp

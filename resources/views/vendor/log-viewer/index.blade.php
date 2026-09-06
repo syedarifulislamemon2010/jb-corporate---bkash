@@ -251,5 +251,24 @@
 @else
     {!! \Opcodes\LogViewer\Facades\LogViewer::js() !!}
 @endif
+<script>
+    (function () {
+        try {
+            if ('BroadcastChannel' in window) {
+                var bc = new BroadcastChannel('jb-corporate-auth');
+                bc.onmessage = function (e) {
+                    if (e && e.data === 'logout') {
+                        window.location.href = '/admin/login';
+                    }
+                };
+            }
+            window.addEventListener('storage', function (e) {
+                if (e.key === 'jb_logout_event') {
+                    window.location.href = '/admin/login';
+                }
+            });
+        } catch (err) {}
+    })();
+</script>
 </body>
 </html>
