@@ -10,23 +10,39 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+
       - name: Setup PHP
         uses: shivammathur/setup-php@v2
         with:
           php-version: '8.3'
-      - name: Install dependencies
-        run: composer install --no-interaction --prefer-dist --ignore-platform-req=ext-oci8
-      - name: Copy .env and generate key
+          extensions: mbstring, dom, fileinfo, sqlite3, zip, gd, intl, bcmath, pdo
+          coverage: none
+
+      - name: Configure test environment
         run: |
           cp .env.example .env
-          php artisan key:generate
-      - name: Test migrations on SQLite (fresh)
-        run: |
-          touch database/test.sqlite
+          sed -i "s/APP_ENV=.*/APP_ENV=testing/" .env
           sed -i "s/DB_CONNECTION=.*/DB_CONNECTION=sqlite/" .env
           sed -i "s|DB_DATABASE=.*|DB_DATABASE=${{ github.workspace }}/database/test.sqlite|" .env
-          php artisan migrate --force
+          sed -i "s/CACHE_STORE=.*/CACHE_STORE=array/" .env
+          sed -i "s/SESSION_DRIVER=.*/SESSION_DRIVER=array/" .env
+          sed -i "s/QUEUE_CONNECTION=.*/QUEUE_CONNECTION=sync/" .env
+          mkdir -p database
+          touch database/test.sqlite
+
+      - name: Install dependencies
+        run: composer install --no-interaction --prefer-dist --no-scripts --ignore-platform-req=ext-oci8
+
+      - name: Generate key & discover packages
+        run: |
+          php artisan key:generate --force
+          php artisan package:discover --ansi
+
+      - name: Test migrations on SQLite (fresh)
+        run: php artisan migrate --force
+
       - name: Test migration rollback
         run: php artisan migrate:rollback --force
+
       - name: Test migration re-run (up again)
         run: php artisan migrate --force

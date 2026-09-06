@@ -18,23 +18,28 @@ jobs:
         uses: shivammathur/setup-php@v2
         with:
           php-version: '8.3'
-          extensions: mbstring, dom, fileinfo, mysql, sqlite3, zip, gd
+          extensions: mbstring, dom, fileinfo, sqlite3, zip, gd, intl, bcmath, pdo
           coverage: none
 
-      - name: Copy .env
-        run: cp .env.example .env
-
-      - name: Install Composer dependencies
-        run: composer install --no-interaction --prefer-dist --optimize-autoloader --ignore-platform-req=ext-oci8
-
-      - name: Generate application key
-        run: php artisan key:generate
-
-      - name: Configure SQLite test database
+      - name: Configure test environment
         run: |
-          touch database/test.sqlite
+          cp .env.example .env
+          sed -i "s/APP_ENV=.*/APP_ENV=testing/" .env
           sed -i "s/DB_CONNECTION=.*/DB_CONNECTION=sqlite/" .env
           sed -i "s|DB_DATABASE=.*|DB_DATABASE=${{ github.workspace }}/database/test.sqlite|" .env
+          sed -i "s/CACHE_STORE=.*/CACHE_STORE=array/" .env
+          sed -i "s/SESSION_DRIVER=.*/SESSION_DRIVER=array/" .env
+          sed -i "s/QUEUE_CONNECTION=.*/QUEUE_CONNECTION=sync/" .env
+          mkdir -p database
+          touch database/test.sqlite
+
+      - name: Install Composer dependencies
+        run: composer install --no-interaction --prefer-dist --optimize-autoloader --no-scripts --ignore-platform-req=ext-oci8
+
+      - name: Generate application key & discover packages
+        run: |
+          php artisan key:generate --force
+          php artisan package:discover --ansi
 
       - name: Run migrations
         run: php artisan migrate --force
