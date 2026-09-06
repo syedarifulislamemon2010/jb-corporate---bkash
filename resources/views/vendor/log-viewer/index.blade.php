@@ -456,64 +456,81 @@
         }
 
         function mountControls() {
-            var reloadBtn = document.getElementById('reload-logs-button');
-            var desktopSettings = document.getElementById('desktop-site-settings');
+            try {
+                if (document.getElementById('jb-log-controls-wrapper')) {
+                    return;
+                }
 
-            var targetAnchor = (reloadBtn && reloadBtn.parentElement) || desktopSettings;
-            if (!targetAnchor || !targetAnchor.parentElement) {
-                return;
+                var reloadBtn = document.getElementById('reload-logs-button');
+                var desktopSettings = document.getElementById('desktop-site-settings');
+
+                var container = null;
+                var insertBeforeNode = null;
+
+                if (desktopSettings) {
+                    var settingsCol = desktopSettings.closest('.hidden.md\\:block') || desktopSettings.parentElement;
+                    container = settingsCol ? settingsCol.parentElement : desktopSettings.parentElement;
+                    insertBeforeNode = settingsCol || desktopSettings;
+                } else if (reloadBtn) {
+                    var reloadCol = reloadBtn.closest('.hidden.md\\:block') || reloadBtn.parentElement;
+                    container = reloadCol ? reloadCol.parentElement : reloadBtn.parentElement;
+                    insertBeforeNode = reloadCol || reloadBtn;
+                } else {
+                    container = document.querySelector('.log-list .flex-1.flex.justify-end') ||
+                                document.querySelector('.log-list header') ||
+                                document.querySelector('.log-list');
+                }
+
+                if (!container) {
+                    return;
+                }
+
+                var wrapper = document.createElement('div');
+                wrapper.id = 'jb-log-controls-wrapper';
+                wrapper.className = 'jb-log-controls';
+
+                var isChecked = isAutoRefreshEnabled();
+                wrapper.innerHTML = 
+                    '<label class="db-autorefresh-label" aria-label="Toggle auto-refresh" title="Toggle 15-second automatic log refresh">' +
+                        '<input type="checkbox" id="jb-log-autorefresh-checkbox" class="db-autorefresh-checkbox" aria-label="Enable or disable 15-second log viewer auto-refresh"' + (isChecked ? ' checked' : '') + ' />' +
+                        '<span class="db-autorefresh-badge">' +
+                            '<span>Auto-refresh (15s)</span>' +
+                            '<span class="db-pulse-dot-sm" id="jb-log-pulse-dot" style="' + (isChecked ? 'display: inline-block;' : 'display: none;') + '" title="Auto-refresh active" aria-hidden="true"></span>' +
+                        '</span>' +
+                    '</label>' +
+                    '<button type="button" id="jb-log-manual-refresh-btn" class="db-btn-refresh" aria-label="Refresh logs now" title="Refresh log viewer data now">' +
+                        '<svg id="jb-log-refresh-icon" class="w-4 h-4 text-slate-400" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" aria-hidden="true">' +
+                            '<path stroke-linecap="round" stroke-linejoin="round" d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0 3.181 3.183a8.25 8.25 0 0 0 13.803-3.7M4.031 9.865a8.25 8.25 0 0 1 13.803-3.7l3.181 3.182m0-4.991v4.99" />' +
+                        '</svg>' +
+                        '<span id="jb-log-refresh-text">Refresh</span>' +
+                    '</button>';
+
+                if (insertBeforeNode && insertBeforeNode.parentElement === container) {
+                    container.insertBefore(wrapper, insertBeforeNode);
+                } else {
+                    container.appendChild(wrapper);
+                }
+
+                var checkbox = wrapper.querySelector('#jb-log-autorefresh-checkbox');
+                if (checkbox) {
+                    checkbox.addEventListener('change', function (e) {
+                        setAutoRefreshEnabled(e.target.checked);
+                    });
+                }
+
+                var manualBtn = wrapper.querySelector('#jb-log-manual-refresh-btn');
+                if (manualBtn) {
+                    manualBtn.addEventListener('click', function (e) {
+                        e.preventDefault();
+                        triggerLogReload(false);
+                        syncTimerState();
+                    });
+                }
+
+                syncTimerState();
+            } catch (err) {
+                console.error('mountControls error:', err);
             }
-
-            var parentContainer = targetAnchor.parentElement;
-
-            // Avoid duplicate mounting
-            if (parentContainer.querySelector('#jb-log-controls-wrapper')) {
-                return;
-            }
-
-            var wrapper = document.createElement('div');
-            wrapper.id = 'jb-log-controls-wrapper';
-            wrapper.className = 'jb-log-controls';
-
-            var isChecked = isAutoRefreshEnabled();
-            wrapper.innerHTML = 
-                '<label class="db-autorefresh-label" aria-label="Toggle auto-refresh" title="Toggle 15-second automatic log refresh">' +
-                    '<input type="checkbox" id="jb-log-autorefresh-checkbox" class="db-autorefresh-checkbox" aria-label="Enable or disable 15-second log viewer auto-refresh"' + (isChecked ? ' checked' : '') + ' />' +
-                    '<span class="db-autorefresh-badge">' +
-                        '<span>Auto-refresh (15s)</span>' +
-                        '<span class="db-pulse-dot-sm" id="jb-log-pulse-dot" style="' + (isChecked ? 'display: inline-block;' : 'display: none;') + '" title="Auto-refresh active" aria-hidden="true"></span>' +
-                    '</span>' +
-                '</label>' +
-                '<button type="button" id="jb-log-manual-refresh-btn" class="db-btn-refresh" aria-label="Refresh logs now" title="Refresh log viewer data now">' +
-                    '<svg id="jb-log-refresh-icon" class="w-4 h-4 text-slate-400" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" aria-hidden="true">' +
-                        '<path stroke-linecap="round" stroke-linejoin="round" d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0 3.181 3.183a8.25 8.25 0 0 0 13.803-3.7M4.031 9.865a8.25 8.25 0 0 1 13.803-3.7l3.181 3.182m0-4.991v4.99" />' +
-                    '</svg>' +
-                    '<span id="jb-log-refresh-text">Refresh</span>' +
-                '</button>';
-
-            if (desktopSettings) {
-                parentContainer.insertBefore(wrapper, desktopSettings);
-            } else {
-                parentContainer.appendChild(wrapper);
-            }
-
-            var checkbox = wrapper.querySelector('#jb-log-autorefresh-checkbox');
-            if (checkbox) {
-                checkbox.addEventListener('change', function (e) {
-                    setAutoRefreshEnabled(e.target.checked);
-                });
-            }
-
-            var manualBtn = wrapper.querySelector('#jb-log-manual-refresh-btn');
-            if (manualBtn) {
-                manualBtn.addEventListener('click', function (e) {
-                    e.preventDefault();
-                    triggerLogReload(false);
-                    syncTimerState();
-                });
-            }
-
-            syncTimerState();
         }
 
         var observer = new MutationObserver(function () {

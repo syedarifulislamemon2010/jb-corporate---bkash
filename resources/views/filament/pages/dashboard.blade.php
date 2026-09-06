@@ -59,22 +59,61 @@
             </div>
         </div>
 
-        <!-- 2. URGENCY ACTION BANNER (Conditional) -->
-        @if ($urgency)
-            <div class="db-banner-warning" role="alert" aria-label="Pending files requiring action">
-                <div class="db-urgency-icon-box" aria-hidden="true">
-                    <x-filament::icon icon="heroicon-o-exclamation-triangle" class="w-6 h-6 text-amber-500" />
+        <!-- 2. URGENCY & EXCEPTIONS ROW (Screenshot 1 & Screenshot 2 Side-by-Side as Cards) -->
+        <div class="db-grid-2" role="region" aria-label="Urgency and exception alerts">
+            <!-- Left Card: Pending Action Files (Screenshot 1) -->
+            @if ($urgency)
+                <div class="db-banner-warning h-full flex items-center" role="alert" aria-label="Pending files requiring action">
+                    <div class="db-urgency-icon-box" aria-hidden="true">
+                        <x-filament::icon icon="heroicon-o-exclamation-triangle" class="w-6 h-6 text-amber-500" />
+                    </div>
+                    <div class="db-urgency-content">
+                        <p class="db-urgency-title">
+                            <span class="db-tabular">{{ $urgency['total'] }}</span> {{ Str::plural('file', $urgency['total']) }} need your action today: <span class="db-tabular">{{ $urgency['pending_checker'] }}</span> pending checker, <span class="db-tabular">{{ $urgency['pending_auth1'] }}</span> 1st auth, <span class="db-tabular">{{ $urgency['pending_auth2'] }}</span> 2nd auth
+                        </p>
+                        <p class="db-urgency-desc">
+                            Please review and clear pending files across all 3 tiers to complete automated CBS settlement.
+                        </p>
+                    </div>
                 </div>
-                <div class="db-urgency-content">
-                    <p class="db-urgency-title">
-                        <span class="db-tabular">{{ $urgency['total'] }}</span> {{ Str::plural('file', $urgency['total']) }} need your action today: <span class="db-tabular">{{ $urgency['pending_checker'] }}</span> pending checker, <span class="db-tabular">{{ $urgency['pending_auth1'] }}</span> 1st auth, <span class="db-tabular">{{ $urgency['pending_auth2'] }}</span> 2nd auth
-                    </p>
-                    <p class="db-urgency-desc">
-                        Please review and clear pending files across all 3 tiers to complete automated CBS settlement.
-                    </p>
+            @else
+                <div class="db-banner-warning h-full flex items-center" role="region" aria-label="Pending files requiring action">
+                    <div class="db-urgency-icon-box" aria-hidden="true">
+                        <x-filament::icon icon="heroicon-o-shield-check" class="w-6 h-6 text-amber-500" />
+                    </div>
+                    <div class="db-urgency-content">
+                        <p class="db-urgency-title">
+                            All clear today — 0 files awaiting action
+                        </p>
+                        <p class="db-urgency-desc">
+                            All 3 verification tiers are clear across all channels.
+                        </p>
+                    </div>
                 </div>
-            </div>
-        @endif
+            @endif
+
+            <!-- Right Card: Failed / Partial Transactions Today (Screenshot 2) -->
+            <a href="/admin/bkash-reports" class="{{ $exceptions['is_clean'] ? 'db-card' : 'db-card-danger' }} db-exception-link h-full flex items-center" aria-label="View failed and partial transactions exception report">
+                <div class="db-flex-between w-full">
+                    <div class="db-flex-gap-3">
+                        <div class="{{ $exceptions['is_clean'] ? 'db-exception-icon-ok' : 'db-exception-icon-err' }}" aria-hidden="true">
+                            <x-filament::icon icon="heroicon-o-exclamation-triangle" class="w-5 h-5" />
+                        </div>
+                        <div>
+                            <div class="db-text-sub db-exception-label">
+                                Failed / Partial Transactions Today
+                            </div>
+                            <div class="db-text-heading db-tabular db-exception-headline">
+                                {{ $exceptions['headline'] }}
+                            </div>
+                        </div>
+                    </div>
+                    <div class="db-link-action db-exception-action">
+                        View Report →
+                    </div>
+                </div>
+            </a>
+        </div>
 
         <!-- 3. ACTION ROW CARDS (3-Tier Action-Required Pipeline) -->
         <div class="db-grid-3" role="region" aria-label="Pending approval queues">
@@ -250,28 +289,6 @@
                 @endif
             @endforeach
         </div>
-
-        <!-- 5. EXCEPTIONS ROW (Tier 3 Informational) -->
-        <a href="/admin/bkash-reports" class="{{ $exceptions['is_clean'] ? 'db-card' : 'db-card-danger' }} db-exception-link" aria-label="View failed and partial transactions exception report">
-            <div class="db-flex-between">
-                <div class="db-flex-gap-3">
-                    <div class="{{ $exceptions['is_clean'] ? 'db-exception-icon-ok' : 'db-exception-icon-err' }}" aria-hidden="true">
-                        <x-filament::icon icon="heroicon-o-exclamation-triangle" class="w-5 h-5" />
-                    </div>
-                    <div>
-                        <div class="db-text-sub db-exception-label">
-                            Failed / Partial Transactions Today
-                        </div>
-                        <div class="db-text-heading db-tabular db-exception-headline">
-                            {{ $exceptions['headline'] }}
-                        </div>
-                    </div>
-                </div>
-                <div class="db-link-action db-exception-action">
-                    View Report →
-                </div>
-            </div>
-        </a>
 
         <!-- 6. BALANCE ROW (Tier 1 Hero TCSA + Tier 3 Operational Balance) -->
         <div class="db-grid-2-1">

@@ -85,6 +85,21 @@
         }
     }
 
+    .db-grid-2 {
+        display: grid;
+        grid-template-columns: repeat(1, minmax(0, 1fr));
+        gap: 1.25rem;
+    }
+    @media (min-width: 1024px) {
+        .db-grid-2 {
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+        }
+    }
+    .db-grid-2 > * {
+        height: 100% !important;
+        margin: 0 !important;
+    }
+
     .db-grid-2-1 {
         display: grid;
         grid-template-columns: repeat(1, minmax(0, 1fr));
@@ -3058,7 +3073,7 @@
         padding-bottom: 0.15rem !important;
     }
 
-    /* ─── 2. Unique Electric Indigo Badge (3, 2, 1) — Completely distinct from RTGS Amber ─── */
+    /* ─── 2. Unique Electric Indigo Badge for normal items (Checker, Auth1, Auth2) ─── */
     .fi-sidebar-item .fi-badge {
         background-color: #4f46e5 !important; /* Striking Electric Indigo */
         color: #ffffff !important;
@@ -3075,6 +3090,32 @@
         color: #ffffff !important;
         border-color: #818cf8 !important;
         box-shadow: 0 0 10px rgba(99, 102, 241, 0.5) !important;
+    }
+
+    /* ─── 2a. Failed Transaction Report Badge (Explicit Striking Red for "3" / Failure Count) ─── */
+    .fi-sidebar-item a[href*="bkash-failed-transactions"] .fi-badge,
+    .fi-sidebar-item a[href*="failed-transaction"] .fi-badge,
+    .fi-sidebar-item .fi-badge.fi-color-danger,
+    .fi-sidebar-item .fi-badge[style*="danger"] {
+        background-color: #ef4444 !important; /* Pure Alert Red */
+        color: #ffffff !important;
+        font-weight: 800 !important;
+        font-size: 0.6875rem !important;
+        padding: 0.12rem 0.52rem !important;
+        border-radius: 9999px !important;
+        border: 1px solid #f87171 !important;
+        box-shadow: 0 2px 6px rgba(239, 68, 68, 0.45) !important;
+    }
+    html.dark .fi-sidebar-item a[href*="bkash-failed-transactions"] .fi-badge,
+    html.dark .fi-sidebar-item a[href*="failed-transaction"] .fi-badge,
+    html.dark .fi-sidebar-item .fi-badge.fi-color-danger,
+    .dark .fi-sidebar-item a[href*="bkash-failed-transactions"] .fi-badge,
+    .dark .fi-sidebar-item a[href*="failed-transaction"] .fi-badge,
+    .dark .fi-sidebar-item .fi-badge.fi-color-danger {
+        background-color: #ef4444 !important;
+        color: #ffffff !important;
+        border-color: #dc2626 !important;
+        box-shadow: 0 0 10px rgba(239, 68, 68, 0.6) !important;
     }
 
     /* ─── 3. Global Search Bar & Icon Unhide + Active Styling ─── */
@@ -3101,20 +3142,94 @@
         height: 38px !important;
         font-size: 0.84rem !important;
     }
-    .fi-global-search-field svg,
-    .fi-global-search svg,
-    .fi-global-search-field .fi-icon {
+    .fi-global-search-field .fi-input-wrp-prefix svg:not(.animate-spin) {
         display: inline-block !important;
         visibility: visible !important;
         opacity: 1 !important;
         color: #0284c7 !important;
     }
-    html.dark .fi-global-search-field svg,
-    .dark .fi-global-search-field svg {
+    html.dark .fi-global-search-field .fi-input-wrp-prefix svg:not(.animate-spin),
+    .dark .fi-global-search-field .fi-input-wrp-prefix svg:not(.animate-spin) {
         color: #38bdf8 !important;
     }
 
-    /* ─── 4. Complete Eradication of Bell Adjacent Stray Arrow / Select ─── */
+    /* ─── 3b. Eradicate Search Box Loading Spinner (Marked in Image 3) ─── */
+    .fi-global-search-field .fi-loading-indicator,
+    .fi-global-search-field svg.animate-spin,
+    .fi-global-search-field [wire\:loading],
+    .fi-global-search-field .fi-input-wrp-prefix [wire\:loading],
+    .fi-global-search-field .fi-input-wrp-prefix .fi-loading-indicator,
+    .fi-global-search-field .fi-input-wrp-prefix svg.animate-spin,
+    .fi-global-search-ctn .fi-loading-indicator,
+    .fi-global-search-ctn svg.animate-spin {
+        display: none !important;
+        visibility: hidden !important;
+        opacity: 0 !important;
+        width: 0 !important;
+        height: 0 !important;
+        max-width: 0 !important;
+        max-height: 0 !important;
+        pointer-events: none !important;
+    }
+
+    /* ─── 4. Topbar Notification Bell: Enlarged + Stray Arrow / Select Removal (Image 4) ─── */
+    .fi-topbar-database-notifications-btn {
+        width: 2.75rem !important;
+        height: 2.75rem !important;
+        display: inline-flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        position: relative !important;
+        border-radius: 0.75rem !important;
+        background-color: transparent !important;
+        transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1) !important;
+    }
+    .fi-topbar-database-notifications-btn:hover {
+        background-color: rgba(148, 163, 184, 0.12) !important;
+    }
+    .fi-topbar-database-notifications-btn svg.fi-topbar-bell-icon,
+    .fi-topbar-database-notifications-btn svg:first-child,
+    .fi-topbar-database-notifications-btn .fi-icon-btn-icon {
+        width: 1.65rem !important;
+        height: 1.65rem !important;
+        stroke-width: 1.8 !important;
+        color: #475569 !important;
+        display: block !important;
+    }
+    html.dark .fi-topbar-database-notifications-btn svg.fi-topbar-bell-icon,
+    html.dark .fi-topbar-database-notifications-btn svg:first-child,
+    .dark .fi-topbar-database-notifications-btn svg.fi-topbar-bell-icon,
+    .dark .fi-topbar-database-notifications-btn svg:first-child {
+        color: #cbd5e1 !important;
+    }
+
+    /* Bell Unread Red Badge */
+    .fi-topbar-database-notifications-btn .fi-icon-btn-badge-ctn {
+        top: -3px !important;
+        right: -3px !important;
+        position: absolute !important;
+    }
+    .fi-topbar-database-notifications-btn .fi-badge {
+        background-color: #ef4444 !important;
+        color: #ffffff !important;
+        font-weight: 800 !important;
+        font-size: 0.6875rem !important;
+        min-width: 1.25rem !important;
+        height: 1.25rem !important;
+        padding: 0 4px !important;
+        border-radius: 9999px !important;
+        box-shadow: 0 2px 6px rgba(239, 68, 68, 0.5) !important;
+        border: 2px solid #ffffff !important;
+        display: flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+    }
+    html.dark .fi-topbar-database-notifications-btn .fi-badge,
+    .dark .fi-topbar-database-notifications-btn .fi-badge {
+        border-color: #0f172a !important;
+    }
+
+    /* Complete Eradication of Bell Adjacent Stray Arrow (▲▼) / Select / Spinbuttons */
     .fi-topbar select,
     .fi-topbar input[type="number"],
     .fi-topbar [role="spinbutton"],
@@ -3130,7 +3245,8 @@
     .fi-modal-trigger ~ select,
     .fi-modal-trigger ~ button:not(.fi-user-menu-trigger):not(.fi-dropdown-trigger),
     .fi-topbar-database-notifications-btn + svg,
-    .fi-topbar-database-notifications-btn ~ svg {
+    .fi-topbar-database-notifications-btn ~ svg,
+    .fi-topbar-database-notifications-btn svg:not(:first-child) {
         display: none !important;
         visibility: hidden !important;
         opacity: 0 !important;

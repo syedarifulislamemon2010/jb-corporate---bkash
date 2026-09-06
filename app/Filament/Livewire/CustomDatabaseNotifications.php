@@ -38,7 +38,7 @@ class CustomDatabaseNotifications extends BaseComponent
     public function getTrigger(): ?View
     {
         return (($this->position ?? filament()->getDatabaseNotificationsPosition()) === DatabaseNotificationsPosition::Topbar)
-            ? view('filament-panels::components.topbar.database-notifications-trigger')
+            ? view('filament.components.database-notifications-trigger')
             : view('filament-panels::components.sidebar.database-notifications-trigger');
     }
 

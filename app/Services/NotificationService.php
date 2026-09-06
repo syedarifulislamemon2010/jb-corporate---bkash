@@ -9,6 +9,7 @@ use App\Models\User;
 use Carbon\Carbon;
 use Filament\Actions\Action;
 use Filament\Notifications\Notification;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
@@ -16,6 +17,61 @@ use Illuminate\Support\Facades\Mail;
 
 class NotificationService
 {
+    /**
+     * Check whether an organization string belongs to Janata Bank.
+     */
+    public static function isJanataBank(?string $org): bool
+    {
+        if (blank($org)) {
+            return true; // default organization is Janata Bank
+        }
+        $lower = strtolower($org);
+        return str_contains($lower, 'janata') || str_contains($lower, 'jb');
+    }
+
+    /**
+     * Check whether an organization string belongs to bKash.
+     */
+    public static function isBkash(?string $org): bool
+    {
+        if (blank($org)) {
+            return false;
+        }
+        return str_contains(strtolower($org), 'bkash');
+    }
+
+    /**
+     * Scope query to users within the same institution/organization.
+     * Guarantees strict cross-organization isolation between Janata Bank PLC. and bKash.
+     */
+    public static function scopeOrganizationUsers(Builder $query, mixed $organization): Builder
+    {
+        $orgStr = is_string($organization) ? $organization : '';
+
+        if (static::isBkash($orgStr)) {
+            // bKash organization users only — Janata Bank users excluded
+            return $query->where('organization', 'like', '%bkash%')
+                         ->where('organization', 'not like', '%janata%');
+        }
+
+        // Otherwise: Janata Bank organization users only — bKash users excluded
+        return $query->where(function ($q) use ($organization, $orgStr) {
+            $q->where('organization', 'like', '%janata%')
+              ->orWhere('organization', 'like', '%jb%')
+              ->orWhereNull('organization');
+
+            if (!empty($orgStr)) {
+                $q->orWhere('organization', $orgStr);
+            }
+            if (is_numeric($organization)) {
+                $q->orWhere('organization_id', $organization);
+            }
+        })->where(function ($q) {
+            $q->where('organization', 'not like', '%bkash%')
+              ->orWhereNull('organization');
+        });
+    }
+
     /**
      * Send Database Notifications to users in the same organization excluding the sender, optionally filtered by role.
      */
@@ -31,19 +87,20 @@ class NotificationService
         ?string $category = null
     ): void {
         $sender = $senderUser ?? Auth::user();
-        if (!$sender) {
-            // For system-triggered notifications (SFTP cron), notify all users
-            $query = User::query();
+        $query = User::query();
+
+        if ($sender) {
+            // Exclude the actor who performed the action
+            $query->where('id', '!=', $sender->id);
+            $org = $sender->getRawOriginal('organization') ?: 'Janata Bank';
         } else {
-            $query = User::query()->where('id', '!=', $sender->id);
-            $org = $sender->getRawOriginal('organization');
-            if (!empty($org)) {
-                $query->where('organization', $org);
-            } elseif (!empty($sender->organization_id)) {
-                $query->where('organization_id', $sender->organization_id);
-            }
+            $org = 'Janata Bank';
         }
 
+        // Strictly isolate by organization (Janata Bank vs bKash)
+        static::scopeOrganizationUsers($query, $org);
+
+        // Filter by role if explicitly provided, otherwise all organization users receive it
         if (!empty($roleNames)) {
             $query->whereHas('roles', fn ($q) => $q->whereIn('name', $roleNames));
         }
