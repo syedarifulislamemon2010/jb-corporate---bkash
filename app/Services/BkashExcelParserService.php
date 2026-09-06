@@ -143,7 +143,7 @@ class BkashExcelParserService
             } elseif (in_array($cleanHeader, ['acname', 'bankaccountname', 'benename', 'beneficiaryname', 'accountname', 'beneaccountname'])) {
                 $mapped['debit_account_title'] = static::cleanString((string) $val, 150);
             } elseif (in_array($cleanHeader, ['accountno', 'beneficiaryacno', 'bankaccountnumber', 'bankaccountno', 'beneaccountno', 'acno'])) {
-                // NOTE: 'debit_account_no' DB column actually stores the beneficiary 
+                // NOTE: 'debit_account_no' DB column actually stores the beneficiary
                 // (destination/credit) account number.
                 $mapped['debit_account_no'] = static::cleanString((string) $val, 100);
             } elseif (in_array($cleanHeader, ['amount', 'amountbdt', 'amountintaka'])) {
@@ -157,10 +157,10 @@ class BkashExcelParserService
             } elseif (in_array($cleanHeader, ['bankname', 'benebankname', 'branchname', 'benebranchname', 'bankbranchname'])) {
                 $mapped['credit_bank'] = static::cleanString((string) $val, 255);
             } elseif (in_array($cleanHeader, ['debitaccount', 'debitaccountno'])) {
-                // NOTE: 'credit_account_no' DB column actually stores the TCSA/Operational 
-                // (source/debit) account number from the Excel "Debit Account" column — 
-                // naming is inverted from its literal meaning but used consistently across 
-                // the codebase (parser, dashboard balance calc, reports). Do NOT rename 
+                // NOTE: 'credit_account_no' DB column actually stores the TCSA/Operational
+                // (source/debit) account number from the Excel "Debit Account" column —
+                // naming is inverted from its literal meaning but used consistently across
+                // the codebase (parser, dashboard balance calc, reports). Do NOT rename
                 // without updating all dependent code.
                 $mapped['credit_account_no'] = static::cleanString((string) $val, 100);
             } elseif (in_array($cleanHeader, ['txnid', 'transactionid'])) {

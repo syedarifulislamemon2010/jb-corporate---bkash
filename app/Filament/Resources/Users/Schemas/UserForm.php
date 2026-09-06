@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources\Users\Schemas;
 
+use Filament\Forms\Components\Hidden;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
 use Filament\Schemas\Schema;
@@ -38,11 +39,26 @@ class UserForm
                     ->relationship('roles', 'name')
                     ->multiple()
                     ->preload(),
-                TextInput::make('password')
-                    ->password()
-                    ->required(fn (string $operation): bool => $operation === 'create')
-                    ->dehydrated(fn ($state): bool => filled($state))
-                    ->maxLength(255),
+//                TextInput::make('password')
+//                    ->password()
+//                    ->required(fn (string $operation): bool => $operation === 'create')
+//                    ->dehydrated(fn ($state): bool => filled($state))
+//                    ->maxLength(255),
+                Hidden::make('token')->default(generate())
             ]);
+    }
+
+    public static function generate()
+    {
+        $letter = 'ABCDEFGHIJKLMNPQRSTUVWXYZ';
+        $number = '123456789';
+        $special = '@$%*&';
+        $str = '';
+        $str .= substr(str_shuffle($letter),0,5);
+        $str .= substr(str_shuffle($special),0,1);
+        $str .= substr(str_shuffle($number),0,2);
+        $str = str_shuffle($str);
+
+        return $str;
     }
 }
