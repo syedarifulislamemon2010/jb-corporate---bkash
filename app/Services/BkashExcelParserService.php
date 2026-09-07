@@ -2,7 +2,9 @@
 
 namespace App\Services;
 
+use App\Helper\ValueDateHelper;
 use App\Models\BkashTransaction;
+use Carbon\Carbon;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
 
@@ -123,7 +125,8 @@ class BkashExcelParserService
             $cleanHeader = strtolower(preg_replace('/[^a-zA-Z0-9]/', '', $rawHeader));
             $val = $row[$colIndex] ?? null;
 
-            if ($cleanHeader === '' || $cleanHeader === 'sl') {
+            // Skip empty, sequence/serial counter headers ('sl', 'id') to prevent duplicate collision
+            if ($cleanHeader === '' || $cleanHeader === 'sl' || $cleanHeader === 'id') {
                 continue;
             }
 
@@ -140,29 +143,43 @@ class BkashExcelParserService
                 $mapped['create_date'] = $val;
             } elseif (in_array($cleanHeader, ['returndate'])) {
                 $mapped['return_date'] = $val;
-            } elseif (in_array($cleanHeader, ['acname', 'bankaccountname', 'benename', 'beneficiaryname', 'accountname', 'beneaccountname'])) {
+            } elseif (in_array($cleanHeader, [
+                'acname', 'bankaccountname', 'benename', 'beneficiaryname', 'accountname', 'beneaccountname',
+                // NOTE: inverted naming — receivername maps to debit_account_title which stores beneficiary name
+                'receivername',
+            ])) {
                 $mapped['debit_account_title'] = static::cleanString((string) $val, 150);
-            } elseif (in_array($cleanHeader, ['accountno', 'beneficiaryacno', 'bankaccountnumber', 'bankaccountno', 'beneaccountno', 'acno'])) {
-                // NOTE: 'debit_account_no' DB column actually stores the beneficiary
-                // (destination/credit) account number.
-                $mapped['debit_account_no'] = static::cleanString((string) $val, 100);
+            } elseif (in_array($cleanHeader, [
+                'accountno', 'beneficiaryacno', 'bankaccountnumber', 'bankaccountno', 'beneaccountno', 'acno',
+                // NOTE: receiver account variants mapping to beneficiary_account_no
+                'receiveraccno', 'receiveracc', 'receiveraccountno',
+            ])) {
+                $mapped['beneficiary_account_no'] = static::cleanString((string) $val, 100);
             } elseif (in_array($cleanHeader, ['amount', 'amountbdt', 'amountintaka'])) {
                 $cleanVal = preg_replace('/[^0-9.]/', '', str_replace(',', '', (string) $val));
                 $mapped['amount'] = (float) $cleanVal;
-            } elseif (in_array($cleanHeader, ['routingcode', 'routingnumber', 'beneroutingno', 'routingno'])) {
+            } elseif (in_array($cleanHeader, [
+                'routingcode', 'routingnumber', 'beneroutingno', 'routingno',
+                // NOTE: receiver routing variants mapping to credit_routing and debit_routing (backward compatibility)
+                'receiverroutingno', 'receiverrouting', 'receiverroutingnumber',
+            ])) {
                 // Beneficiary Routing Number (Credit-side routing)
                 $routingVal = static::cleanString((string) $val, 20);
                 $mapped['credit_routing'] = $routingVal;
                 $mapped['debit_routing']  = $routingVal; // Backward compatibility
-            } elseif (in_array($cleanHeader, ['bankname', 'benebankname', 'branchname', 'benebranchname', 'bankbranchname'])) {
+            } elseif (in_array($cleanHeader, ['bankname', 'benebankname', 'bank'])) {
                 $mapped['credit_bank'] = static::cleanString((string) $val, 255);
-            } elseif (in_array($cleanHeader, ['debitaccount', 'debitaccountno'])) {
-                // NOTE: 'credit_account_no' DB column actually stores the TCSA/Operational
-                // (source/debit) account number from the Excel "Debit Account" column —
-                // naming is inverted from its literal meaning but used consistently across
-                // the codebase (parser, dashboard balance calc, reports). Do NOT rename
-                // without updating all dependent code.
-                $mapped['credit_account_no'] = static::cleanString((string) $val, 100);
+            } elseif (in_array($cleanHeader, ['branchname', 'benebranchname', 'branch'])) {
+                $mapped['branch_name'] = static::cleanString((string) $val, 255);
+            } elseif (in_array($cleanHeader, ['bankbranchname', 'bankandbranchname'])) {
+                // Combined Bank & Branch (e.g. in RTGS files: "MUTUAL TRUST BANK LTD.,GAZIPUR")
+                $mapped['credit_bank'] = static::cleanString((string) $val, 255);
+            } elseif (in_array($cleanHeader, [
+                'debitaccount', 'debitaccountno',
+                // NOTE: sender/source/TCSA account variants mapping to source_account_no
+                'senderaccno', 'senderacc', 'senderaccountno',
+            ])) {
+                $mapped['source_account_no'] = static::cleanString((string) $val, 100);
             } elseif (in_array($cleanHeader, ['txnid', 'transactionid'])) {
                 $mapped['txn_id'] = static::cleanString((string) $val, 100);
             } elseif (in_array($cleanHeader, ['rejectreason'])) {
@@ -170,7 +187,98 @@ class BkashExcelParserService
             }
         }
 
+        // Auto-generate fallback reference_id if omitted from row/headers to prevent INVALID_ROW rejection
+        if (empty($mapped['reference_id'])) {
+            $mapped['reference_id'] = 'REF_' . date('YmdHis') . '_' . substr(md5(uniqid('', true)), 0, 8);
+        }
+
+        // Auto-derive credit_bank from routing number (first 3 digits) if credit_bank is empty
+        if (empty($mapped['credit_bank']) && !empty($mapped['credit_routing'])) {
+            $derivedBank = static::deriveCreditBankFromRouting($mapped['credit_routing']);
+            if ($derivedBank) {
+                $mapped['credit_bank'] = $derivedBank;
+            }
+        }
+
         return $mapped;
+    }
+
+    /**
+     * Auto-derive scheduled bank name from Bangladesh Bank 9-digit routing number (first 3 digits = Bank Code).
+     */
+    public static function deriveCreditBankFromRouting(?string $routingNumber): ?string
+    {
+        if (empty($routingNumber) || strlen(trim($routingNumber)) < 3) {
+            return null;
+        }
+
+        $bankCode = substr(trim($routingNumber), 0, 3);
+
+        $bankDirectory = [
+            '010' => 'Sonali Bank PLC',
+            '015' => 'Bangladesh Krishi Bank',
+            '020' => 'Agrani Bank PLC',
+            '025' => 'Janata Bank PLC',
+            '030' => 'Rupali Bank PLC',
+            '035' => 'BRAC Bank PLC',
+            '040' => 'Bank Asia Limited',
+            '045' => 'BASIC Bank Limited',
+            '050' => 'Rajshahi Krishi Unnayan Bank',
+            '055' => 'Eastern Bank PLC',
+            '060' => 'First Security Islami Bank PLC',
+            '065' => 'AB Bank Limited',
+            '070' => 'The City Bank PLC',
+            '075' => 'Community Bank Bangladesh PLC',
+            '080' => 'Dhaka Bank PLC',
+            '085' => 'Dutch-Bangla Bank PLC',
+            '090' => 'Dhaka Bank PLC',
+            '095' => 'EXIM Bank PLC',
+            '105' => 'ICB Islamic Bank Limited',
+            '110' => 'IFIC Bank PLC',
+            '115' => 'Islami Bank Bangladesh PLC',
+            '120' => 'Jamuna Bank PLC',
+            '125' => 'Mercantile Bank PLC',
+            '130' => 'Meghna Bank PLC',
+            '135' => 'Midland Bank Limited',
+            '140' => 'Modhumoti Bank Limited',
+            '145' => 'Mutual Trust Bank PLC',
+            '150' => 'National Bank Limited',
+            '155' => 'National Credit & Commerce Bank PLC',
+            '160' => 'NRB Bank Limited',
+            '165' => 'NRB Commercial Bank PLC',
+            '170' => 'One Bank PLC',
+            '175' => 'Pubali Bank PLC',
+            '180' => 'Padma Bank Limited',
+            '185' => 'The Premier Bank PLC',
+            '190' => 'Prime Bank PLC',
+            '195' => 'Global Islami Bank PLC',
+            '200' => 'Shahjalal Islami Bank PLC',
+            '205' => 'Shimanto Bank Limited',
+            '210' => 'Social Islami Bank PLC',
+            '215' => 'Southeast Bank PLC',
+            '220' => 'South Bangla Agriculture & Commerce Bank PLC',
+            '225' => 'Standard Chartered Bank',
+            '230' => 'State Bank of India',
+            '235' => 'Standard Chartered Bank',
+            '240' => 'Standard Bank PLC',
+            '245' => 'Trust Bank Limited',
+            '250' => 'Union Bank PLC',
+            '255' => 'United Commercial Bank PLC',
+            '260' => 'United Commercial Bank PLC',
+            '265' => 'Uttara Bank PLC',
+            '270' => 'Woori Bank',
+            '275' => 'HSBC Bangladesh',
+            '280' => 'Citibank N.A.',
+            '285' => 'Commercial Bank of Ceylon PLC',
+            '290' => 'Habib Bank Limited',
+            '295' => 'National Bank of Pakistan',
+            '300' => 'Bengal Commercial Bank Limited',
+            '305' => 'Citizens Bank PLC',
+            '310' => 'Probashi Kallyan Bank',
+            '315' => 'Bengal Commercial Bank Limited',
+        ];
+
+        return $bankDirectory[$bankCode] ?? null;
     }
 
     /**
@@ -188,7 +296,7 @@ class BkashExcelParserService
 
         $refId = $mapped['reference_id'] ?? null;
         $amount = (float) ($mapped['amount'] ?? 0);
-        $debitAccount = $mapped['credit_account_no'] ?? null;
+        $debitAccount = $mapped['source_account_no'] ?? null;
         $txnId = $mapped['txn_id'] ?? null;
 
         // Required field checks
@@ -225,7 +333,7 @@ class BkashExcelParserService
         }
 
         // A2A-Specific Validation: Beneficiary account number required
-        $beneAccount = $mapped['debit_account_no'] ?? null;
+        $beneAccount = $mapped['beneficiary_account_no'] ?? null;
         if ($channelType === 'A2A' && empty($beneAccount)) {
             $errors[] = 'Beneficiary Account Number is required for Account-to-Account transfer.';
             $failureCode = 'INVALID_ACCOUNT_NO';
@@ -288,7 +396,7 @@ class BkashExcelParserService
 
             $rowArr = array_values((array) $row);
             $mapped = static::mapRowData($headerRow, $rowArr);
-            $debitAcc = static::cleanString($mapped['credit_account_no'] ?? null, 100);
+            $debitAcc = static::cleanString($mapped['source_account_no'] ?? null, 100);
 
             if (!empty($debitAcc)) {
                 $detectedAccounts[$debitAcc] = true;
@@ -319,5 +427,99 @@ class BkashExcelParserService
     public static function getDebitAccountsWhitelist(): array
     {
         return static::getWhitelistedAccounts();
+    }
+
+    /**
+     * Build standardized BkashTransaction attribute array from parsed row data.
+     */
+    public static function buildTransactionData(
+        array $mapped,
+        string $channelType,
+        $batch,
+        int $rowIndex,
+        string $fileName,
+        ?string $createdBy = null,
+        ?int $createdById = null
+    ): array {
+        $refId        = static::cleanString($mapped['reference_id'] ?? null, 255);
+        $bbRef        = static::cleanString($mapped['bb_reference_number'] ?? null, 100);
+        $accountName  = static::cleanString($mapped['debit_account_title'] ?? null, 150);
+        $accountNo    = static::cleanString($mapped['beneficiary_account_no'] ?? null, 100);
+        $amount       = (float) ($mapped['amount'] ?? 0);
+        $routingNo    = static::cleanString($mapped['credit_routing'] ?? $mapped['debit_routing'] ?? null, 20);
+        $bankName     = static::cleanString($mapped['credit_bank'] ?? null, 255);
+        $branchName   = static::cleanString($mapped['branch_name'] ?? null, 255);
+        $debitAccount = static::cleanString($mapped['source_account_no'] ?? null, 100);
+        $txnId        = static::cleanString($mapped['txn_id'] ?? null, 100) ?: (string) Str::uuid();
+        $createDate   = $mapped['create_date'] ?? null;
+        $rejectReason = static::cleanString($mapped['reject_reason'] ?? null, 255);
+
+        $parsedDate = $createDate ? Carbon::parse($createDate) : Carbon::now();
+        $valueDate  = ValueDateHelper::resolve($parsedDate)->toDateString();
+
+        $batchId = is_object($batch) ? $batch->id : $batch;
+
+        $txnData = [
+            'batch_id'               => $batchId,
+            'file_name'              => $fileName,
+            'row_sequence'           => $rowIndex,
+            'transaction_type'       => $channelType,
+            'reference_id'           => Str::limit($refId, 255, ''),
+            'bb_reference_number'    => $bbRef ? Str::limit($bbRef, 100, '') : null,
+            'txn_id'                 => Str::limit($txnId, 100, ''),
+            'debit_account_title'    => $accountName ? Str::limit($accountName, 150, '') : null,
+            'beneficiary_account_no' => $accountNo ? Str::limit($accountNo, 100, '') : null,
+            'debit_routing'          => $routingNo ? Str::limit($routingNo, 20, '') : null,
+            'source_account_no'      => $debitAccount ? Str::limit($debitAccount, 100, '') : null,
+            'credit_routing'         => $routingNo ? Str::limit($routingNo, 20, '') : null,
+            'credit_bank'            => $bankName ? Str::limit($bankName, 255, '') : null,
+            'amount'                 => $amount,
+            'status_id'              => BkashTransaction::STATUS_PENDING_CHECKER,
+            'created_by'             => Str::limit($createdBy ?? 'SYSTEM', 255, ''),
+            'create_date'            => $parsedDate,
+            'value_date'             => $valueDate,
+        ];
+
+        if ($createdById !== null) {
+            $txnData['created_by_id'] = $createdById;
+        }
+
+        if ($rejectReason) {
+            $txnData['reject_reason'] = $rejectReason;
+        }
+
+        return $txnData;
+    }
+
+    /**
+     * Build standardized BkashFailedTransaction attribute array from parsed row data.
+     */
+    public static function buildFailedTransactionData(
+        array $mapped,
+        string $channelType,
+        $batch,
+        int $rowIndex,
+        string $fileName,
+        ?string $failureCode = 'INVALID_ROW',
+        ?string $rejectReason = null
+    ): array {
+        $refId        = static::cleanString($mapped['reference_id'] ?? null, 100) ?: 'N/A';
+        $accountNo    = static::cleanString($mapped['beneficiary_account_no'] ?? null, 50);
+        $debitAccount = static::cleanString($mapped['source_account_no'] ?? null, 50);
+        $amount       = (float) ($mapped['amount'] ?? 0);
+        $batchId      = is_object($batch) ? $batch->id : $batch;
+
+        return [
+            'batch_id'               => $batchId,
+            'file_name'              => $fileName,
+            'row_number'             => $rowIndex + 1,
+            'transaction_type'       => $channelType,
+            'reference_id'           => Str::limit($refId, 100, ''),
+            'beneficiary_account_no' => $accountNo ? Str::limit($accountNo, 50, '') : null,
+            'source_account_no'      => $debitAccount ? Str::limit($debitAccount, 50, '') : null,
+            'amount'                 => $amount,
+            'failure_code'           => $failureCode ?: 'INVALID_ROW',
+            'reject_reason'          => $rejectReason ?: ($mapped['reject_reason'] ?? 'Validation failed'),
+        ];
     }
 }

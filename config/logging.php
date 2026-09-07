@@ -74,6 +74,13 @@ return [
             'permission' => 0777,
         ],
 
+        'critical_financial' => [
+            'driver' => 'daily',
+            'path' => storage_path('logs/critical-financial.log'),
+            'level' => 'critical',
+            'days' => 90, // financial audit trail — retain longer than default
+        ],
+
         'slack' => [
             'driver' => 'slack',
             'url' => env('LOG_SLACK_WEBHOOK_URL'),

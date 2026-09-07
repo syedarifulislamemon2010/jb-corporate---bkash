@@ -33,8 +33,8 @@ class DormantAccountHandlingTest extends TestCase
             'reference_id'        => 'REF_DORMANT_TEST_01',
             'txn_id'              => 'TXN_DORMANT_TEST_01',
             'amount'              => 12000.00,
-            'credit_account_no'   => '0100202707747',
-            'debit_account_no'    => '0100999999999',
+            'source_account_no'   => '0100202707747',
+            'beneficiary_account_no'    => '0100999999999',
             'status_id'           => BkashTransaction::STATUS_FINAL_AUTHORIZED,
         ]);
 
@@ -71,8 +71,8 @@ class DormantAccountHandlingTest extends TestCase
             'reference_id'        => 'REF_BATCH_01',
             'txn_id'              => 'TXN_BATCH_01',
             'amount'              => 5000.00,
-            'credit_account_no'   => '0100202707747',
-            'debit_account_no'    => '0100111111111',
+            'source_account_no'   => '0100202707747',
+            'beneficiary_account_no'    => '0100111111111',
             'status_id'           => BkashTransaction::STATUS_FINAL_AUTHORIZED,
             'row_sequence'        => 0,
         ]);
@@ -82,8 +82,8 @@ class DormantAccountHandlingTest extends TestCase
             'reference_id'        => 'REF_BATCH_02',
             'txn_id'              => 'TXN_BATCH_02',
             'amount'              => 8000.00,
-            'credit_account_no'   => '0100202707747',
-            'debit_account_no'    => '0100222222222',
+            'source_account_no'   => '0100202707747',
+            'beneficiary_account_no'    => '0100222222222',
             'status_id'           => BkashTransaction::STATUS_FINAL_AUTHORIZED,
             'row_sequence'        => 1,
         ]);
@@ -93,8 +93,8 @@ class DormantAccountHandlingTest extends TestCase
             'reference_id'        => 'REF_BATCH_03',
             'txn_id'              => 'TXN_BATCH_03',
             'amount'              => 9000.00,
-            'credit_account_no'   => '0100202707747',
-            'debit_account_no'    => '0100333333333',
+            'source_account_no'   => '0100202707747',
+            'beneficiary_account_no'    => '0100333333333',
             'status_id'           => BkashTransaction::STATUS_FINAL_AUTHORIZED,
             'row_sequence'        => 2,
         ]);

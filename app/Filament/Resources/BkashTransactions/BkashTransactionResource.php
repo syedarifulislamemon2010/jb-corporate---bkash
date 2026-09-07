@@ -23,19 +23,19 @@ class BkashTransactionResource extends Resource
     protected static array $globallySearchableAttributes = [
         'reference_id',
         'txn_id',
-        'debit_account_no',
+        'beneficiary_account_no',
         'debit_account_title',
-        'credit_account_no',
+        'source_account_no',
         'file_name',
     ];
 
-    public static function getGlobalSearchResultDetails(Model $record): array
+    public static function getGlobalSearchResultDetails(\Illuminate\Database\Eloquent\Model $record): array
     {
         return [
             'Txn ID'   => $record->txn_id ?? 'N/A',
             'Channel'  => $record->transaction_type,
             'Amount'   => 'BDT ' . BkashTransaction::formatBdtAmount((float) $record->amount),
-            'Account'  => $record->debit_account_no ?? 'N/A',
+            'Account'  => $record->beneficiary_account_no ?? 'N/A',
             'File'     => $record->file_name ?? 'N/A',
         ];
     }
@@ -71,6 +71,37 @@ class BkashTransactionResource extends Resource
             ]);
     }
 
+        public static function getNavigationBadge(): ?string
+    {
+        try {
+            $count = static::getEloquentQuery()
+                ->whereNotNull('batch_id')
+                ->distinct('batch_id')
+                ->count('batch_id');
+
+            if ($count === 0) {
+                $count = static::getEloquentQuery()
+                    ->whereNotNull('file_name')
+                    ->distinct('file_name')
+                    ->count('file_name');
+            }
+
+            return $count > 0 ? (string) $count : null;
+        } catch (\Throwable $e) {
+            return null;
+        }
+    }
+
+    public static function getNavigationBadgeColor(): ?string
+    {
+        return 'warning';
+    }
+
+    public static function getNavigationBadgeTooltip(): ?string
+    {
+        return 'Batch files pending Checker verification';
+    }
+
     public static function form(Schema $schema): Schema
     {
         return BkashTransactionForm::configure($schema);
@@ -91,12 +122,12 @@ class BkashTransactionResource extends Resource
         return false;
     }
 
-    public static function canEdit(Model $record): bool
+    public static function canEdit(\Illuminate\Database\Eloquent\Model $record): bool
     {
         return false;
     }
 
-    public static function canDelete(Model $record): bool
+    public static function canDelete(\Illuminate\Database\Eloquent\Model $record): bool
     {
         return false;
     }
@@ -107,5 +138,15 @@ class BkashTransactionResource extends Resource
             'index'  => ListBkashTransactions::route('/'),
             'upload' => UploadBkashExcel::route('/upload'),
         ];
+    }
+
+    public static function getGloballySearchableAttributes(): array
+    {
+        return ['txn_id', 'reference_id', 'file_name'];
+    }
+
+    public static function getGlobalSearchResultTitle(\Illuminate\Database\Eloquent\Model $record): string
+    {
+        return "Txn: {$record->txn_id}";
     }
 }

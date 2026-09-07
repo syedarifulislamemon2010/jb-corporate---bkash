@@ -8,10 +8,10 @@ use Tests\TestCase;
 class AccountColumnMappingRegressionTest extends TestCase
 {
     /**
-     * Regression guard ensuring Excel "Debit Account" (TCSA source) maps to DB 'credit_account_no'
-     * and Beneficiary "Account No" maps to DB 'debit_account_no'.
+     * Regression guard ensuring Excel "Debit Account" (TCSA source) maps to DB 'source_account_no'
+     * and Beneficiary "Account No" maps to DB 'beneficiary_account_no'.
      */
-    public function test_excel_debit_account_maps_to_db_credit_account_no_and_beneficiary_to_debit_account_no(): void
+    public function test_excel_debit_account_maps_to_db_source_account_no_and_beneficiary_to_beneficiary_account_no(): void
     {
         $headers = [
             'Date',
@@ -33,11 +33,11 @@ class AccountColumnMappingRegressionTest extends TestCase
 
         $mapped = BkashExcelParserService::mapRowData($headers, $row, 'A2A');
 
-        // Verify that 'credit_account_no' in DB holds the TCSA source number from "Debit Account"
-        $this->assertEquals('111613120722698', $mapped['credit_account_no']);
+        // Verify that 'source_account_no' in DB holds the TCSA source number from "Debit Account"
+        $this->assertEquals('111613120722698', $mapped['source_account_no']);
 
-        // Verify that 'debit_account_no' in DB holds the beneficiary account number
-        $this->assertEquals('0100123456789', $mapped['debit_account_no']);
+        // Verify that 'beneficiary_account_no' in DB holds the beneficiary account number
+        $this->assertEquals('0100123456789', $mapped['beneficiary_account_no']);
 
         // Verify amount cleaned
         $this->assertEquals(25000.00, $mapped['amount']);

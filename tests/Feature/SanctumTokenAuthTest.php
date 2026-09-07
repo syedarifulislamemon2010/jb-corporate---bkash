@@ -100,8 +100,8 @@ class SanctumTokenAuthTest extends TestCase
             'reference_id'      => 'REF_SANCTUM_001',
             'txn_id'            => 'TXN_SANCTUM_001',
             'amount'            => 50000.00,
-            'credit_account_no' => '0100202707747',
-            'debit_account_no'  => '0100111111111',
+            'source_account_no' => '0100202707747',
+            'beneficiary_account_no'  => '0100111111111',
             'status_id'         => BkashTransaction::STATUS_FINAL_AUTHORIZED,
         ]);
 
@@ -137,8 +137,8 @@ class SanctumTokenAuthTest extends TestCase
             'reference_id'      => 'REF_SANCTUM_FAIL_002',
             'txn_id'            => 'TXN_SANCTUM_FAIL_002',
             'amount'            => 25000.00,
-            'credit_account_no' => '0100202707747',
-            'debit_account_no'  => '0100222222222',
+            'source_account_no' => '0100202707747',
+            'beneficiary_account_no'  => '0100222222222',
             'status_id'         => BkashTransaction::STATUS_FINAL_AUTHORIZED,
         ]);
 

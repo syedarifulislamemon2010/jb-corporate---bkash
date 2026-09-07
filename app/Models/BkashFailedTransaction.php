@@ -20,8 +20,8 @@ class BkashFailedTransaction extends Model
         'row_number',
         'transaction_type',
         'reference_id',
-        'debit_account_no',
-        'credit_account_no',
+        'source_account_no',
+        'beneficiary_account_no',
         'amount',
         'failure_code',
         'reject_reason',
@@ -38,5 +38,12 @@ class BkashFailedTransaction extends Model
     public function batch(): \Illuminate\Database\Eloquent\Relations\BelongsTo
     {
         return $this->belongsTo(BkashTransactionBatch::class, 'batch_id');
+    }
+
+    protected static function booted(): void
+    {
+        static::created(function (BkashFailedTransaction $failed) {
+            BkashTransactionBatch::revertFailedBatchesToChecker($failed->batch_id, $failed->file_name);
+        });
     }
 }

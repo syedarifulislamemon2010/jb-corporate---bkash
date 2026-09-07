@@ -10,11 +10,20 @@ Route::get('/', function () {
     return redirect('/admin');
 })->name('admin');
 
-Route::middleware(['web'])->group(function () {
-    Route::get('/admin/forgot-password', ForgotPasswordMobile::class)->name('filament.admin.auth.forgot-password');
+Route::middleware(['web', 'throttle:30,1'])->group(function () {
+    Route::get('/admin/reset-password', ForgotPasswordMobile::class)->name('filament.admin.auth.reset-password');
+    Route::get('/admin/forgot-password', function () {
+        return redirect('/admin/reset-password');
+    })->name('filament.admin.auth.forgot-password');
+
     Route::get('/admin/verify-otp', VerifyOtp::class)->name('filament.admin.auth.verify-otp');
     Route::get('/admin/enter-temp-password', EnterTempPassword::class)->name('filament.admin.auth.enter-temp-password');
     Route::get('/admin/set-new-password', SetNewPassword::class)->name('filament.admin.auth.set-new-password');
+});
+
+Route::middleware(['web'])->group(function () {
+    Route::get('/admin/bkash-transactions/download-batch', [\App\Http\Controllers\BatchFileDownloadController::class, 'download'])
+        ->name('admin.bkash.download-batch');
 });
 
 Route::fallback(function () {

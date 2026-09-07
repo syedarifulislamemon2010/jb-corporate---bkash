@@ -38,6 +38,7 @@ class AdminPanelProvider extends PanelProvider
             ->font('Plus Jakarta Sans')
             ->databaseNotifications()
             ->databaseNotificationsPolling('15s')
+            ->databaseNotificationsLivewireComponent(\App\Filament\Livewire\CustomDatabaseNotifications::class)
             ->globalSearchKeybindings(['command+k', 'ctrl+k'])
             ->colors([
                 'primary' => Color::Sky,
@@ -73,6 +74,10 @@ class AdminPanelProvider extends PanelProvider
                     ->label(fn () => (auth()->user()?->getRawOriginal('organization') ?: 'Janata Bank PLC.') . ' · ' . (auth()->user()?->roles?->first()?->name ?? 'User'))
                     ->icon('heroicon-o-building-office-2')
                     ->url('#'),
+                \Filament\Navigation\MenuItem::make()
+                    ->label('Reset Password')
+                    ->icon('heroicon-o-key')
+                    ->url('/admin/reset-password'),
             ])
             ->navigationItems([
                 NavigationItem::make('Log Viewer')
@@ -86,10 +91,7 @@ class AdminPanelProvider extends PanelProvider
             ->pages([
                 CustomDashboard::class,
             ])
-            ->renderHook(
-                \Filament\View\PanelsRenderHook::FOOTER,
-                fn () => view('filament.custom-footer')
-            )
+
             ->renderHook(
                 \Filament\View\PanelsRenderHook::BODY_END,
                 fn () => view('filament.custom-styles')

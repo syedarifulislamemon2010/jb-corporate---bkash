@@ -394,12 +394,7 @@ class Dashboard extends Page
     private function calculateBalance(string $accountNumber): float
     {
         try {
-            // NOTE: 'credit_account_no' DB column actually stores the TCSA/Operational 
-            // (source/debit) account number from the Excel "Debit Account" column — 
-            // naming is inverted from its literal meaning but used consistently across 
-            // the codebase (parser, dashboard balance calc, reports). Do NOT rename 
-            // without updating all dependent code.
-            $totalDebited = (float) BkashTransaction::where('credit_account_no', $accountNumber)
+            $totalDebited = (float) BkashTransaction::where('source_account_no', $accountNumber)
                 ->whereIn('status_id', [
                     BkashTransaction::STATUS_FINAL_AUTHORIZED,
                     BkashTransaction::STATUS_CBS_SUCCESS,

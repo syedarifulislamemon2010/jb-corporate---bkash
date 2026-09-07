@@ -19,8 +19,8 @@ class DuplicateTransactionValidationTest extends TestCase
             'reference_id'        => 'REF_ORIGINAL',
             'txn_id'              => 'TXN_GLOBAL_DUP_999',
             'amount'              => 500.00,
-            'credit_account_no'   => '0100202707747',
-            'debit_account_no'    => '0100123456789',
+            'source_account_no'   => '0100202707747',
+            'beneficiary_account_no'    => '0100123456789',
             'status_id'           => BkashTransaction::STATUS_PENDING_CHECKER,
         ]);
 
@@ -32,8 +32,8 @@ class DuplicateTransactionValidationTest extends TestCase
             'reference_id'      => 'REF_NEW_ROW',
             'txn_id'            => 'TXN_GLOBAL_DUP_999',
             'amount'            => 1000.00,
-            'credit_account_no' => '0100202707747',
-            'debit_account_no'  => '0100987654321',
+            'source_account_no' => '0100202707747',
+            'beneficiary_account_no'  => '0100987654321',
         ];
 
         $result = BkashExcelParserService::validateRow($mapped, 'A2A');
@@ -51,8 +51,8 @@ class DuplicateTransactionValidationTest extends TestCase
             'reference_id'      => 'REF_UNIQUE',
             'txn_id'            => 'TXN_BRAND_NEW_456',
             'amount'            => 1500.00,
-            'credit_account_no' => '0100202707747',
-            'debit_account_no'  => '0100987654321',
+            'source_account_no' => '0100202707747',
+            'beneficiary_account_no'  => '0100987654321',
         ];
 
         $result = BkashExcelParserService::validateRow($mapped, 'A2A');

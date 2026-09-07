@@ -19,8 +19,8 @@ class PeriodReportDownloadTest extends TestCase
             'reference_id'        => 'REF_TODAY_01',
             'txn_id'              => 'TXN_TODAY_01',
             'amount'              => 5000.00,
-            'credit_account_no'   => '0100202707747',
-            'debit_account_no'    => '0100111111111',
+            'source_account_no'   => '0100202707747',
+            'beneficiary_account_no'    => '0100111111111',
             'create_date'         => now(),
             'status_id'           => BkashTransaction::STATUS_CBS_SUCCESS,
         ]);

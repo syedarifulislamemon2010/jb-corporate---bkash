@@ -222,4 +222,112 @@ class NotificationRoleScopingTest extends TestCase
         $this->assertNotContains('auth2@jb.com', $recipients); // actor excluded
         $this->assertNotContains('admin@jb.com', $recipients);
     }
+
+    public function test_checker_action_notifies_all_janata_bank_users_excluding_actor_and_bkash(): void
+    {
+        Mail::fake();
+
+        $bkashUser = User::create([
+            'name'         => 'bKash Operator',
+            'email'        => 'operator@bkash.com',
+            'mobile_no'    => '01811000005',
+            'organization' => 'bKash Limited',
+            'password'     => bcrypt('Secret123!'),
+        ]);
+
+        NotificationService::dispatchStage2(
+            fileName: 'JANATA_BANK_2026_09_06_Slot1.xlsx',
+            totalTrn: 15,
+            totalAmount: 75000.00,
+            authorizerName: $this->checker->name,
+            senderUser: $this->checker
+        );
+
+        // 1. Actor (Checker) excluded
+        $this->assertEquals(0, $this->checker->notifications()->count());
+
+        // 2. Both Authorizers and Admin in Janata Bank received database notifications
+        $this->assertEquals(1, $this->auth1->notifications()->count());
+        $this->assertEquals(1, $this->auth2->notifications()->count());
+        $this->assertEquals(1, $this->admin->notifications()->count());
+
+        // 3. bKash user isolated
+        $this->assertEquals(0, $bkashUser->notifications()->count());
+    }
+
+    public function test_authorizer_1_action_notifies_all_janata_bank_users_excluding_actor(): void
+    {
+        Mail::fake();
+
+        NotificationService::dispatchStage3(
+            fileName: 'JANATA_BANK_2026_09_06_Slot1.xlsx',
+            totalTrn: 15,
+            totalAmount: 75000.00,
+            authorizerName1: $this->auth1->name,
+            senderUser: $this->auth1
+        );
+
+        $this->assertEquals(0, $this->auth1->notifications()->count()); // Actor excluded
+        $this->assertEquals(1, $this->checker->notifications()->count());
+        $this->assertEquals(1, $this->auth2->notifications()->count());
+        $this->assertEquals(1, $this->admin->notifications()->count());
+    }
+
+    public function test_authorizer_2_action_notifies_all_janata_bank_users_excluding_actor(): void
+    {
+        Mail::fake();
+
+        NotificationService::dispatchStage4(
+            fileName: 'JANATA_BANK_2026_09_06_Slot1.xlsx',
+            totalTrn: 15,
+            totalAmount: 75000.00,
+            confirmerName: $this->auth2->name,
+            senderUser: $this->auth2
+        );
+
+        $this->assertEquals(0, $this->auth2->notifications()->count()); // Actor excluded
+        $this->assertEquals(1, $this->checker->notifications()->count());
+        $this->assertEquals(1, $this->auth1->notifications()->count());
+        $this->assertEquals(1, $this->admin->notifications()->count());
+    }
+
+    public function test_dispatch_workflow_notification_dynamically_notifies_authorizers(): void
+    {
+        Mail::fake();
+
+        $batch = \App\Models\BkashTransactionBatch::create([
+            'file_name'          => 'JB_WORKFLOW_TEST.xlsx',
+            'transaction_type'   => 'A2A',
+            'total_transactions' => 5,
+            'total_amount'       => 25000.00,
+            'status_id'          => \App\Models\BkashTransaction::STATUS_PENDING_CHECKER,
+            'create_date'        => \Carbon\Carbon::today(),
+        ]);
+
+        $txn = \App\Models\BkashTransaction::create([
+            'batch_id'         => $batch->id,
+            'file_name'        => 'JB_WORKFLOW_TEST.xlsx',
+            'transaction_type' => 'A2A',
+            'txn_id'           => 'TXN12345678',
+            'channel'          => 'A2A',
+            'beneficiary_acc'  => '01712345678',
+            'amount'           => 5000.00,
+            'status_id'        => \App\Models\BkashTransaction::STATUS_PENDING_CHECKER,
+        ]);
+
+        $outbox = NotificationService::dispatchWorkflowNotification(
+            stage: 2,
+            transaction: $txn,
+            actorName: $this->checker->name,
+            actorId: $this->checker->id
+        );
+
+        $this->assertNotNull($outbox);
+        $this->assertEquals('STAGE_2_CHECKED', $outbox->event_type);
+        $this->assertEquals('JB_WORKFLOW_TEST.xlsx', $outbox->file_name);
+
+        $this->assertEquals(0, $this->checker->notifications()->count());
+        $this->assertEquals(1, $this->auth1->notifications()->count());
+        $this->assertEquals(1, $this->auth2->notifications()->count());
+    }
 }

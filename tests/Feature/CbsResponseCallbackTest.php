@@ -26,8 +26,8 @@ class CbsResponseCallbackTest extends TestCase
             'reference_id'      => 'REF_CALLBACK_01',
             'txn_id'            => 'TXN_CALLBACK_01',
             'amount'            => 15000.00,
-            'credit_account_no' => '0100202707747',
-            'debit_account_no'  => '0100111111111',
+            'source_account_no' => '0100202707747',
+            'beneficiary_account_no'  => '0100111111111',
             'status_id'         => BkashTransaction::STATUS_FINAL_AUTHORIZED,
         ]);
 
@@ -63,8 +63,8 @@ class CbsResponseCallbackTest extends TestCase
             'reference_id'      => 'REF_CALLBACK_FAIL_02',
             'txn_id'            => 'TXN_CALLBACK_FAIL_02',
             'amount'            => 25000.00,
-            'credit_account_no' => '0100202707747',
-            'debit_account_no'  => '0100222222222',
+            'source_account_no' => '0100202707747',
+            'beneficiary_account_no'  => '0100222222222',
             'status_id'         => BkashTransaction::STATUS_FINAL_AUTHORIZED,
         ]);
 

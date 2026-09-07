@@ -20,9 +20,9 @@ class BkashReportsResource extends Resource
     protected static array $globallySearchableAttributes = [
         'reference_id',
         'txn_id',
-        'debit_account_no',
+        'beneficiary_account_no',
         'debit_account_title',
-        'credit_account_no',
+        'source_account_no',
         'file_name',
     ];
 
@@ -32,7 +32,7 @@ class BkashReportsResource extends Resource
             'Txn ID'   => $record->txn_id ?? 'N/A',
             'Channel'  => $record->transaction_type,
             'Amount'   => 'BDT ' . \App\Models\BkashTransaction::formatBdtAmount((float) $record->amount),
-            'Account'  => $record->debit_account_no ?? 'N/A',
+            'Account'  => $record->beneficiary_account_no ?? 'N/A',
             'File'     => $record->file_name ?? 'N/A',
         ];
     }
@@ -53,6 +53,7 @@ class BkashReportsResource extends Resource
             ->emptyStateHeading('No Transaction Reports Found')
             ->emptyStateDescription('No transactions match the selected filter criteria.')
             ->emptyStateIcon('heroicon-o-document-chart-bar')
+            ->striped()
             ->columns([
                 // 1. Global Serial Number — Continuous across pagination
                 TextColumn::make('index')
@@ -127,9 +128,9 @@ class BkashReportsResource extends Resource
                     ->label('Bank Account Name')
                     ->searchable(),
 
-                // 7. Bank Account No
-                TextColumn::make('debit_account_no')
-                    ->label('Bank Account No')
+                // 7. Beneficiary Account
+                TextColumn::make('beneficiary_account_no')
+                    ->label('Beneficiary Account')
                     ->searchable(),
 
                 // 8. Bank & Branch Name
@@ -152,9 +153,9 @@ class BkashReportsResource extends Resource
                     ->alignRight()
                     ->sortable(),
 
-                // 11. Debit Account
-                TextColumn::make('credit_account_no')
-                    ->label('Debit Account')
+                // 11. Source Account
+                TextColumn::make('source_account_no')
+                    ->label('Source Account (TCSA/Ops)')
                     ->searchable(),
 
                 // 12. Txn ID

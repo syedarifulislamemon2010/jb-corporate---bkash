@@ -73,4 +73,14 @@ class SidebarAccordionNavigationTest extends TestCase
             ->test(CustomDashboard::class)
             ->assertStatus(200);
     }
+
+    public function test_authenticated_admin_visiting_admin_root_redirects_cleanly_to_dashboard(): void
+    {
+        $response = $this->actingAs($this->user)->get('/admin');
+
+        $response->assertRedirect('/admin/dashboard');
+
+        $dashboardResponse = $this->actingAs($this->user)->get('/admin/dashboard');
+        $dashboardResponse->assertStatus(200);
+    }
 }

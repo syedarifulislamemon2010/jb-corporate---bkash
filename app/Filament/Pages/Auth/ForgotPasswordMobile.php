@@ -30,7 +30,7 @@ class ForgotPasswordMobile extends SimplePage
     use RestrictsFileUploadsToSchemaComponents;
     use WithRateLimiting;
 
-    protected static ?string $slug = 'forgot-password';
+    protected static ?string $slug = 'reset-password';
 
     /**
      * @var array<string, mixed> | null
@@ -62,20 +62,25 @@ class ForgotPasswordMobile extends SimplePage
     {
         return TextInput::make('mobile_no')
             ->label('Registered Mobile Number')
-            ->placeholder('e.g. 01712345678')
             ->tel()
+            ->placeholder('01XXXXXXXXX')
+            ->regex('/^01[3-9]\d{8}$/')
             ->required()
+            ->maxLength(11)
+            ->validationMessages([
+                'regex' => 'Please enter a valid 11-digit Bangladeshi mobile number (e.g. 01712345678).',
+            ])
             ->autofocus();
     }
 
     public function getTitle(): string | Htmlable
     {
-        return 'Forgot Password';
+        return 'Reset Password';
     }
 
     public function getHeading(): string | Htmlable | null
     {
-        return 'Forgot Password';
+        return 'Reset Password';
     }
 
     public function getSubheading(): string | Htmlable | null
@@ -96,9 +101,9 @@ class ForgotPasswordMobile extends SimplePage
     {
         return Action::make('login')
             ->link()
-            ->label('Back to login')
+            ->label('Back to Dashboard')
             ->icon('heroicon-o-arrow-left')
-            ->url('/admin/login');
+            ->url('/admin/dashboard');
     }
 
     public function content(Schema $schema): Schema

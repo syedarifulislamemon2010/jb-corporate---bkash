@@ -55,8 +55,8 @@ class BkashTransactionForm
                             ->required()
                             ->maxLength(255),
 
-                        TextInput::make('debit_account_no')
-                            ->label('Bank Account No')
+                        TextInput::make('beneficiary_account_no')
+                            ->label('Beneficiary Account')
                             ->required()
                             ->maxLength(100),
 
@@ -93,8 +93,8 @@ class BkashTransactionForm
                             ->disabled(fn (Get $get) => ! $get('credit_routing'))
                             ->visible(fn (Get $get) => in_array($get('transaction_type'), ['BEFTN', 'RTGS'])),
 
-                        TextInput::make('credit_account_no')
-                            ->label('Debit Account')
+                        TextInput::make('source_account_no')
+                            ->label('Source Account (TCSA/Ops)')
                             ->required()
                             ->maxLength(100),
 

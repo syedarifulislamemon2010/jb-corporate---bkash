@@ -9,6 +9,7 @@ use App\Models\User;
 use Carbon\Carbon;
 use Filament\Actions\Action;
 use Filament\Notifications\Notification;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
@@ -16,6 +17,57 @@ use Illuminate\Support\Facades\Mail;
 
 class NotificationService
 {
+    /**
+     * Check whether an organization string belongs to Janata Bank.
+     */
+    public static function isJanataBank(?string $org): bool
+    {
+        if (blank($org)) {
+            return true; // default organization is Janata Bank
+        }
+        $lower = strtolower($org);
+        return str_contains($lower, 'janata') || str_contains($lower, 'jb');
+    }
+
+    /**
+     * Check whether an organization string belongs to bKash.
+     */
+    public static function isBkash(?string $org): bool
+    {
+        if (blank($org)) {
+            return false;
+        }
+        return str_contains(strtolower($org), 10);
+    }
+
+    /**
+     * Scope query to users within the same institution/organization.
+     * Guarantees strict cross-organization isolation between Janata Bank PLC. and bKash.
+     */
+    public static function scopeOrganizationUsers(Builder $query, mixed $organization): Builder
+    {
+        $orgStr = is_string($organization) ? $organization : '';
+
+        if (static::isBkash($orgStr)) {
+            // bKash organization users only — Janata Bank users excluded
+            return $query->where('organization', 10)
+                         ->where('organization', '!=', 1);
+        }
+
+        // Otherwise: Janata Bank organization users only — bKash users excluded
+        return $query->where(function ($q) use ($organization, $orgStr) {
+            $q->where('organization', 1)
+              ->orWhereNull('organization');
+
+            if (!empty($orgStr)) {
+                $q->orWhere('organization', $orgStr);
+            }
+        })->where(function ($q) {
+            $q->where('organization', 'not like', '%bkash%')
+              ->orWhereNull('organization');
+        });
+    }
+
     /**
      * Send Database Notifications to users in the same organization excluding the sender, optionally filtered by role.
      */
@@ -27,22 +79,24 @@ class NotificationService
         string $icon = 'heroicon-o-bell',
         string $color = 'info',
         ?string $actionUrl = null,
-        ?string $actionLabel = null
+        ?string $actionLabel = null,
+        ?string $category = null
     ): void {
         $sender = $senderUser ?? Auth::user();
-        if (!$sender) {
-            // For system-triggered notifications (SFTP cron), notify all users
-            $query = User::query();
+        $query = User::query();
+
+        if ($sender) {
+            // Exclude the actor who performed the action
+            $query->where('id', '!=', $sender->id);
+            $org = $sender->getRawOriginal('organization') ?: 1;
         } else {
-            $query = User::query()->where('id', '!=', $sender->id);
-            $org = $sender->getRawOriginal('organization');
-            if (!empty($org)) {
-                $query->where('organization', $org);
-            } elseif (!empty($sender->organization_id)) {
-                $query->where('organization_id', $sender->organization_id);
-            }
+            $org = 1;
         }
 
+        // Strictly isolate by organization (Janata Bank vs bKash)
+        static::scopeOrganizationUsers($query, $org);
+
+        // Filter by role if explicitly provided, otherwise all organization users receive it
         if (!empty($roleNames)) {
             $query->whereHas('roles', fn ($q) => $q->whereIn('name', $roleNames));
         }
@@ -55,6 +109,10 @@ class NotificationService
                 ->body($body)
                 ->icon($icon)
                 ->color($color);
+
+            if ($category) {
+                $notification->viewData(['category' => $category]);
+            }
 
             if ($actionUrl && $actionLabel) {
                 $notification->actions([
@@ -79,9 +137,14 @@ class NotificationService
 
     /**
      * Dispatch Stage 1: SFTP / Upload File Ingested -> Pending Checker
-     * Recipient Roles: ['bkash_checker']
      */
-    public static function dispatchStage1(string $fileName, int $totalTrn, float $totalAmount, ?User $senderUser = null): NotificationOutbox
+    public static function dispatchStage1(
+        string $fileName,
+        int $totalTrn,
+        float $totalAmount,
+        ?User $senderUser = null,
+        array $recipientRoles = []
+    ): NotificationOutbox
     {
         $formattedAmount = BkashTransaction::formatBdtAmount($totalAmount);
         $uploadTimeStr   = Carbon::now()->timezone('Asia/Dhaka')->format('d M Y, h:i A');
@@ -100,8 +163,6 @@ class NotificationService
               . "Upload Time: {$uploadTimeStr}\n"
               . "Total Files Uploaded Today: {$todayFilesCount}";
 
-        $recipientRoles = ['bkash_checker'];
-
         static::sendOrganizationDatabaseNotification(
             "New bKash Settlement File: {$fileName}",
             "Uploaded at {$uploadTimeStr} | Total Trn: {$totalTrn}, Amount: BDT {$formattedAmount} (File #{$todayFilesCount} today). Pending Authorization.",
@@ -110,7 +171,8 @@ class NotificationService
             'heroicon-o-arrow-down-tray',
             'warning',
             '/admin/bkash-transactions',
-            'Check File →'
+            'Check File →',
+            'checker'
         );
 
         return static::createOutbox('STAGE_1_SFTP', $fileName, $totalTrn, $totalAmount, null, 'ALL_AUTHORIZERS', $body, $senderUser, $recipientRoles);
@@ -118,10 +180,16 @@ class NotificationService
 
     /**
      * Dispatch Stage 2: Checked by Checker -> Pending Authorization
-     * Recipient Roles: ['bkash_checker', 'bkash_authorizer_1']
+     * By default notifies all Janata Bank users (excluding actor), including Authorizer 1 & 2.
      */
-    public static function dispatchStage2(string $fileName, int $totalTrn, float $totalAmount, string $authorizerName, ?User $senderUser = null): NotificationOutbox
-    {
+    public static function dispatchStage2(
+        string $fileName,
+        int $totalTrn,
+        float $totalAmount,
+        string $authorizerName,
+        ?User $senderUser = null,
+        array $recipientRoles = []
+    ): NotificationOutbox {
         $formattedAmount = BkashTransaction::formatBdtAmount($totalAmount);
 
         $body = "Dear Sir/Madam,\n"
@@ -131,8 +199,6 @@ class NotificationService
               . "Thank you\n"
               . "JANATA BANK";
 
-        $recipientRoles = ['bkash_checker', 'bkash_authorizer_1'];
-
         static::sendOrganizationDatabaseNotification(
             "Transactions Checked by {$authorizerName}",
             "File: {$fileName} | Total Trn: {$totalTrn}, Amount: BDT {$formattedAmount}. Pending Confirmation.",
@@ -141,7 +207,8 @@ class NotificationService
             'heroicon-o-shield-check',
             'info',
             '/admin/bkash-transaction-authorizations',
-            '1st Authorizer Approval →'
+            '1st Authorizer Approval →',
+            'authorizer_1'
         );
 
         return static::createOutbox('STAGE_2_CHECKED', $fileName, $totalTrn, $totalAmount, $authorizerName, 'ALL_CONFIRMERS', $body, $senderUser, $recipientRoles);
@@ -149,10 +216,16 @@ class NotificationService
 
     /**
      * Dispatch Stage 3: Authorized by 1st Authorizer -> Pending Further Authorization/Approval
-     * Recipient Roles: ['bkash_checker', 'bkash_authorizer_1', 'bkash_authorizer_2']
+     * By default notifies all Janata Bank users (excluding actor), including Checkers & Authorizer 2.
      */
-    public static function dispatchStage3(string $fileName, int $totalTrn, float $totalAmount, string $authorizerName1, ?User $senderUser = null): NotificationOutbox
-    {
+    public static function dispatchStage3(
+        string $fileName,
+        int $totalTrn,
+        float $totalAmount,
+        string $authorizerName1,
+        ?User $senderUser = null,
+        array $recipientRoles = []
+    ): NotificationOutbox {
         $formattedAmount = BkashTransaction::formatBdtAmount($totalAmount);
 
         $body = "Dear Sir/Madam,\n"
@@ -162,8 +235,6 @@ class NotificationService
               . "Thank you\n"
               . "JANATA BANK";
 
-        $recipientRoles = ['bkash_checker', 'bkash_authorizer_1', 'bkash_authorizer_2'];
-
         static::sendOrganizationDatabaseNotification(
             "Transactions 1st Authorized by {$authorizerName1}",
             "File: {$fileName} | Total Trn: {$totalTrn}, Amount: BDT {$formattedAmount}. Pending Final Authorization.",
@@ -172,7 +243,8 @@ class NotificationService
             'heroicon-o-key',
             'primary',
             '/admin/bkash-transaction-confirmations',
-            'Final Confirmation →'
+            'Final Confirmation →',
+            'authorizer_2'
         );
 
         return static::createOutbox('STAGE_3_AUTH1', $fileName, $totalTrn, $totalAmount, $authorizerName1, 'ALL_AUTHORIZERS_2', $body, $senderUser, $recipientRoles);
@@ -180,10 +252,16 @@ class NotificationService
 
     /**
      * Dispatch Stage 4: Authorized by 2nd Authorizer -> Finally Authorized
-     * Recipient Roles: ['bkash_checker', 'bkash_authorizer_1', 'bkash_authorizer_2']
+     * By default notifies all Janata Bank users (excluding actor), including Checkers & Authorizer 1.
      */
-    public static function dispatchStage4(string $fileName, int $totalTrn, float $totalAmount, string $confirmerName, ?User $senderUser = null): NotificationOutbox
-    {
+    public static function dispatchStage4(
+        string $fileName,
+        int $totalTrn,
+        float $totalAmount,
+        string $confirmerName,
+        ?User $senderUser = null,
+        array $recipientRoles = []
+    ): NotificationOutbox {
         $formattedAmount = BkashTransaction::formatBdtAmount($totalAmount);
 
         $body = "Dear Sir/Madam,\n"
@@ -193,8 +271,6 @@ class NotificationService
               . "Thank you\n"
               . "JANATA BANK";
 
-        $recipientRoles = ['bkash_checker', 'bkash_authorizer_1', 'bkash_authorizer_2'];
-
         static::sendOrganizationDatabaseNotification(
             "Final Confirmation Completed by {$confirmerName}",
             "File: {$fileName} | Total Trn: {$totalTrn}, Amount: BDT {$formattedAmount}. Settled.",
@@ -203,10 +279,35 @@ class NotificationService
             'heroicon-o-check-badge',
             'success',
             '/admin/bkash-transactions',
-            'View Transactions →'
+            'View Transactions →',
+            'authorizer_2'
         );
 
         return static::createOutbox('STAGE_4_AUTH2', $fileName, $totalTrn, $totalAmount, $confirmerName, 'ALL_USERS', $body, $senderUser, $recipientRoles);
+    }
+
+    /**
+     * Dispatch workflow stage notification dynamically from transaction record and actor.
+     */
+    public static function dispatchWorkflowNotification(
+        int $stage,
+        BkashTransaction $transaction,
+        string $actorName,
+        int|string|null $actorId = null
+    ): ?NotificationOutbox {
+        $fileName = $transaction->file_name ?? 'Batch';
+        $batch = BkashTransactionBatch::where('file_name', $fileName)->first();
+        $totalTrn = $batch?->total_transactions ?? BkashTransaction::where('file_name', $fileName)->count();
+        $totalAmount = (float) ($batch?->total_amount ?? BkashTransaction::where('file_name', $fileName)->sum('amount'));
+        $actor = $actorId ? User::find($actorId) : Auth::user();
+
+        return match ($stage) {
+            1 => static::dispatchStage1($fileName, $totalTrn, $totalAmount, $actor),
+            2 => static::dispatchStage2($fileName, $totalTrn, $totalAmount, $actorName, $actor),
+            3 => static::dispatchStage3($fileName, $totalTrn, $totalAmount, $actorName, $actor),
+            4 => static::dispatchStage4($fileName, $totalTrn, $totalAmount, $actorName, $actor),
+            default => null,
+        };
     }
 
     private static function createOutbox(
@@ -350,7 +451,7 @@ class NotificationService
                     Log::error("SMS to {$phone} failed: " . $smsEx->getMessage());
                 }
             }
-            
+
             $outbox->update(['sms_status' => 'SENT']);
         } catch (\Throwable $e) {
             $outbox->update(['sms_status' => 'FAILED']);
@@ -370,9 +471,6 @@ class NotificationService
         if (!empty($organization)) {
             $query->where(function ($q) use ($organization) {
                 $q->where('organization', $organization);
-                if (is_numeric($organization)) {
-                    $q->orWhere('organization_id', $organization);
-                }
             });
         }
         if (!empty($roleNames)) {
@@ -393,9 +491,6 @@ class NotificationService
         if (!empty($organization)) {
             $query->where(function ($q) use ($organization) {
                 $q->where('organization', $organization);
-                if (is_numeric($organization)) {
-                    $q->orWhere('organization_id', $organization);
-                }
             });
         }
         if (!empty($roleNames)) {

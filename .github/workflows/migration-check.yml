@@ -1,0 +1,32 @@
+name: Migration Safety Check
+
+on:
+  pull_request:
+    paths:
+      - 'database/migrations/**'
+
+jobs:
+  check-migrations:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.3'
+      - name: Install dependencies
+        run: composer install --no-interaction --prefer-dist --ignore-platform-req=ext-oci8
+      - name: Copy .env and generate key
+        run: |
+          cp .env.example .env
+          php artisan key:generate
+      - name: Test migrations on SQLite (fresh)
+        run: |
+          touch database/test.sqlite
+          sed -i "s/DB_CONNECTION=.*/DB_CONNECTION=sqlite/" .env
+          sed -i "s|DB_DATABASE=.*|DB_DATABASE=${{ github.workspace }}/database/test.sqlite|" .env
+          php artisan migrate --force
+      - name: Test migration rollback
+        run: php artisan migrate:rollback --force
+      - name: Test migration re-run (up again)
+        run: php artisan migrate --force

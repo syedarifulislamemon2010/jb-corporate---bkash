@@ -85,6 +85,21 @@
         }
     }
 
+    .db-grid-2 {
+        display: grid;
+        grid-template-columns: repeat(1, minmax(0, 1fr));
+        gap: 1.25rem;
+    }
+    @media (min-width: 1024px) {
+        .db-grid-2 {
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+        }
+    }
+    .db-grid-2 > * {
+        height: 100% !important;
+        margin: 0 !important;
+    }
+
     .db-grid-2-1 {
         display: grid;
         grid-template-columns: repeat(1, minmax(0, 1fr));
@@ -1768,7 +1783,1551 @@
             border-right-width: 1px;
         }
     }
+
+    /* ─── High-Priority Failed / Partial Transactions Critical Monitor Card ─── */
+    .db-exception-link {
+        text-decoration: none !important;
+        display: block !important;
+    }
+    .db-card-danger,
+    a.db-exception-link {
+        background-color: #fff1f2 !important;
+        border: 2px solid #f43f5e !important;
+        border-left: 6px solid #e11d48 !important;
+        box-shadow: 0 4px 14px rgba(225, 29, 72, 0.15) !important;
+        border-radius: 0.75rem !important;
+        transition: all 0.2s ease-in-out !important;
+    }
+    html.dark .db-card-danger,
+    html.dark a.db-exception-link,
+    .dark .db-card-danger,
+    .dark a.db-exception-link {
+        background-color: rgba(225, 29, 72, 0.1) !important;
+        border-color: #e11d48 !important;
+        box-shadow: 0 4px 14px rgba(225, 29, 72, 0.25) !important;
+    }
+    a.db-exception-link:hover {
+        transform: translateY(-2px) !important;
+        box-shadow: 0 6px 18px rgba(225, 29, 72, 0.25) !important;
+    }
+    .db-exception-icon-ok,
+    .db-exception-icon-err {
+        background: #ffe4e6 !important;
+        color: #e11d48 !important;
+        border: 1px solid #fecdd3 !important;
+        border-radius: 0.5rem !important;
+        padding: 0.5rem !important;
+    }
+    html.dark .db-exception-icon-ok,
+    html.dark .db-exception-icon-err {
+        background: rgba(225, 29, 72, 0.2) !important;
+        color: #fb7185 !important;
+        border-color: rgba(225, 29, 72, 0.4) !important;
+    }
+    .db-exception-label {
+        color: #be123c !important;
+        font-weight: 700 !important;
+        letter-spacing: 0.05em !important;
+    }
+    html.dark .db-exception-label {
+        color: #fda4af !important;
+    }
+    .db-exception-headline {
+        color: #9f1239 !important;
+        font-size: 0.9375rem !important;
+        font-weight: 700 !important;
+    }
+    html.dark .db-exception-headline {
+        color: #fff1f2 !important;
+    }
+    .db-exception-action {
+        color: #e11d48 !important;
+        font-weight: 700 !important;
+    }
+
+    /* ─── Recent Activity & Pipeline Audit Feed Larger Font Sizes ─── */
+    .db-timeline-file-tag {
+        font-family: var(--font-mono, monospace) !important;
+        font-size: 0.875rem !important;
+        font-weight: 700 !important;
+        padding: 0.2rem 0.6rem !important;
+        border-radius: 6px !important;
+        background-color: #f1f5f9 !important;
+        color: #0f172a !important;
+        border: 1.5px solid #cbd5e1 !important;
+        letter-spacing: 0.02em !important;
+    }
+    html.dark .db-timeline-file-tag,
+    .dark .db-timeline-file-tag {
+        background-color: #090d16 !important;
+        color: #38bdf8 !important;
+        border-color: #334155 !important;
+    }
+    .db-timeline-action-title {
+        font-size: 0.9375rem !important;
+        font-weight: 600 !important;
+    }
+    .db-stage-badge {
+        font-size: 0.75rem !important;
+        font-weight: 700 !important;
+    }
+    .db-timeline-human-time {
+        font-size: 0.8125rem !important;
+    }
+    .db-timeline-actor,
+    .db-timeline-full-time {
+        font-size: 0.8125rem !important;
+    }
+
+    /* ─── 2-Line Text Wrapping & No Horizontal Scrolling on 4 Report / Audit Tables ─── */
+    .fi-resource-bkash-failed-transactions .fi-ta-ctn,
+    .fi-resource-bkash-batches .fi-ta-ctn,
+    .fi-resource-bkash-reports .fi-ta-ctn,
+    .fi-resource-eft-returns .fi-ta-ctn {
+        overflow-x: hidden !important;
+    }
+    .fi-resource-bkash-failed-transactions .fi-ta-table,
+    .fi-resource-bkash-batches .fi-ta-table,
+    .fi-resource-bkash-reports .fi-ta-table,
+    .fi-resource-eft-returns .fi-ta-table {
+        table-layout: auto !important;
+        width: 100% !important;
+    }
+    .fi-resource-bkash-failed-transactions .fi-ta-cell,
+    .fi-resource-bkash-batches .fi-ta-cell,
+    .fi-resource-bkash-reports .fi-ta-cell,
+    .fi-resource-eft-returns .fi-ta-cell {
+        white-space: normal !important;
+        word-break: break-word !important;
+        overflow-wrap: break-word !important;
+        padding-top: 0.5rem !important;
+        padding-bottom: 0.5rem !important;
+    }
+    .fi-resource-bkash-failed-transactions .fi-ta-cell p,
+    .fi-resource-bkash-failed-transactions .fi-ta-cell span,
+    .fi-resource-bkash-batches .fi-ta-cell p,
+    .fi-resource-bkash-batches .fi-ta-cell span,
+    .fi-resource-bkash-reports .fi-ta-cell p,
+    .fi-resource-bkash-reports .fi-ta-cell span,
+    .fi-resource-eft-returns .fi-ta-cell p,
+    .fi-resource-eft-returns .fi-ta-cell span {
+        white-space: normal !important;
+        word-break: break-word !important;
+        line-height: 1.25 !important;
+    }
+
+    /* ─── Clean Topbar Icons Styling ─── */
+    .fi-topbar-end select,
+    .fi-topbar-end input[type="number"]::-webkit-inner-spin-button,
+    .fi-topbar-end input[type="number"]::-webkit-outer-spin-button {
+        display: none !important;
+        -webkit-appearance: none !important;
+        margin: 0 !important;
+    }
+
+    /* ==========================================================================
+       DISTINCT CHANNEL BUTTON COLORS ACROSS ALL 4 PAGES
+       (bkash-transactions, bkash-transaction-authorizations, 
+        bkash-transaction-confirmations, bkash-reports)
+       ========================================================================== */
+
+    /* Tabs Container on bkash-reports */
+    .fi-resource-bkash-reports .fi-tabs,
+    .fi-resource-bkash-reports nav[role="tablist"] {
+        display: flex !important;
+        align-items: center !important;
+        gap: 0.6rem !important;
+        border-bottom: 1.5px solid #cbd5e1 !important;
+        padding-bottom: 0.85rem !important;
+        margin-bottom: 1.25rem !important;
+        background: transparent !important;
+        flex-wrap: wrap !important;
+        border-top: none !important;
+    }
+    html.dark .fi-resource-bkash-reports .fi-tabs,
+    .dark .fi-resource-bkash-reports .fi-tabs {
+        border-bottom-color: #334155 !important;
+    }
+
+    /* Common Button Reset for Tabs */
+    .jb-tab-all, .jb-tab-a2a, .jb-tab-beftn, .jb-tab-rtgs,
+    .fi-resource-bkash-reports .fi-tabs-item {
+        padding: 0.45rem 1rem !important;
+        font-size: 0.8125rem !important;
+        font-weight: 600 !important;
+        border-radius: 0.5rem !important;
+        cursor: pointer !important;
+        transition: all 0.2s ease-in-out !important;
+        font-family: inherit !important;
+        display: inline-flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        text-decoration: none !important;
+        box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05) !important;
+        border-bottom-width: 1.5px !important;
+    }
+    .fi-resource-bkash-reports .fi-tabs-item:after,
+    .fi-resource-bkash-reports .fi-tabs-item:before {
+        display: none !important;
+    }
+
+    /* ─── 1. ALL TRANSACTIONS TAB (Neutral Dark Slate / Navy) ─── */
+    .jb-tab-all,
+    .fi-resource-bkash-reports .fi-tabs-item[wire\:click*="'all'"] {
+        background-color: #ffffff !important;
+        color: #1e293b !important;
+        border: 1.5px solid #94a3b8 !important;
+    }
+    html.dark .jb-tab-all,
+    html.dark .fi-resource-bkash-reports .fi-tabs-item[wire\:click*="'all'"],
+    .dark .jb-tab-all,
+    .dark .fi-resource-bkash-reports .fi-tabs-item[wire\:click*="'all'"] {
+        background-color: #1e293b !important;
+        border-color: #475569 !important;
+        color: #f1f5f9 !important;
+    }
+    .jb-tab-all:hover,
+    .fi-resource-bkash-reports .fi-tabs-item[wire\:click*="'all'"]:hover {
+        background-color: #f1f5f9 !important;
+        color: #0f172a !important;
+        border-color: #475569 !important;
+        transform: translateY(-1px) !important;
+    }
+    .jb-tab-all.active,
+    .fi-resource-bkash-reports .fi-tabs-item[wire\:click*="'all'"].fi-active {
+        background-color: #0f172a !important;
+        border-color: #020617 !important;
+        color: #ffffff !important;
+        font-weight: 700 !important;
+        box-shadow: 0 3px 8px rgba(15, 23, 42, 0.4) !important;
+    }
+    html.dark .jb-tab-all.active,
+    html.dark .fi-resource-bkash-reports .fi-tabs-item[wire\:click*="'all'"].fi-active,
+    .dark .jb-tab-all.active,
+    .dark .fi-resource-bkash-reports .fi-tabs-item[wire\:click*="'all'"].fi-active {
+        background-color: #0284c7 !important;
+        border-color: #38bdf8 !important;
+        color: #ffffff !important;
+    }
+
+    /* ─── 2. A2A TAB (Vibrant Emerald Green) ─── */
+    .jb-tab-a2a,
+    .fi-resource-bkash-reports .fi-tabs-item[wire\:click*="'a2a'"] {
+        background-color: #f0fdf4 !important;
+        color: #15803d !important;
+        border: 1.5px solid #86efac !important;
+    }
+    html.dark .jb-tab-a2a,
+    html.dark .fi-resource-bkash-reports .fi-tabs-item[wire\:click*="'a2a'"],
+    .dark .jb-tab-a2a,
+    .dark .fi-resource-bkash-reports .fi-tabs-item[wire\:click*="'a2a'"] {
+        background-color: rgba(16, 185, 129, 0.12) !important;
+        border-color: rgba(16, 185, 129, 0.35) !important;
+        color: #34d399 !important;
+    }
+    .jb-tab-a2a:hover,
+    .fi-resource-bkash-reports .fi-tabs-item[wire\:click*="'a2a'"]:hover {
+        background-color: #dcfce7 !important;
+        color: #166534 !important;
+        border-color: #4ade80 !important;
+        transform: translateY(-1px) !important;
+    }
+    .jb-tab-a2a.active,
+    .fi-resource-bkash-reports .fi-tabs-item[wire\:click*="'a2a'"].fi-active {
+        background-color: #10b981 !important;
+        border-color: #059669 !important;
+        color: #ffffff !important;
+        font-weight: 700 !important;
+        box-shadow: 0 3px 10px rgba(16, 185, 129, 0.4) !important;
+    }
+    html.dark .jb-tab-a2a.active,
+    html.dark .fi-resource-bkash-reports .fi-tabs-item[wire\:click*="'a2a'"].fi-active,
+    .dark .jb-tab-a2a.active,
+    .dark .fi-resource-bkash-reports .fi-tabs-item[wire\:click*="'a2a'"].fi-active {
+        background-color: #10b981 !important;
+        border-color: #34d399 !important;
+        color: #ffffff !important;
+    }
+
+    /* ─── 3. BEFTN TAB (Vibrant Royal Purple) ─── */
+    .jb-tab-beftn,
+    .fi-resource-bkash-reports .fi-tabs-item[wire\:click*="'beftn'"] {
+        background-color: #faf5ff !important;
+        color: #7e22ce !important;
+        border: 1.5px solid #d8b4fe !important;
+    }
+    html.dark .jb-tab-beftn,
+    html.dark .fi-resource-bkash-reports .fi-tabs-item[wire\:click*="'beftn'"],
+    .dark .jb-tab-beftn,
+    .dark .fi-resource-bkash-reports .fi-tabs-item[wire\:click*="'beftn'"] {
+        background-color: rgba(139, 92, 246, 0.12) !important;
+        border-color: rgba(139, 92, 246, 0.35) !important;
+        color: #c084fc !important;
+    }
+    .jb-tab-beftn:hover,
+    .fi-resource-bkash-reports .fi-tabs-item[wire\:click*="'beftn'"]:hover {
+        background-color: #f3e8ff !important;
+        color: #6b21a8 !important;
+        border-color: #c084fc !important;
+        transform: translateY(-1px) !important;
+    }
+    .jb-tab-beftn.active,
+    .fi-resource-bkash-reports .fi-tabs-item[wire\:click*="'beftn'"].fi-active {
+        background-color: #8b5cf6 !important;
+        border-color: #7c3aed !important;
+        color: #ffffff !important;
+        font-weight: 700 !important;
+        box-shadow: 0 3px 10px rgba(139, 92, 246, 0.4) !important;
+    }
+    html.dark .jb-tab-beftn.active,
+    html.dark .fi-resource-bkash-reports .fi-tabs-item[wire\:click*="'beftn'"].fi-active,
+    .dark .jb-tab-beftn.active,
+    .dark .fi-resource-bkash-reports .fi-tabs-item[wire\:click*="'beftn'"].fi-active {
+        background-color: #8b5cf6 !important;
+        border-color: #a78bfa !important;
+        color: #ffffff !important;
+    }
+
+    /* ─── 4. RTGS TAB (Vibrant Warm Amber Orange) ─── */
+    .jb-tab-rtgs,
+    .fi-resource-bkash-reports .fi-tabs-item[wire\:click*="'rtgs'"] {
+        background-color: #fffbeb !important;
+        color: #b45309 !important;
+        border: 1.5px solid #fde68a !important;
+    }
+    html.dark .jb-tab-rtgs,
+    html.dark .fi-resource-bkash-reports .fi-tabs-item[wire\:click*="'rtgs'"],
+    .dark .jb-tab-rtgs,
+    .dark .fi-resource-bkash-reports .fi-tabs-item[wire\:click*="'rtgs'"] {
+        background-color: rgba(245, 158, 11, 0.12) !important;
+        border-color: rgba(245, 158, 11, 0.35) !important;
+        color: #fbbf24 !important;
+    }
+    .jb-tab-rtgs:hover,
+    .fi-resource-bkash-reports .fi-tabs-item[wire\:click*="'rtgs'"]:hover {
+        background-color: #fef3c7 !important;
+        color: #92400e !important;
+        border-color: #fcd34d !important;
+        transform: translateY(-1px) !important;
+    }
+    .jb-tab-rtgs.active,
+    .fi-resource-bkash-reports .fi-tabs-item[wire\:click*="'rtgs'"].fi-active {
+        background-color: #f59e0b !important;
+        border-color: #d97706 !important;
+        color: #ffffff !important;
+        font-weight: 700 !important;
+        box-shadow: 0 3px 10px rgba(245, 158, 11, 0.4) !important;
+    }
+    html.dark .jb-tab-rtgs.active,
+    html.dark .fi-resource-bkash-reports .fi-tabs-item[wire\:click*="'rtgs'"].fi-active,
+    .dark .jb-tab-rtgs.active,
+    .dark .fi-resource-bkash-reports .fi-tabs-item[wire\:click*="'rtgs'"].fi-active {
+        background-color: #f59e0b !important;
+        border-color: #fbbf24 !important;
+        color: #ffffff !important;
+    }
+
+    /* ─── BKASH-REPORTS ENTERPRISE TABLE POLISH ─── */
+    .fi-resource-bkash-reports .fi-ta-ctn {
+        border: 1px solid #cbd5e1 !important;
+        border-radius: 0.75rem !important;
+        overflow: hidden !important;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06) !important;
+    }
+    html.dark .fi-resource-bkash-reports .fi-ta-ctn,
+    .dark .fi-resource-bkash-reports .fi-ta-ctn {
+        border-color: #334155 !important;
+        background-color: #0f172a !important;
+    }
+    .fi-resource-bkash-reports .fi-ta-table thead {
+        background-color: #f8fafc !important;
+        border-bottom: 2px solid #cbd5e1 !important;
+    }
+    html.dark .fi-resource-bkash-reports .fi-ta-table thead,
+    .dark .fi-resource-bkash-reports .fi-ta-table thead {
+        background-color: #1e293b !important;
+        border-bottom-color: #334155 !important;
+    }
+    .fi-resource-bkash-reports .fi-ta-header-cell {
+        padding: 0.75rem 0.6rem !important;
+        font-size: 0.75rem !important;
+        font-weight: 700 !important;
+        color: #334155 !important;
+    }
+    html.dark .fi-resource-bkash-reports .fi-ta-header-cell,
+    .dark .fi-resource-bkash-reports .fi-ta-header-cell {
+        color: #94a3b8 !important;
+    }
+    .fi-resource-bkash-reports .fi-ta-record:hover {
+        background-color: #f8fafc !important;
+    }
+    html.dark .fi-resource-bkash-reports .fi-ta-record:hover,
+    .dark .fi-resource-bkash-reports .fi-ta-record:hover {
+        background-color: rgba(30, 41, 59, 0.4) !important;
+    }
+        /* High-Contrast Distinct Channel Tabs Across Pipeline & Reports */
+        .jb-tab-all, .jb-tab-a2a, .jb-tab-beftn, .jb-tab-rtgs {
+            padding: 0.5rem 1.15rem !important;
+            font-size: 0.8125rem !important;
+            font-weight: 600 !important;
+            border-radius: 0.5rem !important;
+            cursor: pointer !important;
+            transition: all 0.2s ease-in-out !important;
+            font-family: inherit !important;
+            box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05) !important;
+            display: inline-flex !important;
+            align-items: center !important;
+            justify-content: center !important;
+            text-decoration: none !important;
+        }
+
+        /* 1. All Transactions (Slate / Charcoal) */
+        .jb-tab-all {
+            background-color: #ffffff !important;
+            color: #1e293b !important;
+            border: 1.5px solid #94a3b8 !important;
+        }
+        html.dark .jb-tab-all, .dark .jb-tab-all {
+            background-color: #1e293b !important;
+            border-color: #475569 !important;
+            color: #f1f5f9 !important;
+        }
+        .jb-tab-all:hover {
+            background-color: #f1f5f9 !important;
+            border-color: #475569 !important;
+            color: #0f172a !important;
+            transform: translateY(-1px) !important;
+        }
+        .jb-tab-all.active {
+            background-color: #0f172a !important;
+            border-color: #020617 !important;
+            color: #ffffff !important;
+            font-weight: 700 !important;
+            box-shadow: 0 3px 8px rgba(15, 23, 42, 0.4) !important;
+        }
+        html.dark .jb-tab-all.active, .dark .jb-tab-all.active {
+            background-color: #0284c7 !important;
+            border-color: #38bdf8 !important;
+            color: #ffffff !important;
+        }
+
+        /* 2. A2A (Vibrant Emerald Green) */
+        .jb-tab-a2a {
+            background-color: #f0fdf4 !important;
+            color: #15803d !important;
+            border: 1.5px solid #86efac !important;
+        }
+        html.dark .jb-tab-a2a, .dark .jb-tab-a2a {
+            background-color: rgba(16, 185, 129, 0.12) !important;
+            border-color: rgba(16, 185, 129, 0.35) !important;
+            color: #34d399 !important;
+        }
+        .jb-tab-a2a:hover {
+            background-color: #dcfce7 !important;
+            color: #166534 !important;
+            border-color: #4ade80 !important;
+            transform: translateY(-1px) !important;
+        }
+        .jb-tab-a2a.active {
+            background-color: #10b981 !important;
+            border-color: #059669 !important;
+            color: #ffffff !important;
+            font-weight: 700 !important;
+            box-shadow: 0 3px 10px rgba(16, 185, 129, 0.4) !important;
+        }
+        html.dark .jb-tab-a2a.active, .dark .jb-tab-a2a.active {
+            background-color: #10b981 !important;
+            border-color: #34d399 !important;
+            color: #ffffff !important;
+        }
+
+        /* 3. BEFTN (Vibrant Royal Purple) */
+        .jb-tab-beftn {
+            background-color: #faf5ff !important;
+            color: #7e22ce !important;
+            border: 1.5px solid #d8b4fe !important;
+        }
+        html.dark .jb-tab-beftn, .dark .jb-tab-beftn {
+            background-color: rgba(139, 92, 246, 0.12) !important;
+            border-color: rgba(139, 92, 246, 0.35) !important;
+            color: #c084fc !important;
+        }
+        .jb-tab-beftn:hover {
+            background-color: #f3e8ff !important;
+            color: #6b21a8 !important;
+            border-color: #c084fc !important;
+            transform: translateY(-1px) !important;
+        }
+        .jb-tab-beftn.active {
+            background-color: #8b5cf6 !important;
+            border-color: #7c3aed !important;
+            color: #ffffff !important;
+            font-weight: 700 !important;
+            box-shadow: 0 3px 10px rgba(139, 92, 246, 0.4) !important;
+        }
+        html.dark .jb-tab-beftn.active, .dark .jb-tab-beftn.active {
+            background-color: #8b5cf6 !important;
+            border-color: #a78bfa !important;
+            color: #ffffff !important;
+        }
+
+        /* 4. RTGS (Vibrant Warm Amber Orange) */
+        .jb-tab-rtgs {
+            background-color: #fffbeb !important;
+            color: #b45309 !important;
+            border: 1.5px solid #fde68a !important;
+        }
+        html.dark .jb-tab-rtgs, .dark .jb-tab-rtgs {
+            background-color: rgba(245, 158, 11, 0.12) !important;
+            border-color: rgba(245, 158, 11, 0.35) !important;
+            color: #fbbf24 !important;
+        }
+        .jb-tab-rtgs:hover {
+            background-color: #fef3c7 !important;
+            color: #92400e !important;
+            border-color: #fcd34d !important;
+            transform: translateY(-1px) !important;
+        }
+        .jb-tab-rtgs.active {
+            background-color: #f59e0b !important;
+            border-color: #d97706 !important;
+            color: #ffffff !important;
+            font-weight: 700 !important;
+            box-shadow: 0 3px 10px rgba(245, 158, 11, 0.4) !important;
+        }
+        html.dark .jb-tab-rtgs.active, .dark .jb-tab-rtgs.active {
+            background-color: #f59e0b !important;
+            border-color: #fbbf24 !important;
+            color: #ffffff !important;
+        }
+
+    /* ─── Suppress Any Stray Up/Down Arrows, Select, or Spinners in Topbar ─── */
+    .fi-topbar-end select,
+    
+    .fi-topbar select,
+    header select,
+    .fi-topbar-end input[type="number"]::-webkit-inner-spin-button,
+    .fi-topbar-end input[type="number"]::-webkit-outer-spin-button,
+    .fi-topbar-end [role="spinbutton"],
+    .fi-topbar-end [aria-label*="sort" i],
+    .fi-topbar-database-notifications-btn + *:not(.fi-dropdown):not(.fi-user-menu) {
+        display: none !important;
+        visibility: hidden !important;
+        opacity: 0 !important;
+        width: 0 !important;
+        height: 0 !important;
+        pointer-events: none !important;
+        margin: 0 !important;
+        padding: 0 !important;
+    }
+
+    /* ==========================================================================
+       MODERN INSTITUTIONAL FINTECH SIDEBAR SYSTEM (Janata Bank · bKash H2H)
+       ========================================================================== */
+
+    /* ─── Sidebar Theme (Corporate Midnight Navy in Dark Mode) ─── */
+    html.dark aside.fi-sidebar,
+    .dark aside.fi-sidebar {
+        background-color: #0b1329 !important; /* Deep Corporate Midnight Navy */
+        border-right: 1px solid #1e293b !important;
+        box-shadow: 4px 0 24px rgba(0, 0, 0, 0.35) !important;
+    }
+    html:not(.dark) aside.fi-sidebar {
+        background-color: #ffffff !important;
+        border-right: 1.5px solid #e2e8f0 !important;
+        box-shadow: 2px 0 12px rgba(0, 0, 0, 0.03) !important;
+    }
+
+    /* ─── Navigation Groups & Section Labels ─── */
+    .fi-sidebar-group-label,
+    .fi-sidebar-group-button span {
+        font-size: 0.6875rem !important;
+        font-weight: 800 !important;
+        letter-spacing: 0.08em !important;
+        text-transform: uppercase !important;
+    }
+    html.dark .fi-sidebar-group-label,
+    html.dark .fi-sidebar-group-button span,
+    .dark .fi-sidebar-group-label,
+    .dark .fi-sidebar-group-button span {
+        color: #64748b !important;
+    }
+    html:not(.dark) .fi-sidebar-group-label,
+    html:not(.dark) .fi-sidebar-group-button span {
+        color: #64748b !important;
+    }
+
+    /* ─── Navigation Item Modern Interactive States ─── */
+    .fi-sidebar-item a,
+    .fi-sidebar-item button {
+        border-radius: 0.5rem !important;
+        transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1) !important;
+        padding: 0.45rem 0.65rem !important;
+        margin: 0.15rem 0 !important;
+    }
+    .fi-sidebar-item a:hover,
+    .fi-sidebar-item button:hover {
+        transform: translateX(3px) !important;
+    }
+    html.dark .fi-sidebar-item a:hover,
+    html.dark .fi-sidebar-item button:hover,
+    .dark .fi-sidebar-item a:hover,
+    .dark .fi-sidebar-item button:hover {
+        background-color: rgba(30, 41, 59, 0.7) !important;
+        color: #38bdf8 !important;
+    }
+    html:not(.dark) .fi-sidebar-item a:hover,
+    html:not(.dark) .fi-sidebar-item button:hover {
+        background-color: #f1f5f9 !important;
+        color: #0284c7 !important;
+    }
+
+    /* Active Menu Indicator */
+    .fi-sidebar-item-active a,
+    .fi-sidebar-item-active button {
+        font-weight: 700 !important;
+        border-left: 3.5px solid #0284c7 !important;
+    }
+    html.dark .fi-sidebar-item-active a,
+    html.dark .fi-sidebar-item-active button,
+    .dark .fi-sidebar-item-active a,
+    .dark .fi-sidebar-item-active button {
+        background: linear-gradient(90deg, rgba(2, 132, 199, 0.2), rgba(2, 132, 199, 0.04)) !important;
+        color: #38bdf8 !important;
+        box-shadow: 0 1px 4px rgba(2, 132, 199, 0.15) !important;
+    }
+    html:not(.dark) .fi-sidebar-item-active a,
+    html:not(.dark) .fi-sidebar-item-active button {
+        background: linear-gradient(90deg, #e0f2fe, #f0f9ff) !important;
+        color: #0369a1 !important;
+        border-color: #0284c7 !important;
+        box-shadow: 0 1px 4px rgba(2, 132, 199, 0.1) !important;
+    }
+
+    /* ─── Navigation Badges (Live Status Counters) ─── */
+    .fi-sidebar-item .fi-badge {
+        font-size: 0.6875rem !important;
+        font-weight: 800 !important;
+        padding: 0.15rem 0.5rem !important;
+        border-radius: 9999px !important;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.15) !important;
+    }
+
+    /* ─── Bottom Profile & CBS Widget ─── */
+    .jb-sidebar-profile-card {
+        margin: 0.75rem 0.5rem 0.5rem 0.5rem;
+        padding: 0.65rem 0.75rem;
+        border-radius: 0.65rem;
+        transition: all 0.2s ease;
+        border: 1px solid transparent;
+    }
+    html.dark .jb-sidebar-profile-card,
+    .dark .jb-sidebar-profile-card {
+        background-color: rgba(15, 23, 42, 0.6);
+        border-color: #1e293b;
+    }
+    html:not(.dark) .jb-sidebar-profile-card {
+        background-color: #f8fafc;
+        border-color: #e2e8f0;
+    }
+    .jb-profile-row {
+        display: flex;
+        align-items: center;
+        gap: 0.6rem;
+    }
+    .jb-profile-avatar {
+        width: 32px;
+        height: 32px;
+        min-width: 32px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 0.75rem;
+        font-weight: 800;
+        color: #ffffff;
+        background: linear-gradient(135deg, #0284c7, #0f172a);
+        box-shadow: 0 2px 5px rgba(2, 132, 199, 0.3);
+    }
+    .jb-profile-info {
+        display: flex;
+        flex-direction: column;
+        overflow: hidden;
+    }
+    .jb-profile-name {
+        font-size: 0.8125rem;
+        font-weight: 700;
+        color: #0f172a;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+    html.dark .jb-profile-name,
+    .dark .jb-profile-name {
+        color: #f8fafc;
+    }
+    .jb-profile-role {
+        font-size: 0.6875rem;
+        color: #64748b;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+    html.dark .jb-profile-role,
+    .dark .jb-profile-role {
+        color: #94a3b8;
+    }
+    .jb-profile-cbs-status {
+        display: flex;
+        align-items: center;
+        gap: 0.35rem;
+        margin-top: 0.5rem;
+        padding-top: 0.4rem;
+        border-top: 1px solid #e2e8f0;
+        font-size: 0.6875rem;
+        font-weight: 600;
+    }
+    html.dark .jb-profile-cbs-status,
+    .dark .jb-profile-cbs-status {
+        border-top-color: #1e293b;
+    }
+    .jb-cbs-dot {
+        width: 6px;
+        height: 6px;
+        border-radius: 50%;
+        background-color: #10b981;
+        box-shadow: 0 0 5px #10b981;
+    }
+    .jb-cbs-text {
+        color: #059669;
+    }
+    html.dark .jb-cbs-text,
+    .dark .jb-cbs-text {
+        color: #34d399;
+    }
+
+    /* ==========================================================================
+       IMAGE-3 STYLE RICH DATABASE NOTIFICATIONS SLIDEOVER & BADGES
+       ========================================================================== */
+
+    /* ─── Topbar Bell Unread Badge Polish ─── */
+    .fi-topbar-database-notifications-btn .fi-icon-btn-badge-ctn {
+        top: -3px !important;
+        right: -3px !important;
+    }
+    .fi-topbar-database-notifications-btn .fi-badge {
+        background-color: #ef4444 !important;
+        color: #ffffff !important;
+        font-weight: 800 !important;
+        font-size: 0.6875rem !important;
+        padding: 0.15rem 0.45rem !important;
+        border-radius: 9999px !important;
+        box-shadow: 0 2px 6px rgba(239, 68, 68, 0.4) !important;
+        border: 1.5px solid #ffffff !important;
+    }
+    html.dark .fi-topbar-database-notifications-btn .fi-badge,
+    .dark .fi-topbar-database-notifications-btn .fi-badge {
+        border-color: #0f172a !important;
+    }
+
+    /* ─── Slideover Header ─── */
+    .jb-notif-header {
+        display: flex;
+        flex-direction: column;
+        gap: 0.75rem;
+        padding-bottom: 0.5rem;
+        width: 100%;
+    }
+    .jb-notif-header-title-row {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 0.5rem;
+    }
+    .jb-notif-title-group {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+    .jb-notif-heading {
+        font-size: 1.125rem;
+        font-weight: 800;
+        color: #0f172a;
+        margin: 0;
+    }
+    html.dark .jb-notif-heading,
+    .dark .jb-notif-heading {
+        color: #f8fafc;
+    }
+    .jb-notif-unread-badge {
+        font-size: 0.6875rem;
+        font-weight: 700;
+        padding: 0.15rem 0.5rem;
+        border-radius: 9999px;
+        background-color: #fee2e2;
+        color: #dc2626;
+        border: 1px solid #fca5a5;
+    }
+    html.dark .jb-notif-unread-badge,
+    .dark .jb-notif-unread-badge {
+        background-color: rgba(239, 68, 68, 0.2);
+        color: #f87171;
+        border-color: rgba(239, 68, 68, 0.4);
+    }
+    .jb-mark-all-btn {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.35rem;
+        font-size: 0.75rem;
+        font-weight: 700;
+        color: #0284c7;
+        background: transparent;
+        border: none;
+        cursor: pointer;
+        padding: 0.25rem 0.5rem;
+        border-radius: 0.375rem;
+        transition: all 0.15s ease;
+    }
+    .jb-mark-all-btn:hover {
+        background-color: #f0f9ff;
+        color: #0369a1;
+    }
+    html.dark .jb-mark-all-btn,
+    .dark .jb-mark-all-btn {
+        color: #38bdf8;
+    }
+    html.dark .jb-mark-all-btn:hover,
+    .dark .jb-mark-all-btn:hover {
+        background-color: rgba(56, 189, 248, 0.1);
+        color: #7dd3fc;
+    }
+
+    /* ─── Category Tabs Bar ─── */
+    .jb-notif-tabs-bar {
+        display: flex;
+        align-items: center;
+        gap: 0.35rem;
+        background-color: #f1f5f9;
+        padding: 0.25rem;
+        border-radius: 0.65rem;
+        border: 1px solid #e2e8f0;
+    }
+    html.dark .jb-notif-tabs-bar,
+    .dark .jb-notif-tabs-bar {
+        background-color: #0f172a;
+        border-color: #1e293b;
+    }
+    .jb-notif-tab {
+        flex: 1;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.35rem;
+        padding: 0.35rem 0.5rem;
+        font-size: 0.75rem;
+        font-weight: 700;
+        border-radius: 0.5rem;
+        border: none;
+        background: transparent;
+        color: #64748b;
+        cursor: pointer;
+        transition: all 0.15s ease;
+    }
+    .jb-notif-tab:hover {
+        color: #0f172a;
+        background-color: rgba(255, 255, 255, 0.6);
+    }
+    html.dark .jb-notif-tab:hover,
+    .dark .jb-notif-tab:hover {
+        color: #f8fafc;
+        background-color: rgba(30, 41, 59, 0.6);
+    }
+    .jb-notif-tab.active {
+        background-color: #ffffff;
+        color: #0284c7;
+        box-shadow: 0 1px 4px rgba(0, 0, 0, 0.08);
+    }
+    html.dark .jb-notif-tab.active,
+    .dark .jb-notif-tab.active {
+        background-color: #1e293b;
+        color: #38bdf8;
+        box-shadow: 0 1px 4px rgba(0, 0, 0, 0.3);
+    }
+    .jb-notif-tab-count {
+        font-size: 0.6875rem;
+        font-weight: 800;
+        padding: 0.05rem 0.35rem;
+        border-radius: 9999px;
+        background-color: #e2e8f0;
+        color: #475569;
+    }
+    .jb-notif-tab.active .jb-notif-tab-count {
+        background-color: #e0f2fe;
+        color: #0284c7;
+    }
+    html.dark .jb-notif-tab-count,
+    .dark .jb-notif-tab-count {
+        background-color: #334155;
+        color: #94a3b8;
+    }
+    html.dark .jb-notif-tab.active .jb-notif-tab-count,
+    .dark .jb-notif-tab.active .jb-notif-tab-count {
+        background-color: rgba(2, 132, 199, 0.25);
+        color: #38bdf8;
+    }
+
+    /* ─── Notification Items ─── */
+    .jb-notif-list {
+        display: flex;
+        flex-direction: column;
+        gap: 0.65rem;
+        padding: 0.5rem 0;
+    }
+    .jb-notif-card {
+        border-radius: 0.75rem;
+        background-color: #ffffff;
+        border: 1.5px solid #e2e8f0;
+        padding: 0.85rem;
+        transition: all 0.15s ease;
+        position: relative;
+    }
+    html.dark .jb-notif-card,
+    .dark .jb-notif-card {
+        background-color: #0b1329;
+        border-color: #1e293b;
+    }
+    .jb-notif-card:hover {
+        border-color: #cbd5e1;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+    }
+    html.dark .jb-notif-card:hover,
+    .dark .jb-notif-card:hover {
+        border-color: #334155;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
+    }
+    .jb-notif-card.is-unread {
+        background-color: #f8fafc;
+        border-color: #93c5fd;
+        border-left: 4px solid #0284c7;
+    }
+    html.dark .jb-notif-card.is-unread,
+    .dark .jb-notif-card.is-unread {
+        background-color: rgba(2, 132, 199, 0.08);
+        border-color: rgba(56, 189, 248, 0.4);
+        border-left: 4px solid #38bdf8;
+    }
+    .jb-notif-card-inner {
+        display: flex;
+        gap: 0.75rem;
+        align-items: flex-start;
+    }
+    .jb-notif-icon-col {
+        flex-shrink: 0;
+        margin-top: 0.15rem;
+    }
+    .jb-notif-icon-box {
+        width: 34px;
+        height: 34px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+    .icon-checker {
+        background-color: #fef3c7;
+        color: #d97706;
+    }
+    html.dark .icon-checker,
+    .dark .icon-checker {
+        background-color: rgba(217, 119, 6, 0.2);
+        color: #fbbf24;
+    }
+    .icon-auth1 {
+        background-color: #e0f2fe;
+        color: #0284c7;
+    }
+    html.dark .icon-auth1,
+    .dark .icon-auth1 {
+        background-color: rgba(2, 132, 199, 0.2);
+        color: #38bdf8;
+    }
+    .icon-auth2 {
+        background-color: #fae8ff;
+        color: #a855f7;
+    }
+    html.dark .icon-auth2,
+    .dark .icon-auth2 {
+        background-color: rgba(168, 85, 247, 0.2);
+        color: #c084fc;
+    }
+    .icon-system {
+        background-color: #f1f5f9;
+        color: #64748b;
+    }
+    html.dark .icon-system,
+    .dark .icon-system {
+        background-color: #1e293b;
+        color: #94a3b8;
+    }
+    .jb-notif-body-col {
+        flex: 1;
+        min-width: 0;
+        display: flex;
+        flex-direction: column;
+        gap: 0.35rem;
+    }
+    .jb-notif-title-row {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 0.5rem;
+    }
+    .jb-notif-title {
+        font-size: 0.84rem;
+        font-weight: 700;
+        color: #0f172a;
+        line-height: 1.25;
+    }
+    html.dark .jb-notif-title,
+    .dark .jb-notif-title {
+        color: #f8fafc;
+    }
+    .jb-unread-dot {
+        width: 8px;
+        height: 8px;
+        min-width: 8px;
+        border-radius: 50%;
+        background-color: #0284c7;
+        box-shadow: 0 0 6px #0284c7;
+    }
+    html.dark .jb-unread-dot,
+    .dark .jb-unread-dot {
+        background-color: #38bdf8;
+        box-shadow: 0 0 8px #38bdf8;
+    }
+    .jb-notif-desc {
+        font-size: 0.75rem;
+        color: #475569;
+        line-height: 1.4;
+        word-break: break-word;
+    }
+    html.dark .jb-notif-desc,
+    .dark .jb-notif-desc {
+        color: #94a3b8;
+    }
+    .jb-notif-footer-row {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 0.5rem;
+        margin-top: 0.35rem;
+        padding-top: 0.35rem;
+        border-top: 1px solid #f1f5f9;
+    }
+    html.dark .jb-notif-footer-row,
+    .dark .jb-notif-footer-row {
+        border-top-color: #1e293b;
+    }
+    .jb-notif-time {
+        font-size: 0.6875rem;
+        color: #94a3b8;
+        font-weight: 500;
+    }
+    .jb-notif-item-actions {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+    .jb-notif-action-btn {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.25rem;
+        font-size: 0.6875rem;
+        font-weight: 700;
+        padding: 0.2rem 0.55rem;
+        border-radius: 0.375rem;
+        background-color: #0284c7;
+        color: #ffffff !important;
+        text-decoration: none !important;
+        transition: all 0.15s ease;
+    }
+    .jb-notif-action-btn:hover {
+        background-color: #0369a1;
+        transform: translateY(-1px);
+        box-shadow: 0 2px 5px rgba(2, 132, 199, 0.3);
+    }
+    .jb-mark-single-read-btn {
+        font-size: 0.6875rem;
+        font-weight: 600;
+        color: #64748b;
+        background: transparent;
+        border: none;
+        cursor: pointer;
+        padding: 0.15rem 0.35rem;
+        border-radius: 0.25rem;
+    }
+    .jb-mark-single-read-btn:hover {
+        color: #0f172a;
+        background-color: #f1f5f9;
+    }
+    html.dark .jb-mark-single-read-btn:hover,
+    .dark .jb-mark-single-read-btn:hover {
+        color: #f8fafc;
+        background-color: #1e293b;
+    }
+
+    /* ─── Empty State ─── */
+    .jb-notif-empty-state {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        text-align: center;
+        padding: 3rem 1.5rem;
+    }
+    .jb-notif-empty-icon {
+        width: 56px;
+        height: 56px;
+        border-radius: 50%;
+        background-color: #f1f5f9;
+        color: #94a3b8;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-bottom: 1rem;
+    }
+    html.dark .jb-notif-empty-icon,
+    .dark .jb-notif-empty-icon {
+        background-color: #1e293b;
+        color: #64748b;
+    }
+    .jb-notif-empty-title {
+        font-size: 0.9375rem;
+        font-weight: 700;
+        color: #0f172a;
+        margin: 0 0 0.25rem 0;
+    }
+    html.dark .jb-notif-empty-title,
+    .dark .jb-notif-empty-title {
+        color: #f8fafc;
+    }
+    .jb-notif-empty-desc {
+        font-size: 0.8125rem;
+        color: #64748b;
+        margin: 0;
+    }
+    html.dark .jb-notif-empty-desc,
+    .dark .jb-notif-empty-desc {
+        color: #94a3b8;
+    }
+
+    /* ==========================================================================
+       ENTERPRISE POLISH PATCH (Spacing, Notification Arrow, Card Flex, Sync)
+       ========================================================================== */
+
+    /* ─── Item 5: Compact Sidebar Spacing (30-40% reduction) ─── */
+    .fi-sidebar-item a,
+    .fi-sidebar-item button {
+        padding: 0.28rem 0.55rem !important;
+        margin: 0.04rem 0 !important;
+        min-height: 36px !important;
+        font-size: 0.8125rem !important;
+    }
+    .fi-sidebar-group {
+        padding-top: 0.2rem !important;
+        padding-bottom: 0.2rem !important;
+        margin-top: 0.15rem !important;
+        margin-bottom: 0.15rem !important;
+    }
+    .fi-sidebar-group-label,
+    .fi-sidebar-group-button span {
+        font-size: 0.65rem !important;
+        letter-spacing: 0.08em !important;
+        text-transform: uppercase !important;
+        padding-top: 0.2rem !important;
+        padding-bottom: 0.2rem !important;
+    }
+    .fi-sidebar-nav {
+        padding-left: 0.5rem !important;
+        padding-right: 0.5rem !important;
+        gap: 0.15rem !important;
+    }
+    .fi-sidebar-item .fi-badge {
+        font-size: 0.65rem !important;
+        font-weight: 800 !important;
+        padding: 0.1rem 0.45rem !important;
+        border-radius: 9999px !important;
+    }
+
+    /* ─── Item 6: Eradicate Notification Bell Adjacent Stray Arrows/Select Elements ─── */
+    .fi-topbar-end select,
+    .fi-topbar select,
+    header select,
+    .fi-topbar-end input[type="number"]::-webkit-inner-spin-button,
+    .fi-topbar-end input[type="number"]::-webkit-outer-spin-button,
+    .fi-topbar-end [role="spinbutton"],
+    .fi-topbar-end [aria-label*="sort" i],
+    .fi-topbar-end select,
+    .fi-no-database select,
+    .fi-modal-trigger select,
+    .fi-topbar-database-notifications-btn + select,
+    .fi-modal-trigger + select {
+        display: none !important;
+        visibility: hidden !important;
+        opacity: 0 !important;
+        width: 0 !important;
+        height: 0 !important;
+        pointer-events: none !important;
+        margin: 0 !important;
+        padding: 0 !important;
+        -webkit-appearance: none !important;
+        appearance: none !important;
+    }
+
+    /* ─── Item 9: Robust Flexbox Layout for Database Notification Cards ─── */
+    .jb-notif-card {
+        display: block !important;
+        box-sizing: border-box !important;
+        width: 100% !important;
+        margin-bottom: 0.5rem !important;
+    }
+    .jb-notif-card-inner {
+        display: flex !important;
+        flex-direction: row !important;
+        align-items: flex-start !important;
+        gap: 0.75rem !important;
+        width: 100% !important;
+        box-sizing: border-box !important;
+    }
+    .jb-notif-icon-col {
+        display: flex !important;
+        flex-shrink: 0 !important;
+        align-items: center !important;
+        justify-content: center !important;
+    }
+    .jb-notif-body-col {
+        display: flex !important;
+        flex-direction: column !important;
+        flex: 1 1 0% !important;
+        min-width: 0 !important;
+        gap: 0.35rem !important;
+    }
+    .jb-notif-title-row {
+        display: flex !important;
+        flex-direction: row !important;
+        align-items: center !important;
+        justify-content: space-between !important;
+        gap: 0.5rem !important;
+        width: 100% !important;
+    }
+    .jb-notif-footer-row {
+        display: flex !important;
+        flex-direction: row !important;
+        align-items: center !important;
+        justify-content: space-between !important;
+        gap: 0.5rem !important;
+        width: 100% !important;
+        margin-top: 0.25rem !important;
+    }
+
+    /* ─── Item 4 Polish: Remove any residual footer margins / paddings ─── */
+    .jb-portal-footer,
+    footer[role="contentinfo"] {
+        display: none !important;
+        height: 0 !important;
+        margin: 0 !important;
+        padding: 0 !important;
+    }
+
+    /* ==========================================================================
+       TARGETED FIX: SIDEBAR SPACING, DISTINCT INDIGO BADGE, SEARCH BAR, ARROW FIX
+       ========================================================================== */
+
+    /* ─── 1. Explicit Sidebar Spacing Reduction (30-40% compact) ─── */
+    .fi-sidebar-item {
+        margin-bottom: 0.125rem !important;
+    }
+    .fi-sidebar-group {
+        margin-bottom: 0.35rem !important;
+        padding-top: 0.15rem !important;
+        padding-bottom: 0.15rem !important;
+    }
+    .fi-sidebar-group-items,
+    .fi-sidebar-nav-groups {
+        gap: 0.25rem !important;
+    }
+    .fi-sidebar-item a,
+    .fi-sidebar-item button {
+        padding-top: 0.35rem !important;
+        padding-bottom: 0.35rem !important;
+        padding-left: 0.55rem !important;
+        padding-right: 0.55rem !important;
+        min-height: 38px !important;
+        line-height: 1.25 !important;
+    }
+    .fi-sidebar-group-label,
+    .fi-sidebar-group-button span {
+        font-size: 0.65rem !important;
+        letter-spacing: 0.08em !important;
+        padding-top: 0.15rem !important;
+        padding-bottom: 0.15rem !important;
+    }
+
+    /* ─── 2. Unique Electric Indigo Badge for normal items (Checker, Auth1, Auth2) ─── */
+    .fi-sidebar-item .fi-badge {
+        background-color: #4f46e5 !important; /* Striking Electric Indigo */
+        color: #ffffff !important;
+        font-weight: 800 !important;
+        font-size: 0.6875rem !important;
+        padding: 0.12rem 0.52rem !important;
+        border-radius: 9999px !important;
+        box-shadow: 0 2px 5px rgba(79, 70, 229, 0.4) !important;
+        border: 1px solid #6366f1 !important;
+    }
+    html.dark .fi-sidebar-item .fi-badge,
+    .dark .fi-sidebar-item .fi-badge {
+        background-color: #6366f1 !important;
+        color: #ffffff !important;
+        border-color: #818cf8 !important;
+        box-shadow: 0 0 10px rgba(99, 102, 241, 0.5) !important;
+    }
+
+    /* ─── 2a. Failed Transaction Report Badge (Explicit Striking Red for "3" / Failure Count) ─── */
+    .fi-sidebar-item a[href*="bkash-failed-transactions"] .fi-badge,
+    .fi-sidebar-item a[href*="failed-transaction"] .fi-badge,
+    .fi-sidebar-item .fi-badge.fi-color-danger,
+    .fi-sidebar-item .fi-badge[style*="danger"] {
+        background-color: #ef4444 !important; /* Pure Alert Red */
+        color: #ffffff !important;
+        font-weight: 800 !important;
+        font-size: 0.6875rem !important;
+        padding: 0.12rem 0.52rem !important;
+        border-radius: 9999px !important;
+        border: 1px solid #f87171 !important;
+        box-shadow: 0 2px 6px rgba(239, 68, 68, 0.45) !important;
+    }
+    html.dark .fi-sidebar-item a[href*="bkash-failed-transactions"] .fi-badge,
+    html.dark .fi-sidebar-item a[href*="failed-transaction"] .fi-badge,
+    html.dark .fi-sidebar-item .fi-badge.fi-color-danger,
+    .dark .fi-sidebar-item a[href*="bkash-failed-transactions"] .fi-badge,
+    .dark .fi-sidebar-item a[href*="failed-transaction"] .fi-badge,
+    .dark .fi-sidebar-item .fi-badge.fi-color-danger {
+        background-color: #ef4444 !important;
+        color: #ffffff !important;
+        border-color: #dc2626 !important;
+        box-shadow: 0 0 10px rgba(239, 68, 68, 0.6) !important;
+    }
+
+    /* ─── 3. Global Search Bar & Icon Unhide + Active Styling ─── */
+    .fi-global-search-ctn,
+    .fi-global-search,
+    .fi-global-search-field {
+        display: flex !important;
+        align-items: center !important;
+        width: 100% !important;
+        max-width: 460px !important;
+        opacity: 1 !important;
+        visibility: visible !important;
+        pointer-events: auto !important;
+    }
+    .fi-global-search-field input,
+    .fi-global-search input,
+    input[type="search"].fi-input {
+        display: block !important;
+        visibility: visible !important;
+        opacity: 1 !important;
+        pointer-events: auto !important;
+        cursor: text !important;
+        width: 100% !important;
+        height: 38px !important;
+        font-size: 0.84rem !important;
+    }
+    .fi-global-search-field .fi-input-wrp-prefix svg:not(.animate-spin) {
+        display: inline-block !important;
+        visibility: visible !important;
+        opacity: 1 !important;
+        color: #0284c7 !important;
+    }
+    html.dark .fi-global-search-field .fi-input-wrp-prefix svg:not(.animate-spin),
+    .dark .fi-global-search-field .fi-input-wrp-prefix svg:not(.animate-spin) {
+        color: #38bdf8 !important;
+    }
+
+    /* ─── 3b. Eradicate Search Box Loading Spinner (Marked in Image 3) ─── */
+    .fi-global-search-field .fi-loading-indicator,
+    .fi-global-search-field svg.animate-spin,
+    .fi-global-search-field [wire\:loading],
+    .fi-global-search-field .fi-input-wrp-prefix [wire\:loading],
+    .fi-global-search-field .fi-input-wrp-prefix .fi-loading-indicator,
+    .fi-global-search-field .fi-input-wrp-prefix svg.animate-spin,
+    .fi-global-search-ctn .fi-loading-indicator,
+    .fi-global-search-ctn svg.animate-spin {
+        display: none !important;
+        visibility: hidden !important;
+        opacity: 0 !important;
+        width: 0 !important;
+        height: 0 !important;
+        max-width: 0 !important;
+        max-height: 0 !important;
+        pointer-events: none !important;
+    }
+
+    /* ─── 4. Topbar Notification Bell: Enlarged + Stray Arrow / Select Removal (Image 4) ─── */
+    .fi-topbar-database-notifications-btn {
+        width: 2.75rem !important;
+        height: 2.75rem !important;
+        display: inline-flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        position: relative !important;
+        border-radius: 0.75rem !important;
+        background-color: transparent !important;
+        transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1) !important;
+    }
+    .fi-topbar-database-notifications-btn:hover {
+        background-color: rgba(148, 163, 184, 0.12) !important;
+    }
+    .fi-topbar-database-notifications-btn svg.fi-topbar-bell-icon,
+    .fi-topbar-database-notifications-btn svg:first-child,
+    .fi-topbar-database-notifications-btn .fi-icon-btn-icon {
+        width: 1.65rem !important;
+        height: 1.65rem !important;
+        stroke-width: 1.8 !important;
+        color: #475569 !important;
+        display: block !important;
+    }
+    html.dark .fi-topbar-database-notifications-btn svg.fi-topbar-bell-icon,
+    html.dark .fi-topbar-database-notifications-btn svg:first-child,
+    .dark .fi-topbar-database-notifications-btn svg.fi-topbar-bell-icon,
+    .dark .fi-topbar-database-notifications-btn svg:first-child {
+        color: #cbd5e1 !important;
+    }
+
+    /* Bell Unread Red Badge */
+    .fi-topbar-database-notifications-btn .fi-icon-btn-badge-ctn {
+        top: -3px !important;
+        right: -3px !important;
+        position: absolute !important;
+    }
+    .fi-topbar-database-notifications-btn .fi-badge {
+        background-color: #ef4444 !important;
+        color: #ffffff !important;
+        font-weight: 800 !important;
+        font-size: 0.6875rem !important;
+        min-width: 1.25rem !important;
+        height: 1.25rem !important;
+        padding: 0 4px !important;
+        border-radius: 9999px !important;
+        box-shadow: 0 2px 6px rgba(239, 68, 68, 0.5) !important;
+        border: 2px solid #ffffff !important;
+        display: flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+    }
+    html.dark .fi-topbar-database-notifications-btn .fi-badge,
+    .dark .fi-topbar-database-notifications-btn .fi-badge {
+        border-color: #0f172a !important;
+    }
+
+    /* Complete Eradication of Bell Adjacent Stray Arrow (▲▼) / Select / Spinbuttons */
+    .fi-topbar select,
+    .fi-topbar input[type="number"],
+    .fi-topbar [role="spinbutton"],
+    .fi-topbar [aria-label*="sort" i],
+    .fi-topbar ::-webkit-inner-spin-button,
+    .fi-topbar ::-webkit-outer-spin-button,
+    .fi-no-database select,
+    .fi-modal-trigger select,
+    .fi-topbar-database-notifications-btn select,
+    .fi-topbar-database-notifications-btn + select,
+    .fi-topbar-database-notifications-btn ~ select,
+    .fi-modal-trigger + select,
+    .fi-modal-trigger ~ select,
+    .fi-modal-trigger ~ button:not(.fi-user-menu-trigger):not(.fi-dropdown-trigger),
+    .fi-topbar-database-notifications-btn + svg,
+    .fi-topbar-database-notifications-btn ~ svg,
+    .fi-topbar-database-notifications-btn svg:not(:first-child) {
+        display: none !important;
+        visibility: hidden !important;
+        opacity: 0 !important;
+        width: 0 !important;
+        height: 0 !important;
+        max-width: 0 !important;
+        max-height: 0 !important;
+        pointer-events: none !important;
+        margin: 0 !important;
+        padding: 0 !important;
+        border: none !important;
+        overflow: hidden !important;
+        -webkit-appearance: none !important;
+        appearance: none !important;
+    }
+
 </style>
+
+<script>
+    (function () {
+        var isLoginPage = window.location.pathname.indexOf('/admin/login') !== -1;
+
+        if (isLoginPage) {
+            // Once the server has terminated the session and redirected to the login page
+            if (window.location.search.indexOf('logged_out') !== -1) {
+                try {
+                    if ('BroadcastChannel' in window) {
+                        var bc = new BroadcastChannel('jb-corporate-auth');
+                        bc.postMessage('logout');
+                        setTimeout(function () {
+                            try { bc.close(); } catch(e) {}
+                        }, 1000);
+                    }
+                    localStorage.setItem('jb_logout_event', Date.now().toString());
+
+                    // Clean URL parameter cleanly without reloading the page
+                    if (window.history && window.history.replaceState) {
+                        var cleanUrl = window.location.origin + window.location.pathname;
+                        window.history.replaceState({}, document.title, cleanUrl);
+                    }
+                } catch (e) {}
+            }
+            return;
+        }
+
+        // On authenticated pages: visual feedback on submit to prevent duplicate submissions
+        document.addEventListener('submit', function (e) {
+            var form = e.target;
+            if (form && form.action && form.action.indexOf('/logout') !== -1) {
+                var btn = form.querySelector('button[type="submit"]');
+                if (btn) {
+                    btn.style.opacity = '0.5';
+                    btn.style.pointerEvents = 'none';
+                }
+            }
+        });
+
+        // Listen for logout events broadcast from other tabs (triggered only AFTER server-side logout)
+        var redirectToLogin = function () {
+            if (window.location.pathname.indexOf('/admin/login') === -1) {
+                window.location.href = '/admin/login';
+            }
+        };
+
+        try {
+            if ('BroadcastChannel' in window) {
+                var authChannel = new BroadcastChannel('jb-corporate-auth');
+                authChannel.onmessage = function (ev) {
+                    if (ev && ev.data === 'logout') {
+                        redirectToLogin();
+                    }
+                };
+            }
+            window.addEventListener('storage', function (ev) {
+                if (ev.key === 'jb_logout_event') {
+                    redirectToLogin();
+                }
+            });
+        } catch (e) {}
+    })();
+</script>
 
 <script>
     document.addEventListener('DOMContentLoaded', function () {
@@ -2035,4 +3594,1502 @@
             }
         }, { passive: true });
     });
+</script>
+
+
+<style>
+    /* ===== BATCH FILE GROUP HEADER STYLING ===== */
+    .fi-ta-group-header-row {
+        background-color: rgba(241, 245, 249, 0.75) !important;
+        border-top: 1px solid #e2e8f0 !important;
+        border-bottom: 1px solid #cbd5e1 !important;
+    }
+    html.dark .fi-ta-group-header-row {
+        background-color: rgba(15, 23, 42, 0.85) !important;
+        border-top: 1px solid #1e293b !important;
+        border-bottom: 1px solid #334155 !important;
+    }
+    .fi-ta-group-header {
+        width: 100% !important;
+        display: flex !important;
+        align-items: center !important;
+        justify-content: space-between !important;
+        padding: 0.35rem 0.5rem !important;
+        cursor: pointer !important;
+    }
+    .fi-ta-group-header > div:first-child {
+        flex: 1 1 auto !important;
+        min-width: 0 !important;
+        width: 100% !important;
+    }
+    .fi-ta-group-header .fi-ta-group-heading {
+        display: none !important;
+    }
+    .fi-ta-group-header .fi-ta-group-description {
+        margin: 0 !important;
+        padding: 0 !important;
+        width: 100% !important;
+    }
+    .fi-batch-group-header-strip {
+        user-select: text;
+    }
+
+    /* ─── High-Priority Failed / Partial Transactions Critical Monitor Card ─── */
+    .db-exception-link {
+        text-decoration: none !important;
+        display: block !important;
+    }
+    .db-card-danger,
+    a.db-exception-link {
+        background-color: #fff1f2 !important;
+        border: 2px solid #f43f5e !important;
+        border-left: 6px solid #e11d48 !important;
+        box-shadow: 0 4px 14px rgba(225, 29, 72, 0.15) !important;
+        border-radius: 0.75rem !important;
+        transition: all 0.2s ease-in-out !important;
+    }
+    html.dark .db-card-danger,
+    html.dark a.db-exception-link,
+    .dark .db-card-danger,
+    .dark a.db-exception-link {
+        background-color: rgba(225, 29, 72, 0.1) !important;
+        border-color: #e11d48 !important;
+        box-shadow: 0 4px 14px rgba(225, 29, 72, 0.25) !important;
+    }
+    a.db-exception-link:hover {
+        transform: translateY(-2px) !important;
+        box-shadow: 0 6px 18px rgba(225, 29, 72, 0.25) !important;
+    }
+    .db-exception-icon-ok,
+    .db-exception-icon-err {
+        background: #ffe4e6 !important;
+        color: #e11d48 !important;
+        border: 1px solid #fecdd3 !important;
+        border-radius: 0.5rem !important;
+        padding: 0.5rem !important;
+    }
+    html.dark .db-exception-icon-ok,
+    html.dark .db-exception-icon-err {
+        background: rgba(225, 29, 72, 0.2) !important;
+        color: #fb7185 !important;
+        border-color: rgba(225, 29, 72, 0.4) !important;
+    }
+    .db-exception-label {
+        color: #be123c !important;
+        font-weight: 700 !important;
+        letter-spacing: 0.05em !important;
+    }
+    html.dark .db-exception-label {
+        color: #fda4af !important;
+    }
+    .db-exception-headline {
+        color: #9f1239 !important;
+        font-size: 0.9375rem !important;
+        font-weight: 700 !important;
+    }
+    html.dark .db-exception-headline {
+        color: #fff1f2 !important;
+    }
+    .db-exception-action {
+        color: #e11d48 !important;
+        font-weight: 700 !important;
+    }
+
+    /* ─── Recent Activity & Pipeline Audit Feed Larger Font Sizes ─── */
+    .db-timeline-file-tag {
+        font-family: var(--font-mono, monospace) !important;
+        font-size: 0.875rem !important;
+        font-weight: 700 !important;
+        padding: 0.2rem 0.6rem !important;
+        border-radius: 6px !important;
+        background-color: #f1f5f9 !important;
+        color: #0f172a !important;
+        border: 1.5px solid #cbd5e1 !important;
+        letter-spacing: 0.02em !important;
+    }
+    html.dark .db-timeline-file-tag,
+    .dark .db-timeline-file-tag {
+        background-color: #090d16 !important;
+        color: #38bdf8 !important;
+        border-color: #334155 !important;
+    }
+    .db-timeline-action-title {
+        font-size: 0.9375rem !important;
+        font-weight: 600 !important;
+    }
+    .db-stage-badge {
+        font-size: 0.75rem !important;
+        font-weight: 700 !important;
+    }
+    .db-timeline-human-time {
+        font-size: 0.8125rem !important;
+    }
+    .db-timeline-actor,
+    .db-timeline-full-time {
+        font-size: 0.8125rem !important;
+    }
+
+    /* ─── 2-Line Text Wrapping & No Horizontal Scrolling on 4 Report / Audit Tables ─── */
+    .fi-resource-bkash-failed-transactions .fi-ta-ctn,
+    .fi-resource-bkash-batches .fi-ta-ctn,
+    .fi-resource-bkash-reports .fi-ta-ctn,
+    .fi-resource-eft-returns .fi-ta-ctn {
+        overflow-x: hidden !important;
+    }
+    .fi-resource-bkash-failed-transactions .fi-ta-table,
+    .fi-resource-bkash-batches .fi-ta-table,
+    .fi-resource-bkash-reports .fi-ta-table,
+    .fi-resource-eft-returns .fi-ta-table {
+        table-layout: auto !important;
+        width: 100% !important;
+    }
+    .fi-resource-bkash-failed-transactions .fi-ta-cell,
+    .fi-resource-bkash-batches .fi-ta-cell,
+    .fi-resource-bkash-reports .fi-ta-cell,
+    .fi-resource-eft-returns .fi-ta-cell {
+        white-space: normal !important;
+        word-break: break-word !important;
+        overflow-wrap: break-word !important;
+        padding-top: 0.5rem !important;
+        padding-bottom: 0.5rem !important;
+    }
+    .fi-resource-bkash-failed-transactions .fi-ta-cell p,
+    .fi-resource-bkash-failed-transactions .fi-ta-cell span,
+    .fi-resource-bkash-batches .fi-ta-cell p,
+    .fi-resource-bkash-batches .fi-ta-cell span,
+    .fi-resource-bkash-reports .fi-ta-cell p,
+    .fi-resource-bkash-reports .fi-ta-cell span,
+    .fi-resource-eft-returns .fi-ta-cell p,
+    .fi-resource-eft-returns .fi-ta-cell span {
+        white-space: normal !important;
+        word-break: break-word !important;
+        line-height: 1.25 !important;
+    }
+
+    /* ─── Clean Topbar Icons Styling ─── */
+    .fi-topbar-end select,
+    .fi-topbar-end input[type="number"]::-webkit-inner-spin-button,
+    .fi-topbar-end input[type="number"]::-webkit-outer-spin-button {
+        display: none !important;
+        -webkit-appearance: none !important;
+        margin: 0 !important;
+    }
+
+    /* ==========================================================================
+       DISTINCT CHANNEL BUTTON COLORS ACROSS ALL 4 PAGES
+       (bkash-transactions, bkash-transaction-authorizations, 
+        bkash-transaction-confirmations, bkash-reports)
+       ========================================================================== */
+
+    /* Tabs Container on bkash-reports */
+    .fi-resource-bkash-reports .fi-tabs,
+    .fi-resource-bkash-reports nav[role="tablist"] {
+        display: flex !important;
+        align-items: center !important;
+        gap: 0.6rem !important;
+        border-bottom: 1.5px solid #cbd5e1 !important;
+        padding-bottom: 0.85rem !important;
+        margin-bottom: 1.25rem !important;
+        background: transparent !important;
+        flex-wrap: wrap !important;
+        border-top: none !important;
+    }
+    html.dark .fi-resource-bkash-reports .fi-tabs,
+    .dark .fi-resource-bkash-reports .fi-tabs {
+        border-bottom-color: #334155 !important;
+    }
+
+    /* Common Button Reset for Tabs */
+    .jb-tab-all, .jb-tab-a2a, .jb-tab-beftn, .jb-tab-rtgs,
+    .fi-resource-bkash-reports .fi-tabs-item {
+        padding: 0.45rem 1rem !important;
+        font-size: 0.8125rem !important;
+        font-weight: 600 !important;
+        border-radius: 0.5rem !important;
+        cursor: pointer !important;
+        transition: all 0.2s ease-in-out !important;
+        font-family: inherit !important;
+        display: inline-flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        text-decoration: none !important;
+        box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05) !important;
+        border-bottom-width: 1.5px !important;
+    }
+    .fi-resource-bkash-reports .fi-tabs-item:after,
+    .fi-resource-bkash-reports .fi-tabs-item:before {
+        display: none !important;
+    }
+
+    /* ─── 1. ALL TRANSACTIONS TAB (Neutral Dark Slate / Navy) ─── */
+    .jb-tab-all,
+    .fi-resource-bkash-reports .fi-tabs-item[wire\:click*="'all'"] {
+        background-color: #ffffff !important;
+        color: #1e293b !important;
+        border: 1.5px solid #94a3b8 !important;
+    }
+    html.dark .jb-tab-all,
+    html.dark .fi-resource-bkash-reports .fi-tabs-item[wire\:click*="'all'"],
+    .dark .jb-tab-all,
+    .dark .fi-resource-bkash-reports .fi-tabs-item[wire\:click*="'all'"] {
+        background-color: #1e293b !important;
+        border-color: #475569 !important;
+        color: #f1f5f9 !important;
+    }
+    .jb-tab-all:hover,
+    .fi-resource-bkash-reports .fi-tabs-item[wire\:click*="'all'"]:hover {
+        background-color: #f1f5f9 !important;
+        color: #0f172a !important;
+        border-color: #475569 !important;
+        transform: translateY(-1px) !important;
+    }
+    .jb-tab-all.active,
+    .fi-resource-bkash-reports .fi-tabs-item[wire\:click*="'all'"].fi-active {
+        background-color: #0f172a !important;
+        border-color: #020617 !important;
+        color: #ffffff !important;
+        font-weight: 700 !important;
+        box-shadow: 0 3px 8px rgba(15, 23, 42, 0.4) !important;
+    }
+    html.dark .jb-tab-all.active,
+    html.dark .fi-resource-bkash-reports .fi-tabs-item[wire\:click*="'all'"].fi-active,
+    .dark .jb-tab-all.active,
+    .dark .fi-resource-bkash-reports .fi-tabs-item[wire\:click*="'all'"].fi-active {
+        background-color: #0284c7 !important;
+        border-color: #38bdf8 !important;
+        color: #ffffff !important;
+    }
+
+    /* ─── 2. A2A TAB (Vibrant Emerald Green) ─── */
+    .jb-tab-a2a,
+    .fi-resource-bkash-reports .fi-tabs-item[wire\:click*="'a2a'"] {
+        background-color: #f0fdf4 !important;
+        color: #15803d !important;
+        border: 1.5px solid #86efac !important;
+    }
+    html.dark .jb-tab-a2a,
+    html.dark .fi-resource-bkash-reports .fi-tabs-item[wire\:click*="'a2a'"],
+    .dark .jb-tab-a2a,
+    .dark .fi-resource-bkash-reports .fi-tabs-item[wire\:click*="'a2a'"] {
+        background-color: rgba(16, 185, 129, 0.12) !important;
+        border-color: rgba(16, 185, 129, 0.35) !important;
+        color: #34d399 !important;
+    }
+    .jb-tab-a2a:hover,
+    .fi-resource-bkash-reports .fi-tabs-item[wire\:click*="'a2a'"]:hover {
+        background-color: #dcfce7 !important;
+        color: #166534 !important;
+        border-color: #4ade80 !important;
+        transform: translateY(-1px) !important;
+    }
+    .jb-tab-a2a.active,
+    .fi-resource-bkash-reports .fi-tabs-item[wire\:click*="'a2a'"].fi-active {
+        background-color: #10b981 !important;
+        border-color: #059669 !important;
+        color: #ffffff !important;
+        font-weight: 700 !important;
+        box-shadow: 0 3px 10px rgba(16, 185, 129, 0.4) !important;
+    }
+    html.dark .jb-tab-a2a.active,
+    html.dark .fi-resource-bkash-reports .fi-tabs-item[wire\:click*="'a2a'"].fi-active,
+    .dark .jb-tab-a2a.active,
+    .dark .fi-resource-bkash-reports .fi-tabs-item[wire\:click*="'a2a'"].fi-active {
+        background-color: #10b981 !important;
+        border-color: #34d399 !important;
+        color: #ffffff !important;
+    }
+
+    /* ─── 3. BEFTN TAB (Vibrant Royal Purple) ─── */
+    .jb-tab-beftn,
+    .fi-resource-bkash-reports .fi-tabs-item[wire\:click*="'beftn'"] {
+        background-color: #faf5ff !important;
+        color: #7e22ce !important;
+        border: 1.5px solid #d8b4fe !important;
+    }
+    html.dark .jb-tab-beftn,
+    html.dark .fi-resource-bkash-reports .fi-tabs-item[wire\:click*="'beftn'"],
+    .dark .jb-tab-beftn,
+    .dark .fi-resource-bkash-reports .fi-tabs-item[wire\:click*="'beftn'"] {
+        background-color: rgba(139, 92, 246, 0.12) !important;
+        border-color: rgba(139, 92, 246, 0.35) !important;
+        color: #c084fc !important;
+    }
+    .jb-tab-beftn:hover,
+    .fi-resource-bkash-reports .fi-tabs-item[wire\:click*="'beftn'"]:hover {
+        background-color: #f3e8ff !important;
+        color: #6b21a8 !important;
+        border-color: #c084fc !important;
+        transform: translateY(-1px) !important;
+    }
+    .jb-tab-beftn.active,
+    .fi-resource-bkash-reports .fi-tabs-item[wire\:click*="'beftn'"].fi-active {
+        background-color: #8b5cf6 !important;
+        border-color: #7c3aed !important;
+        color: #ffffff !important;
+        font-weight: 700 !important;
+        box-shadow: 0 3px 10px rgba(139, 92, 246, 0.4) !important;
+    }
+    html.dark .jb-tab-beftn.active,
+    html.dark .fi-resource-bkash-reports .fi-tabs-item[wire\:click*="'beftn'"].fi-active,
+    .dark .jb-tab-beftn.active,
+    .dark .fi-resource-bkash-reports .fi-tabs-item[wire\:click*="'beftn'"].fi-active {
+        background-color: #8b5cf6 !important;
+        border-color: #a78bfa !important;
+        color: #ffffff !important;
+    }
+
+    /* ─── 4. RTGS TAB (Vibrant Warm Amber Orange) ─── */
+    .jb-tab-rtgs,
+    .fi-resource-bkash-reports .fi-tabs-item[wire\:click*="'rtgs'"] {
+        background-color: #fffbeb !important;
+        color: #b45309 !important;
+        border: 1.5px solid #fde68a !important;
+    }
+    html.dark .jb-tab-rtgs,
+    html.dark .fi-resource-bkash-reports .fi-tabs-item[wire\:click*="'rtgs'"],
+    .dark .jb-tab-rtgs,
+    .dark .fi-resource-bkash-reports .fi-tabs-item[wire\:click*="'rtgs'"] {
+        background-color: rgba(245, 158, 11, 0.12) !important;
+        border-color: rgba(245, 158, 11, 0.35) !important;
+        color: #fbbf24 !important;
+    }
+    .jb-tab-rtgs:hover,
+    .fi-resource-bkash-reports .fi-tabs-item[wire\:click*="'rtgs'"]:hover {
+        background-color: #fef3c7 !important;
+        color: #92400e !important;
+        border-color: #fcd34d !important;
+        transform: translateY(-1px) !important;
+    }
+    .jb-tab-rtgs.active,
+    .fi-resource-bkash-reports .fi-tabs-item[wire\:click*="'rtgs'"].fi-active {
+        background-color: #f59e0b !important;
+        border-color: #d97706 !important;
+        color: #ffffff !important;
+        font-weight: 700 !important;
+        box-shadow: 0 3px 10px rgba(245, 158, 11, 0.4) !important;
+    }
+    html.dark .jb-tab-rtgs.active,
+    html.dark .fi-resource-bkash-reports .fi-tabs-item[wire\:click*="'rtgs'"].fi-active,
+    .dark .jb-tab-rtgs.active,
+    .dark .fi-resource-bkash-reports .fi-tabs-item[wire\:click*="'rtgs'"].fi-active {
+        background-color: #f59e0b !important;
+        border-color: #fbbf24 !important;
+        color: #ffffff !important;
+    }
+
+    /* ─── BKASH-REPORTS ENTERPRISE TABLE POLISH ─── */
+    .fi-resource-bkash-reports .fi-ta-ctn {
+        border: 1px solid #cbd5e1 !important;
+        border-radius: 0.75rem !important;
+        overflow: hidden !important;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06) !important;
+    }
+    html.dark .fi-resource-bkash-reports .fi-ta-ctn,
+    .dark .fi-resource-bkash-reports .fi-ta-ctn {
+        border-color: #334155 !important;
+        background-color: #0f172a !important;
+    }
+    .fi-resource-bkash-reports .fi-ta-table thead {
+        background-color: #f8fafc !important;
+        border-bottom: 2px solid #cbd5e1 !important;
+    }
+    html.dark .fi-resource-bkash-reports .fi-ta-table thead,
+    .dark .fi-resource-bkash-reports .fi-ta-table thead {
+        background-color: #1e293b !important;
+        border-bottom-color: #334155 !important;
+    }
+    .fi-resource-bkash-reports .fi-ta-header-cell {
+        padding: 0.75rem 0.6rem !important;
+        font-size: 0.75rem !important;
+        font-weight: 700 !important;
+        color: #334155 !important;
+    }
+    html.dark .fi-resource-bkash-reports .fi-ta-header-cell,
+    .dark .fi-resource-bkash-reports .fi-ta-header-cell {
+        color: #94a3b8 !important;
+    }
+    .fi-resource-bkash-reports .fi-ta-record:hover {
+        background-color: #f8fafc !important;
+    }
+    html.dark .fi-resource-bkash-reports .fi-ta-record:hover,
+    .dark .fi-resource-bkash-reports .fi-ta-record:hover {
+        background-color: rgba(30, 41, 59, 0.4) !important;
+    }
+        /* High-Contrast Distinct Channel Tabs Across Pipeline & Reports */
+        .jb-tab-all, .jb-tab-a2a, .jb-tab-beftn, .jb-tab-rtgs {
+            padding: 0.5rem 1.15rem !important;
+            font-size: 0.8125rem !important;
+            font-weight: 600 !important;
+            border-radius: 0.5rem !important;
+            cursor: pointer !important;
+            transition: all 0.2s ease-in-out !important;
+            font-family: inherit !important;
+            box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05) !important;
+            display: inline-flex !important;
+            align-items: center !important;
+            justify-content: center !important;
+            text-decoration: none !important;
+        }
+
+        /* 1. All Transactions (Slate / Charcoal) */
+        .jb-tab-all {
+            background-color: #ffffff !important;
+            color: #1e293b !important;
+            border: 1.5px solid #94a3b8 !important;
+        }
+        html.dark .jb-tab-all, .dark .jb-tab-all {
+            background-color: #1e293b !important;
+            border-color: #475569 !important;
+            color: #f1f5f9 !important;
+        }
+        .jb-tab-all:hover {
+            background-color: #f1f5f9 !important;
+            border-color: #475569 !important;
+            color: #0f172a !important;
+            transform: translateY(-1px) !important;
+        }
+        .jb-tab-all.active {
+            background-color: #0f172a !important;
+            border-color: #020617 !important;
+            color: #ffffff !important;
+            font-weight: 700 !important;
+            box-shadow: 0 3px 8px rgba(15, 23, 42, 0.4) !important;
+        }
+        html.dark .jb-tab-all.active, .dark .jb-tab-all.active {
+            background-color: #0284c7 !important;
+            border-color: #38bdf8 !important;
+            color: #ffffff !important;
+        }
+
+        /* 2. A2A (Vibrant Emerald Green) */
+        .jb-tab-a2a {
+            background-color: #f0fdf4 !important;
+            color: #15803d !important;
+            border: 1.5px solid #86efac !important;
+        }
+        html.dark .jb-tab-a2a, .dark .jb-tab-a2a {
+            background-color: rgba(16, 185, 129, 0.12) !important;
+            border-color: rgba(16, 185, 129, 0.35) !important;
+            color: #34d399 !important;
+        }
+        .jb-tab-a2a:hover {
+            background-color: #dcfce7 !important;
+            color: #166534 !important;
+            border-color: #4ade80 !important;
+            transform: translateY(-1px) !important;
+        }
+        .jb-tab-a2a.active {
+            background-color: #10b981 !important;
+            border-color: #059669 !important;
+            color: #ffffff !important;
+            font-weight: 700 !important;
+            box-shadow: 0 3px 10px rgba(16, 185, 129, 0.4) !important;
+        }
+        html.dark .jb-tab-a2a.active, .dark .jb-tab-a2a.active {
+            background-color: #10b981 !important;
+            border-color: #34d399 !important;
+            color: #ffffff !important;
+        }
+
+        /* 3. BEFTN (Vibrant Royal Purple) */
+        .jb-tab-beftn {
+            background-color: #faf5ff !important;
+            color: #7e22ce !important;
+            border: 1.5px solid #d8b4fe !important;
+        }
+        html.dark .jb-tab-beftn, .dark .jb-tab-beftn {
+            background-color: rgba(139, 92, 246, 0.12) !important;
+            border-color: rgba(139, 92, 246, 0.35) !important;
+            color: #c084fc !important;
+        }
+        .jb-tab-beftn:hover {
+            background-color: #f3e8ff !important;
+            color: #6b21a8 !important;
+            border-color: #c084fc !important;
+            transform: translateY(-1px) !important;
+        }
+        .jb-tab-beftn.active {
+            background-color: #8b5cf6 !important;
+            border-color: #7c3aed !important;
+            color: #ffffff !important;
+            font-weight: 700 !important;
+            box-shadow: 0 3px 10px rgba(139, 92, 246, 0.4) !important;
+        }
+        html.dark .jb-tab-beftn.active, .dark .jb-tab-beftn.active {
+            background-color: #8b5cf6 !important;
+            border-color: #a78bfa !important;
+            color: #ffffff !important;
+        }
+
+        /* 4. RTGS (Vibrant Warm Amber Orange) */
+        .jb-tab-rtgs {
+            background-color: #fffbeb !important;
+            color: #b45309 !important;
+            border: 1.5px solid #fde68a !important;
+        }
+        html.dark .jb-tab-rtgs, .dark .jb-tab-rtgs {
+            background-color: rgba(245, 158, 11, 0.12) !important;
+            border-color: rgba(245, 158, 11, 0.35) !important;
+            color: #fbbf24 !important;
+        }
+        .jb-tab-rtgs:hover {
+            background-color: #fef3c7 !important;
+            color: #92400e !important;
+            border-color: #fcd34d !important;
+            transform: translateY(-1px) !important;
+        }
+        .jb-tab-rtgs.active {
+            background-color: #f59e0b !important;
+            border-color: #d97706 !important;
+            color: #ffffff !important;
+            font-weight: 700 !important;
+            box-shadow: 0 3px 10px rgba(245, 158, 11, 0.4) !important;
+        }
+        html.dark .jb-tab-rtgs.active, .dark .jb-tab-rtgs.active {
+            background-color: #f59e0b !important;
+            border-color: #fbbf24 !important;
+            color: #ffffff !important;
+        }
+
+    /* ─── Suppress Any Stray Up/Down Arrows, Select, or Spinners in Topbar ─── */
+    .fi-topbar-end select,
+    
+    .fi-topbar select,
+    header select,
+    .fi-topbar-end input[type="number"]::-webkit-inner-spin-button,
+    .fi-topbar-end input[type="number"]::-webkit-outer-spin-button,
+    .fi-topbar-end [role="spinbutton"],
+    .fi-topbar-end [aria-label*="sort" i],
+    .fi-topbar-database-notifications-btn + *:not(.fi-dropdown):not(.fi-user-menu) {
+        display: none !important;
+        visibility: hidden !important;
+        opacity: 0 !important;
+        width: 0 !important;
+        height: 0 !important;
+        pointer-events: none !important;
+        margin: 0 !important;
+        padding: 0 !important;
+    }
+
+    /* ==========================================================================
+       MODERN INSTITUTIONAL FINTECH SIDEBAR SYSTEM (Janata Bank · bKash H2H)
+       ========================================================================== */
+
+    /* ─── Sidebar Theme (Corporate Midnight Navy in Dark Mode) ─── */
+    html.dark aside.fi-sidebar,
+    .dark aside.fi-sidebar {
+        background-color: #0b1329 !important; /* Deep Corporate Midnight Navy */
+        border-right: 1px solid #1e293b !important;
+        box-shadow: 4px 0 24px rgba(0, 0, 0, 0.35) !important;
+    }
+    html:not(.dark) aside.fi-sidebar {
+        background-color: #ffffff !important;
+        border-right: 1.5px solid #e2e8f0 !important;
+        box-shadow: 2px 0 12px rgba(0, 0, 0, 0.03) !important;
+    }
+
+    /* ─── Navigation Groups & Section Labels ─── */
+    .fi-sidebar-group-label,
+    .fi-sidebar-group-button span {
+        font-size: 0.6875rem !important;
+        font-weight: 800 !important;
+        letter-spacing: 0.08em !important;
+        text-transform: uppercase !important;
+    }
+    html.dark .fi-sidebar-group-label,
+    html.dark .fi-sidebar-group-button span,
+    .dark .fi-sidebar-group-label,
+    .dark .fi-sidebar-group-button span {
+        color: #64748b !important;
+    }
+    html:not(.dark) .fi-sidebar-group-label,
+    html:not(.dark) .fi-sidebar-group-button span {
+        color: #64748b !important;
+    }
+
+    /* ─── Navigation Item Modern Interactive States ─── */
+    .fi-sidebar-item a,
+    .fi-sidebar-item button {
+        border-radius: 0.5rem !important;
+        transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1) !important;
+        padding: 0.45rem 0.65rem !important;
+        margin: 0.15rem 0 !important;
+    }
+    .fi-sidebar-item a:hover,
+    .fi-sidebar-item button:hover {
+        transform: translateX(3px) !important;
+    }
+    html.dark .fi-sidebar-item a:hover,
+    html.dark .fi-sidebar-item button:hover,
+    .dark .fi-sidebar-item a:hover,
+    .dark .fi-sidebar-item button:hover {
+        background-color: rgba(30, 41, 59, 0.7) !important;
+        color: #38bdf8 !important;
+    }
+    html:not(.dark) .fi-sidebar-item a:hover,
+    html:not(.dark) .fi-sidebar-item button:hover {
+        background-color: #f1f5f9 !important;
+        color: #0284c7 !important;
+    }
+
+    /* Active Menu Indicator */
+    .fi-sidebar-item-active a,
+    .fi-sidebar-item-active button {
+        font-weight: 700 !important;
+        border-left: 3.5px solid #0284c7 !important;
+    }
+    html.dark .fi-sidebar-item-active a,
+    html.dark .fi-sidebar-item-active button,
+    .dark .fi-sidebar-item-active a,
+    .dark .fi-sidebar-item-active button {
+        background: linear-gradient(90deg, rgba(2, 132, 199, 0.2), rgba(2, 132, 199, 0.04)) !important;
+        color: #38bdf8 !important;
+        box-shadow: 0 1px 4px rgba(2, 132, 199, 0.15) !important;
+    }
+    html:not(.dark) .fi-sidebar-item-active a,
+    html:not(.dark) .fi-sidebar-item-active button {
+        background: linear-gradient(90deg, #e0f2fe, #f0f9ff) !important;
+        color: #0369a1 !important;
+        border-color: #0284c7 !important;
+        box-shadow: 0 1px 4px rgba(2, 132, 199, 0.1) !important;
+    }
+
+    /* ─── Navigation Badges (Live Status Counters) ─── */
+    .fi-sidebar-item .fi-badge {
+        font-size: 0.6875rem !important;
+        font-weight: 800 !important;
+        padding: 0.15rem 0.5rem !important;
+        border-radius: 9999px !important;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.15) !important;
+    }
+
+    /* ─── Bottom Profile & CBS Widget ─── */
+    .jb-sidebar-profile-card {
+        margin: 0.75rem 0.5rem 0.5rem 0.5rem;
+        padding: 0.65rem 0.75rem;
+        border-radius: 0.65rem;
+        transition: all 0.2s ease;
+        border: 1px solid transparent;
+    }
+    html.dark .jb-sidebar-profile-card,
+    .dark .jb-sidebar-profile-card {
+        background-color: rgba(15, 23, 42, 0.6);
+        border-color: #1e293b;
+    }
+    html:not(.dark) .jb-sidebar-profile-card {
+        background-color: #f8fafc;
+        border-color: #e2e8f0;
+    }
+    .jb-profile-row {
+        display: flex;
+        align-items: center;
+        gap: 0.6rem;
+    }
+    .jb-profile-avatar {
+        width: 32px;
+        height: 32px;
+        min-width: 32px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 0.75rem;
+        font-weight: 800;
+        color: #ffffff;
+        background: linear-gradient(135deg, #0284c7, #0f172a);
+        box-shadow: 0 2px 5px rgba(2, 132, 199, 0.3);
+    }
+    .jb-profile-info {
+        display: flex;
+        flex-direction: column;
+        overflow: hidden;
+    }
+    .jb-profile-name {
+        font-size: 0.8125rem;
+        font-weight: 700;
+        color: #0f172a;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+    html.dark .jb-profile-name,
+    .dark .jb-profile-name {
+        color: #f8fafc;
+    }
+    .jb-profile-role {
+        font-size: 0.6875rem;
+        color: #64748b;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+    html.dark .jb-profile-role,
+    .dark .jb-profile-role {
+        color: #94a3b8;
+    }
+    .jb-profile-cbs-status {
+        display: flex;
+        align-items: center;
+        gap: 0.35rem;
+        margin-top: 0.5rem;
+        padding-top: 0.4rem;
+        border-top: 1px solid #e2e8f0;
+        font-size: 0.6875rem;
+        font-weight: 600;
+    }
+    html.dark .jb-profile-cbs-status,
+    .dark .jb-profile-cbs-status {
+        border-top-color: #1e293b;
+    }
+    .jb-cbs-dot {
+        width: 6px;
+        height: 6px;
+        border-radius: 50%;
+        background-color: #10b981;
+        box-shadow: 0 0 5px #10b981;
+    }
+    .jb-cbs-text {
+        color: #059669;
+    }
+    html.dark .jb-cbs-text,
+    .dark .jb-cbs-text {
+        color: #34d399;
+    }
+
+    /* ==========================================================================
+       IMAGE-3 STYLE RICH DATABASE NOTIFICATIONS SLIDEOVER & BADGES
+       ========================================================================== */
+
+    /* ─── Topbar Bell Unread Badge Polish ─── */
+    .fi-topbar-database-notifications-btn .fi-icon-btn-badge-ctn {
+        top: -3px !important;
+        right: -3px !important;
+    }
+    .fi-topbar-database-notifications-btn .fi-badge {
+        background-color: #ef4444 !important;
+        color: #ffffff !important;
+        font-weight: 800 !important;
+        font-size: 0.6875rem !important;
+        padding: 0.15rem 0.45rem !important;
+        border-radius: 9999px !important;
+        box-shadow: 0 2px 6px rgba(239, 68, 68, 0.4) !important;
+        border: 1.5px solid #ffffff !important;
+    }
+    html.dark .fi-topbar-database-notifications-btn .fi-badge,
+    .dark .fi-topbar-database-notifications-btn .fi-badge {
+        border-color: #0f172a !important;
+    }
+
+    /* ─── Slideover Header ─── */
+    .jb-notif-header {
+        display: flex;
+        flex-direction: column;
+        gap: 0.75rem;
+        padding-bottom: 0.5rem;
+        width: 100%;
+    }
+    .jb-notif-header-title-row {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 0.5rem;
+    }
+    .jb-notif-title-group {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+    .jb-notif-heading {
+        font-size: 1.125rem;
+        font-weight: 800;
+        color: #0f172a;
+        margin: 0;
+    }
+    html.dark .jb-notif-heading,
+    .dark .jb-notif-heading {
+        color: #f8fafc;
+    }
+    .jb-notif-unread-badge {
+        font-size: 0.6875rem;
+        font-weight: 700;
+        padding: 0.15rem 0.5rem;
+        border-radius: 9999px;
+        background-color: #fee2e2;
+        color: #dc2626;
+        border: 1px solid #fca5a5;
+    }
+    html.dark .jb-notif-unread-badge,
+    .dark .jb-notif-unread-badge {
+        background-color: rgba(239, 68, 68, 0.2);
+        color: #f87171;
+        border-color: rgba(239, 68, 68, 0.4);
+    }
+    .jb-mark-all-btn {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.35rem;
+        font-size: 0.75rem;
+        font-weight: 700;
+        color: #0284c7;
+        background: transparent;
+        border: none;
+        cursor: pointer;
+        padding: 0.25rem 0.5rem;
+        border-radius: 0.375rem;
+        transition: all 0.15s ease;
+    }
+    .jb-mark-all-btn:hover {
+        background-color: #f0f9ff;
+        color: #0369a1;
+    }
+    html.dark .jb-mark-all-btn,
+    .dark .jb-mark-all-btn {
+        color: #38bdf8;
+    }
+    html.dark .jb-mark-all-btn:hover,
+    .dark .jb-mark-all-btn:hover {
+        background-color: rgba(56, 189, 248, 0.1);
+        color: #7dd3fc;
+    }
+
+    /* ─── Category Tabs Bar ─── */
+    .jb-notif-tabs-bar {
+        display: flex;
+        align-items: center;
+        gap: 0.35rem;
+        background-color: #f1f5f9;
+        padding: 0.25rem;
+        border-radius: 0.65rem;
+        border: 1px solid #e2e8f0;
+    }
+    html.dark .jb-notif-tabs-bar,
+    .dark .jb-notif-tabs-bar {
+        background-color: #0f172a;
+        border-color: #1e293b;
+    }
+    .jb-notif-tab {
+        flex: 1;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.35rem;
+        padding: 0.35rem 0.5rem;
+        font-size: 0.75rem;
+        font-weight: 700;
+        border-radius: 0.5rem;
+        border: none;
+        background: transparent;
+        color: #64748b;
+        cursor: pointer;
+        transition: all 0.15s ease;
+    }
+    .jb-notif-tab:hover {
+        color: #0f172a;
+        background-color: rgba(255, 255, 255, 0.6);
+    }
+    html.dark .jb-notif-tab:hover,
+    .dark .jb-notif-tab:hover {
+        color: #f8fafc;
+        background-color: rgba(30, 41, 59, 0.6);
+    }
+    .jb-notif-tab.active {
+        background-color: #ffffff;
+        color: #0284c7;
+        box-shadow: 0 1px 4px rgba(0, 0, 0, 0.08);
+    }
+    html.dark .jb-notif-tab.active,
+    .dark .jb-notif-tab.active {
+        background-color: #1e293b;
+        color: #38bdf8;
+        box-shadow: 0 1px 4px rgba(0, 0, 0, 0.3);
+    }
+    .jb-notif-tab-count {
+        font-size: 0.6875rem;
+        font-weight: 800;
+        padding: 0.05rem 0.35rem;
+        border-radius: 9999px;
+        background-color: #e2e8f0;
+        color: #475569;
+    }
+    .jb-notif-tab.active .jb-notif-tab-count {
+        background-color: #e0f2fe;
+        color: #0284c7;
+    }
+    html.dark .jb-notif-tab-count,
+    .dark .jb-notif-tab-count {
+        background-color: #334155;
+        color: #94a3b8;
+    }
+    html.dark .jb-notif-tab.active .jb-notif-tab-count,
+    .dark .jb-notif-tab.active .jb-notif-tab-count {
+        background-color: rgba(2, 132, 199, 0.25);
+        color: #38bdf8;
+    }
+
+    /* ─── Notification Items ─── */
+    .jb-notif-list {
+        display: flex;
+        flex-direction: column;
+        gap: 0.65rem;
+        padding: 0.5rem 0;
+    }
+    .jb-notif-card {
+        border-radius: 0.75rem;
+        background-color: #ffffff;
+        border: 1.5px solid #e2e8f0;
+        padding: 0.85rem;
+        transition: all 0.15s ease;
+        position: relative;
+    }
+    html.dark .jb-notif-card,
+    .dark .jb-notif-card {
+        background-color: #0b1329;
+        border-color: #1e293b;
+    }
+    .jb-notif-card:hover {
+        border-color: #cbd5e1;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+    }
+    html.dark .jb-notif-card:hover,
+    .dark .jb-notif-card:hover {
+        border-color: #334155;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
+    }
+    .jb-notif-card.is-unread {
+        background-color: #f8fafc;
+        border-color: #93c5fd;
+        border-left: 4px solid #0284c7;
+    }
+    html.dark .jb-notif-card.is-unread,
+    .dark .jb-notif-card.is-unread {
+        background-color: rgba(2, 132, 199, 0.08);
+        border-color: rgba(56, 189, 248, 0.4);
+        border-left: 4px solid #38bdf8;
+    }
+    .jb-notif-card-inner {
+        display: flex;
+        gap: 0.75rem;
+        align-items: flex-start;
+    }
+    .jb-notif-icon-col {
+        flex-shrink: 0;
+        margin-top: 0.15rem;
+    }
+    .jb-notif-icon-box {
+        width: 34px;
+        height: 34px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+    .icon-checker {
+        background-color: #fef3c7;
+        color: #d97706;
+    }
+    html.dark .icon-checker,
+    .dark .icon-checker {
+        background-color: rgba(217, 119, 6, 0.2);
+        color: #fbbf24;
+    }
+    .icon-auth1 {
+        background-color: #e0f2fe;
+        color: #0284c7;
+    }
+    html.dark .icon-auth1,
+    .dark .icon-auth1 {
+        background-color: rgba(2, 132, 199, 0.2);
+        color: #38bdf8;
+    }
+    .icon-auth2 {
+        background-color: #fae8ff;
+        color: #a855f7;
+    }
+    html.dark .icon-auth2,
+    .dark .icon-auth2 {
+        background-color: rgba(168, 85, 247, 0.2);
+        color: #c084fc;
+    }
+    .icon-system {
+        background-color: #f1f5f9;
+        color: #64748b;
+    }
+    html.dark .icon-system,
+    .dark .icon-system {
+        background-color: #1e293b;
+        color: #94a3b8;
+    }
+    .jb-notif-body-col {
+        flex: 1;
+        min-width: 0;
+        display: flex;
+        flex-direction: column;
+        gap: 0.35rem;
+    }
+    .jb-notif-title-row {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 0.5rem;
+    }
+    .jb-notif-title {
+        font-size: 0.84rem;
+        font-weight: 700;
+        color: #0f172a;
+        line-height: 1.25;
+    }
+    html.dark .jb-notif-title,
+    .dark .jb-notif-title {
+        color: #f8fafc;
+    }
+    .jb-unread-dot {
+        width: 8px;
+        height: 8px;
+        min-width: 8px;
+        border-radius: 50%;
+        background-color: #0284c7;
+        box-shadow: 0 0 6px #0284c7;
+    }
+    html.dark .jb-unread-dot,
+    .dark .jb-unread-dot {
+        background-color: #38bdf8;
+        box-shadow: 0 0 8px #38bdf8;
+    }
+    .jb-notif-desc {
+        font-size: 0.75rem;
+        color: #475569;
+        line-height: 1.4;
+        word-break: break-word;
+    }
+    html.dark .jb-notif-desc,
+    .dark .jb-notif-desc {
+        color: #94a3b8;
+    }
+    .jb-notif-footer-row {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 0.5rem;
+        margin-top: 0.35rem;
+        padding-top: 0.35rem;
+        border-top: 1px solid #f1f5f9;
+    }
+    html.dark .jb-notif-footer-row,
+    .dark .jb-notif-footer-row {
+        border-top-color: #1e293b;
+    }
+    .jb-notif-time {
+        font-size: 0.6875rem;
+        color: #94a3b8;
+        font-weight: 500;
+    }
+    .jb-notif-item-actions {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+    .jb-notif-action-btn {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.25rem;
+        font-size: 0.6875rem;
+        font-weight: 700;
+        padding: 0.2rem 0.55rem;
+        border-radius: 0.375rem;
+        background-color: #0284c7;
+        color: #ffffff !important;
+        text-decoration: none !important;
+        transition: all 0.15s ease;
+    }
+    .jb-notif-action-btn:hover {
+        background-color: #0369a1;
+        transform: translateY(-1px);
+        box-shadow: 0 2px 5px rgba(2, 132, 199, 0.3);
+    }
+    .jb-mark-single-read-btn {
+        font-size: 0.6875rem;
+        font-weight: 600;
+        color: #64748b;
+        background: transparent;
+        border: none;
+        cursor: pointer;
+        padding: 0.15rem 0.35rem;
+        border-radius: 0.25rem;
+    }
+    .jb-mark-single-read-btn:hover {
+        color: #0f172a;
+        background-color: #f1f5f9;
+    }
+    html.dark .jb-mark-single-read-btn:hover,
+    .dark .jb-mark-single-read-btn:hover {
+        color: #f8fafc;
+        background-color: #1e293b;
+    }
+
+    /* ─── Empty State ─── */
+    .jb-notif-empty-state {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        text-align: center;
+        padding: 3rem 1.5rem;
+    }
+    .jb-notif-empty-icon {
+        width: 56px;
+        height: 56px;
+        border-radius: 50%;
+        background-color: #f1f5f9;
+        color: #94a3b8;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-bottom: 1rem;
+    }
+    html.dark .jb-notif-empty-icon,
+    .dark .jb-notif-empty-icon {
+        background-color: #1e293b;
+        color: #64748b;
+    }
+    .jb-notif-empty-title {
+        font-size: 0.9375rem;
+        font-weight: 700;
+        color: #0f172a;
+        margin: 0 0 0.25rem 0;
+    }
+    html.dark .jb-notif-empty-title,
+    .dark .jb-notif-empty-title {
+        color: #f8fafc;
+    }
+    .jb-notif-empty-desc {
+        font-size: 0.8125rem;
+        color: #64748b;
+        margin: 0;
+    }
+    html.dark .jb-notif-empty-desc,
+    .dark .jb-notif-empty-desc {
+        color: #94a3b8;
+    }
+
+    /* ==========================================================================
+       ENTERPRISE POLISH PATCH (Spacing, Notification Arrow, Card Flex, Sync)
+       ========================================================================== */
+
+    /* ─── Item 5: Compact Sidebar Spacing (30-40% reduction) ─── */
+    .fi-sidebar-item a,
+    .fi-sidebar-item button {
+        padding: 0.28rem 0.55rem !important;
+        margin: 0.04rem 0 !important;
+        min-height: 36px !important;
+        font-size: 0.8125rem !important;
+    }
+    .fi-sidebar-group {
+        padding-top: 0.2rem !important;
+        padding-bottom: 0.2rem !important;
+        margin-top: 0.15rem !important;
+        margin-bottom: 0.15rem !important;
+    }
+    .fi-sidebar-group-label,
+    .fi-sidebar-group-button span {
+        font-size: 0.65rem !important;
+        letter-spacing: 0.08em !important;
+        text-transform: uppercase !important;
+        padding-top: 0.2rem !important;
+        padding-bottom: 0.2rem !important;
+    }
+    .fi-sidebar-nav {
+        padding-left: 0.5rem !important;
+        padding-right: 0.5rem !important;
+        gap: 0.15rem !important;
+    }
+    .fi-sidebar-item .fi-badge {
+        font-size: 0.65rem !important;
+        font-weight: 800 !important;
+        padding: 0.1rem 0.45rem !important;
+        border-radius: 9999px !important;
+    }
+
+    /* ─── Item 6: Eradicate Notification Bell Adjacent Stray Arrows/Select Elements ─── */
+    .fi-topbar-end select,
+    .fi-topbar select,
+    header select,
+    .fi-topbar-end input[type="number"]::-webkit-inner-spin-button,
+    .fi-topbar-end input[type="number"]::-webkit-outer-spin-button,
+    .fi-topbar-end [role="spinbutton"],
+    .fi-topbar-end [aria-label*="sort" i],
+    .fi-topbar-end select,
+    .fi-no-database select,
+    .fi-modal-trigger select,
+    .fi-topbar-database-notifications-btn + select,
+    .fi-modal-trigger + select {
+        display: none !important;
+        visibility: hidden !important;
+        opacity: 0 !important;
+        width: 0 !important;
+        height: 0 !important;
+        pointer-events: none !important;
+        margin: 0 !important;
+        padding: 0 !important;
+        -webkit-appearance: none !important;
+        appearance: none !important;
+    }
+
+    /* ─── Item 9: Robust Flexbox Layout for Database Notification Cards ─── */
+    .jb-notif-card {
+        display: block !important;
+        box-sizing: border-box !important;
+        width: 100% !important;
+        margin-bottom: 0.5rem !important;
+    }
+    .jb-notif-card-inner {
+        display: flex !important;
+        flex-direction: row !important;
+        align-items: flex-start !important;
+        gap: 0.75rem !important;
+        width: 100% !important;
+        box-sizing: border-box !important;
+    }
+    .jb-notif-icon-col {
+        display: flex !important;
+        flex-shrink: 0 !important;
+        align-items: center !important;
+        justify-content: center !important;
+    }
+    .jb-notif-body-col {
+        display: flex !important;
+        flex-direction: column !important;
+        flex: 1 1 0% !important;
+        min-width: 0 !important;
+        gap: 0.35rem !important;
+    }
+    .jb-notif-title-row {
+        display: flex !important;
+        flex-direction: row !important;
+        align-items: center !important;
+        justify-content: space-between !important;
+        gap: 0.5rem !important;
+        width: 100% !important;
+    }
+    .jb-notif-footer-row {
+        display: flex !important;
+        flex-direction: row !important;
+        align-items: center !important;
+        justify-content: space-between !important;
+        gap: 0.5rem !important;
+        width: 100% !important;
+        margin-top: 0.25rem !important;
+    }
+
+    /* ─── Item 4 Polish: Remove any residual footer margins / paddings ─── */
+    .jb-portal-footer,
+    footer[role="contentinfo"] {
+        display: none !important;
+        height: 0 !important;
+        margin: 0 !important;
+        padding: 0 !important;
+    }
+
+    /* ==========================================================================
+       TARGETED FIX: SIDEBAR SPACING, DISTINCT INDIGO BADGE, SEARCH BAR, ARROW FIX
+       ========================================================================== */
+
+    /* ─── 1. Explicit Sidebar Spacing Reduction (30-40% compact) ─── */
+    .fi-sidebar-item {
+        margin-bottom: 0.125rem !important;
+    }
+    .fi-sidebar-group {
+        margin-bottom: 0.35rem !important;
+        padding-top: 0.15rem !important;
+        padding-bottom: 0.15rem !important;
+    }
+    .fi-sidebar-group-items,
+    .fi-sidebar-nav-groups {
+        gap: 0.25rem !important;
+    }
+    .fi-sidebar-item a,
+    .fi-sidebar-item button {
+        padding-top: 0.35rem !important;
+        padding-bottom: 0.35rem !important;
+        padding-left: 0.55rem !important;
+        padding-right: 0.55rem !important;
+        min-height: 38px !important;
+        line-height: 1.25 !important;
+    }
+    .fi-sidebar-group-label,
+    .fi-sidebar-group-button span {
+        font-size: 0.65rem !important;
+        letter-spacing: 0.08em !important;
+        padding-top: 0.15rem !important;
+        padding-bottom: 0.15rem !important;
+    }
+
+    /* ─── 2. Unique Electric Indigo Badge (3, 2, 1) — Completely distinct from RTGS Amber ─── */
+    .fi-sidebar-item .fi-badge {
+        background-color: #4f46e5 !important; /* Striking Electric Indigo */
+        color: #ffffff !important;
+        font-weight: 800 !important;
+        font-size: 0.6875rem !important;
+        padding: 0.12rem 0.52rem !important;
+        border-radius: 9999px !important;
+        box-shadow: 0 2px 5px rgba(79, 70, 229, 0.4) !important;
+        border: 1px solid #6366f1 !important;
+    }
+    html.dark .fi-sidebar-item .fi-badge,
+    .dark .fi-sidebar-item .fi-badge {
+        background-color: #6366f1 !important;
+        color: #ffffff !important;
+        border-color: #818cf8 !important;
+        box-shadow: 0 0 10px rgba(99, 102, 241, 0.5) !important;
+    }
+
+    /* ─── 2a. Failed Transaction Report Badge (Explicit Striking Red for "3" / Failure Count) ─── */
+    .fi-sidebar-item a[href*="bkash-failed-transactions"] .fi-badge,
+    .fi-sidebar-item a[href*="failed-transaction"] .fi-badge,
+    .fi-sidebar-item .fi-badge.fi-color-danger,
+    .fi-sidebar-item .fi-badge[class*="danger"],
+    .fi-sidebar-group a[href*="bkash-failed-transactions"] .fi-badge,
+    .fi-sidebar-nav a[href*="bkash-failed-transactions"] .fi-badge,
+    a[href*="bkash-failed-transactions"] .fi-badge {
+        background-color: #dc2626 !important; /* Pure Striking Alert Red */
+        color: #ffffff !important;
+        font-weight: 800 !important;
+        font-size: 0.6875rem !important;
+        padding: 0.12rem 0.52rem !important;
+        border-radius: 9999px !important;
+        border: 1px solid #ef4444 !important;
+        box-shadow: 0 2px 6px rgba(220, 38, 38, 0.5) !important;
+    }
+    html.dark .fi-sidebar-item a[href*="bkash-failed-transactions"] .fi-badge,
+    html.dark .fi-sidebar-item a[href*="failed-transaction"] .fi-badge,
+    html.dark .fi-sidebar-item .fi-badge.fi-color-danger,
+    html.dark .fi-sidebar-item .fi-badge[class*="danger"],
+    .dark .fi-sidebar-item a[href*="bkash-failed-transactions"] .fi-badge,
+    .dark .fi-sidebar-item a[href*="failed-transaction"] .fi-badge,
+    .dark .fi-sidebar-item .fi-badge.fi-color-danger,
+    .dark .fi-sidebar-item .fi-badge[class*="danger"],
+    .dark .fi-sidebar-group a[href*="bkash-failed-transactions"] .fi-badge,
+    .dark .fi-sidebar-nav a[href*="bkash-failed-transactions"] .fi-badge,
+    .dark a[href*="bkash-failed-transactions"] .fi-badge {
+        background-color: #ef4444 !important;
+        color: #ffffff !important;
+        border-color: #f87171 !important;
+        box-shadow: 0 0 10px rgba(239, 68, 68, 0.6) !important;
+    }
+
+    /* ─── 3. Global Search Bar & Icon Unhide + Active Styling ─── */
+    .fi-global-search-ctn,
+    .fi-global-search,
+    .fi-global-search-field {
+        display: flex !important;
+        align-items: center !important;
+        width: 100% !important;
+        max-width: 460px !important;
+        opacity: 1 !important;
+        visibility: visible !important;
+        pointer-events: auto !important;
+    }
+    .fi-global-search-field input,
+    .fi-global-search input,
+    input[type="search"].fi-input {
+        display: block !important;
+        visibility: visible !important;
+        opacity: 1 !important;
+        pointer-events: auto !important;
+        cursor: text !important;
+        width: 100% !important;
+        height: 38px !important;
+        font-size: 0.84rem !important;
+    }
+    .fi-global-search-field svg,
+    .fi-global-search svg,
+    .fi-global-search-field .fi-icon {
+        display: inline-block !important;
+        visibility: visible !important;
+        opacity: 1 !important;
+        color: #0284c7 !important;
+    }
+    html.dark .fi-global-search-field svg,
+    .dark .fi-global-search-field svg {
+        color: #38bdf8 !important;
+    }
+
+    /* ─── 4. Complete Eradication of Bell Adjacent Stray Arrow / Select ─── */
+    .fi-topbar select,
+    .fi-topbar input[type="number"],
+    .fi-topbar [role="spinbutton"],
+    .fi-topbar [aria-label*="sort" i],
+    .fi-topbar ::-webkit-inner-spin-button,
+    .fi-topbar ::-webkit-outer-spin-button,
+    .fi-no-database select,
+    .fi-modal-trigger select,
+    .fi-topbar-database-notifications-btn select,
+    .fi-topbar-database-notifications-btn + select,
+    .fi-topbar-database-notifications-btn ~ select,
+    .fi-modal-trigger + select,
+    .fi-modal-trigger ~ select,
+    .fi-modal-trigger ~ button:not(.fi-user-menu-trigger):not(.fi-dropdown-trigger),
+    .fi-topbar-database-notifications-btn + svg,
+    .fi-topbar-database-notifications-btn ~ svg {
+        display: none !important;
+        visibility: hidden !important;
+        opacity: 0 !important;
+        width: 0 !important;
+        height: 0 !important;
+        max-width: 0 !important;
+        max-height: 0 !important;
+        pointer-events: none !important;
+        margin: 0 !important;
+        padding: 0 !important;
+        border: none !important;
+        overflow: hidden !important;
+        -webkit-appearance: none !important;
+        appearance: none !important;
+    }
+
+</style>
+
+<script>
+    (function () {
+        function purgeStrayArrow() {
+            var bellBtn = document.querySelector('.fi-topbar-database-notifications-btn');
+            if (bellBtn) {
+                var sibling = bellBtn.nextElementSibling;
+                while (sibling) {
+                    if (!sibling.classList.contains('fi-icon-btn-badge-ctn')) {
+                        sibling.style.display = 'none';
+                        sibling.style.visibility = 'hidden';
+                        try { sibling.remove(); } catch(e) {}
+                    }
+                    sibling = sibling.nextElementSibling;
+                }
+                var trigger = bellBtn.closest('.fi-modal-trigger') || bellBtn.parentElement;
+                if (trigger) {
+                    var pSibling = trigger.nextElementSibling;
+                    while (pSibling) {
+                        var isUserMenu = pSibling.classList.contains('fi-user-menu') || 
+                                         pSibling.classList.contains('fi-dropdown') || 
+                                         pSibling.querySelector('.fi-user-menu-trigger') ||
+                                         pSibling.querySelector('img, [class*="avatar"]');
+                        if (!isUserMenu && pSibling.tagName !== 'TEMPLATE' && pSibling.tagName !== 'SCRIPT') {
+                            pSibling.style.display = 'none';
+                            pSibling.style.visibility = 'hidden';
+                            try { pSibling.remove(); } catch(e) {}
+                        }
+                        pSibling = pSibling.nextElementSibling;
+                    }
+                }
+            }
+        }
+
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', purgeStrayArrow);
+        } else {
+            purgeStrayArrow();
+        }
+        setTimeout(purgeStrayArrow, 300);
+        setTimeout(purgeStrayArrow, 800);
+        setTimeout(purgeStrayArrow, 2000);
+        window.addEventListener('livewire:navigated', purgeStrayArrow);
+        window.addEventListener('livewire:load', purgeStrayArrow);
+    })();
 </script>

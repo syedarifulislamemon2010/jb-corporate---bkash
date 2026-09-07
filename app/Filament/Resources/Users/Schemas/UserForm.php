@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources\Users\Schemas;
 
+use App\Helper\PasswordGenerateHelper;
 use Filament\Forms\Components\Hidden;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
@@ -19,7 +20,7 @@ class UserForm
 
                 Select::make('organization')
                     ->label('Organization')
-                    ->relationship('organizationRelation', 'label')
+                    ->relationship('organizationRelation', 'name')
                     ->searchable()
                     ->preload()
                     ->native(false)
@@ -27,8 +28,14 @@ class UserForm
 
                 TextInput::make('mobile_no')
                     ->label('Mobile No')
+                    ->tel()
+                    ->placeholder('01XXXXXXXXX')
+                    ->regex('/^01[3-9]\d{8}$/')
                     ->required()
-                    ->maxLength(255),
+                    ->maxLength(11)
+                    ->validationMessages([
+                        'regex' => 'Please enter a valid 11-digit Bangladeshi mobile number (e.g. 01712345678).',
+                    ]),
 
                 TextInput::make('email')
                     ->label('Email address')
@@ -39,26 +46,10 @@ class UserForm
                     ->relationship('roles', 'name')
                     ->multiple()
                     ->preload(),
-//                TextInput::make('password')
-//                    ->password()
-//                    ->required(fn (string $operation): bool => $operation === 'create')
-//                    ->dehydrated(fn ($state): bool => filled($state))
-//                    ->maxLength(255),
-                Hidden::make('token')->default(generate())
+                Hidden::make('password')
+                    ->required(fn (string $operation): bool => $operation === 'create')
+                    ->default(PasswordGenerateHelper::generate())
+                    ->dehydrated(fn ($state): bool => filled($state))
             ]);
-    }
-
-    public static function generate()
-    {
-        $letter = 'ABCDEFGHIJKLMNPQRSTUVWXYZ';
-        $number = '123456789';
-        $special = '@$%*&';
-        $str = '';
-        $str .= substr(str_shuffle($letter),0,5);
-        $str .= substr(str_shuffle($special),0,1);
-        $str .= substr(str_shuffle($number),0,2);
-        $str = str_shuffle($str);
-
-        return $str;
     }
 }

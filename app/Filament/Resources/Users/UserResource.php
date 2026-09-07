@@ -37,6 +37,9 @@ class UserResource extends Resource
         return $table
             ->defaultPaginationPageOption(50)
             ->paginated([10, 20, 50, 100, 200])
+            ->emptyStateHeading('No Users Yet')
+            ->emptyStateDescription('Create your first user to get started with the approval workflow.')
+            ->emptyStateIcon('heroicon-o-user-plus')
             ->columns([
                 TextColumn::make('index')
                     ->label('#')
@@ -57,7 +60,7 @@ class UserResource extends Resource
                 TextColumn::make('email')
                     ->searchable(),
                 TextColumn::make('mobile_no'),
-                TextColumn::make('organization'),
+                TextColumn::make('organizationRelation.name'),
             ])
             ->actions([
                 EditAction::make(),

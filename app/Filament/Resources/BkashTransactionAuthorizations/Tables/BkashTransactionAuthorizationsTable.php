@@ -28,6 +28,11 @@ class BkashTransactionAuthorizationsTable
                     return false;
                 }
 
+                // Failed transaction files can NEVER be authorized
+                if ($record->belongsToFailedBatch()) {
+                    return false;
+                }
+
                 // Segregation of Duties / Self-Approval Prevention via Policy
                 return \Illuminate\Support\Facades\Gate::forUser($currentUser)->allows('authorize', $record);
             })
@@ -65,16 +70,16 @@ class BkashTransactionAuthorizationsTable
                         default => 'gray',
                     }),
 
-                TextColumn::make('credit_account_no')
-                    ->label('Debit Account')
+                TextColumn::make('source_account_no')
+                    ->label('Source Account (TCSA/Ops)')
                     ->searchable(),
 
                 TextColumn::make('debit_account_title')
                     ->label('Beneficiary Name')
                     ->searchable(),
 
-                TextColumn::make('debit_account_no')
-                    ->label('Beneficiary Acc')
+                TextColumn::make('beneficiary_account_no')
+                    ->label('Beneficiary Account')
                     ->searchable(),
 
                 TextColumn::make('amount')
@@ -105,10 +110,35 @@ class BkashTransactionAuthorizationsTable
                     ->tooltip('Approve selected transactions for 2nd / Final Authorization')
                     ->color('warning')
                     ->requiresConfirmation()
+                    ->modalHeading('Confirm 1st Level Authorization')
+                    ->modalDescription(function (Collection $records) {
+                        return "You are about to authorize {$records->count()} transaction(s) and forward them to the 2nd / Final Authorizer queue.";
+                    })
+                    ->modalSubmitActionLabel('Yes, Authorize Now')
                     ->action(function (Collection $records) {
                         $currentUser = Auth::user();
                         $currentUserId = $currentUser->id ?? null;
                         $currentUserName = $currentUser->name ?? '1st Authorizer';
+
+                        if ($records->isEmpty()) {
+                            return;
+                        }
+
+                        // Guard: Failed transaction files can NEVER be authorized
+                        $failedRecords = $records->filter(fn ($r) => $r->belongsToFailedBatch());
+                        if ($failedRecords->isNotEmpty()) {
+                            foreach ($failedRecords as $fr) {
+                                \App\Models\BkashTransactionBatch::revertFailedBatchesToChecker($fr->batch_id, $fr->file_name);
+                            }
+                            \Filament\Notifications\Notification::make()
+                                ->title('Authorization Blocked (Failed Transactions)')
+                                ->body('Transactions belonging to files with failed transactions cannot be authorized and have been returned to Checker.')
+                                ->danger()
+                                ->persistent()
+                                ->send();
+                        }
+
+                        $records = $records->diff($failedRecords);
 
                         if ($records->isEmpty()) {
                             return;

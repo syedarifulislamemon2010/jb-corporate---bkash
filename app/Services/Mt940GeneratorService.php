@@ -39,8 +39,8 @@ class Mt940GeneratorService
 
         // Fetch settled transactions for this account on target value date
         $transactions = BkashTransaction::where(function ($q) use ($accountNumber) {
-            $q->where('credit_account_no', $accountNumber)
-              ->orWhere('debit_account_no', $accountNumber);
+            $q->where('source_account_no', $accountNumber)
+              ->orWhere('beneficiary_account_no', $accountNumber);
         })
         ->whereIn('status_id', [
             BkashTransaction::STATUS_FINAL_AUTHORIZED,
@@ -66,7 +66,7 @@ class Mt940GeneratorService
 
         // Statement Lines :61: & :86:
         foreach ($transactions as $index => $txn) {
-            $isDebit = ($txn->credit_account_no === $accountNumber);
+            $isDebit = ($txn->source_account_no === $accountNumber);
             $sign = $isDebit ? 'D' : 'C';
             $amountStr = sprintf('%012.2f', (float)$txn->amount);
             $amountStr = str_replace('.', ',', $amountStr);
@@ -76,7 +76,7 @@ class Mt940GeneratorService
             $mt940 .= ":61:{$dateFormatted}{$targetDate->format('md')}{$sign}NBNK{$amountStr}NONREF//{$txnRef}\r\n";
 
             // Details :86:
-            $narrative = static::strLimit("TRN/{$txn->transaction_type}/REF:{$txnRef}/ACC:{$txn->debit_account_no}", 65);
+            $narrative = static::strLimit("TRN/{$txn->transaction_type}/REF:{$txnRef}/ACC:{$txn->beneficiary_account_no}", 65);
             $mt940 .= ":86:{$narrative}\r\n";
 
             if ($isDebit) {

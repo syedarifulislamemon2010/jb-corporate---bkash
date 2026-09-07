@@ -44,6 +44,7 @@ class SeedTestUsersCommand extends Command
 
         // 2. Ensure Roles Exist
         $roles = [
+            'super_admin'        => 'Super Administrator with full system access',
             'bkash_checker'      => 'bKash Checker — verifies uploaded transaction files',
             'bkash_authorizer_1' => 'bKash 1st Authorizer — first-level approval',
             'bkash_authorizer_2' => 'bKash 2nd Authorizer — final approval and CBS settlement',
@@ -53,8 +54,24 @@ class SeedTestUsersCommand extends Command
             Role::firstOrCreate(['name' => $roleName, 'guard_name' => 'web']);
         }
 
-        // 3. Create or update test users with known password Test@Pass123
+        // 3. Create or update test users with known credentials
         $usersData = [
+            [
+                'name'         => 'Syed Ariful Islam Emon',
+                'email'        => 'emon@jb.com',
+                'mobile_no'    => '01711223344',
+                'organization' => 'Janata Bank PLC.',
+                'role'         => 'super_admin',
+                'password'     => '123456',
+            ],
+            [
+                'name'         => 'G S Kibria',
+                'email'        => 'kibria@jb.com',
+                'mobile_no'    => '01738535099',
+                'organization' => 'Janata Bank PLC.',
+                'role'         => 'super_admin',
+                'password'     => 'password',
+            ],
             [
                 'name'         => 'bKash Checker Test User',
                 'email'        => 'checker@test.jbcorporate.com',
@@ -148,22 +165,22 @@ class SeedTestUsersCommand extends Command
                 'transaction_type'    => 'A2A',
                 'reference_id'        => $testRefId,
                 'txn_id'              => $testTxnId,
-                'debit_account_no'    => '0100111111111',
-                'debit_account_title' => 'Test Beneficiary User',
-                'credit_account_no'   => '0100202707747',
-                'amount'              => 50000.00,
-                'status_id'           => BkashTransaction::STATUS_FINAL_AUTHORIZED, // 1003
-                'checked_by'          => 'bKash Checker Test User',
-                'checked_at'          => Carbon::now()->subMinutes(15),
-                'approved_by_1'       => 'bKash 1st Authorizer Test User',
-                'approved_at_1'       => Carbon::now()->subMinutes(10),
-                'approved_by_2'       => 'bKash 2nd Authorizer Test User',
-                'approved_at_2'       => Carbon::now()->subMinutes(5),
-                'confirmed_by'        => null,
-                'confirmed_at'        => null,
-                'response_id'         => null,
-                'cbs_success_at'      => null,
-                'reject_reason'       => null,
+                'beneficiary_account_no' => '0100111111111',
+                'debit_account_title'    => 'Test Beneficiary User',
+                'source_account_no'      => '0100202707747',
+                'amount'                 => 50000.00,
+                'status_id'              => BkashTransaction::STATUS_FINAL_AUTHORIZED, // 1003
+                'checked_by'             => 'bKash Checker Test User',
+                'checked_at'             => Carbon::now()->subMinutes(15),
+                'approved_by_1'          => 'bKash 1st Authorizer Test User',
+                'approved_at_1'          => Carbon::now()->subMinutes(10),
+                'approved_by_2'          => 'bKash 2nd Authorizer Test User',
+                'approved_at_2'          => Carbon::now()->subMinutes(5),
+                'confirmed_by'           => null,
+                'confirmed_at'           => null,
+                'response_id'            => null,
+                'cbs_success_at'         => null,
+                'reject_reason'          => null,
             ];
 
             if ($txn) {
@@ -181,8 +198,8 @@ class SeedTestUsersCommand extends Command
                     ['Reference ID', $txn->reference_id],
                     ['Status ID', $txn->status_id . ' (STATUS_FINAL_AUTHORIZED)'],
                     ['Amount (BDT)', number_format($txn->amount, 2)],
-                    ['Beneficiary Acc', $txn->debit_account_no],
-                    ['TCSA Pool Acc', $txn->credit_account_no],
+                    ['Beneficiary Acc', $txn->beneficiary_account_no],
+                    ['TCSA Pool Acc', $txn->source_account_no],
                 ]
             );
             $this->newLine();

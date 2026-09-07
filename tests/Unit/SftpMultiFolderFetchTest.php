@@ -138,8 +138,8 @@ class SftpMultiFolderFetchTest extends TestCase
         $mapped = [
             'reference_id'      => 'REF001',
             'amount'            => 500,
-            'credit_account_no' => '0100202707747',
-            'debit_account_no'  => null, // Missing beneficiary account!
+            'source_account_no' => '0100202707747',
+            'beneficiary_account_no'  => null, // Missing beneficiary account!
         ];
 
         $result = BkashExcelParserService::validateRow($mapped, 'A2A');

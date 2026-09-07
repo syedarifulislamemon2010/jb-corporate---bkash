@@ -29,6 +29,11 @@ class BkashTransactionConfirmationsTable
                     return false;
                 }
 
+                // Failed transaction files can NEVER be authorized/confirmed
+                if ($record->belongsToFailedBatch()) {
+                    return false;
+                }
+
                 // 3-Person Segregation of Duties / Self-Approval Prevention via Policy
                 return \Illuminate\Support\Facades\Gate::forUser($currentUser)->allows('confirm', $record);
             })
@@ -66,16 +71,16 @@ class BkashTransactionConfirmationsTable
                         default => 'gray',
                     }),
 
-                TextColumn::make('credit_account_no')
-                    ->label('Debit Account')
+                TextColumn::make('source_account_no')
+                    ->label('Source Account (TCSA/Ops)')
                     ->searchable(),
 
                 TextColumn::make('debit_account_title')
                     ->label('Beneficiary Name')
                     ->searchable(),
 
-                TextColumn::make('debit_account_no')
-                    ->label('Beneficiary Acc')
+                TextColumn::make('beneficiary_account_no')
+                    ->label('Beneficiary Account')
                     ->searchable(),
 
                 TextColumn::make('amount')
@@ -105,10 +110,44 @@ class BkashTransactionConfirmationsTable
                     ->tooltip('Perform final confirmation and trigger automated CBS settlement')
                     ->color('success')
                     ->requiresConfirmation()
+                    ->modalHeading('Confirm Final Settlement')
+                    ->modalDescription(function (Collection $records) {
+                        $totalAmount = $records->sum('amount');
+                        $formattedAmount = \App\Models\BkashTransaction::formatBdtAmount((float) $totalAmount);
+                        return "You are about to FINALLY settle {$records->count()} transaction(s) " .
+                               "totaling BDT {$formattedAmount}. This will trigger instant CBS " .
+                               "settlement (debit + credit) and CANNOT be reversed. Please verify " .
+                               "the amounts carefully before proceeding.";
+                    })
+                    ->modalSubmitActionLabel('Yes, Settle Now')
                     ->action(function (Collection $records) {
                         $currentUser = Auth::user();
                         $currentUserId = $currentUser->id ?? null;
                         $currentUserName = $currentUser->name ?? '2nd Authorizer';
+
+                        if ($records->isEmpty()) {
+                            return;
+                        }
+
+                        // Guard: Failed transaction files can NEVER be confirmed/settled
+                        $failedRecords = $records->filter(fn ($r) => $r->belongsToFailedBatch());
+                        if ($failedRecords->isNotEmpty()) {
+                            foreach ($failedRecords as $fr) {
+                                \App\Models\BkashTransactionBatch::revertFailedBatchesToChecker($fr->batch_id, $fr->file_name);
+                            }
+                            \Filament\Notifications\Notification::make()
+                                ->title('Confirmation Blocked (Failed Transactions)')
+                                ->body('Transactions belonging to files with failed transactions cannot be confirmed and have been returned to Checker.')
+                                ->danger()
+                                ->persistent()
+                                ->send();
+                        }
+
+                        $records = $records->diff($failedRecords);
+
+                        if ($records->isEmpty()) {
+                            return;
+                        }
 
                         // 3-Person Segregation of Duties Check: 2nd Authorizer != Checker AND 2nd Authorizer != 1st Authorizer
                         $ineligibleRecords = $records->filter(function ($record) use ($currentUserId, $currentUserName) {

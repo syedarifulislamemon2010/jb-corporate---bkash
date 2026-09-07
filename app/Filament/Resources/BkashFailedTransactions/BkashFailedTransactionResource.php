@@ -26,6 +26,21 @@ class BkashFailedTransactionResource extends Resource
 
     protected static ?string $navigationIconColor = 'danger';
 
+        public static function getNavigationBadge(): ?string
+    {
+        try {
+            $count = \App\Models\BkashFailedTransaction::count();
+            return $count > 0 ? (string) $count : '0';
+        } catch (\Throwable $e) {
+            return null;
+        }
+    }
+
+    public static function getNavigationBadgeColor(): ?string
+    {
+        return 'danger';
+    }
+
     public static function table(Table $table): Table
     {
         return $table
@@ -112,13 +127,11 @@ class BkashFailedTransactionResource extends Resource
                     ->searchable()
                     ->sortable(),
 
-                // 8. Debit Account
-                TextColumn::make('debit_account_no')
-                    ->label('Debit Account')
+                TextColumn::make('source_account_no')
+                    ->label('Source Account (TCSA/Ops)')
                     ->searchable(),
 
-                // 9. Beneficiary Account
-                TextColumn::make('credit_account_no')
+                TextColumn::make('beneficiary_account_no')
                     ->label('Beneficiary Account')
                     ->searchable(),
 
@@ -157,6 +170,24 @@ class BkashFailedTransactionResource extends Resource
     {
         return [
             'index' => Pages\ListBkashFailedTransactions::route('/'),
+        ];
+    }
+
+    public static function getGloballySearchableAttributes(): array
+    {
+        return ['txn_id', 'reference_id', 'file_name'];
+    }
+
+    public static function getGlobalSearchResultTitle(\Illuminate\Database\Eloquent\Model $record): string
+    {
+        return "Failed Txn: {$record->txn_id}";
+    }
+
+    public static function getGlobalSearchResultDetails(\Illuminate\Database\Eloquent\Model $record): array
+    {
+        return [
+            'File'   => $record->file_name ?? 'N/A',
+            'Reason' => $record->reject_reason ?? 'Validation/CBS Error',
         ];
     }
 }
