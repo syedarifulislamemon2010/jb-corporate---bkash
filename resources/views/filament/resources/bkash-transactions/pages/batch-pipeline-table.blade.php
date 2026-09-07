@@ -350,6 +350,47 @@
             border-color: rgba(234, 88, 12, 0.4);
         }
 
+        /* Self-Action Restricted Badge & Lock Icon */
+        .jb-restricted-lock {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 22px;
+            height: 22px;
+            border-radius: 4px;
+            background-color: #fef2f2;
+            border: 1px solid #fecaca;
+            color: #ef4444;
+            cursor: not-allowed;
+            transition: all 0.15s ease;
+        }
+        html.dark .jb-restricted-lock, .dark .jb-restricted-lock {
+            background-color: rgba(239, 68, 68, 0.15);
+            border-color: rgba(239, 68, 68, 0.35);
+            color: #f87171;
+        }
+
+        .jb-badge-restricted {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.25rem;
+            font-size: 0.6875rem;
+            font-weight: 600;
+            padding: 0.12rem 0.45rem;
+            border-radius: 9999px;
+            background-color: #fee2e2;
+            color: #991b1b;
+            border: 1px solid #fca5a5;
+            margin-left: 0.5rem;
+            white-space: nowrap;
+            vertical-align: middle;
+        }
+        html.dark .jb-badge-restricted, .dark .jb-badge-restricted {
+            background-color: rgba(239, 68, 68, 0.2);
+            color: #fca5a5;
+            border-color: rgba(239, 68, 68, 0.4);
+        }
+
         /* Download Button */
         .jb-btn-download {
             display: inline-flex;
@@ -615,6 +656,9 @@
 
         @php
             $batches = $this->getBatches();
+            $currentUser = auth()->user();
+            $selectableBatches = $batches->filter(fn ($b) => $b->canUserSelectForAction($actionMethod ?? '', $currentUser));
+            $hasSelectableBatches = $selectableBatches->isNotEmpty();
         @endphp
 
         <!-- Master Batch Files Table -->
@@ -623,11 +667,24 @@
                 <thead class="jb-master-thead">
                     <tr>
                         <th style="width: 44px; min-width: 44px; text-align: center;">
-                            <input
-                                type="checkbox"
-                                wire:model.live="selectAll"
-                                class="jb-checkbox"
-                            />
+                            @if($hasSelectableBatches)
+                                <input
+                                    type="checkbox"
+                                    wire:model.live="selectAll"
+                                    class="jb-checkbox"
+                                    title="Select all eligible batch files"
+                                />
+                            @else
+                                <span 
+                                    class="jb-restricted-lock" 
+                                    style="width: 20px; height: 20px; border-color: #cbd5e1; background: #f8fafc; color: #94a3b8;" 
+                                    title="No batch files currently selectable by your account on this page"
+                                >
+                                    <svg style="width: 12px; height: 12px;" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+                                    </svg>
+                                </span>
+                            @endif
                         </th>
                         <th style="width: 48px; min-width: 48px;">#</th>
                         <th style="min-width: 260px;">File Name</th>
@@ -643,6 +700,9 @@
                 @forelse($batches as $batch)
                     @php
                         $txns = $batch->getBatchTransactions();
+                        $canSelectThisBatch = $batch->canUserSelectForAction($actionMethod ?? '', $currentUser, $txns);
+                        $restrictionReason = !$canSelectThisBatch ? $batch->getSelectionRestrictionReason($actionMethod ?? '', $currentUser, $txns) : null;
+
                         $successCount = $batch->id
                             ? \App\Models\BkashTransaction::where(function ($q) use ($batch) {
                                 $q->where('batch_id', $batch->id);
@@ -668,14 +728,25 @@
                     <!-- Scoped tbody per batch ensures 100% reliable default-collapsed Alpine state -->
                     <tbody x-data="{ open: false }" class="jb-batch-tbody">
                         <tr class="jb-master-row">
-                            <!-- Checkbox (Only on file row) -->
+                            <!-- Checkbox (Only if allowed by segregation of duties) -->
                             <td style="text-align: center;" onclick="event.stopPropagation()">
-                                <input
-                                    type="checkbox"
-                                    wire:model.live="selectedBatches"
-                                    value="{{ $batch->id }}"
-                                    class="jb-checkbox"
-                                />
+                                @if($canSelectThisBatch)
+                                    <input
+                                        type="checkbox"
+                                        wire:model.live="selectedBatches"
+                                        value="{{ $batch->id }}"
+                                        class="jb-checkbox"
+                                    />
+                                @else
+                                    <span 
+                                        class="jb-restricted-lock" 
+                                        title="{{ $restrictionReason ?? 'Self-action restricted: You cannot select your own file.' }}"
+                                    >
+                                        <svg style="width: 13px; height: 13px;" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+                                        </svg>
+                                    </span>
+                                @endif
                             </td>
 
                             <!-- # Index -->
@@ -695,6 +766,14 @@
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 5l7 7-7 7"></path>
                                     </svg>
                                     <span>{{ $batch->file_name }}</span>
+                                    @if(!$canSelectThisBatch && filled($restrictionReason))
+                                        <span class="jb-badge-restricted" title="{{ $restrictionReason }}">
+                                            <svg style="width: 10px; height: 10px;" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+                                            </svg>
+                                            <span>Restricted</span>
+                                        </span>
+                                    @endif
                                 </button>
                             </td>
 
@@ -787,7 +866,7 @@
                                                             <td style="font-family: monospace;">{{ $txn->beneficiary_account_no }}</td>
                                                             <td style="text-align: right; font-weight: 600; font-family: monospace;" class="jb-num">{{ number_format($txn->amount, 2) }}</td>
                                                             <td style="text-align: right; font-family: monospace;" class="jb-num">{{ $txn->credit_routing ?? '-' }}</td>
-                                                            <td>{{ $txn->credit_bank ?? '-' }}</td>
+                                                            <td style="font-family: monospace;">{{ \App\Models\BkashTransaction::getCreditBank3($txn->credit_routing ?: $txn->debit_routing, $txn->credit_bank) }}</td>
                                                             <td style="font-family: monospace; color: #64748b;">{{ $txn->txn_id }}</td>
                                                         </tr>
                                                     @empty

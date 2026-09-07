@@ -26,10 +26,10 @@ class DatabaseSeeder extends Seeder
                 'name'         => 'G S Kibria',
                 'password'     => Hash::make('password'),
                 'mobile_no'    => '01738535099',
-                'organization' => 'Janata Bank PLC',
+                'organization' => '1',
             ]
         );
-        $kibria->assignRole('super_admin');
+        $kibria->syncRoles(['super_admin', 'panel_user']);
 
         $emon = User::updateOrCreate(
             ['email' => 'emon@jb.com'],
@@ -37,10 +37,10 @@ class DatabaseSeeder extends Seeder
                 'name'         => 'Syed Ariful Islam Emon',
                 'password'     => Hash::make('123456'),
                 'mobile_no'    => '01711223344',
-                'organization' => 'Janata Bank PLC',
+                'organization' => '1',
             ]
         );
-        $emon->assignRole('super_admin');
+        $emon->syncRoles(['super_admin', 'panel_user']);
 
         // 3. Seed banking pipeline role accounts for testing / demonstration
         $checker = User::updateOrCreate(
@@ -49,10 +49,10 @@ class DatabaseSeeder extends Seeder
                 'name'         => 'Janata Checker',
                 'password'     => Hash::make('123456'),
                 'mobile_no'    => '01700000001',
-                'organization' => 'Janata Bank PLC',
+                'organization' => '1',
             ]
         );
-        $checker->assignRole('bkash_checker');
+        $checker->syncRoles(['bkash_checker', 'panel_user']);
 
         $auth1 = User::updateOrCreate(
             ['email' => 'authorizer1@jb.com'],
@@ -60,10 +60,10 @@ class DatabaseSeeder extends Seeder
                 'name'         => 'Janata 1st Authorizer',
                 'password'     => Hash::make('123456'),
                 'mobile_no'    => '01700000002',
-                'organization' => 'Janata Bank PLC',
+                'organization' => '1',
             ]
         );
-        $auth1->assignRole('bkash_authorizer_1');
+        $auth1->syncRoles(['bkash_authorizer_1', 'bkash_authorizer', 'panel_user']);
 
         $auth2 = User::updateOrCreate(
             ['email' => 'authorizer2@jb.com'],
@@ -71,9 +71,9 @@ class DatabaseSeeder extends Seeder
                 'name'         => 'Janata 2nd Authorizer',
                 'password'     => Hash::make('123456'),
                 'mobile_no'    => '01700000003',
-                'organization' => 'Janata Bank PLC',
+                'organization' => '1',
             ]
         );
-        $auth2->assignRole('bkash_authorizer_2');
+        $auth2->syncRoles(['bkash_authorizer_2', 'panel_user']);
     }
 }

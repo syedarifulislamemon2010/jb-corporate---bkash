@@ -65,7 +65,7 @@
             title="Download original source file"
             class="inline-flex items-center gap-1.5 px-2.5 py-1 text-xs font-semibold rounded-md shadow-sm text-primary-700 bg-primary-50 hover:bg-primary-100 border border-primary-200 transition dark:bg-primary-950/60 dark:text-primary-300 dark:border-primary-800 dark:hover:bg-primary-900"
         >
-            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <svg style="width: 14px; height: 14px; min-width: 14px;" class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path>
             </svg>
             <span>Download</span>

@@ -271,4 +271,222 @@ class BkashTransactionBatch extends Model
 
         $this->update(['status_id' => min($distinctStatuses)]);
     }
+
+    /**
+     * Determine if a user is permitted to perform 1st-level authorization on this batch.
+     * Segregation of Duties: User who verified/checked this file cannot authorize it.
+     */
+    public function canUserAuthorize(?User $user = null, ?iterable $transactions = null): bool
+    {
+        $user = $user ?? \Illuminate\Support\Facades\Auth::user();
+        if (!$user) {
+            return false;
+        }
+
+        if ($this->hasFailedTransactions()) {
+            return false;
+        }
+
+        $userId = $user->id;
+        $userName = $user->name;
+
+        if ($transactions !== null) {
+            foreach ($transactions as $t) {
+                if (($userId && (int)$t->checked_by_id === (int)$userId) ||
+                    ($userName && $t->checked_by === $userName)) {
+                    return false;
+                }
+            }
+            return true;
+        }
+
+        return !\App\Models\BkashTransaction::where(function ($q) {
+            $q->where('batch_id', $this->id);
+            if (filled($this->file_name)) {
+                $q->orWhere('file_name', $this->file_name);
+            }
+        })->where(function ($q) use ($userId, $userName) {
+            if ($userId) {
+                $q->where('checked_by_id', $userId);
+            }
+            if ($userName) {
+                $q->orWhere('checked_by', $userName);
+            }
+        })->exists();
+    }
+
+    /**
+     * Determine if a user is permitted to perform 2nd-level / final confirmation on this batch.
+     * Segregation of Duties: User who checked or 1st-authorized this file cannot confirm it.
+     */
+    public function canUserConfirm(?User $user = null, ?iterable $transactions = null): bool
+    {
+        $user = $user ?? \Illuminate\Support\Facades\Auth::user();
+        if (!$user) {
+            return false;
+        }
+
+        if ($this->hasFailedTransactions()) {
+            return false;
+        }
+
+        $userId = $user->id;
+        $userName = $user->name;
+
+        if ($transactions !== null) {
+            foreach ($transactions as $t) {
+                $isChecker = ($userId && (int)$t->checked_by_id === (int)$userId) ||
+                             ($userName && $t->checked_by === $userName);
+                $isAuth1   = ($userId && (int)$t->approved_by_1_id === (int)$userId) ||
+                             ($userName && $t->approved_by_1 === $userName);
+                if ($isChecker || $isAuth1) {
+                    return false;
+                }
+            }
+            return true;
+        }
+
+        return !\App\Models\BkashTransaction::where(function ($q) {
+            $q->where('batch_id', $this->id);
+            if (filled($this->file_name)) {
+                $q->orWhere('file_name', $this->file_name);
+            }
+        })->where(function ($q) use ($userId, $userName) {
+            $q->where(function ($sub) use ($userId, $userName) {
+                if ($userId) {
+                    $sub->where('checked_by_id', $userId);
+                }
+                if ($userName) {
+                    $sub->orWhere('checked_by', $userName);
+                }
+            })->orWhere(function ($sub) use ($userId, $userName) {
+                if ($userId) {
+                    $sub->where('approved_by_1_id', $userId);
+                }
+                if ($userName) {
+                    $sub->orWhere('approved_by_1', $userName);
+                }
+            });
+        })->exists();
+    }
+
+    /**
+     * Determine whether the batch is selectable by the user for the given action method.
+     */
+    public function canUserSelectForAction(string $actionMethod, ?User $user = null, ?iterable $transactions = null): bool
+    {
+        return match ($actionMethod) {
+            'authorizeSelectedBatches' => $this->canUserAuthorize($user, $transactions),
+            'confirmSelectedBatches'   => $this->canUserConfirm($user, $transactions),
+            default                    => !$this->hasFailedTransactions(),
+        };
+    }
+
+    /**
+     * Get a human-readable reason why this batch cannot be selected by the current user.
+     */
+    public function getSelectionRestrictionReason(string $actionMethod, ?User $user = null, ?iterable $transactions = null): ?string
+    {
+        $user = $user ?? \Illuminate\Support\Facades\Auth::user();
+        if (!$user) {
+            return 'Authentication required';
+        }
+
+        if ($this->hasFailedTransactions()) {
+            return 'File contains failed transactions and cannot be processed.';
+        }
+
+        $userId = $user->id;
+        $userName = $user->name;
+
+        if ($actionMethod === 'authorizeSelectedBatches') {
+            $isCheckedByMe = false;
+            if ($transactions !== null) {
+                foreach ($transactions as $t) {
+                    if (($userId && (int)$t->checked_by_id === (int)$userId) ||
+                        ($userName && $t->checked_by === $userName)) {
+                        $isCheckedByMe = true;
+                        break;
+                    }
+                }
+            } else {
+                $isCheckedByMe = \App\Models\BkashTransaction::where(function ($q) {
+                    $q->where('batch_id', $this->id);
+                    if (filled($this->file_name)) {
+                        $q->orWhere('file_name', $this->file_name);
+                    }
+                })->where(function ($q) use ($userId, $userName) {
+                    if ($userId) {
+                        $q->where('checked_by_id', $userId);
+                    }
+                    if ($userName) {
+                        $q->orWhere('checked_by', $userName);
+                    }
+                })->exists();
+            }
+
+            if ($isCheckedByMe) {
+                return 'You verified this file as Checker. 1st authorization must be done by a different user.';
+            }
+        }
+
+        if ($actionMethod === 'confirmSelectedBatches') {
+            $isAuthorizedByMe = false;
+            $isCheckedByMe = false;
+
+            if ($transactions !== null) {
+                foreach ($transactions as $t) {
+                    if (($userId && (int)$t->approved_by_1_id === (int)$userId) ||
+                        ($userName && $t->approved_by_1 === $userName)) {
+                        $isAuthorizedByMe = true;
+                        break;
+                    }
+                    if (($userId && (int)$t->checked_by_id === (int)$userId) ||
+                        ($userName && $t->checked_by === $userName)) {
+                        $isCheckedByMe = true;
+                        break;
+                    }
+                }
+            } else {
+                $isAuthorizedByMe = \App\Models\BkashTransaction::where(function ($q) {
+                    $q->where('batch_id', $this->id);
+                    if (filled($this->file_name)) {
+                        $q->orWhere('file_name', $this->file_name);
+                    }
+                })->where(function ($q) use ($userId, $userName) {
+                    if ($userId) {
+                        $q->where('approved_by_1_id', $userId);
+                    }
+                    if ($userName) {
+                        $q->orWhere('approved_by_1', $userName);
+                    }
+                })->exists();
+
+                if (!$isAuthorizedByMe) {
+                    $isCheckedByMe = \App\Models\BkashTransaction::where(function ($q) {
+                        $q->where('batch_id', $this->id);
+                        if (filled($this->file_name)) {
+                            $q->orWhere('file_name', $this->file_name);
+                        }
+                    })->where(function ($q) use ($userId, $userName) {
+                        if ($userId) {
+                            $q->where('checked_by_id', $userId);
+                        }
+                        if ($userName) {
+                            $q->orWhere('checked_by', $userName);
+                        }
+                    })->exists();
+                }
+            }
+
+            if ($isAuthorizedByMe) {
+                return 'You 1st-authorized this file. Final confirmation must be done by a different user.';
+            }
+            if ($isCheckedByMe) {
+                return 'You verified this file as Checker. Final confirmation must come from a third distinct user.';
+            }
+        }
+
+        return null;
+    }
 }

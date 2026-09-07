@@ -48,10 +48,28 @@ class ListBkashTransactionAuthorizations extends ListRecords
     public function updatedSelectAll($value): void
     {
         if ($value) {
-            $this->selectedBatches = $this->getBatches()->pluck('id')->map(fn ($id) => (string) $id)->toArray();
+            $currentUser = Auth::user();
+            $this->selectedBatches = $this->getBatches()
+                ->filter(fn ($batch) => $batch->canUserAuthorize($currentUser))
+                ->pluck('id')
+                ->map(fn ($id) => (string) $id)
+                ->values()
+                ->toArray();
         } else {
             $this->selectedBatches = [];
         }
+    }
+
+    public function updatedSelectedBatches(): void
+    {
+        $currentUser = Auth::user();
+        $selectableBatches = $this->getBatches()->filter(fn ($b) => $b->canUserAuthorize($currentUser));
+        $selectableIds = $selectableBatches->pluck('id')->map(fn ($id) => (string) $id)->toArray();
+
+        // Enforce segregation of duties: drop any unselectable batch from selection
+        $this->selectedBatches = array_values(array_intersect($this->selectedBatches, $selectableIds));
+
+        $this->selectAll = !empty($selectableIds) && count(array_intersect($selectableIds, $this->selectedBatches)) === count($selectableIds);
     }
 
     public function getBatches(): Collection
@@ -165,16 +183,11 @@ class ListBkashTransactionAuthorizations extends ListRecords
                   ->orWhere('file_name', $batch->file_name);
             })->where('status_id', BkashTransaction::STATUS_CHECKED)->get();
 
-            // Segregation of duties: 1st Authorizer != Checker (unless super_admin with no other checker)
-            $selfChecked = $txns->filter(function ($t) use ($currentUserId, $currentUserName) {
-                return ($currentUserId && $t->checked_by_id === $currentUserId) ||
-                       ($t->checked_by && $t->checked_by === $currentUserName);
-            });
-
-            if ($selfChecked->isNotEmpty() && !$currentUser->hasRole('super_admin')) {
+            // Segregation of duties: 1st Authorizer != Checker (Strictly enforced: no user can self-authorize)
+            if (!$batch->canUserAuthorize($currentUser, $txns)) {
                 \Filament\Notifications\Notification::make()
                     ->title('Authorization Blocked (Segregation of Duties)')
-                    ->body("File '{$batch->file_name}' was checked by you. 1st authorization must come from a different user.")
+                    ->body("File '{$batch->file_name}' was verified/checked by you. 1st authorization must come from a different user.")
                     ->danger()
                     ->persistent()
                     ->send();

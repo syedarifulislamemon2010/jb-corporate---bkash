@@ -157,6 +157,26 @@ class BkashTransaction extends Model
     }
 
     /**
+     * Get Credit Bank & Branch display code:
+     * As per user requirement, displays only the first 3 digits of the credit routing number.
+     */
+    public static function getCreditBank3(?string $routing, ?string $fallback = null): string
+    {
+        if (filled($routing) && strlen(trim((string)$routing)) >= 3) {
+            return substr(trim((string)$routing), 0, 3);
+        }
+        return filled($fallback) ? (string) $fallback : '-';
+    }
+
+    /**
+     * Accessor for credit bank 3-digit code.
+     */
+    public function getCreditBankCode3Attribute(): string
+    {
+        return static::getCreditBank3($this->credit_routing ?: $this->debit_routing, $this->credit_bank);
+    }
+
+    /**
      * Check if this transaction belongs to a batch/file that has failed transactions.
      */
     public function belongsToFailedBatch(): bool

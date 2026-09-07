@@ -143,6 +143,7 @@ class BkashTransactionsTable
 
                 TextColumn::make('credit_bank')
                     ->label('Bank Name')
+                    ->formatStateUsing(fn ($state, BkashTransaction $record) => BkashTransaction::getCreditBank3($record->credit_routing ?: $record->debit_routing, $state))
                     ->searchable()
                     ->toggleable(),
 

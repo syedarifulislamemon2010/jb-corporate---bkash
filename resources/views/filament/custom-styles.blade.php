@@ -1209,9 +1209,13 @@
     }
 
     /* ─── Slide-over Notifications Drawer Polish ─── */
-    .fi-no-database,
     .fi-no-notifications {
         overflow-x: hidden !important;
+    }
+    .fi-no-database,
+    .fi-modal-trigger,
+    .fi-topbar-database-notifications-btn {
+        overflow: visible !important;
     }
 
     .fi-no-notification-unread-ctn,
@@ -1916,6 +1920,26 @@
         line-height: 1.25 !important;
     }
 
+    /* ─── Batch Slide-Over Detail Modal Safety Guard ─── */
+    .jb-batch-modal-wrapper svg {
+        display: inline-block !important;
+        vertical-align: middle !important;
+        flex-shrink: 0 !important;
+    }
+    .jb-batch-modal-wrapper .jb-metric-icon-box svg {
+        width: 18px !important;
+        height: 18px !important;
+        max-width: 18px !important;
+        max-height: 18px !important;
+    }
+    .jb-batch-modal-wrapper .jb-btn-excel svg,
+    .jb-batch-modal-wrapper .jb-btn-csv svg {
+        width: 15px !important;
+        height: 15px !important;
+        max-width: 15px !important;
+        max-height: 15px !important;
+    }
+
     /* ─── Clean Topbar Icons Styling ─── */
     .fi-topbar-end select,
     .fi-topbar-end input[type="number"]::-webkit-inner-spin-button,
@@ -2512,48 +2536,111 @@
 
     /* ─── Topbar Bell Unread Badge Polish ─── */
     .fi-topbar-database-notifications-btn .fi-icon-btn-badge-ctn {
-        top: -3px !important;
-        right: -3px !important;
+        top: 1px !important;
+        right: 2px !important;
+        position: absolute !important;
+        overflow: visible !important;
+        pointer-events: none !important;
+        z-index: 20 !important;
     }
     .fi-topbar-database-notifications-btn .fi-badge {
         background-color: #ef4444 !important;
         color: #ffffff !important;
         font-weight: 800 !important;
         font-size: 0.6875rem !important;
-        padding: 0.15rem 0.45rem !important;
+        line-height: 1 !important;
+        min-width: 1.25rem !important;
+        height: 1.25rem !important;
+        padding: 0 0.35rem !important;
         border-radius: 9999px !important;
         box-shadow: 0 2px 6px rgba(239, 68, 68, 0.4) !important;
-        border: 1.5px solid #ffffff !important;
+        border: 2px solid #ffffff !important;
+        display: inline-flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        white-space: nowrap !important;
+        box-sizing: border-box !important;
     }
     html.dark .fi-topbar-database-notifications-btn .fi-badge,
     .dark .fi-topbar-database-notifications-btn .fi-badge {
         border-color: #0f172a !important;
     }
 
+    /* ─── Slideover Close Button ('X') Clean Positioning & Styling ─── */
+    .jb-notifications-slideover .fi-modal-close-btn,
+    .fi-modal.fi-modal-slide-over .fi-modal-close-btn {
+        position: absolute !important;
+        top: 1.1rem !important;
+        right: 1.25rem !important;
+        width: 2.1rem !important;
+        height: 2.1rem !important;
+        display: flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        border-radius: 9999px !important;
+        color: #64748b !important;
+        background-color: #f1f5f9 !important;
+        border: 1px solid #cbd5e1 !important;
+        transition: all 0.15s ease-in-out !important;
+        z-index: 50 !important;
+        cursor: pointer !important;
+    }
+    .jb-notifications-slideover .fi-modal-close-btn:hover,
+    .fi-modal.fi-modal-slide-over .fi-modal-close-btn:hover {
+        color: #0f172a !important;
+        background-color: #e2e8f0 !important;
+        border-color: #94a3b8 !important;
+        transform: scale(1.06) !important;
+    }
+    .jb-notifications-slideover .fi-modal-close-btn svg,
+    .fi-modal.fi-modal-slide-over .fi-modal-close-btn svg {
+        width: 1.15rem !important;
+        height: 1.15rem !important;
+        stroke-width: 2.2 !important;
+    }
+    html.dark .jb-notifications-slideover .fi-modal-close-btn,
+    html.dark .fi-modal.fi-modal-slide-over .fi-modal-close-btn,
+    .dark .jb-notifications-slideover .fi-modal-close-btn,
+    .dark .fi-modal.fi-modal-slide-over .fi-modal-close-btn {
+        color: #94a3b8 !important;
+        background-color: #1e293b !important;
+        border-color: #334155 !important;
+    }
+    html.dark .jb-notifications-slideover .fi-modal-close-btn:hover,
+    html.dark .fi-modal.fi-modal-slide-over .fi-modal-close-btn:hover,
+    .dark .jb-notifications-slideover .fi-modal-close-btn:hover,
+    .dark .fi-modal.fi-modal-slide-over .fi-modal-close-btn:hover {
+        color: #f8fafc !important;
+        background-color: #334155 !important;
+        border-color: #475569 !important;
+    }
+
     /* ─── Slideover Header ─── */
     .jb-notif-header {
         display: flex;
         flex-direction: column;
-        gap: 0.75rem;
-        padding-bottom: 0.5rem;
+        gap: 0.65rem;
+        padding-bottom: 0.25rem;
         width: 100%;
     }
     .jb-notif-header-title-row {
         display: flex;
         align-items: center;
-        justify-content: space-between;
-        gap: 0.5rem;
+        justify-content: flex-start;
+        padding-right: 3.5rem !important; /* Never overlaps or touches the top-right X button */
+        min-height: 2.1rem;
     }
     .jb-notif-title-group {
         display: flex;
         align-items: center;
-        gap: 0.5rem;
+        gap: 0.6rem;
     }
     .jb-notif-heading {
-        font-size: 1.125rem;
+        font-size: 1.15rem;
         font-weight: 800;
         color: #0f172a;
         margin: 0;
+        letter-spacing: -0.02em;
     }
     html.dark .jb-notif-heading,
     .dark .jb-notif-heading {
@@ -2562,7 +2649,7 @@
     .jb-notif-unread-badge {
         font-size: 0.6875rem;
         font-weight: 700;
-        padding: 0.15rem 0.5rem;
+        padding: 0.15rem 0.55rem;
         border-radius: 9999px;
         background-color: #fee2e2;
         color: #dc2626;
@@ -2574,6 +2661,34 @@
         color: #f87171;
         border-color: rgba(239, 68, 68, 0.4);
     }
+
+    /* ─── Action Toolbar Row ("Mark all as read" & "Clear all") ─── */
+    .jb-notif-actions-toolbar {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 0.2rem 0.25rem;
+        margin-top: -0.15rem;
+        border-bottom: 1px dashed #e2e8f0;
+        padding-bottom: 0.5rem;
+    }
+    html.dark .jb-notif-actions-toolbar,
+    .dark .jb-notif-actions-toolbar {
+        border-bottom-color: #1e293b;
+    }
+
+    .jb-notif-actions-left {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+    .jb-notif-actions-right {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    /* Mark all as read button */
     .jb-mark-all-btn {
         display: inline-flex;
         align-items: center;
@@ -2581,25 +2696,80 @@
         font-size: 0.75rem;
         font-weight: 700;
         color: #0284c7;
-        background: transparent;
-        border: none;
+        background-color: #f0f9ff;
+        border: 1px solid #bae6fd;
         cursor: pointer;
-        padding: 0.25rem 0.5rem;
+        padding: 0.22rem 0.55rem;
         border-radius: 0.375rem;
         transition: all 0.15s ease;
     }
     .jb-mark-all-btn:hover {
-        background-color: #f0f9ff;
+        background-color: #e0f2fe;
         color: #0369a1;
+        border-color: #7dd3fc;
     }
     html.dark .jb-mark-all-btn,
     .dark .jb-mark-all-btn {
         color: #38bdf8;
+        background-color: rgba(56, 189, 248, 0.12);
+        border-color: rgba(56, 189, 248, 0.25);
     }
     html.dark .jb-mark-all-btn:hover,
     .dark .jb-mark-all-btn:hover {
-        background-color: rgba(56, 189, 248, 0.1);
+        background-color: rgba(56, 189, 248, 0.22);
         color: #7dd3fc;
+        border-color: rgba(56, 189, 248, 0.4);
+    }
+
+    /* Clear all button */
+    .jb-clear-action-wrapper .fi-btn,
+    .jb-clear-action-wrapper .fi-ac-action,
+    .jb-clear-action-wrapper a,
+    .jb-clear-action-wrapper button {
+        display: inline-flex !important;
+        align-items: center !important;
+        gap: 0.35rem !important;
+        font-size: 0.75rem !important;
+        font-weight: 700 !important;
+        color: #e11d48 !important; /* Rose-600 */
+        background-color: #fff1f2 !important; /* Rose-50 */
+        border: 1px solid #fecdd3 !important; /* Rose-200 */
+        padding: 0.22rem 0.6rem !important;
+        border-radius: 0.375rem !important;
+        cursor: pointer !important;
+        transition: all 0.15s ease !important;
+        text-decoration: none !important;
+    }
+    .jb-clear-action-wrapper .fi-btn:hover,
+    .jb-clear-action-wrapper .fi-ac-action:hover,
+    .jb-clear-action-wrapper a:hover,
+    .jb-clear-action-wrapper button:hover {
+        background-color: #ffe4e6 !important; /* Rose-100 */
+        color: #be123c !important; /* Rose-700 */
+        border-color: #fda4af !important;
+    }
+    html.dark .jb-clear-action-wrapper .fi-btn,
+    html.dark .jb-clear-action-wrapper .fi-ac-action,
+    html.dark .jb-clear-action-wrapper a,
+    html.dark .jb-clear-action-wrapper button,
+    .dark .jb-clear-action-wrapper .fi-btn,
+    .dark .jb-clear-action-wrapper .fi-ac-action,
+    .dark .jb-clear-action-wrapper a,
+    .dark .jb-clear-action-wrapper button {
+        color: #fb7185 !important;
+        background-color: rgba(225, 29, 72, 0.15) !important;
+        border-color: rgba(225, 29, 72, 0.3) !important;
+    }
+    html.dark .jb-clear-action-wrapper .fi-btn:hover,
+    html.dark .jb-clear-action-wrapper .fi-ac-action:hover,
+    html.dark .jb-clear-action-wrapper a:hover,
+    html.dark .jb-clear-action-wrapper button:hover,
+    .dark .jb-clear-action-wrapper .fi-btn:hover,
+    .dark .jb-clear-action-wrapper .fi-ac-action:hover,
+    .dark .jb-clear-action-wrapper a:hover,
+    .dark .jb-clear-action-wrapper button:hover {
+        background-color: rgba(225, 29, 72, 0.28) !important;
+        color: #fda4af !important;
     }
 
     /* ─── Category Tabs Bar ─── */
@@ -3205,24 +3375,30 @@
 
     /* Bell Unread Red Badge */
     .fi-topbar-database-notifications-btn .fi-icon-btn-badge-ctn {
-        top: -3px !important;
-        right: -3px !important;
+        top: 1px !important;
+        right: 2px !important;
         position: absolute !important;
+        overflow: visible !important;
+        pointer-events: none !important;
+        z-index: 20 !important;
     }
     .fi-topbar-database-notifications-btn .fi-badge {
         background-color: #ef4444 !important;
         color: #ffffff !important;
         font-weight: 800 !important;
         font-size: 0.6875rem !important;
+        line-height: 1 !important;
         min-width: 1.25rem !important;
         height: 1.25rem !important;
-        padding: 0 4px !important;
+        padding: 0 0.35rem !important;
         border-radius: 9999px !important;
         box-shadow: 0 2px 6px rgba(239, 68, 68, 0.5) !important;
         border: 2px solid #ffffff !important;
-        display: flex !important;
+        display: inline-flex !important;
         align-items: center !important;
         justify-content: center !important;
+        white-space: nowrap !important;
+        box-sizing: border-box !important;
     }
     html.dark .fi-topbar-database-notifications-btn .fi-badge,
     .dark .fi-topbar-database-notifications-btn .fi-badge {
@@ -3633,6 +3809,23 @@
     .fi-batch-group-header-strip {
         user-select: text;
     }
+
+    /* ===== SVG UTILITY SIZING FALLBACKS FOR CUSTOM COMPONENTS, TABLES & MODALS ===== */
+    svg.w-3, .w-3 > svg, svg[class*="w-3 "] { width: 0.75rem !important; height: 0.75rem !important; min-width: 0.75rem !important; }
+    svg.w-3\.5, svg.w-3_5, .w-3\.5 > svg { width: 0.875rem !important; height: 0.875rem !important; min-width: 0.875rem !important; }
+    svg.w-4, .w-4 > svg, svg[class*="w-4 "] { width: 1rem !important; height: 1rem !important; min-width: 1rem !important; }
+    svg.w-5, .w-5 > svg, svg[class*="w-5 "] { width: 1.25rem !important; height: 1.25rem !important; min-width: 1.25rem !important; }
+    svg.w-6, .w-6 > svg, svg[class*="w-6 "] { width: 1.5rem !important; height: 1.5rem !important; min-width: 1.5rem !important; }
+    svg.w-7, .w-7 > svg, svg[class*="w-7 "] { width: 1.75rem !important; height: 1.75rem !important; min-width: 1.75rem !important; }
+    svg.w-8, .w-8 > svg, svg[class*="w-8 "] { width: 2rem !important; height: 2rem !important; min-width: 2rem !important; }
+
+    svg.h-3, svg[class*="h-3 "] { height: 0.75rem !important; }
+    svg.h-3\.5, svg.h-3_5 { height: 0.875rem !important; }
+    svg.h-4, svg[class*="h-4 "] { height: 1rem !important; }
+    svg.h-5, svg[class*="h-5 "] { height: 1.25rem !important; }
+    svg.h-6, svg[class*="h-6 "] { height: 1.5rem !important; }
+    svg.h-7, svg[class*="h-7 "] { height: 1.75rem !important; }
+    svg.h-8, svg[class*="h-8 "] { height: 2rem !important; }
 
     /* ─── High-Priority Failed / Partial Transactions Critical Monitor Card ─── */
     .db-exception-link {
@@ -4362,95 +4555,37 @@
 
     /* ─── Topbar Bell Unread Badge Polish ─── */
     .fi-topbar-database-notifications-btn .fi-icon-btn-badge-ctn {
-        top: -3px !important;
-        right: -3px !important;
+        top: 1px !important;
+        right: 2px !important;
+        position: absolute !important;
+        overflow: visible !important;
+        pointer-events: none !important;
+        z-index: 20 !important;
     }
     .fi-topbar-database-notifications-btn .fi-badge {
         background-color: #ef4444 !important;
         color: #ffffff !important;
         font-weight: 800 !important;
         font-size: 0.6875rem !important;
-        padding: 0.15rem 0.45rem !important;
+        line-height: 1 !important;
+        min-width: 1.25rem !important;
+        height: 1.25rem !important;
+        padding: 0 0.35rem !important;
         border-radius: 9999px !important;
         box-shadow: 0 2px 6px rgba(239, 68, 68, 0.4) !important;
-        border: 1.5px solid #ffffff !important;
+        border: 2px solid #ffffff !important;
+        display: inline-flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        white-space: nowrap !important;
+        box-sizing: border-box !important;
     }
     html.dark .fi-topbar-database-notifications-btn .fi-badge,
     .dark .fi-topbar-database-notifications-btn .fi-badge {
         border-color: #0f172a !important;
     }
 
-    /* ─── Slideover Header ─── */
-    .jb-notif-header {
-        display: flex;
-        flex-direction: column;
-        gap: 0.75rem;
-        padding-bottom: 0.5rem;
-        width: 100%;
-    }
-    .jb-notif-header-title-row {
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        gap: 0.5rem;
-    }
-    .jb-notif-title-group {
-        display: flex;
-        align-items: center;
-        gap: 0.5rem;
-    }
-    .jb-notif-heading {
-        font-size: 1.125rem;
-        font-weight: 800;
-        color: #0f172a;
-        margin: 0;
-    }
-    html.dark .jb-notif-heading,
-    .dark .jb-notif-heading {
-        color: #f8fafc;
-    }
-    .jb-notif-unread-badge {
-        font-size: 0.6875rem;
-        font-weight: 700;
-        padding: 0.15rem 0.5rem;
-        border-radius: 9999px;
-        background-color: #fee2e2;
-        color: #dc2626;
-        border: 1px solid #fca5a5;
-    }
-    html.dark .jb-notif-unread-badge,
-    .dark .jb-notif-unread-badge {
-        background-color: rgba(239, 68, 68, 0.2);
-        color: #f87171;
-        border-color: rgba(239, 68, 68, 0.4);
-    }
-    .jb-mark-all-btn {
-        display: inline-flex;
-        align-items: center;
-        gap: 0.35rem;
-        font-size: 0.75rem;
-        font-weight: 700;
-        color: #0284c7;
-        background: transparent;
-        border: none;
-        cursor: pointer;
-        padding: 0.25rem 0.5rem;
-        border-radius: 0.375rem;
-        transition: all 0.15s ease;
-    }
-    .jb-mark-all-btn:hover {
-        background-color: #f0f9ff;
-        color: #0369a1;
-    }
-    html.dark .jb-mark-all-btn,
-    .dark .jb-mark-all-btn {
-        color: #38bdf8;
-    }
-    html.dark .jb-mark-all-btn:hover,
-    .dark .jb-mark-all-btn:hover {
-        background-color: rgba(56, 189, 248, 0.1);
-        color: #7dd3fc;
-    }
+
 
     /* ─── Category Tabs Bar ─── */
     .jb-notif-tabs-bar {

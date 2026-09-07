@@ -82,9 +82,9 @@ class BkashReportsResource extends Resource
                     ->sortable()
                     ->toggleable(),
 
-                // 3. Ref No.
-                TextColumn::make('reference_id')
-                    ->label('Ref No.')
+                // 3. Txn ID
+                TextColumn::make('txn_id')
+                    ->label('Txn ID')
                     ->searchable()
                     ->sortable(),
 
@@ -133,9 +133,10 @@ class BkashReportsResource extends Resource
                     ->label('Beneficiary Account')
                     ->searchable(),
 
-                // 8. Bank & Branch Name
+                // 8. Bank & Branch Name — Displays first 3 digits of credit routing as per requirement
                 TextColumn::make('credit_routing')
                     ->label('Bank & Branch Name')
+                    ->formatStateUsing(fn ($state, BkashTransaction $record) => BkashTransaction::getCreditBank3($state ?: $record->debit_routing, $record->credit_bank))
                     ->searchable()
                     ->toggleable(),
 
@@ -158,9 +159,9 @@ class BkashReportsResource extends Resource
                     ->label('Source Account (TCSA/Ops)')
                     ->searchable(),
 
-                // 12. Txn ID
-                TextColumn::make('txn_id')
-                    ->label('Txn ID')
+                // 12. Ref No.
+                TextColumn::make('reference_id')
+                    ->label('Ref No.')
                     ->searchable()
                     ->sortable(),
 

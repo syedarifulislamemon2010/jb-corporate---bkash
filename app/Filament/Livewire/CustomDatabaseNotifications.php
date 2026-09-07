@@ -2,6 +2,7 @@
 
 namespace App\Filament\Livewire;
 
+use Filament\Actions\Action;
 use Filament\Enums\DatabaseNotificationsPosition;
 use Filament\Facades\Filament;
 use Filament\Notifications\Livewire\DatabaseNotifications as BaseComponent;
@@ -18,6 +19,14 @@ class CustomDatabaseNotifications extends BaseComponent
     public ?DatabaseNotificationsPosition $position = null;
 
     public string $activeTab = 'all';
+
+    public function clearNotificationsAction(): Action
+    {
+        return parent::clearNotificationsAction()
+            ->icon('heroicon-o-trash')
+            ->label('Clear all')
+            ->tooltip('Clear all notifications');
+    }
 
     public function setTab(string $tab): void
     {

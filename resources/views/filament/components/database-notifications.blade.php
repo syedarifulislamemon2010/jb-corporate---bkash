@@ -54,6 +54,7 @@
         {{-- Slideover Header --}}
         <x-slot name="header">
             <div class="jb-notif-header">
+                {{-- Row 1: Title & Unread Badge (Dedicated top bar with ample right margin for the modal Close 'X' button) --}}
                 <div class="jb-notif-header-title-row">
                     <div class="jb-notif-title-group">
                         <h2 id="database-notifications.heading" class="jb-notif-heading">
@@ -65,27 +66,36 @@
                             </span>
                         @endif
                     </div>
-
-                    <div class="jb-notif-header-actions">
-                        @if ($unreadNotificationsCount && $this->markAllNotificationsAsReadAction?->isVisible())
-                            <button
-                                type="button"
-                                wire:click="markAllNotificationsAsRead"
-                                class="jb-mark-all-btn"
-                                title="Mark all as read"
-                            >
-                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
-                                </svg>
-                                <span>Mark all as read</span>
-                            </button>
-                        @endif
-
-                        @if ($this->clearNotificationsAction?->isVisible())
-                            {{ $this->clearNotificationsAction }}
-                        @endif
-                    </div>
                 </div>
+
+                {{-- Row 2: Action Toolbar (Mark all as read on left, Clear all on right — completely isolated from the top-right X button) --}}
+                @if (($unreadNotificationsCount && $this->markAllNotificationsAsReadAction?->isVisible()) || ($this->clearNotificationsAction?->isVisible()))
+                    <div class="jb-notif-actions-toolbar">
+                        <div class="jb-notif-actions-left">
+                            @if ($unreadNotificationsCount && $this->markAllNotificationsAsReadAction?->isVisible())
+                                <button
+                                    type="button"
+                                    wire:click="markAllNotificationsAsRead"
+                                    class="jb-mark-all-btn"
+                                    title="Mark all notifications as read"
+                                >
+                                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7" />
+                                    </svg>
+                                    <span>Mark all as read</span>
+                                </button>
+                            @endif
+                        </div>
+
+                        <div class="jb-notif-actions-right">
+                            @if ($this->clearNotificationsAction?->isVisible())
+                                <div class="jb-clear-action-wrapper" title="Clear all notifications">
+                                    {{ $this->clearNotificationsAction }}
+                                </div>
+                            @endif
+                        </div>
+                    </div>
+                @endif
 
                 {{-- Category Filter Tabs --}}
                 <div class="jb-notif-tabs-bar">

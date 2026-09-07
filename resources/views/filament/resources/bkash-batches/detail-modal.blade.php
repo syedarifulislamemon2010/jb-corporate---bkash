@@ -13,159 +13,575 @@
 
     $channel = $batch->transaction_type ?? 'A2A';
     $channelBadgeClass = match ($channel) {
-        'RTGS'  => 'bg-rose-100 text-rose-800 dark:bg-rose-900/40 dark:text-rose-300 border-rose-200 dark:border-rose-800',
-        'BEFTN' => 'bg-amber-100 text-amber-800 dark:bg-amber-900/40 dark:text-amber-300 border-amber-200 dark:border-amber-800',
-        'A2A'   => 'bg-emerald-100 text-emerald-800 dark:bg-emerald-900/40 dark:text-emerald-300 border-emerald-200 dark:border-emerald-800',
-        default => 'bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-300 border-gray-200 dark:border-gray-700',
+        'RTGS'  => 'jb-badge-rtgs',
+        'BEFTN' => 'jb-badge-beftn',
+        'A2A'   => 'jb-badge-a2a',
+        default => 'jb-badge-default',
     };
 
     $transactions = $batch->transactions()->orderBy('row_sequence', 'asc')->limit(100)->get();
     $failedList = $batch->failedTransactions()->limit(50)->get();
 @endphp
 
-<div class="space-y-6">
+<div class="jb-batch-modal-wrapper">
+    <style>
+        .jb-batch-modal-wrapper {
+            font-family: inherit;
+            color: #1e293b;
+            display: flex;
+            flex-direction: column;
+            gap: 1.125rem;
+            width: 100%;
+            padding: 0.25rem 0;
+        }
+        html.dark .jb-batch-modal-wrapper, .dark .jb-batch-modal-wrapper {
+            color: #f1f5f9;
+        }
+
+        /* SVG Sizing Safety — Strict boundary enforcement */
+        .jb-batch-modal-wrapper svg {
+            display: inline-block !important;
+            vertical-align: middle !important;
+            flex-shrink: 0 !important;
+        }
+
+        /* Header Card */
+        .jb-modal-header-card {
+            background-color: #f8fafc;
+            border: 1px solid #e2e8f0;
+            border-radius: 0.75rem;
+            padding: 1rem 1.25rem;
+            box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
+        }
+        html.dark .jb-modal-header-card, .dark .jb-modal-header-card {
+            background-color: #0f172a;
+            border-color: #334155;
+        }
+
+        .jb-modal-top-row {
+            display: flex;
+            align-items: flex-start;
+            justify-content: space-between;
+            gap: 1rem;
+            flex-wrap: wrap;
+        }
+        .jb-modal-meta-label {
+            font-size: 0.6875rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: #64748b;
+        }
+        html.dark .jb-modal-meta-label, .dark .jb-modal-meta-label {
+            color: #94a3b8;
+        }
+        .jb-modal-file-title {
+            font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+            font-size: 0.9375rem;
+            font-weight: 700;
+            color: #0f172a;
+            word-break: break-all;
+            margin: 0.25rem 0;
+            line-height: 1.4;
+        }
+        html.dark .jb-modal-file-title, .dark .jb-modal-file-title {
+            color: #f8fafc;
+        }
+        .jb-modal-subtext {
+            font-size: 0.75rem;
+            color: #64748b;
+            margin: 0;
+        }
+        html.dark .jb-modal-subtext, .dark .jb-modal-subtext {
+            color: #94a3b8;
+        }
+
+        .jb-modal-badges-group {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            flex-wrap: wrap;
+        }
+        .jb-modal-badge {
+            display: inline-flex;
+            align-items: center;
+            padding: 0.25rem 0.625rem;
+            font-size: 0.75rem;
+            font-weight: 700;
+            border-radius: 0.375rem;
+            border: 1px solid transparent;
+            letter-spacing: 0.025em;
+        }
+        .jb-badge-rtgs {
+            background-color: #ffe4e6;
+            color: #9f1239;
+            border-color: #fecdd3;
+        }
+        .jb-badge-beftn {
+            background-color: #fef3c7;
+            color: #92400e;
+            border-color: #fde68a;
+        }
+        .jb-badge-a2a {
+            background-color: #d1fae5;
+            color: #065f46;
+            border-color: #a7f3d0;
+        }
+        .jb-badge-default {
+            background-color: #f1f5f9;
+            color: #334155;
+            border-color: #cbd5e1;
+        }
+        .jb-badge-total {
+            background-color: #e0f2fe;
+            color: #0369a1;
+            border-color: #bae6fd;
+        }
+        html.dark .jb-badge-rtgs { background-color: rgba(159, 18, 57, 0.3); color: #fda4af; border-color: #be123c; }
+        html.dark .jb-badge-beftn { background-color: rgba(146, 64, 14, 0.3); color: #fde68a; border-color: #d97706; }
+        html.dark .jb-badge-a2a { background-color: rgba(6, 95, 70, 0.3); color: #6ee7b7; border-color: #059669; }
+        html.dark .jb-badge-total { background-color: rgba(3, 105, 161, 0.3); color: #7dd3fc; border-color: #0284c7; }
+
+        /* Export Bar */
+        .jb-modal-export-bar {
+            margin-top: 0.875rem;
+            padding-top: 0.875rem;
+            border-top: 1px solid #e2e8f0;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 0.75rem;
+        }
+        html.dark .jb-modal-export-bar, .dark .jb-modal-export-bar {
+            border-top-color: #334155;
+        }
+        .jb-btn-excel, .jb-btn-csv {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.4rem;
+            padding: 0.375rem 0.75rem;
+            font-size: 0.75rem;
+            font-weight: 600;
+            border-radius: 0.5rem;
+            text-decoration: none;
+            transition: all 0.15s ease-in-out;
+            cursor: pointer;
+            box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+        }
+        .jb-btn-excel {
+            background-color: #ecfdf5;
+            color: #047857;
+            border: 1px solid #a7f3d0;
+        }
+        .jb-btn-excel:hover {
+            background-color: #d1fae5;
+            color: #065f46;
+        }
+        .jb-btn-csv {
+            background-color: #f0f9ff;
+            color: #0284c7;
+            border: 1px solid #bae6fd;
+        }
+        .jb-btn-csv:hover {
+            background-color: #e0f2fe;
+            color: #0369a1;
+        }
+        html.dark .jb-btn-excel {
+            background-color: rgba(6, 78, 59, 0.4);
+            color: #6ee7b7;
+            border-color: #059669;
+        }
+        html.dark .jb-btn-excel:hover {
+            background-color: rgba(6, 78, 59, 0.6);
+        }
+        html.dark .jb-btn-csv {
+            background-color: rgba(3, 105, 161, 0.4);
+            color: #7dd3fc;
+            border-color: #0284c7;
+        }
+        html.dark .jb-btn-csv:hover {
+            background-color: rgba(3, 105, 161, 0.6);
+        }
+
+        /* Metrics 3-Card Grid */
+        .jb-metrics-row {
+            display: grid;
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+            gap: 0.875rem;
+            width: 100%;
+        }
+        @media (max-width: 640px) {
+            .jb-metrics-row {
+                grid-template-columns: 1fr;
+            }
+        }
+        .jb-metric-card {
+            border-radius: 0.75rem;
+            padding: 0.875rem 1rem;
+            border: 1px solid transparent;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            box-shadow: 0 1px 2px rgba(0, 0, 0, 0.03);
+        }
+        .jb-metric-card-success {
+            background-color: #f0fdf4;
+            border-color: #bbf7d0;
+        }
+        html.dark .jb-metric-card-success, .dark .jb-metric-card-success {
+            background-color: rgba(6, 78, 59, 0.25);
+            border-color: rgba(5, 150, 105, 0.4);
+        }
+        .jb-metric-card-failed {
+            background-color: #fff1f2;
+            border-color: #fecdd3;
+        }
+        html.dark .jb-metric-card-failed, .dark .jb-metric-card-failed {
+            background-color: rgba(136, 19, 55, 0.25);
+            border-color: rgba(225, 29, 72, 0.4);
+        }
+        .jb-metric-card-pending {
+            background-color: #fffbeb;
+            border-color: #fde68a;
+        }
+        html.dark .jb-metric-card-pending, .dark .jb-metric-card-pending {
+            background-color: rgba(120, 53, 15, 0.25);
+            border-color: rgba(217, 119, 6, 0.4);
+        }
+        .jb-metric-header-flex {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 0.5rem;
+        }
+        .jb-metric-label {
+            font-size: 0.6875rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+        .jb-metric-label-success { color: #15803d; }
+        .jb-metric-label-failed { color: #be123c; }
+        .jb-metric-label-pending { color: #b45309; }
+        html.dark .jb-metric-label-success { color: #86efac; }
+        html.dark .jb-metric-label-failed { color: #fda4af; }
+        html.dark .jb-metric-label-pending { color: #fde047; }
+
+        .jb-metric-count {
+            font-size: 1.5rem;
+            font-weight: 800;
+            line-height: 1.1;
+            margin-top: 0.35rem;
+            font-family: inherit;
+        }
+        .jb-metric-count-success { color: #166534; }
+        .jb-metric-count-failed { color: #9f1239; }
+        .jb-metric-count-pending { color: #92400e; }
+        html.dark .jb-metric-count-success, .dark .jb-metric-count-success { color: #86efac; }
+        html.dark .jb-metric-count-failed, .dark .jb-metric-count-failed { color: #fca5a5; }
+        html.dark .jb-metric-count-pending, .dark .jb-metric-count-pending { color: #fde047; }
+
+        .jb-metric-icon-box {
+            width: 2.25rem;
+            height: 2.25rem;
+            min-width: 2.25rem;
+            min-height: 2.25rem;
+            border-radius: 0.5rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+        }
+        .jb-metric-icon-box-success {
+            background-color: #dcfce7;
+            color: #16a34a;
+        }
+        .jb-metric-icon-box-failed {
+            background-color: #ffe4e6;
+            color: #e11d48;
+        }
+        .jb-metric-icon-box-pending {
+            background-color: #fef3c7;
+            color: #d97706;
+        }
+        html.dark .jb-metric-icon-box-success { background-color: rgba(22, 163, 74, 0.3); color: #86efac; }
+        html.dark .jb-metric-icon-box-failed { background-color: rgba(225, 29, 72, 0.3); color: #fda4af; }
+        html.dark .jb-metric-icon-box-pending { background-color: rgba(217, 119, 6, 0.3); color: #fde047; }
+
+        .jb-metric-desc {
+            font-size: 0.6875rem;
+            margin-top: 0.5rem;
+            margin-bottom: 0;
+            color: #64748b;
+        }
+        html.dark .jb-metric-desc {
+            color: #94a3b8;
+        }
+
+        /* Table Card */
+        .jb-modal-table-card {
+            background-color: #ffffff;
+            border: 1px solid #e2e8f0;
+            border-radius: 0.75rem;
+            overflow: hidden;
+            box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
+            width: 100%;
+        }
+        html.dark .jb-modal-table-card, .dark .jb-modal-table-card {
+            background-color: #0f172a;
+            border-color: #334155;
+        }
+        .jb-modal-table-header {
+            padding: 0.625rem 1rem;
+            background-color: #f8fafc;
+            border-bottom: 1px solid #e2e8f0;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        html.dark .jb-modal-table-header, .dark .jb-modal-table-header {
+            background-color: #1e293b;
+            border-bottom-color: #334155;
+        }
+        .jb-table-heading {
+            font-size: 0.75rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: #334155;
+            margin: 0;
+        }
+        html.dark .jb-table-heading {
+            color: #cbd5e1;
+        }
+        .jb-table-scroll-container {
+            overflow-x: auto;
+            max-height: 20rem;
+            width: 100%;
+        }
+        .jb-modal-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.75rem;
+            text-align: left;
+        }
+        .jb-modal-table th {
+            background-color: #f1f5f9;
+            color: #475569;
+            font-weight: 700;
+            padding: 0.5rem 0.75rem;
+            border-bottom: 1px solid #e2e8f0;
+            position: sticky;
+            top: 0;
+            z-index: 10;
+            white-space: nowrap;
+        }
+        html.dark .jb-modal-table th, .dark .jb-modal-table th {
+            background-color: #1e293b;
+            color: #94a3b8;
+            border-bottom-color: #334155;
+        }
+        .jb-modal-table td {
+            padding: 0.5rem 0.75rem;
+            border-bottom: 1px solid #f1f5f9;
+            color: #334155;
+            vertical-align: middle;
+        }
+        html.dark .jb-modal-table td, .dark .jb-modal-table td {
+            border-bottom-color: #1e293b;
+            color: #cbd5e1;
+        }
+        .jb-modal-table tr:hover td {
+            background-color: #f8fafc;
+        }
+        html.dark .jb-modal-table tr:hover td, .dark .jb-modal-table tr:hover td {
+            background-color: #1e293b;
+        }
+
+        .jb-status-badge {
+            display: inline-block;
+            padding: 0.15rem 0.5rem;
+            font-size: 0.6875rem;
+            font-weight: 700;
+            border-radius: 0.25rem;
+            text-align: center;
+            white-space: nowrap;
+        }
+        .jb-status-success {
+            background-color: #dcfce7;
+            color: #15803d;
+        }
+        .jb-status-danger {
+            background-color: #ffe4e6;
+            color: #be123c;
+        }
+        .jb-status-warning {
+            background-color: #fef3c7;
+            color: #b45309;
+        }
+        .jb-status-gray {
+            background-color: #f1f5f9;
+            color: #475569;
+        }
+        html.dark .jb-status-success { background-color: rgba(21, 128, 61, 0.3); color: #86efac; }
+        html.dark .jb-status-danger { background-color: rgba(190, 18, 60, 0.3); color: #fda4af; }
+        html.dark .jb-status-warning { background-color: rgba(180, 83, 9, 0.3); color: #fde047; }
+        html.dark .jb-status-gray { background-color: rgba(71, 85, 105, 0.3); color: #cbd5e1; }
+    </style>
+
     {{-- Header Metadata --}}
-    <div class="rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50/50 dark:bg-gray-800/50 p-4">
-        <div class="flex items-start justify-between gap-4 flex-wrap">
+    <div class="jb-modal-header-card">
+        <div class="jb-modal-top-row">
             <div>
-                <span class="text-xs font-medium uppercase tracking-wider text-gray-500 dark:text-gray-400">Batch File Name</span>
-                <h3 class="font-mono text-base font-bold text-gray-900 dark:text-white">{{ $batch->file_name }}</h3>
-                <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">
-                    Uploaded by <span class="font-semibold text-gray-700 dark:text-gray-300">{{ $batch->created_by ?? 'SYSTEM' }}</span>
+                <span class="jb-modal-meta-label">Batch File Name</span>
+                <h3 class="jb-modal-file-title">{{ $batch->file_name }}</h3>
+                <p class="jb-modal-subtext">
+                    Uploaded by <strong style="font-weight: 600; color: #334155;">{{ $batch->created_by ?? 'SYSTEM' }}</strong>
                     on {{ $batch->create_date?->format('d M Y, h:i A') ?? $batch->created_at?->format('d M Y, h:i A') }}
                 </p>
             </div>
-            <div class="flex items-center gap-2">
-                <span class="px-2.5 py-1 text-xs font-semibold rounded-md border {{ $channelBadgeClass }}">
+            <div class="jb-modal-badges-group">
+                <span class="jb-modal-badge {{ $channelBadgeClass }}">
                     {{ $channel }}
                 </span>
-                <span class="px-2.5 py-1 text-xs font-semibold rounded-md bg-primary-50 text-primary-700 dark:bg-primary-900/30 dark:text-primary-300 border border-primary-200 dark:border-primary-800">
+                <span class="jb-modal-badge jb-badge-total">
                     {{ $batch->total_data ?? $batch->transactions()->count() }} Total
                 </span>
             </div>
         </div>
 
         {{-- Export Action Buttons --}}
-        <div class="mt-4 pt-3 border-t border-gray-200 dark:border-gray-700 flex items-center justify-between flex-wrap gap-2">
-            <span class="text-xs font-medium text-gray-600 dark:text-gray-400">Export Transactions:</span>
-            <div class="flex items-center gap-2">
+        <div class="jb-modal-export-bar">
+            <span style="font-size: 0.75rem; font-weight: 600; color: #64748b;">Export Transactions:</span>
+            <div style="display: flex; align-items: center; gap: 0.5rem; flex-wrap: wrap;">
                 <a href="{{ route('admin.bkash.download-batch', ['file' => $batch->file_name, 'format' => 'xlsx']) }}"
                    target="_blank"
-                   class="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-emerald-700 bg-emerald-50 dark:bg-emerald-950/40 dark:text-emerald-300 border border-emerald-300 dark:border-emerald-800 rounded-lg hover:bg-emerald-100 dark:hover:bg-emerald-900/50 shadow-sm transition">
-                    <svg class="w-4 h-4 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
-                    Download as Excel
+                   class="jb-btn-excel">
+                    <svg width="15" height="15" style="width: 15px; height: 15px; min-width: 15px; min-height: 15px; max-width: 15px; max-height: 15px;" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                    </svg>
+                    <span>Download as Excel</span>
                 </a>
                 <a href="{{ route('admin.bkash.download-batch', ['file' => $batch->file_name, 'format' => 'csv']) }}"
                    target="_blank"
-                   class="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-sky-700 bg-sky-50 dark:bg-sky-950/40 dark:text-sky-300 border border-sky-300 dark:border-sky-800 rounded-lg hover:bg-sky-100 dark:hover:bg-sky-900/50 shadow-sm transition">
-                    <svg class="w-4 h-4 text-sky-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
-                    Download as CSV
+                   class="jb-btn-csv">
+                    <svg width="15" height="15" style="width: 15px; height: 15px; min-width: 15px; min-height: 15px; max-width: 15px; max-height: 15px;" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/>
+                    </svg>
+                    <span>Download as CSV</span>
                 </a>
             </div>
         </div>
     </div>
 
     {{-- Status Summary Cards (3 cards) --}}
-    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+    <div class="jb-metrics-row">
         {{-- Successful Card --}}
-        <div class="rounded-xl border border-emerald-200 dark:border-emerald-900/50 bg-emerald-50/50 dark:bg-emerald-950/20 p-4">
-            <div class="flex items-center justify-between">
-                <div>
-                    <span class="text-xs font-semibold uppercase tracking-wider text-emerald-700 dark:text-emerald-400">Successful</span>
-                    <h4 class="mt-1 text-2xl font-bold text-emerald-800 dark:text-emerald-200">{{ $successCount }}</h4>
+        <div class="jb-metric-card jb-metric-card-success">
+            <div>
+                <div class="jb-metric-header-flex">
+                    <span class="jb-metric-label jb-metric-label-success">Successful</span>
+                    <div class="jb-metric-icon-box jb-metric-icon-box-success">
+                        <svg width="18" height="18" style="width: 18px; height: 18px; min-width: 18px; min-height: 18px; max-width: 18px; max-height: 18px;" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/>
+                        </svg>
+                    </div>
                 </div>
-                <div class="p-2 bg-emerald-100 dark:bg-emerald-900/50 rounded-lg">
-                    <svg class="w-6 h-6 text-emerald-600 dark:text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
-                </div>
+                <div class="jb-metric-count jb-metric-count-success">{{ $successCount }}</div>
             </div>
-            <p class="mt-2 text-xs text-emerald-600 dark:text-emerald-400">Settled in CBS system</p>
+            <p class="jb-metric-desc" style="color: #15803d;">Settled in CBS system</p>
         </div>
 
         {{-- Failed Card --}}
-        <div class="rounded-xl border border-rose-200 dark:border-rose-900/50 bg-rose-50/50 dark:bg-rose-950/20 p-4">
-            <div class="flex items-center justify-between">
-                <div>
-                    <span class="text-xs font-semibold uppercase tracking-wider text-rose-700 dark:text-rose-400">Failed / Error</span>
-                    <h4 class="mt-1 text-2xl font-bold text-rose-800 dark:text-rose-200">{{ $failedCount }}</h4>
+        <div class="jb-metric-card jb-metric-card-failed">
+            <div>
+                <div class="jb-metric-header-flex">
+                    <span class="jb-metric-label jb-metric-label-failed">Failed / Error</span>
+                    <div class="jb-metric-icon-box jb-metric-icon-box-failed">
+                        <svg width="18" height="18" style="width: 18px; height: 18px; min-width: 18px; min-height: 18px; max-width: 18px; max-height: 18px;" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
+                        </svg>
+                    </div>
                 </div>
-                <div class="p-2 bg-rose-100 dark:bg-rose-900/50 rounded-lg">
-                    <svg class="w-6 h-6 text-rose-600 dark:text-rose-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
-                </div>
+                <div class="jb-metric-count jb-metric-count-failed">{{ $failedCount }}</div>
             </div>
-            <p class="mt-2 text-xs text-rose-600 dark:text-rose-400">Validation or CBS callback rejected</p>
+            <p class="jb-metric-desc" style="color: #be123c;">Validation or CBS callback rejected</p>
         </div>
 
         {{-- Pending Card --}}
-        <div class="rounded-xl border border-amber-200 dark:border-amber-900/50 bg-amber-50/50 dark:bg-amber-950/20 p-4">
-            <div class="flex items-center justify-between">
-                <div>
-                    <span class="text-xs font-semibold uppercase tracking-wider text-amber-700 dark:text-amber-400">Pending</span>
-                    <h4 class="mt-1 text-2xl font-bold text-amber-800 dark:text-amber-200">{{ $pendingCount }}</h4>
+        <div class="jb-metric-card jb-metric-card-pending">
+            <div>
+                <div class="jb-metric-header-flex">
+                    <span class="jb-metric-label jb-metric-label-pending">Pending</span>
+                    <div class="jb-metric-icon-box jb-metric-icon-box-pending">
+                        <svg width="18" height="18" style="width: 18px; height: 18px; min-width: 18px; min-height: 18px; max-width: 18px; max-height: 18px;" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                        </svg>
+                    </div>
                 </div>
-                <div class="p-2 bg-amber-100 dark:bg-amber-900/50 rounded-lg">
-                    <svg class="w-6 h-6 text-amber-600 dark:text-amber-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
-                </div>
+                <div class="jb-metric-count jb-metric-count-pending">{{ $pendingCount }}</div>
             </div>
-            <p class="mt-2 text-xs text-amber-600 dark:text-amber-400">Awaiting checker or authorizers</p>
+            <p class="jb-metric-desc" style="color: #b45309;">Awaiting checker or authorizers</p>
         </div>
     </div>
 
     {{-- Mini-Table of Transactions --}}
-    <div class="rounded-xl border border-gray-200 dark:border-gray-700 overflow-hidden bg-white dark:bg-gray-900">
-        <div class="px-4 py-3 bg-gray-50 dark:bg-gray-800/80 border-b border-gray-200 dark:border-gray-700 flex items-center justify-between">
-            <h4 class="text-xs font-bold uppercase tracking-wider text-gray-700 dark:text-gray-300">
+    <div class="jb-modal-table-card">
+        <div class="jb-modal-table-header">
+            <h4 class="jb-table-heading">
                 Batch Transactions Preview ({{ $transactions->count() }} of {{ $batch->total_data }})
             </h4>
-            <span class="text-xs text-gray-500">Read-Only Audit View</span>
+            <span style="font-size: 0.6875rem; color: #64748b; font-weight: 500;">Read-Only Audit View</span>
         </div>
 
-        <div class="overflow-x-auto max-h-96">
-            <table class="w-full text-left text-xs border-collapse">
-                <thead class="bg-gray-100/75 dark:bg-gray-800 text-gray-600 dark:text-gray-400 sticky top-0 border-b border-gray-200 dark:border-gray-700">
+        <div class="jb-table-scroll-container">
+            <table class="jb-modal-table">
+                <thead>
                     <tr>
-                        <th class="py-2.5 px-3 font-semibold">Ref / Txn ID</th>
-                        <th class="py-2.5 px-3 font-semibold">Beneficiary Name</th>
-                        <th class="py-2.5 px-3 font-semibold">Beneficiary Account</th>
-                        <th class="py-2.5 px-3 font-semibold text-right">Amount (BDT)</th>
-                        <th class="py-2.5 px-3 font-semibold text-center">Status</th>
+                        <th>Ref / Txn ID</th>
+                        <th>Beneficiary Name</th>
+                        <th>Beneficiary Account</th>
+                        <th style="text-align: right;">Amount (BDT)</th>
+                        <th style="text-align: center;">Status</th>
                     </tr>
                 </thead>
-                <tbody class="divide-y divide-gray-100 dark:divide-gray-800 font-sans">
+                <tbody>
                     @forelse($transactions as $txn)
                         @php
                             $statusLabel = BkashTransaction::statusLabel($txn->status_id);
                             $statusBadge = match($txn->status_id) {
-                                1004, 1006 => 'bg-emerald-100 text-emerald-800 dark:bg-emerald-900/40 dark:text-emerald-300',
-                                9000, 1007 => 'bg-rose-100 text-rose-800 dark:bg-rose-900/40 dark:text-rose-300',
-                                1000        => 'bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-300',
-                                default     => 'bg-amber-100 text-amber-800 dark:bg-amber-900/40 dark:text-amber-300',
+                                1004, 1006 => 'jb-status-success',
+                                9000, 1007 => 'jb-status-danger',
+                                1000        => 'jb-status-warning',
+                                default     => 'jb-status-gray',
                             };
                         @endphp
-                        <tr class="hover:bg-gray-50/50 dark:hover:bg-gray-800/40 transition">
-                            <td class="py-2 px-3 font-mono font-medium text-gray-900 dark:text-white">
+                        <tr>
+                            <td style="font-family: ui-monospace, monospace; font-weight: 600;">
                                 {{ $txn->reference_id }}
                                 @if($txn->txn_id && $txn->txn_id !== $txn->reference_id)
-                                    <span class="block text-[10px] text-gray-500 font-normal">{{ $txn->txn_id }}</span>
+                                    <span style="display: block; font-size: 0.625rem; color: #64748b; font-weight: normal;">{{ $txn->txn_id }}</span>
                                 @endif
                             </td>
-                            <td class="py-2 px-3 text-gray-800 dark:text-gray-200">
+                            <td>
                                 {{ $txn->debit_account_title ?: 'N/A' }}
                             </td>
-                            <td class="py-2 px-3 font-mono text-gray-600 dark:text-gray-300">
+                            <td style="font-family: ui-monospace, monospace; color: #475569;">
                                 {{ $txn->beneficiary_account_no }}
                             </td>
-                            <td class="py-2 px-3 text-right font-mono font-semibold text-gray-900 dark:text-white">
+                            <td style="text-align: right; font-family: ui-monospace, monospace; font-weight: 700;">
                                 {{ number_format((float) $txn->amount, 2) }}
                             </td>
-                            <td class="py-2 px-3 text-center">
-                                <span class="inline-block px-2 py-0.5 text-[11px] font-semibold rounded {{ $statusBadge }}">
+                            <td style="text-align: center;">
+                                <span class="jb-status-badge {{ $statusBadge }}">
                                     {{ $statusLabel }}
                                 </span>
                             </td>
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="5" class="py-4 text-center text-gray-500">No transactions found for this batch.</td>
+                            <td colspan="5" style="padding: 1.5rem; text-align: center; color: #64748b;">No transactions found for this batch.</td>
                         </tr>
                     @endforelse
                 </tbody>
@@ -175,29 +591,31 @@
 
     {{-- Failed Transactions Section if any --}}
     @if($failedList->isNotEmpty())
-        <div class="rounded-xl border border-rose-200 dark:border-rose-900/60 overflow-hidden bg-white dark:bg-gray-900">
-            <div class="px-4 py-2.5 bg-rose-50 dark:bg-rose-950/30 border-b border-rose-200 dark:border-rose-900/60 flex items-center justify-between">
-                <h4 class="text-xs font-bold uppercase tracking-wider text-rose-800 dark:text-rose-300">
+        <div class="jb-modal-table-card" style="border-color: #fecdd3;">
+            <div class="jb-modal-table-header" style="background-color: #fff1f2; border-bottom-color: #fecdd3;">
+                <h4 class="jb-table-heading" style="color: #9f1239;">
                     Failed Ingestion Rows ({{ $failedList->count() }})
                 </h4>
             </div>
-            <div class="overflow-x-auto max-h-60">
-                <table class="w-full text-left text-xs border-collapse">
-                    <thead class="bg-rose-100/50 dark:bg-rose-950/40 text-rose-900 dark:text-rose-200 sticky top-0">
-                        <tr>
-                            <th class="py-2 px-3 font-semibold">Row #</th>
-                            <th class="py-2 px-3 font-semibold">Ref No</th>
-                            <th class="py-2 px-3 font-semibold">Failure Code</th>
-                            <th class="py-2 px-3 font-semibold">Reason</th>
+            <div class="jb-table-scroll-container">
+                <table class="jb-modal-table">
+                    <thead>
+                        <tr style="background-color: #ffe4e6;">
+                            <th style="color: #9f1239; background-color: #ffe4e6;">Row #</th>
+                            <th style="color: #9f1239; background-color: #ffe4e6;">Ref No</th>
+                            <th style="color: #9f1239; background-color: #ffe4e6;">Failure Code</th>
+                            <th style="color: #9f1239; background-color: #ffe4e6;">Reason</th>
                         </tr>
                     </thead>
-                    <tbody class="divide-y divide-rose-100 dark:divide-rose-900/40">
+                    <tbody>
                         @foreach($failedList as $failed)
-                            <tr class="hover:bg-rose-50/30 dark:hover:bg-rose-950/20">
-                                <td class="py-2 px-3 font-mono font-medium">{{ $failed->row_number }}</td>
-                                <td class="py-2 px-3 font-mono">{{ $failed->reference_id }}</td>
-                                <td class="py-2 px-3"><span class="px-1.5 py-0.5 text-[10px] font-bold rounded bg-rose-200 text-rose-900 dark:bg-rose-900 dark:text-rose-100">{{ $failed->failure_code }}</span></td>
-                                <td class="py-2 px-3 text-rose-700 dark:text-rose-300">{{ $failed->reject_reason }}</td>
+                            <tr>
+                                <td style="font-family: ui-monospace, monospace; font-weight: 600;">{{ $failed->row_number }}</td>
+                                <td style="font-family: ui-monospace, monospace;">{{ $failed->reference_id }}</td>
+                                <td>
+                                    <span class="jb-status-badge jb-status-danger">{{ $failed->failure_code }}</span>
+                                </td>
+                                <td style="color: #be123c;">{{ $failed->reject_reason }}</td>
                             </tr>
                         @endforeach
                     </tbody>

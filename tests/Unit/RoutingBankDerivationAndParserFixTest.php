@@ -101,4 +101,24 @@ class RoutingBankDerivationAndParserFixTest extends TestCase
 
         $this->assertEquals('Pubali Bank PLC', $mapped['credit_bank']);
     }
+
+    /**
+     * Test that credit bank displays only the first 3 digits of credit routing as per requirement.
+     */
+    public function test_credit_bank_shows_first_three_digits_of_credit_routing(): void
+    {
+        $this->assertEquals('315', BkashTransaction::getCreditBank3('315260856'));
+        $this->assertEquals('145', BkashTransaction::getCreditBank3('145330527'));
+        $this->assertEquals('010', BkashTransaction::getCreditBank3('010260000'));
+        $this->assertEquals('-', BkashTransaction::getCreditBank3(null));
+        $this->assertEquals('-', BkashTransaction::getCreditBank3(''));
+        $this->assertEquals('Custom Bank', BkashTransaction::getCreditBank3(null, 'Custom Bank'));
+
+        // Test model accessor
+        $txn = new BkashTransaction([
+            'credit_routing' => '315260856',
+            'credit_bank'    => 'Bengal Commercial Bank Limited',
+        ]);
+        $this->assertEquals('315', $txn->credit_bank_code_3);
+    }
 }
