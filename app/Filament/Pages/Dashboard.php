@@ -301,7 +301,7 @@ class Dashboard extends Page
         $activities = [];
 
         // 1. Fetch outbox notifications
-        $notifications = NotificationOutbox::latest()->take(6)->get();
+        $notifications = NotificationOutbox::latest()->take(25)->get();
         foreach ($notifications as $n) {
             $stageBadge = match ($n->event_type) {
                 'STAGE_1_SFTP'    => 'STAGE 1: SFTP INGEST',
@@ -359,8 +359,9 @@ class Dashboard extends Page
                 'node_class'   => $nodeClass,
                 'file_name'    => $n->file_name,
                 'actor_name'   => $n->actor_name ?: 'System Daemon',
-                'time'         => $n->created_at->format('d M Y, h:i:s A'),
-                'time_human'   => $n->created_at->diffForHumans(),
+                'time'         => $n->created_at ? $n->created_at->format('d M Y, h:i:s A') : '',
+                'time_human'   => $n->created_at ? $n->created_at->diffForHumans() : '',
+                'raw_time'     => $n->created_at ? $n->created_at->timestamp : 0,
                 'icon'         => $icon,
                 'color'        => match ($n->event_type) {
                     'STAGE_4_AUTH2' => 'text-emerald-500 dark:text-emerald-400',
@@ -370,7 +371,7 @@ class Dashboard extends Page
         }
 
         // 2. Fetch EFT Returns
-        $eftReturns = EftReturn::latest()->take(2)->get();
+        $eftReturns = EftReturn::latest()->take(10)->get();
         foreach ($eftReturns as $eft) {
             $created = $eft->created_at ?: Carbon::now();
             $activities[] = [
@@ -383,12 +384,16 @@ class Dashboard extends Page
                 'actor_name'   => 'Settlement Daemon',
                 'time'         => $created->format('d M Y, h:i:s A'),
                 'time_human'   => $created->diffForHumans(),
+                'raw_time'     => $created->timestamp,
                 'icon'         => 'heroicon-o-arrow-uturn-left',
                 'color'        => 'text-amber-500 dark:text-amber-400',
             ];
         }
 
-        return array_slice($activities, 0, 8);
+        // Sort all activities chronologically descending
+        usort($activities, fn($a, $b) => ($b['raw_time'] ?? 0) <=> ($a['raw_time'] ?? 0));
+
+        return array_slice($activities, 0, 25);
     }
 
     private function calculateBalance(string $accountNumber): float

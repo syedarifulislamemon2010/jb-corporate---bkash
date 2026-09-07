@@ -49,10 +49,28 @@ class ListBkashTransactionConfirmations extends ListRecords
     public function updatedSelectAll($value): void
     {
         if ($value) {
-            $this->selectedBatches = $this->getBatches()->pluck('id')->map(fn ($id) => (string) $id)->toArray();
+            $currentUser = Auth::user();
+            $this->selectedBatches = $this->getBatches()
+                ->filter(fn ($batch) => $batch->canUserConfirm($currentUser))
+                ->pluck('id')
+                ->map(fn ($id) => (string) $id)
+                ->values()
+                ->toArray();
         } else {
             $this->selectedBatches = [];
         }
+    }
+
+    public function updatedSelectedBatches(): void
+    {
+        $currentUser = Auth::user();
+        $selectableBatches = $this->getBatches()->filter(fn ($b) => $b->canUserConfirm($currentUser));
+        $selectableIds = $selectableBatches->pluck('id')->map(fn ($id) => (string) $id)->toArray();
+
+        // Enforce segregation of duties: drop any unselectable batch from selection
+        $this->selectedBatches = array_values(array_intersect($this->selectedBatches, $selectableIds));
+
+        $this->selectAll = !empty($selectableIds) && count(array_intersect($selectableIds, $this->selectedBatches)) === count($selectableIds);
     }
 
     public function getBatches(): Collection
@@ -167,16 +185,8 @@ class ListBkashTransactionConfirmations extends ListRecords
                   ->orWhere('file_name', $batch->file_name);
             })->where('status_id', BkashTransaction::STATUS_AUTH_1_APPROVED)->get();
 
-            // 3-Person Segregation of Duties Check
-            $ineligible = $txns->filter(function ($t) use ($currentUserId, $currentUserName) {
-                $isChecker = ($currentUserId && $t->checked_by_id === $currentUserId) ||
-                             ($t->checked_by && $t->checked_by === $currentUserName);
-                $isAuth1   = ($currentUserId && $t->approved_by_1_id === $currentUserId) ||
-                             ($t->approved_by_1 && $t->approved_by_1 === $currentUserName);
-                return $isChecker || $isAuth1;
-            });
-
-            if ($ineligible->isNotEmpty() && !$currentUser->hasRole('super_admin')) {
+            // 3-Person Segregation of Duties Check (Strictly enforced: Confirmer != Checker && Confirmer != 1st Authorizer)
+            if (!$batch->canUserConfirm($currentUser, $txns)) {
                 \Filament\Notifications\Notification::make()
                     ->title('Confirmation Blocked (Segregation of Duties)')
                     ->body("File '{$batch->file_name}' was checked or 1st-authorized by you. Final confirmation must come from a third distinct user.")
