@@ -42,17 +42,53 @@ class SeedTestUsersCommand extends Command
         $this->info('===============================================================');
         $this->newLine();
 
-        // 2. Ensure Roles Exist
+        // 2. Ensure Roles Exist & Have Banking Permissions
         $roles = [
             'super_admin'        => 'Super Administrator with full system access',
+            'panel_user'         => 'Standard panel user role',
+            'bkash_authorizer'   => 'Legacy bKash Authorizer role',
             'bkash_checker'      => 'bKash Checker — verifies uploaded transaction files',
             'bkash_authorizer_1' => 'bKash 1st Authorizer — first-level approval',
             'bkash_authorizer_2' => 'bKash 2nd Authorizer — final approval and CBS settlement',
         ];
 
+        $roleModels = [];
         foreach ($roles as $roleName => $desc) {
-            Role::firstOrCreate(['name' => $roleName, 'guard_name' => 'web']);
+            $roleModels[$roleName] = Role::firstOrCreate(['name' => $roleName, 'guard_name' => 'web']);
         }
+
+        $bankingPermissions = [
+            'ViewAny:BkashTransactionBatch',
+            'View:BkashTransactionBatch',
+            'Update:BkashTransactionBatch',
+            'Reorder:BkashTransactionBatch',
+            'ViewAny:BkashFailedTransaction',
+            'View:BkashFailedTransaction',
+            'Delete:BkashFailedTransaction',
+            'Reorder:BkashFailedTransaction',
+            'ViewAny:BkashTransaction',
+            'View:BkashTransaction',
+            'Update:BkashTransaction',
+            'Reorder:BkashTransaction',
+            'ViewAny:EftReturn',
+            'View:EftReturn',
+            'Update:EftReturn',
+            'Reorder:EftReturn',
+            'View:Dashboard',
+        ];
+
+        $permModels = [];
+        foreach ($bankingPermissions as $pName) {
+            $permModels[] = \Spatie\Permission\Models\Permission::firstOrCreate(['name' => $pName, 'guard_name' => 'web']);
+        }
+
+        foreach (['bkash_checker', 'bkash_authorizer_1', 'bkash_authorizer_2', 'bkash_authorizer', 'panel_user'] as $rName) {
+            if (isset($roleModels[$rName])) {
+                $roleModels[$rName]->syncPermissions($permModels);
+            }
+        }
+
+        app()[\Spatie\Permission\PermissionRegistrar::class]->forgetCachedPermissions();
 
         // 3. Create or update test users with known credentials
         $usersData = [
@@ -60,7 +96,7 @@ class SeedTestUsersCommand extends Command
                 'name'         => 'Syed Ariful Islam Emon',
                 'email'        => 'emon@jb.com',
                 'mobile_no'    => '01711223344',
-                'organization' => 'Janata Bank PLC.',
+                'organization' => '1',
                 'role'         => 'super_admin',
                 'password'     => '123456',
             ],
@@ -68,7 +104,7 @@ class SeedTestUsersCommand extends Command
                 'name'         => 'G S Kibria',
                 'email'        => 'kibria@jb.com',
                 'mobile_no'    => '01738535099',
-                'organization' => 'Janata Bank PLC.',
+                'organization' => '1',
                 'role'         => 'super_admin',
                 'password'     => 'password',
             ],
@@ -76,7 +112,7 @@ class SeedTestUsersCommand extends Command
                 'name'         => 'bKash Checker Test User',
                 'email'        => 'checker@test.jbcorporate.com',
                 'mobile_no'    => '01711000001',
-                'organization' => 'Janata Bank PLC.',
+                'organization' => '10',
                 'role'         => 'bkash_checker',
                 'password'     => 'Test@Pass123',
             ],
@@ -84,7 +120,7 @@ class SeedTestUsersCommand extends Command
                 'name'         => 'bKash 1st Authorizer Test User',
                 'email'        => 'authorizer1@test.jbcorporate.com',
                 'mobile_no'    => '01711000002',
-                'organization' => 'Janata Bank PLC.',
+                'organization' => '10',
                 'role'         => 'bkash_authorizer_1',
                 'password'     => 'Test@Pass123',
             ],
@@ -92,7 +128,7 @@ class SeedTestUsersCommand extends Command
                 'name'         => 'bKash 2nd Authorizer Test User',
                 'email'        => 'authorizer2@test.jbcorporate.com',
                 'mobile_no'    => '01711000003',
-                'organization' => 'Janata Bank PLC.',
+                'organization' => '10',
                 'role'         => 'bkash_authorizer_2',
                 'password'     => 'Test@Pass123',
             ],
@@ -122,9 +158,8 @@ class SeedTestUsersCommand extends Command
                 ]);
             }
 
-            if (!$user->hasRole($data['role'])) {
-                $user->assignRole($data['role']);
-            }
+            $rolesToAssign = array_unique([$data['role'], 'panel_user']);
+            $user->syncRoles($rolesToAssign);
 
             $seededUsersTable[] = [
                 'Role'     => $data['role'],

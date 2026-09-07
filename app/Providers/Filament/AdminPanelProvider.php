@@ -84,7 +84,8 @@ class AdminPanelProvider extends PanelProvider
                     ->url('/admin/log-viewer', shouldOpenInNewTab: true)
                     ->icon('heroicon-o-command-line')
                     ->group('Administration')
-                    ->sort(10),
+                    ->sort(10)
+                    ->visible(fn () => auth()->user()?->hasRole(\BezhanSalleh\FilamentShield\Support\Utils::getSuperAdminName()) ?? false),
             ])
             ->discoverResources(in: app_path('Filament/Resources'), for: 'App\Filament\Resources')
             ->discoverPages(in: app_path('Filament/Pages'), for: 'App\Filament\Pages')

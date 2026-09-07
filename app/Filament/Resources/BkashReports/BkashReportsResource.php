@@ -133,9 +133,10 @@ class BkashReportsResource extends Resource
                     ->label('Beneficiary Account')
                     ->searchable(),
 
-                // 8. Bank & Branch Name
+                // 8. Bank & Branch Name — Displays first 3 digits of credit routing as per requirement
                 TextColumn::make('credit_routing')
                     ->label('Bank & Branch Name')
+                    ->formatStateUsing(fn ($state, BkashTransaction $record) => BkashTransaction::getCreditBank3($state ?: $record->debit_routing, $record->credit_bank))
                     ->searchable()
                     ->toggleable(),
 

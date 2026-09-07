@@ -666,7 +666,7 @@
                                                             <td style="font-family: monospace;">{{ $txn->beneficiary_account_no }}</td>
                                                             <td style="text-align: right; font-weight: 600; font-family: monospace;" class="jb-num">{{ number_format($txn->amount, 2) }}</td>
                                                             <td style="text-align: right; font-family: monospace;" class="jb-num">{{ $txn->credit_routing ?? '-' }}</td>
-                                                            <td>{{ $txn->credit_bank ?? '-' }}</td>
+                                                            <td style="font-family: monospace;">{{ \App\Models\BkashTransaction::getCreditBank3($txn->credit_routing ?: $txn->debit_routing, $txn->credit_bank) }}</td>
                                                             <td style="font-family: monospace; color: #64748b;">{{ $txn->txn_id }}</td>
                                                         </tr>
                                                     @empty

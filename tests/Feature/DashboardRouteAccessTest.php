@@ -49,4 +49,53 @@ class DashboardRouteAccessTest extends TestCase
         $response->assertSee('Reset Password');
         $response->assertSee('Back to Dashboard');
     }
+
+    public function test_bkash_checker_can_access_dashboard_and_transactions_without_403(): void
+    {
+        Role::firstOrCreate(['name' => 'bkash_checker', 'guard_name' => 'web']);
+        $checker = User::create([
+            'name'         => 'Test Checker',
+            'email'        => 'checker_test@jb.com',
+            'mobile_no'    => '01711001111',
+            'organization' => '1',
+            'password'     => bcrypt('123456'),
+        ]);
+        $checker->assignRole('bkash_checker');
+
+        $responseDash = $this->actingAs($checker)->get('/admin/dashboard');
+        $this->assertEquals(200, $responseDash->getStatusCode(), 'Checker was denied dashboard access.');
+
+        $responseTxn = $this->actingAs($checker)->get('/admin/bkash-transactions');
+        $this->assertNotEquals(403, $responseTxn->getStatusCode(), 'Checker received 403 on /admin/bkash-transactions.');
+    }
+
+    public function test_bkash_authorizers_can_access_dashboard_and_pipeline_without_403(): void
+    {
+        Role::firstOrCreate(['name' => 'bkash_authorizer_1', 'guard_name' => 'web']);
+        Role::firstOrCreate(['name' => 'bkash_authorizer_2', 'guard_name' => 'web']);
+
+        $auth1 = User::create([
+            'name'         => 'Test Auth 1',
+            'email'        => 'auth1_test@jb.com',
+            'mobile_no'    => '01711002222',
+            'organization' => '1',
+            'password'     => bcrypt('123456'),
+        ]);
+        $auth1->assignRole('bkash_authorizer_1');
+
+        $responseAuth1 = $this->actingAs($auth1)->get('/admin/bkash-transaction-authorizations');
+        $this->assertNotEquals(403, $responseAuth1->getStatusCode(), 'Authorizer 1 received 403 on authorizations.');
+
+        $auth2 = User::create([
+            'name'         => 'Test Auth 2',
+            'email'        => 'auth2_test@jb.com',
+            'mobile_no'    => '01711003333',
+            'organization' => '1',
+            'password'     => bcrypt('123456'),
+        ]);
+        $auth2->assignRole('bkash_authorizer_2');
+
+        $responseAuth2 = $this->actingAs($auth2)->get('/admin/bkash-transaction-confirmations');
+        $this->assertNotEquals(403, $responseAuth2->getStatusCode(), 'Authorizer 2 received 403 on confirmations.');
+    }
 }

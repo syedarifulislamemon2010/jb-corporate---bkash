@@ -108,14 +108,12 @@ class ExcelExportService
         $row1 = 2;
         $rtgsBeftnTxns = $transactions->filter(fn($t) => in_array($t->transaction_type, ['RTGS', 'BEFTN']));
         foreach ($rtgsBeftnTxns as $t) {
-            $bankBranch = $t->credit_bank ?: ($t->credit_routing ?: '');
             $routingCode = $t->credit_routing ?: ($t->debit_routing ?: '');
+            $bankBranch = BkashTransaction::getCreditBank3($routingCode, $t->credit_bank);
             $sheet1->setCellValue("A{$row1}", $t->create_date?->format('d/m/Y') ?? $t->created_at?->format('d/m/Y'));
             $sheet1->setCellValue("B{$row1}", $t->bb_reference_number ?: $t->reference_id);
             $sheet1->setCellValue("C{$row1}", $t->debit_account_title);
             $sheet1->setCellValueExplicit("D{$row1}", (string) $t->beneficiary_account_no, \PhpOffice\PhpSpreadsheet\Cell\DataType::TYPE_STRING);
-            $bankBranch = $t->credit_bank ?: ($t->credit_routing ?: '');
-            $routingCode = $t->credit_routing ?: ($t->debit_routing ?: '');
             $sheet1->setCellValue("E{$row1}", $bankBranch);
             $sheet1->setCellValueExplicit("F{$row1}", (string) $routingCode, \PhpOffice\PhpSpreadsheet\Cell\DataType::TYPE_STRING);
             $sheet1->setCellValue("G{$row1}", (float) $t->amount);

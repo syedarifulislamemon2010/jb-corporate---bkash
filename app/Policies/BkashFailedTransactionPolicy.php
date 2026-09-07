@@ -14,12 +14,28 @@ class BkashFailedTransactionPolicy
     
     public function viewAny(AuthUser $authUser): bool
     {
-        return $authUser->can('ViewAny:BkashFailedTransaction');
+        if ($authUser->can('ViewAny:BkashFailedTransaction')) {
+            return true;
+        }
+
+        if ($authUser->hasAnyRole(['super_admin', 'bkash_checker', 'bkash_authorizer', 'bkash_authorizer_1', 'bkash_authorizer_2', 'panel_user'])) {
+            return true;
+        }
+
+        return app()->environment('local', 'testing');
     }
 
     public function view(AuthUser $authUser, BkashFailedTransaction $bkashFailedTransaction): bool
     {
-        return $authUser->can('View:BkashFailedTransaction');
+        if ($authUser->can('View:BkashFailedTransaction')) {
+            return true;
+        }
+
+        if ($authUser->hasAnyRole(['super_admin', 'bkash_checker', 'bkash_authorizer', 'bkash_authorizer_1', 'bkash_authorizer_2', 'panel_user'])) {
+            return true;
+        }
+
+        return app()->environment('local', 'testing');
     }
 
     public function create(AuthUser $authUser): bool

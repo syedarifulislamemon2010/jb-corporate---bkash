@@ -31,7 +31,11 @@ class User extends Authenticatable implements FilamentUser
             return true;
         }
 
-        // Allow any user with an assigned banking role (e.g. bkash_checker, bkash_authorizer_1, bkash_authorizer_2)
+        // Allow any user with an assigned banking role
+        if ($this->hasAnyRole(['bkash_checker', 'bkash_authorizer', 'bkash_authorizer_1', 'bkash_authorizer_2'])) {
+            return true;
+        }
+
         if ($this->roles()->exists()) {
             return true;
         }
