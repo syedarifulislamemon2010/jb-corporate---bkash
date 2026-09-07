@@ -392,9 +392,6 @@
                         <span>Live Stream</span>
                     </span>
                 </div>
-                @if (!empty($activities))
-                    <a href="/admin/bkash-transactions" class="db-link-action db-exception-link db-link-xs" aria-label="View all transactions activity">View all activity →</a>
-                @endif
             </div>
 
             @if (empty($activities))
@@ -404,7 +401,7 @@
                 </div>
             @else
                 <div class="db-timeline-feed" role="feed" aria-label="Recent pipeline activity timeline">
-                    @foreach (array_slice($activities, 0, 5) as $act)
+                    @foreach ($activities as $act)
                         <div class="db-timeline-item" role="article" aria-label="Activity item: {{ $act['title'] }} at {{ $act['time'] }}">
                             <!-- Timeline node line and icon badge -->
                             <div class="db-timeline-node-wrapper">
@@ -421,7 +418,7 @@
                                 <div class="db-timeline-top-row">
                                     <div class="flex items-center flex-wrap gap-2">
                                         <span class="db-stage-badge {{ $act['badge_class'] ?? 'db-stage-slate' }}">
-                                            {{ $act['stage_badge'] ?? 'EVENT' }}
+                                             {{ $act['stage_badge'] ?? 'EVENT' }}
                                         </span>
                                         <span class="db-timeline-action-title">
                                             {{ $act['action_title'] ?? $act['title'] }}
@@ -451,13 +448,6 @@
                         </div>
                     @endforeach
                 </div>
-                @if (count($activities) > 5)
-                    <div class="db-activity-more">
-                        <a href="/admin/bkash-transactions" class="db-link-action db-exception-link db-link-xs" aria-label="View {{ count($activities) - 5 }} more activity records">
-                            +{{ count($activities) - 5 }} more — view full transaction history →
-                        </a>
-                    </div>
-                @endif
             @endif
         </div>
 
