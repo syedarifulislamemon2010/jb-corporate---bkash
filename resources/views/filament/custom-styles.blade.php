@@ -2720,6 +2720,20 @@
         color: #7dd3fc;
         border-color: rgba(56, 189, 248, 0.4);
     }
+    .jb-mark-all-btn svg {
+        width: 14px !important;
+        height: 14px !important;
+        min-width: 14px !important;
+        max-width: 14px !important;
+        flex-shrink: 0 !important;
+    }
+    .jb-clear-action-wrapper svg {
+        width: 14px !important;
+        height: 14px !important;
+        min-width: 14px !important;
+        max-width: 14px !important;
+        flex-shrink: 0 !important;
+    }
 
     /* Clear all button */
     .jb-clear-action-wrapper .fi-btn,
@@ -2902,6 +2916,14 @@
         display: flex;
         align-items: center;
         justify-content: center;
+        flex-shrink: 0;
+    }
+    .jb-notif-icon-box svg {
+        width: 16px !important;
+        height: 16px !important;
+        min-width: 16px !important;
+        max-width: 16px !important;
+        flex-shrink: 0 !important;
     }
     .icon-checker {
         background-color: #fef3c7;
@@ -3065,6 +3087,14 @@
         align-items: center;
         justify-content: center;
         margin-bottom: 1rem;
+        flex-shrink: 0;
+    }
+    .jb-notif-empty-icon svg {
+        width: 28px !important;
+        height: 28px !important;
+        min-width: 28px !important;
+        max-width: 28px !important;
+        flex-shrink: 0 !important;
     }
     html.dark .jb-notif-empty-icon,
     .dark .jb-notif-empty-icon {

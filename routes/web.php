@@ -10,7 +10,13 @@ Route::get('/', function () {
     return redirect('/admin');
 })->name('admin');
 
-Route::middleware(['web', 'throttle:30,1'])->group(function () {
+Route::middleware([
+    'web',
+    'panel:admin',
+    \Filament\Http\Middleware\DisableBladeIconComponents::class,
+    \Filament\Http\Middleware\DispatchServingFilamentEvent::class,
+    'throttle:30,1',
+])->group(function () {
     Route::get('/admin/reset-password', ForgotPasswordMobile::class)->name('filament.admin.auth.reset-password');
     Route::get('/admin/forgot-password', function () {
         return redirect('/admin/reset-password');
