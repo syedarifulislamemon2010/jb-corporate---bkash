@@ -113,18 +113,18 @@
             letter-spacing: 0.025em;
         }
         .jb-badge-rtgs {
-            background-color: #ffe4e6;
-            color: #9f1239;
-            border-color: #fecdd3;
-        }
-        .jb-badge-beftn {
-            background-color: #fef3c7;
-            color: #92400e;
+            background-color: #fffbeb;
+            color: #b45309;
             border-color: #fde68a;
         }
+        .jb-badge-beftn {
+            background-color: #f5f3ff;
+            color: #6d28d9;
+            border-color: #ddd6fe;
+        }
         .jb-badge-a2a {
-            background-color: #d1fae5;
-            color: #065f46;
+            background-color: #ecfdf5;
+            color: #047857;
             border-color: #a7f3d0;
         }
         .jb-badge-default {
@@ -137,9 +137,9 @@
             color: #0369a1;
             border-color: #bae6fd;
         }
-        html.dark .jb-badge-rtgs { background-color: rgba(159, 18, 57, 0.3); color: #fda4af; border-color: #be123c; }
-        html.dark .jb-badge-beftn { background-color: rgba(146, 64, 14, 0.3); color: #fde68a; border-color: #d97706; }
-        html.dark .jb-badge-a2a { background-color: rgba(6, 95, 70, 0.3); color: #6ee7b7; border-color: #059669; }
+        html.dark .jb-badge-rtgs { background-color: rgba(245, 158, 11, 0.25); color: #fbbf24; border-color: rgba(245, 158, 11, 0.4); }
+        html.dark .jb-badge-beftn { background-color: rgba(139, 92, 246, 0.25); color: #c084fc; border-color: rgba(139, 92, 246, 0.4); }
+        html.dark .jb-badge-a2a { background-color: rgba(16, 185, 129, 0.25); color: #6ee7b7; border-color: rgba(16, 185, 129, 0.4); }
         html.dark .jb-badge-total { background-color: rgba(3, 105, 161, 0.3); color: #7dd3fc; border-color: #0284c7; }
 
         /* Export Bar */

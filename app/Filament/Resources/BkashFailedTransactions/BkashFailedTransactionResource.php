@@ -26,11 +26,11 @@ class BkashFailedTransactionResource extends Resource
 
     protected static ?string $navigationIconColor = 'danger';
 
-        public static function getNavigationBadge(): ?string
+    public static function getNavigationBadge(): ?string
     {
         try {
             $count = \App\Models\BkashFailedTransaction::count();
-            return $count > 0 ? (string) $count : '0';
+            return $count > 0 ? (string) $count : null;
         } catch (\Throwable $e) {
             return null;
         }
@@ -116,8 +116,8 @@ class BkashFailedTransactionResource extends Resource
                     ->badge()
                     ->color(fn (string $state): string => match ($state) {
                         'A2A'   => 'success',
-                        'BEFTN' => 'warning',
-                        'RTGS'  => 'danger',
+                        'BEFTN' => 'purple',
+                        'RTGS'  => 'warning',
                         default => 'gray',
                     }),
 
@@ -180,12 +180,14 @@ class BkashFailedTransactionResource extends Resource
 
     public static function getGlobalSearchResultTitle(\Illuminate\Database\Eloquent\Model $record): string
     {
-        return "Failed Txn: {$record->txn_id}";
+        $id = $record->txn_id ?: $record->reference_id ?: 'Record';
+        return "Failed Txn: {$id}";
     }
 
     public static function getGlobalSearchResultDetails(\Illuminate\Database\Eloquent\Model $record): array
     {
         return [
+            'Ref No' => $record->reference_id ?? 'N/A',
             'File'   => $record->file_name ?? 'N/A',
             'Reason' => $record->reject_reason ?? 'Validation/CBS Error',
         ];

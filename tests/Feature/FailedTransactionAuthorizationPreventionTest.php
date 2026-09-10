@@ -75,8 +75,23 @@ class FailedTransactionAuthorizationPreventionTest extends TestCase
 
     public function test_failed_transaction_badge_has_danger_color_and_css_styling(): void
     {
+        $this->assertEquals(0, BkashFailedTransaction::count());
+        $this->assertNull(BkashFailedTransactionResource::getNavigationBadge(), 'Badge should be null when there are 0 failed records.');
+
         $badgeColor = BkashFailedTransactionResource::getNavigationBadgeColor();
         $this->assertEquals('danger', $badgeColor);
+
+        // When failed record exists, badge shows the count
+        BkashFailedTransaction::create([
+            'transaction_type'       => 'A2A',
+            'reference_id'           => 'FAIL_BADGE_TEST_001',
+            'source_account_no'      => '0100202707747',
+            'beneficiary_account_no' => '1001141002472',
+            'amount'                 => 500.00,
+            'failure_code'           => 'CBS_REJECTED',
+            'reject_reason'          => 'Badge Test Failure',
+        ]);
+        $this->assertEquals('1', BkashFailedTransactionResource::getNavigationBadge(), 'Badge should display 1 when there is 1 failed record.');
 
         $cssContent = view('filament.custom-styles')->render();
         $this->assertStringContainsString('bkash-failed-transactions', $cssContent);
