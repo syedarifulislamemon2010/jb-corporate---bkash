@@ -37,7 +37,7 @@ class NotificationService
         if (blank($org)) {
             return false;
         }
-        return str_contains(strtolower($org), 'bkash');
+        return str_contains(strtolower($org), 10);
     }
 
     /**
@@ -50,21 +50,17 @@ class NotificationService
 
         if (static::isBkash($orgStr)) {
             // bKash organization users only — Janata Bank users excluded
-            return $query->where('organization', 'like', '%bkash%')
-                         ->where('organization', 'not like', '%janata%');
+            return $query->where('organization', 10)
+                         ->where('organization', '!=', 1);
         }
 
         // Otherwise: Janata Bank organization users only — bKash users excluded
         return $query->where(function ($q) use ($organization, $orgStr) {
-            $q->where('organization', 'like', '%janata%')
-              ->orWhere('organization', 'like', '%jb%')
+            $q->where('organization', 1)
               ->orWhereNull('organization');
 
             if (!empty($orgStr)) {
                 $q->orWhere('organization', $orgStr);
-            }
-            if (is_numeric($organization)) {
-                $q->orWhere('organization_id', $organization);
             }
         })->where(function ($q) {
             $q->where('organization', 'not like', '%bkash%')
@@ -92,9 +88,9 @@ class NotificationService
         if ($sender) {
             // Exclude the actor who performed the action
             $query->where('id', '!=', $sender->id);
-            $org = $sender->getRawOriginal('organization') ?: 'Janata Bank';
+            $org = $sender->getRawOriginal('organization') ?: 1;
         } else {
-            $org = 'Janata Bank';
+            $org = 1;
         }
 
         // Strictly isolate by organization (Janata Bank vs bKash)
@@ -455,7 +451,7 @@ class NotificationService
                     Log::error("SMS to {$phone} failed: " . $smsEx->getMessage());
                 }
             }
-            
+
             $outbox->update(['sms_status' => 'SENT']);
         } catch (\Throwable $e) {
             $outbox->update(['sms_status' => 'FAILED']);
@@ -475,9 +471,6 @@ class NotificationService
         if (!empty($organization)) {
             $query->where(function ($q) use ($organization) {
                 $q->where('organization', $organization);
-                if (is_numeric($organization)) {
-                    $q->orWhere('organization_id', $organization);
-                }
             });
         }
         if (!empty($roleNames)) {
@@ -498,9 +491,6 @@ class NotificationService
         if (!empty($organization)) {
             $query->where(function ($q) use ($organization) {
                 $q->where('organization', $organization);
-                if (is_numeric($organization)) {
-                    $q->orWhere('organization_id', $organization);
-                }
             });
         }
         if (!empty($roleNames)) {
