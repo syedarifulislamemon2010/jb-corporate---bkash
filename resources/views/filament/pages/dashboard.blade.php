@@ -93,7 +93,7 @@
             @endif
 
             <!-- Right Card: Failed / Partial Transactions Today (Screenshot 2) -->
-            <a href="/admin/bkash-reports" class="{{ $exceptions['is_clean'] ? 'db-card' : 'db-card-danger' }} db-exception-link h-full flex items-center" aria-label="View failed and partial transactions exception report">
+            <a href="{{ $exceptions['action_url'] ?? '/admin/bkash-failed-transactions' }}" class="{{ $exceptions['is_clean'] ? 'db-card' : 'db-card-danger' }} db-exception-link h-full flex items-center" aria-label="View failed and partial transactions exception report">
                 <div class="db-flex-between w-full">
                     <div class="db-flex-gap-3">
                         <div class="{{ $exceptions['is_clean'] ? 'db-exception-icon-ok' : 'db-exception-icon-err' }}" aria-hidden="true">

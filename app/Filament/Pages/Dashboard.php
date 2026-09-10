@@ -202,8 +202,8 @@ class Dashboard extends Page
                 'is_clean'    => true,
                 'headline'    => 'Clean run today — 0 failed records',
                 'subtext'     => 'All ingested files processed without format or routing errors.',
-                'action_label'=> null,
-                'action_url'  => null,
+                'action_label'=> 'View Report →',
+                'action_url'  => '/admin/bkash-failed-transactions',
             ];
         }
 
@@ -213,7 +213,7 @@ class Dashboard extends Page
             'headline'    => "{$failedCount} " . Str::plural('transaction', $failedCount) . " flagged today",
             'subtext'     => 'Invalid routing, missing account details, or duplicate records require review.',
             'action_label'=> 'View Error Report →',
-            'action_url'  => '/admin/bkash-reports',
+            'action_url'  => '/admin/bkash-failed-transactions',
         ];
     }
 
